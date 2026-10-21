@@ -1,0 +1,81 @@
+{
+ "schema": 1,
+ "source": "SRD 5.2.1",
+ "license": "CC-BY-4.0",
+ "attribution": "This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+ "datasets": {
+  "rules_glossary": {
+   "count": 140,
+   "tr_complete": 140,
+   "tr_partial": 0,
+   "bytes": 198284
+  },
+  "conditions": {
+   "count": 15,
+   "tr_complete": 15,
+   "tr_partial": 0,
+   "bytes": 33884
+  },
+  "spells": {
+   "count": 339,
+   "tr_complete": 50,
+   "tr_partial": 29,
+   "bytes": 499637
+  },
+  "monsters": {
+   "count": 330,
+   "tr_complete": 0,
+   "tr_partial": 0,
+   "bytes": 558394
+  },
+  "classes": {
+   "count": 12,
+   "tr_complete": 0,
+   "tr_partial": 0,
+   "bytes": 187628
+  },
+  "subclasses": {
+   "count": 12,
+   "tr_complete": 0,
+   "tr_partial": 0,
+   "bytes": 34751
+  },
+  "species": {
+   "count": 9,
+   "tr_complete": 0,
+   "tr_partial": 0,
+   "bytes": 15164
+  },
+  "backgrounds": {
+   "count": 4,
+   "tr_complete": 0,
+   "tr_partial": 0,
+   "bytes": 2402
+  },
+  "feats": {
+   "count": 17,
+   "tr_complete": 0,
+   "tr_partial": 0,
+   "bytes": 12121
+  },
+  "equipment": {
+   "count": 192,
+   "tr_complete": 0,
+   "tr_partial": 0,
+   "bytes": 83829
+  },
+  "weapon_properties": {
+   "count": 10,
+   "tr_complete": 0,
+   "tr_partial": 0,
+   "bytes": 5216
+  },
+  "weapon_mastery": {
+   "count": 8,
+   "tr_complete": 0,
+   "tr_partial": 0,
+   "bytes": 3621
+  }
+ },
+ "total_bytes": 1682323
+}

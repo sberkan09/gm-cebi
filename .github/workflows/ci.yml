@@ -1,0 +1,41 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pipeline/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Fetch SRD 5.2.1 (checksum-verified)
+        run: python -m gmcebi_pipeline.fetch
+      - run: python -m pytest -q
+
+  flutter:
+    runs-on: ubuntu-latest
+    # The Flutter app arrives in Phase 1; until then every step is skipped.
+    # (hashFiles() is not allowed in a job-level `if`, so the check is per step.)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        if: ${{ hashFiles('pubspec.yaml') != '' }}
+        with:
+          channel: stable
+          cache: true
+      - if: ${{ hashFiles('pubspec.yaml') != '' }}
+        run: flutter pub get
+      - if: ${{ hashFiles('pubspec.yaml') != '' }}
+        run: flutter analyze
+      - if: ${{ hashFiles('pubspec.yaml') != '' }}
+        run: flutter test
