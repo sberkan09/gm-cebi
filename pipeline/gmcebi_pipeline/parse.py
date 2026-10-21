@@ -183,7 +183,8 @@ def parse_spells(lines: list[Line]) -> list[Spell]:
     a, b = CHAPTERS["spells"]
     chunk = lines_between(lines, a, b)
     start = section_lines(chunk, "Spell Descriptions", 106)
-    secs = relocate_tables(segment(chunk[start:], min_level=4, max_level=4))
+    body_lines, statblocks = _pull_statblocks(chunk[start:])
+    secs = relocate_tables(segment(body_lines, min_level=4, max_level=4))
     spells: list[Spell] = []
     for s in secs:
         if s.level != 4:
@@ -243,7 +244,78 @@ def parse_spells(lines: list[Line]) -> list[Spell]:
             source=SourceRef(page=s.page, page_end=src(s).page_end,
                              heading=["Spells", "Spell Descriptions", s.title]),
         ))
+    # Attach each summoned-creature stat block to the spell that names it.
+    for title, sb_lines in statblocks:
+        owners = [sp for sp in spells
+                  if any(f"{title} stat block" in (b.text or "").replace("*", "") for b in sp.blocks)]
+        if len(owners) != 1:
+            WARNINGS.append(f"stat block {title!r}: {len(owners)} referencing spells")
+            continue
+        owners[0].blocks += [Block(type="p", text=f"### {title}")] + statblock_blocks(sb_lines)
     return spells
+
+
+def statblock_blocks(lines: list[Line]) -> list[Block]:
+    """Render a free-form stat block (summoned creature) as paragraphs + ability table."""
+    paras: list[list[Line]] = []
+    abil: list[Line] = []
+    for ln in lines:
+        f0 = ln.spans[0].font
+        if ln.font.startswith("GillSans") and not _is_mon_section(ln):
+            abil.append(ln)
+            continue
+        last = paras[-1][-1] if paras else None
+        prev_done = (last is None or _is_mon_section(last)
+                     or last.text.rstrip().endswith((".", ")", ":")))
+        stat_label = f0.startswith("Optima-Bold") and not f0.endswith("Italic")
+        entry = f0.startswith("Optima-BoldItalic")
+        starts = (_is_mon_section(ln) or stat_label or (entry and prev_done) or ln.text.startswith("\t")
+                  or (f0.startswith("Optima-Italic") and not paras)
+                  or (last is not None and _is_mon_section(last)))
+        if starts or not paras:
+            paras.append([])
+        paras[-1].append(ln)
+    out: list[Block] = []
+    rows: list[list[Line]] = []
+    for ln in sorted(abil, key=lambda l: l.y0):
+        if rows and abs(ln.y0 - rows[-1][0].y0) < 5:
+            rows[-1].append(ln)
+        else:
+            rows.append([ln])
+    ab_txt = " ".join(ln.text.replace("\t", " ") for r in rows for ln in sorted(r, key=lambda l: l.x0))
+    table_rows = [[a, sc, mo, sv] for a, sc, mo, sv in ABILITY_RE.findall(ab_txt)]
+    placed = False
+    for para in paras:
+        text = tidy_markdown(join_text([line_markdown(ln).lstrip("\t ") for ln in para]))
+        if _is_mon_section(para[0]):
+            text = f"#### {text}"
+        if not placed and table_rows and (_is_mon_section(para[0]) or text.startswith(("**Senses", "**Skills",
+                                                                                          "**Resist", "**Immun"))):
+            out.append(Block(type="table", header=["", "Score", "Mod", "Save"], rows=table_rows))
+            placed = True
+        out.append(Block(type="p", text=text))
+    if table_rows and not placed:
+        out.append(Block(type="table", header=["", "Score", "Mod", "Save"], rows=table_rows))
+    return out
+
+
+def _pull_statblocks(lines: list[Line]) -> tuple[list[Line], list[tuple[str, list[Line]]]]:
+    """Remove h3 stat blocks (Optima/GillSans runs) embedded in the spell chapter."""
+    rest: list[Line] = []
+    blocks: list[tuple[str, list[Line]]] = []
+    i = 0
+    while i < len(lines):
+        ln = lines[i]
+        if heading_level(ln) == 3:
+            j = i + 1
+            while j < len(lines) and not lines[j].font.startswith("Cambria") and heading_level(lines[j]) not in (2, 3, 4):
+                j += 1
+            blocks.append((ln.text.strip(), lines[i + 1:j]))
+            i = j
+            continue
+        rest.append(ln)
+        i += 1
+    return rest, blocks
 
 
 # ---------------------------------------------------------------- monsters
