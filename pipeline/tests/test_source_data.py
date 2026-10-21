@@ -51,10 +51,29 @@ def test_spot_checks(source):
     assert dagger["fields"]["Damage"] == "1d4 Piercing" and dagger["fields"]["Mastery"] == "Nick"
 
 
+def test_animals_are_not_in_a_monster_family(source):
+    """Review B1: the Animals chapter must reset the family heading."""
+    mons = {m["id"]: m for m in source["monsters"]}
+    assert mons["wolf"].get("group") is None
+    assert mons["wolf"]["source"]["heading"] == ["Animals", "Wolf"]
+    assert sum(m.get("group") == "Zombies" for m in source["monsters"]) == 2
+
+
+def test_lists_and_continuations(source):
+    aoe = next(r for r in source["rules_glossary"] if r["id"] == "area-of-effect")
+    assert [b["text"] for b in aoe["blocks"][1:7]] == ["- Cone", "- Cube", "- Cylinder", "- Emanation",
+                                                       "- Line", "- Sphere"]
+    dwarf = next(s for s in source["species"] if s["id"] == "dwarf")
+    assert "Bonus Action" in dwarf["traits"][-1]["text"] and len(dwarf["blocks"]) == 1
+    presti = next(s for s in source["spells"] if s["id"] == "prestidigitation")
+    assert any(b["text"].startswith("**Fire Play.**") for b in presti["blocks"])
+
+
 def test_no_soft_hyphen_leftovers(source):
     import json
     import re
     blob = json.dumps(source, ensure_ascii=False)
+    assert "\u00ad" not in blob
     # "word- word" from a line-break hyphen that was not joined
     leftovers = re.findall(r"[a-z]{3,}- [a-z]{3,}", blob)
     assert len(leftovers) <= 3, leftovers

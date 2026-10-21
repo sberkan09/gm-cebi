@@ -14,7 +14,7 @@ def test_markup_preserved():
 
 
 def test_references_resolve():
-    titles = {"Rules Glossary": "Kurallar Sözlüğü", "Fireball": "Ateş Topu"}
+    titles = {"Rules Glossary": "Kurallar Sözlüğü", "*Fireball": "Ateş Topu"}
     assert check_references("(see “Rules Glossary”)", "(bkz. “Kurallar Sözlüğü”)", titles) == []
     assert check_references("(see “Rules Glossary”)", "(bkz. “Kurallar”)", titles)
     assert check_references("like *Fireball*", "*Fireball* gibi", titles)
