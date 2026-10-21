@@ -67,7 +67,8 @@ def split_sentences(text: str) -> list[str]:
 # --- invariant tokens --------------------------------------------------------
 
 DICE_RE = re.compile(r"(?<![\w])\d*d\d+(?:\s*[+\-−]\s*\d+)?(?=s?\b)")
-NUMBER_RE = re.compile(r"(?<![\w])[+\-−]?\d[\d,]*(?:/\d+)?(?:½)?")
+NUMBER_RE = re.compile(r"(?<![\w])[+\-−]?\d(?:[\d,.]*\d)?(?:/\d+)?(?:½)?")
+_THOUSANDS = re.compile(r"\d{1,3}(?:[.,]\d{3})+")
 
 
 def dice_tokens(text: str) -> list[str]:
@@ -78,7 +79,10 @@ def number_tokens(text: str) -> list[str]:
     """All numbers (incl. inside dice), normalised; used to check preservation."""
     toks = []
     for m in NUMBER_RE.finditer(text):
-        t = m.group().replace("−", "-").replace(",", "").lstrip("+")
+        t = m.group().replace("−", "-").lstrip("+")
+        # 1,000 (English) and 1.000 (Turkish) are the same number.
+        if _THOUSANDS.fullmatch(t.lstrip("-")):
+            t = t.replace(",", "").replace(".", "")
         toks.append(t)
     # dice like 2d6 contribute 2 and 6 through \d boundaries handled above
     for m in re.finditer(r"d(\d+)", text):

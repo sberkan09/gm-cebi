@@ -21,10 +21,33 @@ from .textutil import tr_lower
 
 GLOSSARY_PATH = Path(__file__).resolve().parents[1] / "glossary.csv"
 STATUSES = {"topluluk", "öneri", "tartışmalı"}
-FIELDS = ["id", "en", "tr", "category", "status", "alternatives", "note", "evidence", "enforce", "en_pattern"]
+FIELDS = ["id", "en", "tr", "category", "status", "alternatives", "note", "evidence", "enforce", "en_pattern",
+          "tr_pattern"]
 
 _IZAFET = re.compile(r"(?<=\w)(sı|si|su|sü|ı|i|u|ü)$")
 _SOFTEN = {"p": "[pb]", "ç": "[çc]", "t": "[td]", "k": "[kğ]", "ğ": "[ğk]"}
+
+# Turkish inflection allowed after a glossary term, as ordered slots:
+# plural, possessive, case, "-ki", copula/person. A bare prefix match ("büyü" in
+# "büyük", "din" in "dinlenme") is NOT accepted. Meaning-changing derivations
+# (-lı "with", -lık, -sız) are excluded; "-lı" is only allowed with a personal
+# ending (Avantajlısın, Dezavantajlıdır).
+def _alt(words: str) -> str:
+    return "(?:" + "|".join(sorted(set(words.split()), key=len, reverse=True)) + ")"
+
+
+_PLURAL = _alt("lar ler")
+_POSS = _alt("""ı i u ü sı si su sü ım im um üm m ın in un ün n
+                mız miz muz müz ımız imiz umuz ümüz nız niz nuz nüz ınız iniz unuz ünüz""")
+_CASE = _alt("""yı yi yu yü nı ni nu nü ı i u ü a e ya ye na ne da de ta te nda nde
+                dan den tan ten ndan nden la le yla yle nın nin nun nün ın in un ün ca ce""")
+_COND = _alt("ysa yse sa se")
+_PERSON = _alt("m n k nız niz nuz nüz lar ler")
+_COPULA = _alt("""ken yken dır dir dur dür tır tir tur tür sın sin sun sün sınız siniz
+                  ymış ymiş ymuş ymüş mış miş muş müş
+                  lısın lisin lusun lüsün lıdır lidir ludur lüdür""")
+_TAIL = (rf"(?:['’])?{_PLURAL}?{_POSS}?{_CASE}?(?:ki)?(?:{_COND}{_PERSON}?)?{_COPULA}?{_COPULA}?"
+         r"(?!\w)")
 
 
 @dataclass
@@ -39,6 +62,7 @@ class Term:
     evidence: str = ""
     enforce: bool = True
     en_pattern: str = ""
+    tr_pattern: str = ""  # optional regex over lowercased Turkish, for natural derivations
 
     @cached_property
     def en_re(self) -> re.Pattern[str]:
@@ -48,19 +72,22 @@ class Term:
 
     @cached_property
     def tr_re(self) -> re.Pattern[str]:
+        if self.tr_pattern:
+            return re.compile(r"(?<!\w)(?:" + self.tr_pattern + ")" + _TAIL, re.UNICODE)
         words = tr_lower(self.tr).split()
         last = words[-1]
-        if len(words) > 1:
-            stem = _IZAFET.sub("", last) if len(last) >= 4 else last
-        else:
-            stem = last
-        if stem and stem[-1] in _SOFTEN and len(stem) > 2:
-            stem_re = re.escape(stem[:-1]) + _SOFTEN[stem[-1]]
-        else:
-            stem_re = re.escape(stem)
-        parts = [re.escape(w) for w in words[:-1]] + [stem_re]
-        # Allow inflection and apostrophe suffixes after the last word.
-        return re.compile(r"(?<!\w)" + r"\s+".join(parts) + r"[\w'’]*", re.UNICODE)
+        stems = {last}
+        if len(words) > 1 and len(last) >= 4:
+            stems.add(_IZAFET.sub("", last))  # Can Puanı → Can Puan-ları (and Pasif Algı-sı keeps both)
+        alts = []
+        for stem in sorted(stems, key=len, reverse=True):
+            if stem and stem[-1] in _SOFTEN and len(stem) > 2:
+                alts.append(re.escape(stem[:-1]) + _SOFTEN[stem[-1]])
+            else:
+                alts.append(re.escape(stem))
+        parts = [re.escape(w) for w in words[:-1]] + ["(?:" + "|".join(alts) + ")"]
+        # Inflection (and an apostrophe after abbreviations/numbers) may follow the last word.
+        return re.compile(r"(?<!\w)" + r"\s+".join(parts) + _TAIL, re.UNICODE)
 
     def found_in_tr(self, tr_text: str) -> bool:
         return bool(self.tr_re.search(tr_lower(tr_text)))
@@ -82,7 +109,7 @@ class Glossary:
                 id=r["id"], en=r["en"], tr=r["tr"], category=r["category"], status=r["status"],
                 alternatives=[a for a in r["alternatives"].split("|") if a],
                 note=r["note"], evidence=r["evidence"], enforce=r["enforce"].strip() == "yes",
-                en_pattern=r["en_pattern"],
+                en_pattern=r["en_pattern"], tr_pattern=r.get("tr_pattern", ""),
             ))
         return cls(terms)
 
@@ -121,16 +148,84 @@ class Glossary:
                 hits.append(t)
         return hits
 
+    def _rejected_alternatives(self, t: Term) -> list[Term]:
+        """Alternatives of `t` that must not be used instead of the chosen term.
+
+        Skips alternatives that are themselves the chosen Turkish of another term
+        (e.g. "Kuvvet" is rejected for Strength but is the term for Force) and
+        English abbreviations.
+        """
+        if not hasattr(self, "_chosen"):
+            self._chosen = {tr_lower(x.tr) for x in self.terms}
+        out = []
+        for alt in t.alternatives:
+            a = tr_lower(alt)
+            if a in self._chosen or re.fullmatch(r"[A-Z]{1,4}", alt) or alt == t.en \
+                    or re.search(rf"(?<!\w){re.escape(a)}(?!\w)", tr_lower(t.tr)):
+                continue
+            out.append(Term(id=f"{t.id}~alt", en=t.en, tr=alt, category=t.category, status=t.status))
+        return out
+
     def check(self, en_text: str, tr_text: str) -> list[str]:
-        """Return a message per required term missing from the translation."""
-        missing = []
+        """One message per required term missing, and per rejected alternative used."""
+        issues = []
         for t in self.terms_in(en_text):
             if not t.found_in_tr(tr_text):
-                missing.append(f"term:{t.id} '{t.en}' → '{t.tr}' bulunamadı")
-        return missing
+                issues.append(f"term:{t.id} '{t.en}' → '{t.tr}' bulunamadı")
+            else:
+                case = _case_issue(t, en_text, tr_text)
+                if case:
+                    issues.append(case)
+            for alt in self._rejected_alternatives(t):
+                if alt.found_in_tr(tr_text):
+                    issues.append(f"term-alt:{t.id} reddedilen '{alt.tr}' kullanılmış (sözlük: '{t.tr}')")
+        return issues
 
     def lookup(self, en: str) -> Term | None:
         for t in self.terms:
             if t.en == en:
                 return t
         return None
+
+
+_SKIP_CASE = {"kısaltma", "birim", "para"}
+
+
+def _at_sentence_start(text: str, pos: int) -> bool:
+    head = re.sub(r"[\s*“”\"'(\-]+$", "", text[:pos])
+    return not head or head.endswith((".", "!", "?", ":", ";"))
+
+
+def _case_issue(t: Term, en: str, tr: str) -> str | None:
+    """Capitalisation follows the source: Advantage → Avantaj, saving throw → kurtarma zarı."""
+    if t.category in _SKIP_CASE or not t.tr[:1].isalpha():
+        return None
+    em = t.en_re.search(en)
+    if not em or _at_sentence_start(en, em.start()):
+        return None
+    want_upper = en[em.start()].isupper()
+    seen = None
+    for tm_ in t.tr_re.finditer(tr_lower(tr)):
+        if _at_sentence_start(tr, tm_.start()) or tr[tm_.start()].isupper() == want_upper:
+            return None  # one correctly-cased (or sentence-initial) occurrence is enough
+        seen = seen or tm_
+    if seen is None:
+        return None
+    return f"case:{t.id} '{tr[seen.start():seen.end()]}' kaynağın büyük/küçük harfini izlemiyor"
+
+
+def build_title_map(glossary: "Glossary", names: list[tuple[str, str, str]]) -> dict[str, str]:
+    """English title → Turkish title for cross-reference checks and see-also links.
+
+    Quoted references (“Cover”) use plain keys; italic spell references
+    (*Fireball*) use "*"-prefixed keys, so a spell and a rule with the same
+    English name ("Shield", "Light") never shadow each other.
+    `names` = [(dataset, english_name, turkish_name)] of translated records.
+    """
+    titles: dict[str, str] = {}
+    for t in glossary.terms:
+        k = f"*{t.en}" if t.category == "büyü adı" else t.en
+        titles.setdefault(k, t.tr)
+    for ds, en, tr in names:
+        titles.setdefault(f"*{en}" if ds == "spells" else en, tr)
+    return titles
