@@ -24,14 +24,18 @@ jobs:
 
   flutter:
     runs-on: ubuntu-latest
-    # The Flutter app arrives in Phase 1; until then this job is a no-op.
-    if: ${{ hashFiles('pubspec.yaml') != '' }}
+    # The Flutter app arrives in Phase 1; until then every step is skipped.
+    # (hashFiles() is not allowed in a job-level `if`, so the check is per step.)
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
+        if: ${{ hashFiles('pubspec.yaml') != '' }}
         with:
           channel: stable
           cache: true
-      - run: flutter pub get
-      - run: flutter analyze
-      - run: flutter test
+      - if: ${{ hashFiles('pubspec.yaml') != '' }}
+        run: flutter pub get
+      - if: ${{ hashFiles('pubspec.yaml') != '' }}
+        run: flutter analyze
+      - if: ${{ hashFiles('pubspec.yaml') != '' }}
+        run: flutter test

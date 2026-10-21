@@ -23,7 +23,7 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-10-21 — Bu ortamda API anahtarı yok; pilot çeviri, hattın `queue → out → import` yolu üzerinden oturum içi Claude (claude-opus-5-5) alt ajanlarıyla yapıldı. Aynı talimat (`prompts/translate_tr.md`) API arka ucuyla (`translate api`) da kullanılır. Her segment `engine` alanında üreticisini taşır.
 - 2026-10-21 — Pilot büyü adları (50) çeviriden önce sözlüğe "büyü adı" olarak eklendi; böylece paralel çevirmenler aynı adları kullanır ve italik büyü atıfları doğrulanabilir.
 - 2026-10-21 — Asset biçimi: kayıt başına `en` ve tam `tr` kopyası + `tr_status`; çevrilmemiş alan İngilizce kalır (uygulama alan bazında geri düşer). Boyut bütçesi hat içinde denetlenir.
-- 2026-10-21 — CI: `flutter` işi `pubspec.yaml` yokken atlanır (Faz 0'da uygulama yok). agentgate yalnızca gözlem modunda (`fail-on-conflict: false`, test eşlemesi yok, `runner = "command"`).
+- 2026-10-21 — CI: `flutter` işinin adımları `pubspec.yaml` yokken atlanır (job düzeyinde `if` içinde hashFiles kullanılamıyor) (Faz 0'da uygulama yok). agentgate yalnızca gözlem modunda (`fail-on-conflict: false`, test eşlemesi yok, `runner = "command"`).
 - 2026-10-21 — Python bağımlılıkları test edilen sürümlere sabitlendi (pymupdf 2.0, pydantic 2.13.5, pytest 9.1.1); CI Python 3.11.
 
 ## Onay bekleyenler
