@@ -1,0 +1,27 @@
+# Conflict forecast between open agent branches (observe mode: never fails the build,
+# selects no tests). Based on sberkan09/agentgate docs/engine-workflow-example.yml.
+name: agentgate
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: sberkan09/agentgate@main
+        id: gate
+        with:
+          base: main
+          agent-branches: "claude/*,codex/*,copilot/*"
+          fail-on-conflict: false

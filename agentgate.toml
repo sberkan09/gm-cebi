@@ -1,0 +1,12 @@
+# agentgate runs in observe mode only: conflict forecast between agent branches.
+# No test map: CI always runs the full suite (see .github/workflows/ci.yml).
+[agentgate]
+base = "main"
+agent_branches = ["claude/*", "codex/*", "copilot/*"]
+
+[tests]
+runner = "command"
+
+[deps]
+languages = ["python"]
+roots = ["pipeline"]
