@@ -67,7 +67,55 @@
   "blocks": [
    {
     "type": "p",
-    "text": "On your turn, you can take one action. Choose which action to take from those below or from the special actions provided by your features. *See also* “Playing the Game” (“Actions”). These actions are defined elsewhere in this glossary: Attack Dash Disengage Dodge Help Hide Influence Magic Ready Search Study Utilize"
+    "text": "On your turn, you can take one action. Choose which action to take from those below or from the special actions provided by your features. *See also* “Playing the Game” (“Actions”). These actions are defined elsewhere in this glossary:"
+   },
+   {
+    "type": "p",
+    "text": "- Attack"
+   },
+   {
+    "type": "p",
+    "text": "- Dash"
+   },
+   {
+    "type": "p",
+    "text": "- Disengage"
+   },
+   {
+    "type": "p",
+    "text": "- Dodge"
+   },
+   {
+    "type": "p",
+    "text": "- Help"
+   },
+   {
+    "type": "p",
+    "text": "- Hide"
+   },
+   {
+    "type": "p",
+    "text": "- Influence"
+   },
+   {
+    "type": "p",
+    "text": "- Magic"
+   },
+   {
+    "type": "p",
+    "text": "- Ready"
+   },
+   {
+    "type": "p",
+    "text": "- Search"
+   },
+   {
+    "type": "p",
+    "text": "- Study"
+   },
+   {
+    "type": "p",
+    "text": "- Utilize"
    }
   ],
   "see_also": [
@@ -188,7 +236,35 @@
   "blocks": [
    {
     "type": "p",
-    "text": "The descriptions of many spells and other features specify that they have an area of effect, which typically has one of six shapes. These shapes are defined elsewhere in this glossary: Cone Cube Cylinder Emanation Line Sphere An area of effect has a point of origin, a location from which the effect’s energy erupts. The rules for each shape specify how to position its point of origin. If all straight lines extending from the point of origin to a location in the area of effect are blocked, that location isn’t included in the area of effect. To block a line, an obstruction must provide Total Cover. *See also* “Cover.”"
+    "text": "The descriptions of many spells and other features specify that they have an area of effect, which typically has one of six shapes. These shapes are defined elsewhere in this glossary:"
+   },
+   {
+    "type": "p",
+    "text": "- Cone"
+   },
+   {
+    "type": "p",
+    "text": "- Cube"
+   },
+   {
+    "type": "p",
+    "text": "- Cylinder"
+   },
+   {
+    "type": "p",
+    "text": "- Emanation"
+   },
+   {
+    "type": "p",
+    "text": "- Line"
+   },
+   {
+    "type": "p",
+    "text": "- Sphere"
+   },
+   {
+    "type": "p",
+    "text": "An area of effect has a point of origin, a location from which the effect’s energy erupts. The rules for each shape specify how to position its point of origin. If all straight lines extending from the point of origin to a location in the area of effect are blocked, that location isn’t included in the area of effect. To block a line, an obstruction must provide Total Cover. *See also* “Cover.”"
    },
    {
     "type": "p",
@@ -877,7 +953,71 @@
   "blocks": [
    {
     "type": "p",
-    "text": "A condition is a temporary game state. The definition of a condition says how it affects its recipient, and various rules define how to end a condition. This glossary defines these conditions: Blinded Charmed Deafened Exhaustion Frightened Grappled Incapacitated Invisible Paralyzed Petrified Poisoned Prone Restrained Stunned Unconscious A condition doesn’t stack with itself; a recipient either has a condition or doesn’t. The Exhaustion condition is an exception to that rule."
+    "text": "A condition is a temporary game state. The definition of a condition says how it affects its recipient, and various rules define how to end a condition. This glossary defines these conditions:"
+   },
+   {
+    "type": "p",
+    "text": "- Blinded"
+   },
+   {
+    "type": "p",
+    "text": "- Charmed"
+   },
+   {
+    "type": "p",
+    "text": "- Deafened"
+   },
+   {
+    "type": "p",
+    "text": "- Exhaustion"
+   },
+   {
+    "type": "p",
+    "text": "- Frightened"
+   },
+   {
+    "type": "p",
+    "text": "- Grappled"
+   },
+   {
+    "type": "p",
+    "text": "- Incapacitated"
+   },
+   {
+    "type": "p",
+    "text": "- Invisible"
+   },
+   {
+    "type": "p",
+    "text": "- Paralyzed"
+   },
+   {
+    "type": "p",
+    "text": "- Petrified"
+   },
+   {
+    "type": "p",
+    "text": "- Poisoned"
+   },
+   {
+    "type": "p",
+    "text": "- Prone"
+   },
+   {
+    "type": "p",
+    "text": "- Restrained"
+   },
+   {
+    "type": "p",
+    "text": "- Stunned"
+   },
+   {
+    "type": "p",
+    "text": "- Unconscious"
+   },
+   {
+    "type": "p",
+    "text": "A condition doesn’t stack with itself; a recipient either has a condition or doesn’t. The Exhaustion condition is an exception to that rule."
    }
   ],
   "see_also": []
@@ -1000,7 +1140,67 @@
   "blocks": [
    {
     "type": "p",
-    "text": "Every creature, including every player character, has a tag in the rules that identifies the type of creature it is. Most player characters are of the Humanoid type. These are the game’s creature types: Aberration Beast Celestial Construct Dragon Elemental Fey Fiend Giant Humanoid Monstrosity Ooze Plant Undead The types don’t have rules themselves, but some rules in the game affect creatures of certain types in different ways."
+    "text": "Every creature, including every player character, has a tag in the rules that identifies the type of creature it is. Most player characters are of the Humanoid type. These are the game’s creature types:"
+   },
+   {
+    "type": "p",
+    "text": "- Aberration"
+   },
+   {
+    "type": "p",
+    "text": "- Beast"
+   },
+   {
+    "type": "p",
+    "text": "- Celestial"
+   },
+   {
+    "type": "p",
+    "text": "- Construct"
+   },
+   {
+    "type": "p",
+    "text": "- Dragon"
+   },
+   {
+    "type": "p",
+    "text": "- Elemental"
+   },
+   {
+    "type": "p",
+    "text": "- Fey"
+   },
+   {
+    "type": "p",
+    "text": "- Fiend"
+   },
+   {
+    "type": "p",
+    "text": "- Giant"
+   },
+   {
+    "type": "p",
+    "text": "- Humanoid"
+   },
+   {
+    "type": "p",
+    "text": "- Monstrosity"
+   },
+   {
+    "type": "p",
+    "text": "- Ooze"
+   },
+   {
+    "type": "p",
+    "text": "- Plant"
+   },
+   {
+    "type": "p",
+    "text": "- Undead"
+   },
+   {
+    "type": "p",
+    "text": "The types don’t have rules themselves, but some rules in the game affect creatures of certain types in different ways."
    }
   ],
   "see_also": []

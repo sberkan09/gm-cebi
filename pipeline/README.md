@@ -52,17 +52,19 @@ olur ve makine çıktısı onu bir daha ezemez.
 
 Her segment içe aktarılırken (`qc.py`):
 
-1. **Terim tutarlılığı** — `enforce=yes` olan her sözlük terimi kaynakta geçiyorsa çeviride de (çekimli biçimi dahil) geçmeli.
-2. **Sayı ve zar** — sayıların ve zar ifadelerinin (2d6+3) çok kümesi birebir aynı.
-3. **Referanslar** — tırnaklı başlık atıfları (“Rules Glossary”) ve italik büyü adları bilinen Türkçe başlığa çözülmeli.
+1. **Terim tutarlılığı** — `enforce=yes` olan her sözlük terimi kaynakta geçiyorsa çeviride de geçmeli. Eşleşme kökten sonra yalnızca sıralı Türkçe çekim eklerini kabul eder (çoğul, iyelik, hâl, -ki, şart, ek-fiil); "büyük" "büyü"yü, "dinlenme" "din"i karşılamaz. Gerekirse `tr_pattern` sütunu doğal türetmeye izin verir (Avantajlı, 5 fitlik).
+   - **Reddedilen alternatif** — terimin `alternatives` sütunundaki biçimler (başka bir terimin seçili karşılığı değilse) çeviride geçerse hata.
+   - **Büyük/küçük harf** — terim kaynakta büyük harfliyse (Advantage) Türkçede de büyük, küçükse (saving throw) küçük; cümle başı hariç.
+2. **Sayı ve zar** — sayıların ve zar ifadelerinin (2d6+3) çok kümesi birebir aynı. Binlik ayırıcılar eşdeğer sayılır (1,000 = 1.000; Türkçede nokta kullanılır).
+3. **Referanslar** — tırnaklı başlık atıfları (“Rules Glossary”) ve italik büyü adları, hedefi sözlükte ya da çevrilmiş kayıt adlarında varsa o Türkçe başlıkla çevrilmeli. Hedefi henüz bilinmeyen atıflar denetlenmez (sözlüğe "bölüm" satırı eklenince denetime girer). Büyü atıfları (*Shield*) ile kural atıfları (“Shield”) ayrı anahtarlarla tutulur.
 4. **Biçim** — `**` / `*` sayıları ve başlık etiketleri korunmalı.
 5. **Ürün kimliği** — yasaklı adlar geçmemeli; ayrıca İngilizce kelime kalıntısı uyarısı.
 
-Bulgular segmentin `qc` alanına yazılır ve inceleme kuyruğunda öne alınır.
+Bulgular segmentin `qc` alanına yazılır ve inceleme kuyruğunda öne alınır. Sert bulgulu (sayı, zar, biçim, ürün kimliği) makine çevirileri asset'lere girmez; terim ve üslup uyarıları girer ama incelemede kalır.
 
 ## Sözlük
 
 `glossary.csv` tek gerçek kaynaktır. Sütunlar: `id, en, tr, category, status,
-alternatives, note, evidence, enforce, en_pattern`. `en_pattern` boşsa İngilizce
+alternatives, note, evidence, enforce, en_pattern, tr_pattern`. `en_pattern` boşsa İngilizce
 terim büyük/küçük harfe duyarlı tam kelime olarak aranır. Bir terimi değiştirince
 `translate qc` ile belleği yeniden denetle; yeni bulgular inceleme kuyruğuna düşer.

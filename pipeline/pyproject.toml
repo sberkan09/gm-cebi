@@ -3,7 +3,7 @@ name = "gmcebi-pipeline"
 version = "0.1.0"
 description = "SRD 5.2.1 -> structured JSON -> Turkish translation -> app assets"
 requires-python = ">=3.11"
-dependencies = ["pymupdf>=1.26", "pydantic>=2.7"]
+dependencies = ["pymupdf==2.0", "pydantic==2.13.5"]  # keep in sync with requirements.txt
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -131,6 +131,7 @@ def tidy_markdown(text: str) -> str:
     text = re.sub(r"\*\*\s*\*\*", " ", text)
     text = re.sub(r"(?<!\*)\*\s+\*(?!\*)", " ", text)
     text = text.replace(" ", " ").replace("‑", "-")
+    text = re.sub("­\\s*(?=[a-z])", "", text).replace("­", "")
     text = re.sub(r"^[••]\s*", "- ", text)
     return re.sub(r"[ \t]+", " ", text).strip()
 
@@ -141,7 +142,7 @@ def md_paragraphs(lines: list[Line]) -> list[str]:
     for ln in lines:
         raw = ln.text
         first = ln.spans[0]
-        new = (raw.startswith("\t") or raw.lstrip().startswith("•")
+        new = (raw.lstrip(" ").startswith("\t") or raw.lstrip().startswith("•")
                # Bold (not bold-italic) run-in sub-options such as "Forest Gnome."
                or (first.font.endswith("-Bold") and first.text.strip().endswith(".")))
         if new or not paras:

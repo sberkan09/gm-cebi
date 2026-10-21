@@ -26,7 +26,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-from .glossary import Glossary
+from .glossary import Glossary, build_title_map
 from .qc import check_segment
 from .segments import record_segments, segment_key
 from .tm import TM, Entry
@@ -64,15 +64,15 @@ def scoped_records(scope: dict[str, list[str] | None]) -> dict[str, list[dict]]:
 
 def title_map(tm: TM, glossary: Glossary) -> dict[str, str]:
     """English title → Turkish title, from the glossary and translated record names."""
-    titles = {t.en: t.tr for t in glossary.terms}
+    names = []
     for ds_file in SOURCE.glob("*.json"):
         if ds_file.name.startswith("_"):
             continue
         for r in json.loads(ds_file.read_text(encoding="utf-8")):
             tr = tm.lookup_tr(r["name"], lambda en, ds=ds_file.stem: segment_key(en, ds))
             if tr:
-                titles.setdefault(r["name"], tr)
-    return titles
+                names.append((ds_file.stem, r["name"], tr))
+    return build_title_map(glossary, names)
 
 
 def cmd_queue(args) -> None:
@@ -93,21 +93,26 @@ def cmd_queue(args) -> None:
                     item["refs"].append(f"{ds}/{seg.ref}")
     for item in pending.values():
         item["terms"] = [{"en": t.en, "tr": t.tr} for t in glossary.terms_in(item["en"])]
-        refs = [t for t in titles if f"“{t}" in item["en"] or f"*{t}*" in item["en"]]
+        refs = [t for t in titles
+                if (t.startswith("*") and f"{t}*" in item["en"]) or (not t.startswith("*") and f"“{t}" in item["en"])]
         item["titles"] = {t: titles[t] for t in refs}
     # Segments that are exactly a glossary term are filled from the glossary.
     prefer = {"spells": "büyü adı", "conditions": "durum"}
     auto = []
     for k, it in list(pending.items()):
-        cands = [t for t in glossary.terms if t.en == it["en"]]
+        bullet = it["en"].startswith("- ")
+        word = it["en"][2:] if bullet else it["en"]
+        cands = [t for t in glossary.terms if t.en in (word, f"{word} [Action]")]
         if not cands:
             continue
         cands.sort(key=lambda t: t.category != prefer.get(it["ds"], t.category))
+        cands = [t for t in cands if t.category not in ("bölüm",)] or cands
         if it["ds"] != "spells" and cands[0].category == "büyü adı":
             continue
         pending.pop(k)
         auto.append(k)
-        tm.put(Entry(key=k, en=it["en"], tr=cands[0].tr, engine="glossary", refs=it["refs"]))
+        tm.put(Entry(key=k, en=it["en"], tr=("- " if bullet else "") + cands[0].tr, engine="glossary",
+                     refs=it["refs"]))
     for it in pending.values():
         it.pop("ds", None)
     if auto:

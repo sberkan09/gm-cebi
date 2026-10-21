@@ -26,3 +26,8 @@ def test_short_text_is_one_segment():
 def test_dice_and_numbers():
     assert dice_tokens("takes 2d6 + 3 Fire damage and 1d4") == ["1d4", "2d6+3"]
     assert number_tokens("DC 15, 1,500 GP, −2") == ["-2", "15", "1500"]
+
+
+def test_thousands_separators_are_equivalent():
+    assert number_tokens("1,000 GP") == number_tokens("1.000 altın") == ["1000"]
+    assert number_tokens("XP 7,200") == number_tokens("TP 7.200")

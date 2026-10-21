@@ -8422,7 +8422,7 @@
   "legendary_actions": [
    {
     "name": "Banish",
-    "text": "*Charisma Saving Throw:* DC 21, one creature the dragon can see within 120 feet. *Failure:* 10 (3d6) Force damage, and the target has the Incapacitated condition and is transported to a harmless demiplane until the start of the dragon’s next turn, at which point it re­appears in an unoccupied space of the dragon’s choice within 120 feet of the dragon. *Failure or Success:* The dragon can’t take this action again until the start of its next turn."
+    "text": "*Charisma Saving Throw:* DC 21, one creature the dragon can see within 120 feet. *Failure:* 10 (3d6) Force damage, and the target has the Incapacitated condition and is transported to a harmless demiplane until the start of the dragon’s next turn, at which point it reappears in an unoccupied space of the dragon’s choice within 120 feet of the dragon. *Failure or Success:* The dragon can’t take this action again until the start of its next turn."
    },
    {
     "name": "Guiding Light",
@@ -21184,7 +21184,7 @@
   "actions": [
    {
     "name": "Slam",
-    "text": "*Melee Attack Roll:* +6, reach 5 ft. *Hit:* 13 (2d8 + 4) Bludgeoning damage. **Animals**"
+    "text": "*Melee Attack Roll:* +6, reach 5 ft. *Hit:* 13 (2d8 + 4) Bludgeoning damage."
    }
   ],
   "bonus_actions": [],
@@ -21199,13 +21199,11 @@
    "document": "SRD 5.2.1",
    "page": 344,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Allosaurus"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast (Dinosaur)",
   "alignment": "Unaligned",
@@ -21277,13 +21275,11 @@
    "document": "SRD 5.2.1",
    "page": 344,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Ankylosaurus"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Huge",
   "creature_type": "Beast (Dinosaur)",
   "alignment": "Unaligned",
@@ -21354,13 +21350,11 @@
    "document": "SRD 5.2.1",
    "page": 344,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Ape"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -21437,13 +21431,11 @@
    "page": 344,
    "page_end": 345,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Archelon"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Huge",
   "creature_type": "Beast (Dinosaur)",
   "alignment": "Unaligned",
@@ -21520,13 +21512,11 @@
    "document": "SRD 5.2.1",
    "page": 345,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Baboon"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Small",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -21598,13 +21588,11 @@
    "document": "SRD 5.2.1",
    "page": 345,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Badger"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -21673,13 +21661,11 @@
    "document": "SRD 5.2.1",
    "page": 345,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Bat"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -21746,13 +21732,11 @@
    "document": "SRD 5.2.1",
    "page": 345,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Black Bear"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -21825,13 +21809,11 @@
    "page": 345,
    "page_end": 346,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Blood Hawk"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Small",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -21904,13 +21886,11 @@
    "document": "SRD 5.2.1",
    "page": 346,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Boar"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -21982,13 +21962,11 @@
    "document": "SRD 5.2.1",
    "page": 346,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Brown Bear"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -22064,13 +22042,11 @@
    "document": "SRD 5.2.1",
    "page": 346,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Camel"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -22137,13 +22113,11 @@
    "document": "SRD 5.2.1",
    "page": 346,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Cat"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -22217,13 +22191,11 @@
    "page": 346,
    "page_end": 347,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Constrictor Snake"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -22295,13 +22267,11 @@
    "document": "SRD 5.2.1",
    "page": 347,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Crab"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -22374,13 +22344,11 @@
    "document": "SRD 5.2.1",
    "page": 347,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Crocodile"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -22453,13 +22421,11 @@
    "document": "SRD 5.2.1",
    "page": 347,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Deer"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -22532,13 +22498,11 @@
    "document": "SRD 5.2.1",
    "page": 347,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Dire Wolf"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -22612,13 +22576,11 @@
    "page": 347,
    "page_end": 348,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Draft Horse"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -22685,13 +22647,11 @@
    "document": "SRD 5.2.1",
    "page": 348,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Eagle"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Small",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -22759,13 +22719,11 @@
    "document": "SRD 5.2.1",
    "page": 348,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Elephant"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Huge",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -22841,13 +22799,11 @@
    "document": "SRD 5.2.1",
    "page": 348,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Elk"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -22915,13 +22871,11 @@
    "document": "SRD 5.2.1",
    "page": 348,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Flying Snake"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Monstrosity",
   "alignment": "Unaligned",
@@ -22994,13 +22948,11 @@
    "page": 348,
    "page_end": 349,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Frog"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -23077,13 +23029,11 @@
    "document": "SRD 5.2.1",
    "page": 349,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Ape"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Huge",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -23164,13 +23114,11 @@
    "document": "SRD 5.2.1",
    "page": 349,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Badger"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -23239,13 +23187,11 @@
    "document": "SRD 5.2.1",
    "page": 349,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Bat"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -23312,13 +23258,11 @@
    "document": "SRD 5.2.1",
    "page": 349,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Boar"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -23391,13 +23335,11 @@
    "page": 349,
    "page_end": 350,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Centipede"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Small",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -23464,13 +23406,11 @@
    "document": "SRD 5.2.1",
    "page": 350,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Constrictor Snake"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Huge",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -23546,13 +23486,11 @@
    "document": "SRD 5.2.1",
    "page": 350,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Crab"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -23625,13 +23563,11 @@
    "document": "SRD 5.2.1",
    "page": 350,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Crocodile"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Huge",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -23713,13 +23649,11 @@
    "page": 350,
    "page_end": 351,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Eagle"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Celestial",
   "alignment": "Neutral Good",
@@ -23792,13 +23726,11 @@
    "document": "SRD 5.2.1",
    "page": 351,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Elk"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Huge",
   "creature_type": "Celestial",
   "alignment": "Neutral Good",
@@ -23867,13 +23799,11 @@
    "document": "SRD 5.2.1",
    "page": 351,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Fire Beetle"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Small",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -23946,13 +23876,11 @@
    "document": "SRD 5.2.1",
    "page": 351,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Frog"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -24033,13 +23961,11 @@
    "document": "SRD 5.2.1",
    "page": 351,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Goat"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -24107,13 +24033,11 @@
    "document": "SRD 5.2.1",
    "page": 352,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Hyena"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -24186,13 +24110,11 @@
    "document": "SRD 5.2.1",
    "page": 352,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Lizard"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -24264,13 +24186,11 @@
    "document": "SRD 5.2.1",
    "page": 352,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Octopus"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -24348,13 +24268,11 @@
    "document": "SRD 5.2.1",
    "page": 352,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Owl"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Celestial",
   "alignment": "Neutral",
@@ -24432,13 +24350,11 @@
    "document": "SRD 5.2.1",
    "page": 353,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Rat"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Small",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -24511,13 +24427,11 @@
    "document": "SRD 5.2.1",
    "page": 353,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Scorpion"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -24592,13 +24506,11 @@
    "document": "SRD 5.2.1",
    "page": 353,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Seahorse"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -24675,13 +24587,11 @@
    "document": "SRD 5.2.1",
    "page": 353,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Shark"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Huge",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -24759,13 +24669,11 @@
    "page": 353,
    "page_end": 354,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Spider"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -24846,13 +24754,11 @@
    "document": "SRD 5.2.1",
    "page": 354,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Toad"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -24932,13 +24838,11 @@
    "document": "SRD 5.2.1",
    "page": 354,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Venomous Snake"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -25006,13 +24910,11 @@
    "document": "SRD 5.2.1",
    "page": 354,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Vulture"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Monstrosity",
   "alignment": "Neutral Evil",
@@ -25087,13 +24989,11 @@
    "page": 354,
    "page_end": 355,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Wasp"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -25165,13 +25065,11 @@
    "document": "SRD 5.2.1",
    "page": 355,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Weasel"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -25239,13 +25137,11 @@
    "document": "SRD 5.2.1",
    "page": 355,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Giant Wolf Spider"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -25318,13 +25214,11 @@
    "document": "SRD 5.2.1",
    "page": 355,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Goat"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -25392,13 +25286,11 @@
    "document": "SRD 5.2.1",
    "page": 355,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Hawk"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -25467,13 +25359,11 @@
    "page": 355,
    "page_end": 356,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Hippopotamus"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -25550,13 +25440,11 @@
    "document": "SRD 5.2.1",
    "page": 356,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Hunter Shark"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -25629,13 +25517,11 @@
    "document": "SRD 5.2.1",
    "page": 356,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Hyena"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -25708,13 +25594,11 @@
    "document": "SRD 5.2.1",
    "page": 356,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Jackal"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Small",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -25782,13 +25666,11 @@
    "document": "SRD 5.2.1",
    "page": 356,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Killer Whale"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Huge",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -25862,13 +25744,11 @@
    "page": 356,
    "page_end": 357,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Lion"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -25953,13 +25833,11 @@
    "document": "SRD 5.2.1",
    "page": 357,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Lizard"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -26031,13 +25909,11 @@
    "document": "SRD 5.2.1",
    "page": 357,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Mammoth"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Huge",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -26113,13 +25989,11 @@
    "document": "SRD 5.2.1",
    "page": 357,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Mastiff"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -26187,13 +26061,11 @@
    "document": "SRD 5.2.1",
    "page": 357,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Mule"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -26266,13 +26138,11 @@
    "page": 357,
    "page_end": 358,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Octopus"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Small",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -26354,13 +26224,11 @@
    "document": "SRD 5.2.1",
    "page": 358,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Owl"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -26433,13 +26301,11 @@
    "document": "SRD 5.2.1",
    "page": 358,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Panther"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -26512,13 +26378,11 @@
    "document": "SRD 5.2.1",
    "page": 358,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Piranha"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -26591,13 +26455,11 @@
    "page": 358,
    "page_end": 359,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Plesiosaurus"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast (Dinosaur)",
   "alignment": "Unaligned",
@@ -26670,13 +26532,11 @@
    "document": "SRD 5.2.1",
    "page": 359,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Polar Bear"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -26749,13 +26609,11 @@
    "document": "SRD 5.2.1",
    "page": 359,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Pony"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -26822,13 +26680,11 @@
    "document": "SRD 5.2.1",
    "page": 359,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Pteranodon"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast (Dinosaur)",
   "alignment": "Unaligned",
@@ -26901,13 +26757,11 @@
    "document": "SRD 5.2.1",
    "page": 359,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Rat"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -26980,13 +26834,11 @@
    "document": "SRD 5.2.1",
    "page": 359,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Raven"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -27059,13 +26911,11 @@
    "document": "SRD 5.2.1",
    "page": 360,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Reef Shark"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -27142,13 +26992,11 @@
    "document": "SRD 5.2.1",
    "page": 360,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Rhinoceros"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -27215,13 +27063,11 @@
    "document": "SRD 5.2.1",
    "page": 360,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Riding Horse"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -27288,13 +27134,11 @@
    "document": "SRD 5.2.1",
    "page": 360,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Saber-Toothed Tiger"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -27373,13 +27217,11 @@
    "document": "SRD 5.2.1",
    "page": 360,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Scorpion"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -27446,13 +27288,11 @@
    "document": "SRD 5.2.1",
    "page": 361,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Seahorse"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -27525,13 +27365,11 @@
    "document": "SRD 5.2.1",
    "page": 361,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Spider"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -27608,13 +27446,11 @@
    "document": "SRD 5.2.1",
    "page": 361,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Swarm of Bats"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Swarm of Tiny Beasts",
   "alignment": "Unaligned",
@@ -27688,13 +27524,11 @@
    "document": "SRD 5.2.1",
    "page": 361,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Swarm of Insects"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Swarm of Tiny Beasts",
   "alignment": "Unaligned",
@@ -27772,13 +27606,11 @@
    "document": "SRD 5.2.1",
    "page": 362,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Swarm of Piranhas"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Swarm of Tiny Beasts",
   "alignment": "Unaligned",
@@ -27856,13 +27688,11 @@
    "document": "SRD 5.2.1",
    "page": 362,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Swarm of Rats"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Swarm of Tiny Beasts",
   "alignment": "Unaligned",
@@ -27936,13 +27766,11 @@
    "document": "SRD 5.2.1",
    "page": 362,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Swarm of Ravens"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Swarm of Tiny Beasts",
   "alignment": "Unaligned",
@@ -28022,13 +27850,11 @@
    "page": 362,
    "page_end": 363,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Swarm of Venomous Snakes"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Swarm of Tiny Beasts",
   "alignment": "Unaligned",
@@ -28102,13 +27928,11 @@
    "document": "SRD 5.2.1",
    "page": 363,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Tiger"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -28181,13 +28005,11 @@
    "document": "SRD 5.2.1",
    "page": 363,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Triceratops"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Huge",
   "creature_type": "Beast (Dinosaur)",
   "alignment": "Unaligned",
@@ -28258,13 +28080,11 @@
    "document": "SRD 5.2.1",
    "page": 363,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Tyrannosaurus Rex"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Huge",
   "creature_type": "Beast (Dinosaur)",
   "alignment": "Unaligned",
@@ -28340,13 +28160,11 @@
    "document": "SRD 5.2.1",
    "page": 363,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Venomous Snake"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -28414,13 +28232,11 @@
    "page": 363,
    "page_end": 364,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Vulture"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -28493,13 +28309,11 @@
    "document": "SRD 5.2.1",
    "page": 364,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Warhorse"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Large",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -28566,13 +28380,11 @@
    "document": "SRD 5.2.1",
    "page": 364,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Weasel"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Tiny",
   "creature_type": "Beast",
   "alignment": "Unaligned",
@@ -28640,13 +28452,11 @@
    "document": "SRD 5.2.1",
    "page": 364,
    "heading": [
-    "Monsters",
-    "Zombies",
+    "Animals",
     "Wolf"
    ]
   },
   "kind": "monster",
-  "group": "Zombies",
   "size": "Medium",
   "creature_type": "Beast",
   "alignment": "Unaligned",

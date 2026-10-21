@@ -1,488 +1,492 @@
-id,en,tr,category,status,alternatives,note,evidence,enforce,en_pattern
-ability,Ability,Yetenek,kural,tartışmalı,Özellik|Kabiliyet,Yetenek/Özellik/Kabiliyet üçü de kullanılıyor; Beceri (skill) ile çakışmayan en yaygın biçim seçildi.,"R,N,C,I,A",no,
-ability-score,Ability Score,Yetenek Puanı,kural,tartışmalı,Özellik Puanı|Kabiliyet Puanı,,"R,C,I,A",yes,
-ability-score-improvement,Ability Score Improvement,Yetenek Puanı Artışı,kural,öneri,,,,yes,
-ability-modifier,ability modifier,yetenek değiştiricisi,kural,tartışmalı,ayar|tamamlayıcı|etken,"Topluluk bölünmüş (Ayar, Tamamlayıcı, Etken, Değiştirici); en anlaşılır olan seçildi.","C,A,J,I",yes,\bability modifier
-modifier,modifier,değiştirici,kural,tartışmalı,ayar|tamamlayıcı|etken,,"C,A,J,I",no,
-ability-check,Ability Check,Yetenek Testi,kural,tartışmalı,Kabiliyet Zarı|Yetenek Zarı,2024 kurallarında check bir D20 Testi türü; 'Test' bunu yansıtıyor.,"E,A,B",yes,\b[Aa]bility [Cc]hecks?\b
-d20-test,D20 Test,D20 Testi,kural,öneri,,,,yes,\bD20 Tests?\b
-saving-throw,Saving Throw,Kurtarma Zarı,kural,topluluk,Kurtulma Zarı|Kurtarma Atışı,En yaygın biçim.,"A,E,F,K",yes,\b[Ss]aving [Tt]hrows?\b
-death-saving-throw,Death Saving Throw,Ölüm Kurtarma Zarı,kural,öneri,Ölüm Kurtarma Atışı,,I,yes,\bDeath Saving Throws?\b
-attack-roll,Attack Roll,Saldırı Zarı,kural,topluluk,İsabet Zarı,,"A,B,E",yes,\b[Aa]ttack [Rr]olls?\b
-damage-roll,Damage Roll,Hasar Zarı,kural,öneri,,,,yes,\b[Dd]amage [Rr]olls?\b
-advantage,Advantage,Avantaj,kural,topluluk,,Evrensel.,"A,B,E,F",yes,\bAdvantage\b
-disadvantage,Disadvantage,Dezavantaj,kural,topluluk,,Evrensel.,"A,B,E,F",yes,\bDisadvantage\b
-hit-points,Hit Points,Can Puanı,kural,topluluk,Can,,"A,C,D,F,I,K",yes,\bHit Points?\b
-hit-point-maximum,Hit Point Maximum,azami Can Puanı,kural,öneri,,,,no,
-temporary-hit-points,Temporary Hit Points,Geçici Can Puanı,kural,öneri,,,,yes,\bTemporary Hit Points?\b
-hit-point-dice,Hit Point Dice,Can Zarı,kural,topluluk,,2024'te Hit Dice → Hit Point Dice; Türkçe biçim aynı kalır.,"A,D,I",yes,\bHit (Point )?Dice\b|\bHit Point Die\b
-armor-class,Armor Class,Zırh Sınıfı,kural,topluluk,Zırh Seviyesi,,"C,D,E,I,J",yes,\bArmor Class\b
-initiative,Initiative,İnisiyatif,kural,tartışmalı,Öncelik,Topluluk Öncelik/İnisiyatif arasında bölünmüş; ürün sahibinin kendi brief'i 'İnisiyatif' kullanıyor.,"B,K,I",yes,\bInitiative\b
-proficiency,Proficiency,Yetkinlik,kural,tartışmalı,Yeterlilik|Uzmanlık,Uzmanlık 'Expertise' ile çakışıyor; Yetkinlik/Yeterlilik eşit yaygın.,"A,E,K,F,J",yes,\b[Pp]roficien(t|cy|cies)\b
-proficiency-bonus,Proficiency Bonus,Yetkinlik Bonusu,kural,tartışmalı,Yeterlilik Bonusu,,"A,E,F,J",yes,\bProficiency Bonus\b
-expertise,Expertise,Uzmanlık,kural,öneri,Ekspertiz,,B,yes,\bExpertise\b
-skill,Skill,Beceri,kural,topluluk,Yetenek,,"A,E",yes,\b[Ss]kills?\b
-difficulty-class,Difficulty Class,Zorluk Derecesi,kural,tartışmalı,Zorluk Seviyesi,Kısaltma ZD. 'Zorluk Seviyesi (ZS)' Zırh Sınıfı kısaltmasıyla çakışıyor.,"D,I,A,B",yes,\bDifficulty Class\b
-dc,DC,ZD,kısaltma,tartışmalı,ZS,Zorluk Derecesi kısaltması.,"D,I",yes,\bDC\b
-ac,AC,ZS,kısaltma,öneri,,Zırh Sınıfı kısaltması.,,yes,\bAC\b
-hp,HP,CP,kısaltma,öneri,,Can Puanı kısaltması. Bakır para kısaltması kullanılmadığı için çakışma yok.,,yes,\bHP\b
-xp,XP,TP,kısaltma,öneri,,Tecrübe Puanı.,,yes,\bXP\b
-pb,PB,YB,kısaltma,öneri,,Yetkinlik Bonusu.,,yes,\bPB\b
-cr,CR,TD,kısaltma,tartışmalı,ZD,Tehlike Derecesi; FRP-SRD 'ZD' kullanıyor ama ZD bizde Zorluk Derecesi.,A,yes,\bCR\b
-challenge-rating,Challenge Rating,Tehlike Derecesi,kural,tartışmalı,Zorluk Derecesi,FRP-SRD 'Zorluk Derecesi' diyor; DC ile çakıştığı için ayrıştırıldı.,A,yes,\bChallenge Rating\b
-experience-points,Experience Points,Tecrübe Puanı,kural,topluluk,Deneyim Puanı,Oyuncular arasında 'TP' yaygın.,,yes,\bExperience Points?\b
-critical-hit,Critical Hit,Kritik Vuruş,kural,topluluk,,,"A,J",yes,\bCritical Hits?\b
-short-rest,Short Rest,Kısa Dinlenme,kural,topluluk,,,"I,J,U",yes,\bShort Rests?\b
-long-rest,Long Rest,Uzun Dinlenme,kural,topluluk,,,"A,I,J,N,U",yes,\bLong Rests?\b
-heroic-inspiration,Heroic Inspiration,Kahramanca İlham,kural,öneri,İlham,5e'deki 'Inspiration' için İlham yaygın; 2024 adı eklendi.,"A,I",yes,\bHeroic Inspiration\b
-concentration,Concentration,Konsantrasyon,kural,topluluk,,Evrensel.,"A,B,F,J",yes,\bConcentration\b
-ritual,Ritual,Ritüel,kural,topluluk,Ayin,,"A,S",yes,\bRitual\b
-spell,Spell,Büyü,kural,topluluk,,,"A,F",yes,\b[Ss]pells?\b
-spell-slot,Spell Slot,Büyü Slotu,kural,topluluk,Büyü Yuvası|Büyü Hanesi,Topluluk ağırlıkla 'slot' kullanıyor.,"A,B,F,R",yes,\b[Ss]pell [Ss]lots?\b
-cantrip,Cantrip,Cantrip,kural,tartışmalı,Bazbüyü|Sıfırıncı Seviye Büyü,Topluluk İngilizce bırakıyor (kural gereği seçildi); BG3 resmi çevirisi 'Bazbüyü'. Türkçeleştirme isteniyorsa 'Bazbüyü' önerilir.,"B,F,V,J",yes,\b[Cc]antrips?\b
-spellcasting,Spellcasting,Büyü Yapma,kural,öneri,,,S,no,
-spellcasting-ability,Spellcasting Ability,büyü yeteneği,kural,öneri,,,,yes,\b[Ss]pellcasting [Aa]bility\b
-spellcasting-focus,Spellcasting Focus,Büyü Odağı,kural,öneri,,,,yes,\bSpellcasting Focus\b
-spell-attack,Spell Attack,Büyü Saldırısı,kural,öneri,,,,yes,\b[Ss]pell [Aa]ttacks?\b
-spell-save-dc,spell save DC,büyü kurtarma ZD'si,kural,öneri,,,B,yes,\bspell save DC\b
-casting-time,Casting Time,Yapma Süresi,büyü,öneri,,Büyü kartı alanı.,,yes,\bCasting Time\b
-range,Range,Menzil,büyü,topluluk,,Büyü kartı alanı ve silah özelliği.,,no,
-components,Components,Bileşenler,büyü,öneri,,,,yes,\bComponents\b
-verbal,Verbal,Sözlü,büyü,öneri,,V → S (Sözlü).,,no,
-somatic,Somatic,Bedensel,büyü,öneri,,S → B (Bedensel).,,no,
-material,Material,Malzeme,büyü,öneri,,M → M (Malzeme).,,no,
-duration,Duration,Süre,büyü,topluluk,,,,yes,\bDuration\b
-instantaneous,Instantaneous,Anlık,büyü,öneri,,,,yes,\bInstantaneous\b
-using-a-higher-level-spell-slot,Using a Higher-Level Spell Slot,Daha Yüksek Seviyeli Büyü Slotu Kullanma,büyü,öneri,,,,yes,
-cantrip-upgrade,Cantrip Upgrade,Cantrip Gelişimi,büyü,öneri,,,,yes,
-level,Level,Seviye,kural,topluluk,Düzey,'Level 2 Evocation' → '2. Seviye Oluşturma'.,A,no,
-spellbook,Spellbook,Büyü Kitabı,kural,öneri,,,,yes,\b[Ss]pellbook\b
-action,Action,Eylem,eylem,topluluk,Aksiyon,,"A,B,I",yes,\bActions?\b
-bonus-action,Bonus Action,Bonus Eylem,eylem,topluluk,Bonus Aksiyon,,"A,B,I",yes,\bBonus Actions?\b
-reaction,Reaction,Reaksiyon,eylem,topluluk,Tepki,BG3 ve çoğu topluluk kaynağı Reaksiyon; FRP-SRD Tepki.,"B,I,J,N,U,A",yes,\bReactions?\b
-opportunity-attack,Opportunity Attack,Fırsat Saldırısı,eylem,topluluk,,,"B,I",yes,\bOpportunity Attacks?\b
-attack-action,Attack [Action],Saldırı,eylem,topluluk,,'Attack action' → 'Saldırı eylemi'.,"A,B",no,
-dash,Dash,Atılma,eylem,öneri,Koşma,,,yes,\bDash\b
-disengage,Disengage,Geri Çekilme,eylem,öneri,,,,yes,\bDisengage\b
-dodge,Dodge,Kaçınma,eylem,öneri,Savuşturma,,,yes,\bDodge\b
-help,Help,Yardım,eylem,öneri,,,,yes,\bHelp action\b
-hide,Hide,Saklanma,eylem,öneri,,,,yes,\bHide action\b
-influence,Influence,Etkileme,eylem,öneri,,,,yes,\bInfluence action\b
-magic-action,Magic [Action],Büyü,eylem,öneri,,'Magic action' → 'Büyü eylemi'.,,yes,\bMagic action\b
-ready,Ready,Hazırlanma,eylem,öneri,,,,yes,\bReady action\b
-search,Search,Arama,eylem,öneri,,,,yes,\bSearch action\b
-study,Study,İnceleme,eylem,öneri,,,,yes,\bStudy action\b
-utilize,Utilize,Kullanma,eylem,öneri,,,,yes,\bUtilize\b
-multiattack,Multiattack,Çoklu Saldırı,canavar,öneri,,,,yes,\bMultiattack\b
-unarmed-strike,Unarmed Strike,Silahsız Vuruş,kural,öneri,,,,yes,\bUnarmed Strikes?\b
-speed,Speed,Hız,kural,topluluk,,,A,yes,\bSpeed\b
-fly-speed,Fly Speed,Uçma Hızı,kural,öneri,,,,yes,\b[Ff]ly Speed\b
-swim-speed,Swim Speed,Yüzme Hızı,kural,öneri,,,,yes,\b[Ss]wim Speed\b
-climb-speed,Climb Speed,Tırmanma Hızı,kural,öneri,,,,yes,\b[Cc]limb Speed\b
-burrow-speed,Burrow Speed,Kazma Hızı,kural,öneri,,,,yes,\b[Bb]urrow Speed\b
-difficult-terrain,Difficult Terrain,Zorlu Arazi,kural,öneri,,,,yes,\bDifficult Terrain\b
-cover,Cover,Siper,kural,öneri,Örtü,,,yes,\b(Half|Three-Quarters|Total) Cover\b|\bCover\b
-half-cover,Half Cover,Yarım Siper,kural,öneri,,,,yes,\bHalf Cover\b
-three-quarters-cover,Three-Quarters Cover,Üç Çeyrek Siper,kural,öneri,,,,yes,\bThree-Quarters Cover\b
-total-cover,Total Cover,Tam Siper,kural,öneri,,,,yes,\bTotal Cover\b
-bright-light,Bright Light,Parlak Işık,kural,öneri,,,,yes,\bBright Light\b
-dim-light,Dim Light,Loş Işık,kural,öneri,,,,yes,\bDim Light\b
-darkness,Darkness,Karanlık,kural,öneri,,,,yes,\bDarkness\b
-lightly-obscured,Lightly Obscured,Hafif Örtülü,kural,öneri,,,,yes,\bLightly Obscured\b
-heavily-obscured,Heavily Obscured,Yoğun Örtülü,kural,öneri,,,,yes,\bHeavily Obscured\b
-darkvision,Darkvision,Karanlık Görüş,duyu,öneri,Karanlıkta Görme,,,yes,\bDarkvision\b
-blindsight,Blindsight,Kör Görüş,duyu,öneri,,,,yes,\bBlindsight\b
-tremorsense,Tremorsense,Titreşim Algısı,duyu,öneri,,,,yes,\bTremorsense\b
-truesight,Truesight,Gerçek Görüş,duyu,öneri,,,,yes,\bTruesight\b
-passive-perception,Passive Perception,Pasif Algı,duyu,öneri,,,,yes,\bPassive Perception\b
-telepathy,Telepathy,Telepati,duyu,öneri,,,,yes,\b[Tt]elepathy\b
-bloodied,Bloodied,Kanlı,kural,öneri,Yaralı,,,yes,\bBloodied\b
-resistance,Resistance,Direnç,hasar,topluluk,,,"F,J,K,N",yes,\bResistances?\b
-vulnerability,Vulnerability,Zafiyet,hasar,öneri,Hassaslık,BG3 'Hassaslık' kullanıyor.,J,yes,\bVulnerabilit(y|ies)\b
-immunity,Immunity,Bağışıklık,hasar,topluluk,,,"A,F,J",yes,\bImmunit(y|ies)\b
-damage,Damage,Hasar,hasar,topluluk,,,"A,C,F,N",yes,\b[Dd]amage\b
-damage-threshold,Damage Threshold,Hasar Eşiği,hasar,öneri,,,,yes,\bDamage Threshold\b
-healing,Healing,İyileşme,kural,öneri,,,,no,
-stable,Stable,Stabil,kural,öneri,Durağan,,,no,
-dead,Dead,Ölü,kural,öneri,,,,no,
-surprise,Surprise,Baskın,kural,öneri,Şaşkınlık,,,no,
-grappling,Grappling,Kapışma,kural,öneri,,,,yes,\bGrappling\b
-encounter,Encounter,Karşılaşma,kural,öneri,,,,no,
-attunement,Attunement,Uyumlanma,eşya,öneri,,,,yes,\bAttunement\b
-magic-item,Magic Item,Büyülü Eşya,eşya,öneri,,,,yes,\b[Mm]agic [Ii]tems?\b
-legendary-action,Legendary Action,Efsanevi Eylem,canavar,öneri,,,A,yes,\bLegendary Actions?\b
-legendary-resistance,Legendary Resistance,Efsanevi Direnç,canavar,öneri,,,,yes,\bLegendary Resistance\b
-lair,Lair,İn,canavar,öneri,Yuva,,,yes,\b[Ll]air\b
-stat-block,Stat Block,İstatistik Bloğu,canavar,öneri,Değer Kartı,,,yes,\b[Ss]tat [Bb]locks?\b
-traits,Traits,Özellikler,canavar,öneri,,Canavar kartı bölüm başlığı.,,no,
-monster,Monster,Canavar,kural,topluluk,Yaratık,,A,no,
-creature,Creature,Yaratık,kural,topluluk,,,A,no,
-creature-type,Creature Type,Yaratık Türü,kural,öneri,,,A,yes,\b[Cc]reature [Tt]ype\b
-game-master,Game Master,Oyun Yöneticisi,kural,topluluk,DM,Kısaltma 'GM' korunur (uygulama adı da GM Cebi).,"A,E,I",yes,\bGame Master\b
-gm,GM,GM,kısaltma,topluluk,DM|OY,,"B,C",yes,\bGM\b
-player-character,Player Character,Oyuncu Karakteri,kural,öneri,,,I,yes,\b[Pp]layer [Cc]haracters?\b
-nonplayer-character,Nonplayer Character,Oyuncu Olmayan Karakter,kural,öneri,NPC,Kısaltma 'NPC' korunur.,,yes,\b[Nn]onplayer [Cc]haracters?\b
-weapon-mastery,Weapon Mastery,Silah Ustalığı,silah,öneri,,,,yes,\bWeapon Mastery\b
-armor-training,Armor Training,Zırh Eğitimi,zırh,öneri,,,,yes,\bArmor Training\b
-feat,Feat,Hüner,köken,topluluk,Yetenek,,"A,B,H,T",yes,\b[Ff]eats?\b
-origin-feat,Origin Feat,Köken Hüneri,köken,öneri,,,,yes,
-general-feat,General Feat,Genel Hüner,köken,öneri,,,,yes,
-fighting-style-feat,Fighting Style Feat,Dövüş Tarzı Hüneri,köken,öneri,,,,yes,
-epic-boon-feat,Epic Boon Feat,Destansı Lütuf Hüneri,köken,öneri,,,,yes,
-background,Background,Geçmiş,köken,topluluk,,,"A,B,I,N,R",yes,\b[Bb]ackgrounds?\b
-species,Species,Soy,köken,tartışmalı,Irk|Tür,5.1'de 'Irk' (race) kullanılıyordu; 2024 'species' için 'Soy' öneriliyor. 'Tür' Yaratık Türü ile çakışıyor.,"A,R",yes,\b[Ss]pecies\b
-class,Class,Sınıf,sınıf,topluluk,,,"A,B,F",no,
-subclass,Subclass,Alt Sınıf,sınıf,topluluk,,,"A,B,F",yes,\b[Ss]ubclass(es)?\b
-class-feature,Class Feature,Sınıf Özelliği,sınıf,öneri,,,,no,
-multiclassing,Multiclassing,Çoklu Sınıf,sınıf,öneri,,,,no,
-alignment,Alignment,Yönelim,kural,topluluk,Hizalanma,,"A,D",yes,\b[Aa]lignment\b
-lawful,Lawful,Kuralcı,yönelim,topluluk,,,"A,C,D,K",yes,
-chaotic,Chaotic,Kaotik,yönelim,topluluk,,,"A,C,D,K",yes,
-neutral,Neutral,Tarafsız,yönelim,topluluk,,,"A,C,D,K",yes,
-good,Good,İyi,yönelim,topluluk,,,"C,K",no,
-evil,Evil,Kötü,yönelim,topluluk,,,"C,K",no,
-unaligned,Unaligned,Yönelimsiz,yönelim,öneri,,,,yes,\bUnaligned\b
-coin,Coin,Sikke,ekipman,öneri,Para,,,no,
-copper-piece,Copper Piece,bakır,para,tartışmalı,BP,Kısaltma yerine kelime: '5 CP' → '5 bakır'. İngilizce kısaltmalar (GP=gold) Türkçe okumada yanıltıcı.,,yes,\bCP\b|\bCopper Pieces?\b
-silver-piece,Silver Piece,gümüş,para,tartışmalı,,'1 SP' → '1 gümüş'.,,yes,\bSP\b|\bSilver Pieces?\b
-electrum-piece,Electrum Piece,elektrum,para,tartışmalı,,'1 EP' → '1 elektrum'.,,yes,\bEP\b|\bElectrum Pieces?\b
-gold-piece,Gold Piece,altın,para,tartışmalı,AP|GP,'50 GP' → '50 altın'.,,yes,\bGP\b|\bGold Pieces?\b
-platinum-piece,Platinum Piece,platin,para,tartışmalı,,'10 PP' → '10 platin'.,,yes,\bPP\b|\bPlatinum Pieces?\b
-feet,feet,fit,birim,tartışmalı,ayak|ft,Sayılar değişmez (QC). 30 feet → 30 fit. Metrik gösterim ileride uygulama ayarı olabilir.,,yes,"\d[\d,]*[- ](feet|foot)\b|\bft\."
-mile,mile,mil,birim,öneri,,,,yes,\bmiles?\b
-pound-lb,pound (lb.),lb,birim,öneri,libre,Ağırlık birimi kısaltması korunur.,,no,
-round,Round,Tur,kural,topluluk,Raunt,,,no,
-turn,Turn,Sıra,kural,öneri,Hamle,Tur (round) ile karışmaması için 'Sıra'.,,no,
-target,Target,Hedef,kural,topluluk,,,,no,
-area-of-effect,Area of Effect,Etki Alanı,alan,öneri,,,,yes,\b[Aa]rea of [Ee]ffect\b
-cone,Cone,Koni,alan,öneri,,,,yes,\bCone\b
-cube,Cube,Küp,alan,öneri,,,,yes,\bCube\b
-cylinder,Cylinder,Silindir,alan,öneri,,,,yes,\bCylinder\b
-emanation,Emanation,Yayılım,alan,öneri,,,,yes,\bEmanation\b
-line,Line,Çizgi,alan,öneri,Hat,,,yes,\bLine\b(?! of)
-sphere,Sphere,Küre,alan,öneri,,,,yes,\bSphere\b
-hazard,Hazard,Tehlike,kural,öneri,,,,no,
-falling,Falling,Düşme,kural,öneri,,,,no,
-suffocation,Suffocation,Boğulma,kural,öneri,,,,no,
-teleportation,Teleportation,Işınlanma,kural,öneri,,,,no,
-shape-shifting,Shape-Shifting,Biçim Değiştirme,kural,öneri,,,,no,
-curse,Curse,Lanet,kural,öneri,,,,no,
-possession,Possession,Ele Geçirilme,kural,öneri,,,,no,
-illusion,Illusion,İllüzyon,kural,topluluk,Yanılsama,,"B,F",no,
-attitude,Attitude,Tavır,kural,öneri,,,,no,
-friendly,Friendly,Dostça,kural,öneri,,,,yes,\bFriendly\b
-hostile,Hostile,Düşmanca,kural,öneri,,,,yes,\bHostile\b
-indifferent,Indifferent,Kayıtsız,kural,öneri,,,,yes,\bIndifferent\b
-carrying-capacity,Carrying Capacity,Taşıma Kapasitesi,kural,öneri,,,,yes,
-jumping,Jumping,Zıplama,kural,öneri,,,,yes,
-long-jump,Long Jump,Uzun Atlama,kural,öneri,,,,yes,
-high-jump,High Jump,Yüksek Atlama,kural,öneri,,,,yes,
-improvised-weapon,Improvised Weapon,Doğaçlama Silah,silah,öneri,,,,yes,
-occupied-space,Occupied Space,Dolu Alan,kural,öneri,,,,yes,
-unoccupied-space,Unoccupied Space,Boş Alan,kural,öneri,,,,yes,
-strength,Strength,Güç,yetenek,tartışmalı,Kuvvet,Topluluk yaklaşık yarı yarıya bölünmüş; BG3 'Kuvvet'. Force (hasar türü) 'Kuvvet' olduğundan Güç seçildi.,"A,C,D,E,I,O,B,H,J",yes,\bStrength\b
-dexterity,Dexterity,Çeviklik,yetenek,topluluk,,Evrensel.,"A,B,C,E,F,J",yes,\bDexterity\b
-constitution,Constitution,Dayanıklılık,yetenek,topluluk,,Evrensel.,"A,B,C,E,F,H,J",yes,\bConstitution\b
-intelligence,Intelligence,Zeka,yetenek,topluluk,,,"A,B,C,E,J",yes,\bIntelligence\b
-wisdom,Wisdom,Bilgelik,yetenek,tartışmalı,Akıl|İrfan|Sezgi,Bilgelik/Akıl/İrfan arasında uzlaşma yok; FRP-SRD ve FRPNET Bilgelik.,"A,C,D,E,B,H,J",yes,\bWisdom\b
-charisma,Charisma,Karizma,yetenek,topluluk,,,"A,B,C,E,J",yes,\bCharisma\b
-str,Str,Güç,kısaltma,tartışmalı,Kuv,Canavar kartı kısaltması.,,no,
-dex,Dex,Çev,kısaltma,öneri,,,,no,
-con,Con,Day,kısaltma,öneri,,,,no,
-int,Int,Zek,kısaltma,öneri,,,,no,
-wis,Wis,Bil,kısaltma,öneri,,,,no,
-cha,Cha,Kar,kısaltma,öneri,,,,no,
-acrobatics,Acrobatics,Akrobasi,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bAcrobatics\b
-animal-handling,Animal Handling,Hayvan Terbiyesi,beceri,tartışmalı,Hayvanlarla İlgilenme,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bAnimal Handling\b
-arcana,Arcana,Arkana,beceri,tartışmalı,Gizli İlimler|Büyü Bilgisi,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bArcana\b
-athletics,Athletics,Atletizm,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bAthletics\b
-deception,Deception,Aldatma,beceri,topluluk,Kandırma,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bDeception\b
-history,History,Tarih,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bHistory\b
-insight,Insight,Sezgi,beceri,topluluk,Önsezi,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bInsight\b
-intimidation,Intimidation,Gözdağı,beceri,tartışmalı,Korkutma|Yıldırma,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bIntimidation\b
-investigation,Investigation,Araştırma,beceri,topluluk,Soruşturma,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bInvestigation\b
-medicine,Medicine,Tıp,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bMedicine\b
-nature,Nature,Doğa,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bNature\b
-perception,Perception,Algı,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bPerception\b
-performance,Performance,Gösteri,beceri,tartışmalı,Performans,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bPerformance\b
-persuasion,Persuasion,İkna,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bPersuasion\b
-religion,Religion,Din,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bReligion\b
-sleight-of-hand,Sleight of Hand,El Çabukluğu,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bSleight of Hand\b
-stealth,Stealth,Gizlilik,beceri,topluluk,Sinsilik,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bStealth\b
-survival,Survival,Hayatta Kalma,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bSurvival\b
-blinded,Blinded,Kör,durum,öneri,Körlük,Durum adları sıfat olarak: 'Kör durumunda'.,"A,K",yes,\bBlinded\b
-charmed,Charmed,Büyülenmiş,durum,öneri,Efsunlanmış,,"F,K",yes,\bCharmed\b
-deafened,Deafened,Sağır,durum,öneri,Sağırlık,,A,yes,\bDeafened\b
-exhaustion,Exhaustion,Yorgunluk,durum,topluluk,Bitkinlik,,A,yes,\bExhaustion\b
-frightened,Frightened,Korkmuş,durum,öneri,Dehşete Düşmüş,,,yes,\bFrightened\b
-grappled,Grappled,Yakalanmış,durum,topluluk,Tutulmuş,,B,yes,\bGrappled\b
-incapacitated,Incapacitated,Etkisiz,durum,öneri,Aciz,,,yes,\bIncapacitated\b
-invisible,Invisible,Görünmez,durum,topluluk,,,F,yes,\bInvisible\b
-paralyzed,Paralyzed,Felçli,durum,topluluk,Felç,,"J,K",yes,\bParalyzed\b
-petrified,Petrified,Taşlaşmış,durum,öneri,,,,yes,\bPetrified\b
-poisoned,Poisoned,Zehirlenmiş,durum,öneri,,,K,yes,\bPoisoned\b
-prone,Prone,Yerde,durum,topluluk,Yere Yığılmış,,B,yes,\bProne\b
-restrained,Restrained,Kısıtlanmış,durum,öneri,Bağlanmış,,,yes,\bRestrained\b
-stunned,Stunned,Sersemlemiş,durum,öneri,,,K,yes,\bStunned\b
-unconscious,Unconscious,Bilinçsiz,durum,topluluk,Baygın,,B,yes,\bUnconscious\b
-condition,Condition,Durum,durum,topluluk,,,,yes,\b[Cc]onditions?\b
-acid,Acid,Asit,hasar türü,topluluk,,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"F,J,N",yes,\bAcid damage\b
-bludgeoning,Bludgeoning,Ezici,hasar türü,tartışmalı,Küt,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,K,yes,\bBludgeoning damage\b
-cold,Cold,Soğuk,hasar türü,topluluk,Buz,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"F,N,J",yes,\bCold damage\b
-fire,Fire,Ateş,hasar türü,topluluk,,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"A,F,J,N",yes,\bFire damage\b
-force,Force,Kuvvet,hasar türü,öneri,Saf Enerji,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,,yes,\bForce damage\b
-lightning,Lightning,Yıldırım,hasar türü,topluluk,Elektrik,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"J,N,F",yes,\bLightning damage\b
-necrotic,Necrotic,Nekrotik,hasar türü,tartışmalı,Çürüme,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"N,J",yes,\bNecrotic damage\b
-piercing,Piercing,Delici,hasar türü,topluluk,,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,K,yes,\bPiercing damage\b
-poison,Poison,Zehir,hasar türü,topluluk,,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"A,J,N",yes,\bPoison damage\b
-psychic,Psychic,Psişik,hasar türü,topluluk,,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"J,N",yes,\bPsychic damage\b
-radiant,Radiant,Işıltı,hasar türü,tartışmalı,Radyant|Işık,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"N,J",yes,\bRadiant damage\b
-slashing,Slashing,Kesici,hasar türü,topluluk,Kesme,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"K,J",yes,\bSlashing damage\b
-thunder,Thunder,Gök Gürültüsü,hasar türü,tartışmalı,Ses,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"N,J",yes,\bThunder damage\b
-abjuration,Abjuration,Koruma,büyü okulu,tartışmalı,Sakınma|Abjurasyon,,"F,S,K,B",no,
-conjuration,Conjuration,Çağırma,büyü okulu,topluluk,Konjurasyon,,"F,K,S",no,
-divination,Divination,Kehanet,büyü okulu,topluluk,Divinasyon,,"F,K",no,
-enchantment,Enchantment,Efsunlama,büyü okulu,tartışmalı,Büyüleme,,"K,S",no,
-evocation,Evocation,Oluşturma,büyü okulu,tartışmalı,Evokasyon,,"A,K,B",no,
-illusion-b-y-okulu,Illusion,İllüzyon,büyü okulu,topluluk,Yanılsama,,"B,F",no,
-necromancy,Necromancy,Nekromansi,büyü okulu,topluluk,Ölüm İlmi,,"A,B,K",no,
-transmutation,Transmutation,Dönüşüm,büyü okulu,tartışmalı,Transmutasyon|Başkalaşım,,"F,B,K",no,
-school-of-magic,School of Magic,Büyü Okulu,büyü okulu,topluluk,Ekol,,"B,F,A",no,
-tiny,Tiny,Minik,boyut,öneri,,Küçük/Orta/Büyük FRP-SRD'de var; diğerleri öneri.,A,no,
-small,Small,Küçük,boyut,topluluk,,Küçük/Orta/Büyük FRP-SRD'de var; diğerleri öneri.,A,no,
-medium,Medium,Orta,boyut,topluluk,,Küçük/Orta/Büyük FRP-SRD'de var; diğerleri öneri.,A,no,
-large,Large,Büyük,boyut,topluluk,,Küçük/Orta/Büyük FRP-SRD'de var; diğerleri öneri.,A,no,
-huge,Huge,Devasa,boyut,öneri,,Küçük/Orta/Büyük FRP-SRD'de var; diğerleri öneri.,A,no,
-gargantuan,Gargantuan,Muazzam,boyut,öneri,,Küçük/Orta/Büyük FRP-SRD'de var; diğerleri öneri.,A,no,
-size,Size,Boyut,boyut,topluluk,,,A,no,
-aberration,Aberration,Garabet,yaratık türü,öneri,Aberasyon,,,no,
-beast,Beast,Hayvan,yaratık türü,tartışmalı,Canavar,FRP-SRD 'Canavar'ı beast için kullanıyor; biz Canavar'ı 'monster' için ayırdık.,A,no,
-celestial,Celestial,Göksel,yaratık türü,öneri,,,,no,
-construct,Construct,Yapıt,yaratık türü,öneri,Yapay Varlık,,,no,
-dragon,Dragon,Ejderha,yaratık türü,topluluk,,,K,no,
-elemental,Elemental,Elemental,yaratık türü,topluluk,,,K,no,
-fey,Fey,Peri,yaratık türü,topluluk,,,A,no,
-fiend,Fiend,İblis,yaratık türü,tartışmalı,Şeytan|Zebani,,"K,B",no,
-giant,Giant,Dev,yaratık türü,topluluk,,,K,no,
-humanoid,Humanoid,İnsansı,yaratık türü,topluluk,,,"A,B",no,
-monstrosity,Monstrosity,Ucube,yaratık türü,öneri,,,,no,
-ooze,Ooze,Balçık,yaratık türü,öneri,,,,no,
-plant,Plant,Bitki,yaratık türü,öneri,,,,no,
-undead,Undead,Hortlak,yaratık türü,topluluk,Yaşayan Ölü,,"A,K,F",no,
-barbarian,Barbarian,Barbar,sınıf,topluluk,,,"A,B,D,G,J,K",yes,\bBarbarians?\b
-bard,Bard,Ozan,sınıf,topluluk,Bard,,"A,B,G,J,K",yes,\bBards?\b
-cleric,Cleric,Rahip,sınıf,tartışmalı,Ruhban,FRP-SRD/FRPNET Rahip; BG3 Ruhban.,"A,B,C,H,G,J,K",yes,\bClerics?\b
-druid,Druid,Druid,sınıf,topluluk,,,"A,B,G,H,J,K",yes,\bDruids?\b
-fighter,Fighter,Savaşçı,sınıf,topluluk,Dövüşçü,BG3 bilinçli olarak Dövüşçü seçti.,"A,B,C,G,O,J",yes,\bFighters?\b
-monk,Monk,Keşiş,sınıf,topluluk,,,"A,B,G,J,K",yes,\bMonks?\b
-paladin,Paladin,Paladin,sınıf,topluluk,,,"A,B,G,J,K",yes,\bPaladins?\b
-ranger,Ranger,Korucu,sınıf,tartışmalı,Kolcu,Yaklaşık eşit bölünmüş.,"A,G,K,B,J,O",yes,\bRangers?\b
-rogue,Rogue,Düzenbaz,sınıf,topluluk,Hırsız,Hırsız alt sınıf (Thief) için ayrıldı.,"A,B,C,G,J,K,T",yes,\bRogues?\b
-sorcerer,Sorcerer,Sihirbaz,sınıf,tartışmalı,Sorcerer,Çoğu oyuncu İngilizce bırakıyor; Türkçe biçim olarak Sihirbaz yerleşik.,"A,G,J,K,L,B,F,S",yes,\bSorcerers?\b
-warlock,Warlock,Sehhar,sınıf,tartışmalı,Warlock,Topluluk çoğunlukla İngilizce 'Warlock' diyor; Türkçe tek yerleşik biçim BG3'ün 'Sehhar'ı. Karar ürün sahibinde.,"L,B,G,S",yes,\bWarlocks?\b
-wizard,Wizard,Büyücü,sınıf,topluluk,,,"A,C,F,G,J,K",yes,\bWizards?\b
-path-of-the-berserker,Path of the Berserker,Gözü Dönmüş Yolu,alt sınıf,öneri,,,,yes,\bPath of the Berserker\b
-college-of-lore,College of Lore,İrfan Okulu,alt sınıf,öneri,,,,yes,\bCollege of Lore\b
-life-domain,Life Domain,Yaşam Alanı,alt sınıf,öneri,,,,yes,\bLife Domain\b
-circle-of-the-land,Circle of the Land,Toprak Çemberi,alt sınıf,öneri,,,,yes,\bCircle of the Land\b
-champion,Champion,Şampiyon,alt sınıf,öneri,,,,yes,\bChampion\b
-warrior-of-the-open-hand,Warrior of the Open Hand,Açık El Savaşçısı,alt sınıf,öneri,,,,yes,\bWarrior of the Open Hand\b
-oath-of-devotion,Oath of Devotion,Bağlılık Yemini,alt sınıf,öneri,,,,yes,\bOath of Devotion\b
-hunter,Hunter,Avcı,alt sınıf,öneri,,,,yes,\bHunter\b
-thief,Thief,Hırsız,alt sınıf,öneri,,,,yes,\bThief\b
-draconic-sorcery,Draconic Sorcery,Ejderha Sihri,alt sınıf,öneri,,,,yes,\bDraconic Sorcery\b
-fiend-patron,Fiend Patron,İblis Hamisi,alt sınıf,öneri,,,,yes,\bFiend Patron\b
-evoker,Evoker,Oluşturucu,alt sınıf,öneri,,,,yes,\bEvoker\b
-dragonborn,Dragonborn,Ejderdoğan,soy,topluluk,,,"A,O,P",yes,\bDragonborn(s|es)?\b
-dwarf,Dwarf,Cüce,soy,topluluk,,,"A,B,H,I,K,O",yes,\bDwarf(s|es)?\b
-elf,Elf,Elf,soy,topluluk,,,"A,B,I,K,O",yes,\bElf(s|es)?\b
-gnome,Gnome,Gnom,soy,topluluk,Gnome,,"A,K",yes,\bGnome(s|es)?\b
-goliath,Goliath,Goliat,soy,öneri,Goliath,,B,yes,\bGoliath(s|es)?\b
-halfling,Halfling,Buçukluk,soy,topluluk,Halfling,,"A,K,O",yes,\bHalfling(s|es)?\b
-human,Human,İnsan,soy,topluluk,,,"A,I",yes,\bHuman(s|es)?\b
-orc,Orc,Ork,soy,topluluk,,,"A,B,K",yes,\bOrc(s|es)?\b
-tiefling,Tiefling,Tiefling,soy,topluluk,Şeytanımsı,,"J,O",yes,\bTiefling(s|es)?\b
-drow,Drow,Drow,soy,öneri,Kara Elf,Elf soyu; SRD 5.2.1'de geçtiği için lisanslı.,,no,
-high-elf,High Elf,Yüksek Elf,soy,öneri,,,,yes,
-wood-elf,Wood Elf,Orman Elfi,soy,öneri,,,,yes,
-forest-gnome,Forest Gnome,Orman Gnomu,soy,öneri,,,,yes,
-rock-gnome,Rock Gnome,Kaya Gnomu,soy,öneri,,,,yes,
-acolyte,Acolyte,Mürit,geçmiş,öneri,,,,no,
-criminal,Criminal,Suçlu,geçmiş,öneri,,,,no,
-sage,Sage,Bilge,geçmiş,öneri,,,,no,
-soldier,Soldier,Asker,geçmiş,öneri,,,,no,
-alert,Alert,Tetikte,hüner,öneri,,,,no,
-magic-initiate,Magic Initiate,Büyü Çırağı,hüner,öneri,,,,no,
-savage-attacker,Savage Attacker,Vahşi Saldırgan,hüner,öneri,,,,no,
-skilled,Skilled,Becerikli,hüner,öneri,,,,no,
-grappler,Grappler,Güreşçi,hüner,öneri,,,,no,
-archery,Archery,Okçuluk,hüner,öneri,,,,no,
-defense,Defense,Savunma,hüner,öneri,,,,no,
-great-weapon-fighting,Great Weapon Fighting,Büyük Silah Dövüşü,hüner,öneri,,,,no,
-two-weapon-fighting,Two-Weapon Fighting,İki Silahla Dövüş,hüner,öneri,,,,no,
-boon-of-combat-prowess,Boon of Combat Prowess,Savaş Hüneri Lütfu,hüner,öneri,,,,no,
-boon-of-dimensional-travel,Boon of Dimensional Travel,Boyutlar Arası Yolculuk Lütfu,hüner,öneri,,,,no,
-boon-of-fate,Boon of Fate,Kader Lütfu,hüner,öneri,,,,no,
-boon-of-irresistible-offense,Boon of Irresistible Offense,Karşı Konulmaz Saldırı Lütfu,hüner,öneri,,,,no,
-boon-of-spell-recall,Boon of Spell Recall,Büyü Hatırlama Lütfu,hüner,öneri,,,,no,
-boon-of-the-night-spirit,Boon of the Night Spirit,Gece Ruhu Lütfu,hüner,öneri,,,,no,
-boon-of-truesight,Boon of Truesight,Gerçek Görüş Lütfu,hüner,öneri,,,,no,
-ammunition,Ammunition,Mühimmat,silah özelliği,öneri,Cephane,,,no,
-finesse,Finesse,İncelik,silah özelliği,öneri,Zarafet,,,no,
-heavy,Heavy,Ağır,silah özelliği,topluluk,,,A,no,
-light,Light,Hafif,silah özelliği,topluluk,,,A,no,
-loading,Loading,Doldurma,silah özelliği,öneri,,,,no,
-reach,Reach,Erişim,silah özelliği,topluluk,Uzanım,,A,no,
-thrown,Thrown,Fırlatma,silah özelliği,öneri,Fırlatılabilir,,,no,
-two-handed,Two-Handed,İki Elli,silah özelliği,tartışmalı,Çift Elli,,A,no,
-versatile,Versatile,Çok Yönlü,silah özelliği,tartışmalı,Ayarlanabilir,,A,no,
-cleave,Cleave,Yarma,silah ustalığı,öneri,,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,
-graze,Graze,Sıyırma,silah ustalığı,öneri,,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,
-nick,Nick,Çentik,silah ustalığı,öneri,,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,
-push,Push,İtme,silah ustalığı,öneri,,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,
-sap,Sap,Zayıflatma,silah ustalığı,öneri,Sersemletme,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,
-slow,Slow,Yavaşlatma,silah ustalığı,öneri,,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,
-topple,Topple,Devirme,silah ustalığı,öneri,,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,
-vex,Vex,Taciz,silah ustalığı,öneri,Rahatsız Etme,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,
-simple-weapon,Simple Weapon,Basit Silah,silah,öneri,,,,yes,\bSimple weapons?\b
-martial-weapon,Martial Weapon,Savaş Silahı,silah,öneri,Askerî Silah,,,yes,\bMartial weapons?\b
-light-armor,Light Armor,Hafif Zırh,zırh,topluluk,,,"A,H",yes,\bLight armor\b
-medium-armor,Medium Armor,Orta Zırh,zırh,topluluk,,,"A,H",yes,\bMedium armor\b
-heavy-armor,Heavy Armor,Ağır Zırh,zırh,topluluk,,,"A,H",yes,\bHeavy armor\b
-shield,Shield,Kalkan,zırh,topluluk,,,"A,H",yes,\bShields?\b
-club,Club,Sopa,silah,öneri,,,,no,
-dagger,Dagger,Hançer,silah,öneri,,,,no,
-greatclub,Greatclub,Büyük Sopa,silah,öneri,,,,no,
-handaxe,Handaxe,El Baltası,silah,öneri,,,,no,
-javelin,Javelin,Cirit,silah,öneri,,,,no,
-light-hammer,Light Hammer,Hafif Çekiç,silah,öneri,,,,no,
-mace,Mace,Topuz,silah,öneri,,,,no,
-quarterstaff,Quarterstaff,Asa,silah,öneri,,,,no,
-sickle,Sickle,Orak,silah,öneri,,,,no,
-spear,Spear,Mızrak,silah,öneri,,,,no,
-dart,Dart,Dart,silah,öneri,,,,no,
-light-crossbow,Light Crossbow,Hafif Arbalet,silah,öneri,,,,no,
-shortbow,Shortbow,Kısa Yay,silah,öneri,,,,no,
-sling,Sling,Sapan,silah,öneri,,,,no,
-battleaxe,Battleaxe,Savaş Baltası,silah,öneri,,,,no,
-flail,Flail,Döven,silah,öneri,,,,no,
-glaive,Glaive,Glaive,silah,öneri,,,,no,
-greataxe,Greataxe,Büyük Balta,silah,öneri,,,,no,
-greatsword,Greatsword,Büyük Kılıç,silah,öneri,,,,no,
-halberd,Halberd,Teber,silah,öneri,,,,no,
-lance,Lance,Kargı,silah,öneri,,,,no,
-longsword,Longsword,Uzun Kılıç,silah,öneri,,,,no,
-maul,Maul,Gürz,silah,öneri,,,,no,
-morningstar,Morningstar,Çivili Gürz,silah,öneri,,,,no,
-pike,Pike,Uzun Mızrak,silah,öneri,,,,no,
-rapier,Rapier,Meç,silah,öneri,,,,no,
-scimitar,Scimitar,Pala,silah,öneri,,,,no,
-shortsword,Shortsword,Kısa Kılıç,silah,öneri,,,,no,
-trident,Trident,Üç Dişli Mızrak,silah,öneri,,,,no,
-warhammer,Warhammer,Savaş Çekici,silah,öneri,,,,no,
-war-pick,War Pick,Savaş Kazması,silah,öneri,,,,no,
-whip,Whip,Kırbaç,silah,öneri,,,,no,
-blowgun,Blowgun,Üfleme Borusu,silah,öneri,,,,no,
-hand-crossbow,Hand Crossbow,El Arbaleti,silah,öneri,,,,no,
-heavy-crossbow,Heavy Crossbow,Ağır Arbalet,silah,öneri,,,,no,
-longbow,Longbow,Uzun Yay,silah,öneri,,,,no,
-musket,Musket,Misket Tüfeği,silah,öneri,,,,no,
-pistol,Pistol,Tabanca,silah,öneri,,,,no,
-padded-armor,Padded Armor,Kapitone Zırh,zırh,öneri,,,,no,
-leather-armor,Leather Armor,Deri Zırh,zırh,öneri,,,,no,
-studded-leather-armor,Studded Leather Armor,Perçinli Deri Zırh,zırh,öneri,,,,no,
-hide-armor,Hide Armor,Post Zırh,zırh,öneri,,,,no,
-chain-shirt,Chain Shirt,Zincir Gömlek,zırh,öneri,,,,no,
-scale-mail,Scale Mail,Pullu Zırh,zırh,öneri,,,,no,
-breastplate,Breastplate,Göğüslük,zırh,öneri,,,,no,
-half-plate-armor,Half Plate Armor,Yarım Plaka Zırh,zırh,öneri,,,,no,
-ring-mail,Ring Mail,Halkalı Zırh,zırh,öneri,,,,no,
-chain-mail,Chain Mail,Zincir Zırh,zırh,öneri,,,,no,
-splint-armor,Splint Armor,Lamalı Zırh,zırh,öneri,,,,no,
-plate-armor,Plate Armor,Plaka Zırh,zırh,öneri,,,,no,
-artisans-tools,Artisan’s Tools,Zanaatkâr Aletleri,ekipman,öneri,,,,no,
-thieves-tools,Thieves’ Tools,Hırsız Aletleri,ekipman,öneri,,,,no,
-herbalism-kit,Herbalism Kit,Bitki Bilimi Takımı,ekipman,öneri,,,,no,
-musical-instrument,Musical Instrument,Müzik Aleti,ekipman,öneri,,,,no,
-gaming-set,Gaming Set,Oyun Takımı,ekipman,öneri,,,,no,
-holy-symbol,Holy Symbol,Kutsal Sembol,ekipman,öneri,,,,no,
-arcane-focus,Arcane Focus,Arkana Odağı,ekipman,öneri,,,,no,
-druidic-focus,Druidic Focus,Druid Odağı,ekipman,öneri,,,,no,
-component-pouch,Component Pouch,Bileşen Kesesi,ekipman,öneri,,,,no,
-explorers-pack,Explorer’s Pack,Kâşif Çantası,ekipman,öneri,,,,no,
-healers-kit,Healer’s Kit,Şifacı Takımı,ekipman,öneri,,,,no,
-potion-of-healing,Potion of Healing,Şifa İksiri,ekipman,öneri,,,,no,
-spell-scroll,Spell Scroll,Büyü Parşömeni,ekipman,öneri,,,,no,
-chapter-playing-the-game,Playing the Game,Oyunun Oynanışı,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,
-chapter-character-creation,Character Creation,Karakter Oluşturma,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,
-chapter-classes,Classes,Sınıflar,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,
-chapter-character-origins,Character Origins,Karakter Kökenleri,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,
-chapter-feats,Feats,Hünerler,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,
-chapter-equipment,Equipment,Ekipman,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,
-chapter-spells,Spells,Büyüler,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,
-chapter-rules-glossary,Rules Glossary,Kurallar Sözlüğü,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,
-chapter-gameplay-toolbox,Gameplay Toolbox,Oyun Araç Kutusu,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,
-chapter-magic-items,Magic Items,Büyülü Eşyalar,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,
-chapter-monsters,Monsters,Canavarlar,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,
-spell-fire-bolt,Fire Bolt,Ateş Oku,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-light,Light,Işık,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-mage-hand,Mage Hand,Büyücü Eli,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-minor-illusion,Minor Illusion,Küçük İllüzyon,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-prestidigitation,Prestidigitation,El Çabukluğu Büyüsü,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-sacred-flame,Sacred Flame,Kutsal Alev,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-guidance,Guidance,Rehberlik,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-eldritch-blast,Eldritch Blast,Kadim Patlama,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-vicious-mockery,Vicious Mockery,Acımasız Alay,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-ray-of-frost,Ray of Frost,Ayaz Işını,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-shocking-grasp,Shocking Grasp,Şok Edici Kavrayış,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-thaumaturgy,Thaumaturgy,Mucizecilik,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-druidcraft,Druidcraft,Druid Hüneri,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-acid-splash,Acid Splash,Asit Sıçraması,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-bless,Bless,Kutsama,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-cure-wounds,Cure Wounds,Yaraları İyileştir,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-healing-word,Healing Word,Şifa Sözü,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-magic-missile,Magic Missile,Büyülü Füze,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-shield,Shield,Kalkan Büyüsü,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-sleep,Sleep,Uyku,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-detect-magic,Detect Magic,Büyü Algıla,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-charm-person,Charm Person,Kişiyi Büyüle,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-thunderwave,Thunderwave,Gök Gürültüsü Dalgası,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-burning-hands,Burning Hands,Yanan Eller,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-faerie-fire,Faerie Fire,Peri Ateşi,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-guiding-bolt,Guiding Bolt,Yol Gösteren Şimşek,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-command,Command,Emir,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-hunters-mark,Hunter’s Mark,Avcının İşareti,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-mage-armor,Mage Armor,Büyücü Zırhı,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-feather-fall,Feather Fall,Tüy Düşüşü,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-identify,Identify,Tanımla,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-misty-step,Misty Step,Sisli Adım,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-hold-person,Hold Person,Kişiyi Durdur,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-invisibility,Invisibility,Görünmezlik,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-spiritual-weapon,Spiritual Weapon,Ruhani Silah,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-scorching-ray,Scorching Ray,Kavurucu Işın,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-web,Web,Ağ,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-suggestion,Suggestion,Telkin,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-darkness,Darkness,Karanlık,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-lesser-restoration,Lesser Restoration,Küçük Onarım,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-fireball,Fireball,Ateş Topu,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-counterspell,Counterspell,Karşı Büyü,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-dispel-magic,Dispel Magic,Büyüyü Boz,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-fly,Fly,Uçma,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-haste,Haste,Hız Büyüsü,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-revivify,Revivify,Dirilt,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-lightning-bolt,Lightning Bolt,Yıldırım Oku,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-spirit-guardians,Spirit Guardians,Ruh Muhafızları,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-polymorph,Polymorph,Biçim Değiştir,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-spell-greater-invisibility,Greater Invisibility,Üstün Görünmezlik,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,
-section-combat,Combat,Savaş,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,
-section-exploration,Exploration,Keşif,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,
-section-social-interaction,Social Interaction,Sosyal Etkileşim,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,
-section-damage-and-healing,Damage and Healing,Hasar ve İyileşme,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,
-section-level-advancement,Level Advancement,Seviye Atlama,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,
-section-the-six-abilities,The Six Abilities,Altı Yetenek,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,
-section-create-your-character,Create Your Character,Karakterini Oluştur,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,
-section-combat-encounters,Combat Encounters,Savaş Karşılaşmaları,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,
-section-animals,Animals,Hayvanlar,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,
-section-d20-tests,D20 Tests,D20 Testleri,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,
-wild-shape,Wild Shape,Vahşi Biçim,sınıf,öneri,,Druid özelliği.,,yes,\bWild Shape\b
-see-also,See also,Ayrıca bkz.,kural,öneri,,Çapraz referans kalıbı.,,no,
+id,en,tr,category,status,alternatives,note,evidence,enforce,en_pattern,tr_pattern
+ability,Ability,Yetenek,kural,tartışmalı,Özellik|Kabiliyet,Yetenek/Özellik/Kabiliyet üçü de kullanılıyor; Beceri (skill) ile çakışmayan en yaygın biçim seçildi.,"R,N,C,I,A",no,,
+ability-score,Ability Score,Yetenek Puanı,kural,tartışmalı,Özellik Puanı|Kabiliyet Puanı,,"R,C,I,A",yes,,
+ability-score-improvement,Ability Score Improvement,Yetenek Puanı Artışı,kural,öneri,,,,yes,,
+ability-modifier,ability modifier,yetenek değiştiricisi,kural,tartışmalı,ayar|tamamlayıcı|etken,"Topluluk bölünmüş (Ayar, Tamamlayıcı, Etken, Değiştirici); en anlaşılır olan seçildi.","C,A,J,I",yes,\bability modifier,
+modifier,modifier,değiştirici,kural,tartışmalı,ayar|tamamlayıcı|etken,,"C,A,J,I",no,,
+ability-check,Ability Check,Yetenek Testi,kural,tartışmalı,Kabiliyet Zarı|Yetenek Zarı,2024 kurallarında check bir D20 Testi türü; 'Test' bunu yansıtıyor.,"E,A,B",yes,\b[Aa]bility [Cc]hecks?\b,
+d20-test,D20 Test,D20 Testi,kural,öneri,,,,yes,\bD20 Tests?\b,
+saving-throw,Saving Throw,Kurtarma Zarı,kural,topluluk,Kurtulma Zarı|Kurtarma Atışı,En yaygın biçim.,"A,E,F,K",yes,\b[Ss]aving [Tt]hrows?\b,
+death-saving-throw,Death Saving Throw,Ölüm Kurtarma Zarı,kural,öneri,Ölüm Kurtarma Atışı,,I,yes,\bDeath Saving Throws?\b,
+attack-roll,Attack Roll,Saldırı Zarı,kural,topluluk,İsabet Zarı,,"A,B,E",yes,\b[Aa]ttack [Rr]olls?\b,
+damage-roll,Damage Roll,Hasar Zarı,kural,öneri,,,,yes,\b[Dd]amage [Rr]olls?\b,
+advantage,Advantage,Avantaj,kural,topluluk,,Evrensel.,"A,B,E,F",yes,\bAdvantage\b,avantaj(?:lı)?
+disadvantage,Disadvantage,Dezavantaj,kural,topluluk,,Evrensel.,"A,B,E,F",yes,\bDisadvantage\b,dezavantaj(?:lı)?
+hit-points,Hit Points,Can Puanı,kural,topluluk,Can,,"A,C,D,F,I,K",yes,\bHit Points?\b,
+hit-point-maximum,Hit Point Maximum,azami Can Puanı,kural,öneri,,,,no,,
+temporary-hit-points,Temporary Hit Points,Geçici Can Puanı,kural,öneri,,,,yes,\bTemporary Hit Points?\b,
+hit-point-dice,Hit Point Dice,Can Zarı,kural,topluluk,,2024'te Hit Dice → Hit Point Dice; Türkçe biçim aynı kalır.,"A,D,I",yes,\bHit (Point )?Dice\b|\bHit Point Die\b,
+armor-class,Armor Class,Zırh Sınıfı,kural,topluluk,Zırh Seviyesi,,"C,D,E,I,J",yes,\bArmor Class\b,
+initiative,Initiative,İnisiyatif,kural,tartışmalı,Öncelik,Topluluk Öncelik/İnisiyatif arasında bölünmüş; ürün sahibinin kendi brief'i 'İnisiyatif' kullanıyor.,"B,K,I",yes,\bInitiative\b,
+proficiency,Proficiency,Yetkinlik,kural,tartışmalı,Yeterlilik|Uzmanlık,Uzmanlık 'Expertise' ile çakışıyor; Yetkinlik/Yeterlilik eşit yaygın.,"A,E,K,F,J",yes,\b[Pp]roficien(t|cy|cies)\b,
+proficiency-bonus,Proficiency Bonus,Yetkinlik Bonusu,kural,tartışmalı,Yeterlilik Bonusu,,"A,E,F,J",yes,\bProficiency Bonus\b,
+expertise,Expertise,Uzmanlık,kural,öneri,Ekspertiz,,B,yes,\bExpertise\b,
+skill,Skill,Beceri,kural,topluluk,Yetenek,,"A,E",yes,\b[Ss]kills?\b,
+difficulty-class,Difficulty Class,Zorluk Derecesi,kural,tartışmalı,Zorluk Seviyesi,Kısaltma ZD. 'Zorluk Seviyesi (ZS)' Zırh Sınıfı kısaltmasıyla çakışıyor.,"D,I,A,B",yes,\bDifficulty Class\b,
+dc,DC,ZD,kısaltma,tartışmalı,ZS,Zorluk Derecesi kısaltması.,"D,I",yes,\bDC\b,
+ac,AC,ZS,kısaltma,öneri,,Zırh Sınıfı kısaltması.,,yes,\bAC\b,
+hp,HP,CP,kısaltma,öneri,,Can Puanı kısaltması. Bakır para kısaltması kullanılmadığı için çakışma yok.,,yes,\bHP\b,
+xp,XP,TP,kısaltma,öneri,,Tecrübe Puanı.,,yes,\bXP\b,
+pb,PB,YB,kısaltma,öneri,,Yetkinlik Bonusu.,,yes,\bPB\b,
+cr,CR,TD,kısaltma,tartışmalı,ZD,Tehlike Derecesi; FRP-SRD 'ZD' kullanıyor ama ZD bizde Zorluk Derecesi.,A,yes,\bCR\b,
+challenge-rating,Challenge Rating,Tehlike Derecesi,kural,tartışmalı,Zorluk Derecesi,FRP-SRD 'Zorluk Derecesi' diyor; DC ile çakıştığı için ayrıştırıldı.,A,yes,\bChallenge Rating\b,
+experience-points,Experience Points,Tecrübe Puanı,kural,topluluk,Deneyim Puanı,Oyuncular arasında 'TP' yaygın.,,yes,\bExperience Points?\b,
+critical-hit,Critical Hit,Kritik Vuruş,kural,topluluk,,,"A,J",yes,\bCritical Hits?\b,
+short-rest,Short Rest,Kısa Dinlenme,kural,topluluk,,,"I,J,U",yes,\bShort Rests?\b,
+long-rest,Long Rest,Uzun Dinlenme,kural,topluluk,,,"A,I,J,N,U",yes,\bLong Rests?\b,
+heroic-inspiration,Heroic Inspiration,Kahramanca İlham,kural,öneri,İlham,5e'deki 'Inspiration' için İlham yaygın; 2024 adı eklendi.,"A,I",yes,\bHeroic Inspiration\b,
+concentration,Concentration,Konsantrasyon,kural,topluluk,,Evrensel.,"A,B,F,J",yes,\bConcentration\b,
+ritual,Ritual,Ritüel,kural,topluluk,Ayin,,"A,S",yes,\bRitual\b,
+spell,Spell,Büyü,kural,topluluk,,,"A,F",yes,\b[Ss]pells?\b,
+spell-slot,Spell Slot,Büyü Slotu,kural,topluluk,Büyü Yuvası|Büyü Hanesi,Topluluk ağırlıkla 'slot' kullanıyor.,"A,B,F,R",yes,\b[Ss]pell [Ss]lots?\b,
+cantrip,Cantrip,Cantrip,kural,tartışmalı,Bazbüyü|Sıfırıncı Seviye Büyü,Topluluk İngilizce bırakıyor (kural gereği seçildi); BG3 resmi çevirisi 'Bazbüyü'. Türkçeleştirme isteniyorsa 'Bazbüyü' önerilir.,"B,F,V,J",yes,\b[Cc]antrips?\b,
+spellcasting,Spellcasting,Büyü Yapma,kural,öneri,,,S,no,,
+spellcasting-ability,Spellcasting Ability,büyü yeteneği,kural,öneri,,,,yes,\b[Ss]pellcasting [Aa]bility\b,
+spellcasting-focus,Spellcasting Focus,Büyü Odağı,kural,öneri,,,,yes,\bSpellcasting Focus\b,
+spell-attack,Spell Attack,Büyü Saldırısı,kural,öneri,,,,yes,\b[Ss]pell [Aa]ttacks?\b,
+spell-save-dc,spell save DC,büyü kurtarma ZD'si,kural,öneri,,,B,yes,\bspell save DC\b,
+casting-time,Casting Time,Yapma Süresi,büyü,öneri,,Büyü kartı alanı.,,yes,\bCasting Time\b,
+range,Range,Menzil,büyü,topluluk,,Büyü kartı alanı ve silah özelliği.,,no,,
+components,Components,Bileşenler,büyü,öneri,,,,yes,\bComponents\b,
+verbal,Verbal,Sözlü,büyü,öneri,,V → S (Sözlü).,,no,,
+somatic,Somatic,Bedensel,büyü,öneri,,S → B (Bedensel).,,no,,
+material,Material,Malzeme,büyü,öneri,,M → M (Malzeme).,,no,,
+duration,Duration,Süre,büyü,topluluk,,,,yes,\bDuration\b,
+instantaneous,Instantaneous,Anlık,büyü,öneri,,,,yes,\bInstantaneous\b,
+using-a-higher-level-spell-slot,Using a Higher-Level Spell Slot,Daha Yüksek Seviyeli Büyü Slotu Kullanma,büyü,öneri,,,,yes,,
+cantrip-upgrade,Cantrip Upgrade,Cantrip Gelişimi,büyü,öneri,,,,yes,,
+level,Level,Seviye,kural,topluluk,Düzey,'Level 2 Evocation' → '2. Seviye Oluşturma'.,A,no,,
+spellbook,Spellbook,Büyü Kitabı,kural,öneri,,,,yes,\b[Ss]pellbook\b,
+action,Action,Eylem,eylem,topluluk,Aksiyon,,"A,B,I",yes,\bActions?\b,
+bonus-action,Bonus Action,Bonus Eylem,eylem,topluluk,Bonus Aksiyon,,"A,B,I",yes,\bBonus Actions?\b,
+reaction,Reaction,Reaksiyon,eylem,topluluk,Tepki,BG3 ve çoğu topluluk kaynağı Reaksiyon; FRP-SRD Tepki.,"B,I,J,N,U,A",yes,\bReactions?\b,
+opportunity-attack,Opportunity Attack,Fırsat Saldırısı,eylem,topluluk,,,"B,I",yes,\bOpportunity Attacks?\b,
+attack-action,Attack [Action],Saldırı,eylem,topluluk,,'Attack action' → 'Saldırı eylemi'.,"A,B",no,,
+dash,Dash,Atılma,eylem,öneri,Koşma,,,yes,\bDash\b,
+disengage,Disengage,Geri Çekilme,eylem,öneri,,,,yes,\bDisengage\b,
+dodge,Dodge,Kaçınma,eylem,öneri,Savuşturma,,,yes,\bDodge\b,
+help,Help,Yardım,eylem,öneri,,,,yes,\bHelp action\b,
+hide,Hide,Saklanma,eylem,öneri,,,,yes,\bHide action\b,
+influence,Influence,Etkileme,eylem,öneri,,,,yes,\bInfluence action\b,
+magic-action,Magic [Action],Büyü,eylem,öneri,,'Magic action' → 'Büyü eylemi'.,,yes,\bMagic action\b,
+ready,Ready,Hazırlanma,eylem,öneri,,,,yes,\bReady action\b,
+search,Search,Arama,eylem,öneri,,,,yes,\bSearch action\b,
+study,Study,İnceleme,eylem,öneri,,,,yes,\bStudy action\b,
+utilize,Utilize,Kullanma,eylem,öneri,,,,yes,\bUtilize\b,
+multiattack,Multiattack,Çoklu Saldırı,canavar,öneri,,,,yes,\bMultiattack\b,
+unarmed-strike,Unarmed Strike,Silahsız Vuruş,kural,öneri,,,,yes,\bUnarmed Strikes?\b,
+speed,Speed,Hız,kural,topluluk,,,A,yes,\bSpeed\b,
+fly-speed,Fly Speed,Uçma Hızı,kural,öneri,,,,yes,\b[Ff]ly Speed\b,
+swim-speed,Swim Speed,Yüzme Hızı,kural,öneri,,,,yes,\b[Ss]wim Speed\b,
+climb-speed,Climb Speed,Tırmanma Hızı,kural,öneri,,,,yes,\b[Cc]limb Speed\b,
+burrow-speed,Burrow Speed,Kazma Hızı,kural,öneri,,,,yes,\b[Bb]urrow Speed\b,
+difficult-terrain,Difficult Terrain,Zorlu Arazi,kural,öneri,,,,yes,\bDifficult Terrain\b,
+cover,Cover,Siper,kural,öneri,Örtü,,,yes,\b(Half|Three-Quarters|Total) Cover\b|\bCover\b,
+half-cover,Half Cover,Yarım Siper,kural,öneri,,,,yes,\bHalf Cover\b,
+three-quarters-cover,Three-Quarters Cover,Üç Çeyrek Siper,kural,öneri,,,,yes,\bThree-Quarters Cover\b,
+total-cover,Total Cover,Tam Siper,kural,öneri,,,,yes,\bTotal Cover\b,
+bright-light,Bright Light,Parlak Işık,kural,öneri,,,,yes,\bBright Light\b,parlak\s+ışı[kğ](?:lı)?
+dim-light,Dim Light,Loş Işık,kural,öneri,,,,yes,\bDim Light\b,loş\s+ışı[kğ](?:lı)?
+darkness,Darkness,Karanlık,kural,öneri,,,,yes,\bDarkness\b,
+lightly-obscured,Lightly Obscured,Hafif Örtülü,kural,öneri,,,,yes,\bLightly Obscured\b,
+heavily-obscured,Heavily Obscured,Yoğun Örtülü,kural,öneri,,,,yes,\bHeavily Obscured\b,
+darkvision,Darkvision,Karanlık Görüş,duyu,öneri,Karanlıkta Görme,,,yes,\bDarkvision\b,
+blindsight,Blindsight,Kör Görüş,duyu,öneri,,,,yes,\bBlindsight\b,
+tremorsense,Tremorsense,Titreşim Algısı,duyu,öneri,,,,yes,\bTremorsense\b,
+truesight,Truesight,Gerçek Görüş,duyu,öneri,,,,yes,\bTruesight\b,
+passive-perception,Passive Perception,Pasif Algı,duyu,öneri,,,,yes,\bPassive Perception\b,
+telepathy,Telepathy,Telepati,duyu,öneri,,,,yes,\b[Tt]elepathy\b,
+bloodied,Bloodied,Kanlı,kural,öneri,Yaralı,,,yes,\bBloodied\b,
+resistance,Resistance,Direnç,hasar,topluluk,,,"F,J,K,N",yes,\bResistances?\b,
+vulnerability,Vulnerability,Zafiyet,hasar,öneri,Hassaslık,BG3 'Hassaslık' kullanıyor.,J,yes,\bVulnerabilit(y|ies)\b,
+immunity,Immunity,Bağışıklık,hasar,topluluk,,,"A,F,J",yes,\bImmunit(y|ies)\b,
+damage,Damage,Hasar,hasar,topluluk,,,"A,C,F,N",yes,\b[Dd]amage\b,
+damage-threshold,Damage Threshold,Hasar Eşiği,hasar,öneri,,,,yes,\bDamage Threshold\b,
+healing,Healing,İyileşme,kural,öneri,,,,no,,
+stable,Stable,Stabil,kural,öneri,Durağan,,,no,,
+dead,Dead,Ölü,kural,öneri,,,,no,,
+surprise,Surprise,Baskın,kural,öneri,Şaşkınlık,,,no,,
+grappling,Grappling,Kapışma,kural,öneri,,,,yes,\bGrappling\b,
+encounter,Encounter,Karşılaşma,kural,öneri,,,,no,,
+attunement,Attunement,Uyumlanma,eşya,öneri,,,,yes,\bAttunement\b,
+magic-item,Magic Item,Büyülü Eşya,eşya,öneri,,,,yes,\b[Mm]agic [Ii]tems?\b,
+legendary-action,Legendary Action,Efsanevi Eylem,canavar,öneri,,,A,yes,\bLegendary Actions?\b,
+legendary-resistance,Legendary Resistance,Efsanevi Direnç,canavar,öneri,,,,yes,\bLegendary Resistance\b,
+lair,Lair,İn,canavar,öneri,Yuva,,,yes,\b[Ll]air\b,
+stat-block,Stat Block,İstatistik Bloğu,canavar,öneri,Değer Kartı,,,yes,\b[Ss]tat [Bb]locks?\b,
+traits,Traits,Özellikler,canavar,öneri,,Canavar kartı bölüm başlığı.,,no,,
+monster,Monster,Canavar,kural,topluluk,Yaratık,,A,no,,
+creature,Creature,Yaratık,kural,topluluk,,,A,no,,
+creature-type,Creature Type,Yaratık Türü,kural,öneri,,,A,yes,\b[Cc]reature [Tt]ype\b,
+game-master,Game Master,Oyun Yöneticisi,kural,topluluk,DM,Kısaltma 'GM' korunur (uygulama adı da GM Cebi).,"A,E,I",yes,\bGame Master\b,
+gm,GM,GM,kısaltma,topluluk,DM|OY,,"B,C",yes,\bGM\b,
+player-character,Player Character,Oyuncu Karakteri,kural,öneri,,,I,yes,\b[Pp]layer [Cc]haracters?\b,
+nonplayer-character,Nonplayer Character,Oyuncu Olmayan Karakter,kural,öneri,NPC,Kısaltma 'NPC' korunur.,,yes,\b[Nn]onplayer [Cc]haracters?\b,
+weapon-mastery,Weapon Mastery,Silah Ustalığı,silah,öneri,,,,yes,\bWeapon Mastery\b,
+armor-training,Armor Training,Zırh Eğitimi,zırh,öneri,,,,yes,\bArmor Training\b,
+feat,Feat,Hüner,köken,topluluk,Yetenek,,"A,B,H,T",yes,\b[Ff]eats?\b,
+origin-feat,Origin Feat,Köken Hüneri,köken,öneri,,,,yes,,
+general-feat,General Feat,Genel Hüner,köken,öneri,,,,yes,,
+fighting-style-feat,Fighting Style Feat,Dövüş Tarzı Hüneri,köken,öneri,,,,yes,,
+epic-boon-feat,Epic Boon Feat,Destansı Lütuf Hüneri,köken,öneri,,,,yes,,
+background,Background,Geçmiş,köken,topluluk,,,"A,B,I,N,R",yes,\b[Bb]ackgrounds?\b,
+species,Species,Soy,köken,tartışmalı,Irk|Tür,5.1'de 'Irk' (race) kullanılıyordu; 2024 'species' için 'Soy' öneriliyor. 'Tür' Yaratık Türü ile çakışıyor.,"A,R",yes,\b[Ss]pecies\b,
+class,Class,Sınıf,sınıf,topluluk,,,"A,B,F",no,,
+subclass,Subclass,Alt Sınıf,sınıf,topluluk,,,"A,B,F",yes,\b[Ss]ubclass(es)?\b,
+class-feature,Class Feature,Sınıf Özelliği,sınıf,öneri,,,,no,,
+multiclassing,Multiclassing,Çoklu Sınıf,sınıf,öneri,,,,no,,
+alignment,Alignment,Yönelim,kural,topluluk,Hizalanma,,"A,D",yes,\b[Aa]lignment\b,
+lawful,Lawful,Kuralcı,yönelim,topluluk,,,"A,C,D,K",yes,,
+chaotic,Chaotic,Kaotik,yönelim,topluluk,,,"A,C,D,K",yes,,
+neutral,Neutral,Tarafsız,yönelim,topluluk,,,"A,C,D,K",yes,,
+good,Good,İyi,yönelim,topluluk,,,"C,K",no,,
+evil,Evil,Kötü,yönelim,topluluk,,,"C,K",no,,
+unaligned,Unaligned,Yönelimsiz,yönelim,öneri,,,,yes,\bUnaligned\b,
+coin,Coin,Sikke,ekipman,öneri,Para,,,no,,
+copper-piece,Copper Piece,bakır,para,tartışmalı,BP,Kısaltma yerine kelime: '5 CP' → '5 bakır'. İngilizce kısaltmalar (GP=gold) Türkçe okumada yanıltıcı.,,yes,\bCP\b|\bCopper Pieces?\b,
+silver-piece,Silver Piece,gümüş,para,tartışmalı,,'1 SP' → '1 gümüş'.,,yes,\bSP\b|\bSilver Pieces?\b,
+electrum-piece,Electrum Piece,elektrum,para,tartışmalı,,'1 EP' → '1 elektrum'.,,yes,\bEP\b|\bElectrum Pieces?\b,
+gold-piece,Gold Piece,altın,para,tartışmalı,AP|GP,'50 GP' → '50 altın'.,,yes,\bGP\b|\bGold Pieces?\b,
+platinum-piece,Platinum Piece,platin,para,tartışmalı,,'10 PP' → '10 platin'.,,yes,\bPP\b|\bPlatinum Pieces?\b,
+feet,feet,fit,birim,tartışmalı,ft,"Sayılar değişmez (QC). 30 feet → 30 fit. Metrik gösterim ileride uygulama ayarı olabilir. ""5 fitlik"" kabul edilir; ""ayak"" (vücut) normal kelime olarak serbest.",,yes,"\d[\d,]*[- ](feet|foot)\b|\bft\.",fi[td](?:lik)?
+mile,mile,mil,birim,öneri,,,,yes,\bmiles?\b,
+pound-lb,pound (lb.),lb,birim,öneri,libre,Ağırlık birimi kısaltması korunur.,,no,,
+round,Round,Tur,kural,topluluk,Raunt,,,no,,
+turn,Turn,Sıra,kural,öneri,Hamle,Tur (round) ile karışmaması için 'Sıra'.,,no,,
+target,Target,Hedef,kural,topluluk,,,,no,,
+area-of-effect,Area of Effect,Etki Alanı,alan,öneri,,,,yes,\b[Aa]rea of [Ee]ffect\b,
+cone,Cone,Koni,alan,öneri,,,,yes,\bCone\b,
+cube,Cube,Küp,alan,öneri,,,,yes,\bCube\b,
+cylinder,Cylinder,Silindir,alan,öneri,,,,yes,\bCylinder\b,
+emanation,Emanation,Yayılım,alan,öneri,,,,yes,\bEmanation\b,
+line,Line,Çizgi,alan,öneri,,"""hat"" sıradan kelime olarak da geçtiği için alternatif listesinden çıkarıldı.",,yes,\bLine\b(?! of),
+sphere,Sphere,Küre,alan,öneri,,,,yes,\bSphere\b,
+hazard,Hazard,Tehlike,kural,öneri,,,,no,,
+falling,Falling,Düşme,kural,öneri,,,,no,,
+suffocation,Suffocation,Boğulma,kural,öneri,,,,no,,
+teleportation,Teleportation,Işınlanma,kural,öneri,,,,no,,
+shape-shifting,Shape-Shifting,Biçim Değiştirme,kural,öneri,,,,no,,
+curse,Curse,Lanet,kural,öneri,,,,no,,
+possession,Possession,Ele Geçirilme,kural,öneri,,,,no,,
+illusion,Illusion,İllüzyon,kural,topluluk,Yanılsama,,"B,F",no,,
+attitude,Attitude,Tavır,kural,öneri,,,,no,,
+friendly,Friendly,Dostça,kural,öneri,,,,yes,\bFriendly\b,
+hostile,Hostile,Düşmanca,kural,öneri,,,,yes,\bHostile\b,
+indifferent,Indifferent,Kayıtsız,kural,öneri,,,,yes,\bIndifferent\b,
+carrying-capacity,Carrying Capacity,Taşıma Kapasitesi,kural,öneri,,,,yes,,
+jumping,Jumping,Zıplama,kural,öneri,,,,yes,,
+long-jump,Long Jump,Uzun Atlama,kural,öneri,,,,yes,,
+high-jump,High Jump,Yüksek Atlama,kural,öneri,,,,yes,,
+improvised-weapon,Improvised Weapon,Doğaçlama Silah,silah,öneri,,,,yes,,
+occupied-space,Occupied Space,Dolu Alan,kural,öneri,,,,yes,,
+unoccupied-space,Unoccupied Space,Boş Alan,kural,öneri,,,,yes,,
+strength,Strength,Güç,yetenek,tartışmalı,Kuvvet,Topluluk yaklaşık yarı yarıya bölünmüş; BG3 'Kuvvet'. Force (hasar türü) 'Kuvvet' olduğundan Güç seçildi.,"A,C,D,E,I,O,B,H,J",yes,\bStrength\b,
+dexterity,Dexterity,Çeviklik,yetenek,topluluk,,Evrensel.,"A,B,C,E,F,J",yes,\bDexterity\b,
+constitution,Constitution,Dayanıklılık,yetenek,topluluk,,Evrensel.,"A,B,C,E,F,H,J",yes,\bConstitution\b,
+intelligence,Intelligence,Zeka,yetenek,topluluk,,,"A,B,C,E,J",yes,\bIntelligence\b,
+wisdom,Wisdom,Bilgelik,yetenek,tartışmalı,Akıl|İrfan|Sezgi,Bilgelik/Akıl/İrfan arasında uzlaşma yok; FRP-SRD ve FRPNET Bilgelik.,"A,C,D,E,B,H,J",yes,\bWisdom\b,
+charisma,Charisma,Karizma,yetenek,topluluk,,,"A,B,C,E,J",yes,\bCharisma\b,
+str,Str,Güç,kısaltma,tartışmalı,Kuv,Canavar kartı kısaltması.,,no,,
+dex,Dex,Çev,kısaltma,öneri,,,,no,,
+con,Con,Day,kısaltma,öneri,,,,no,,
+int,Int,Zek,kısaltma,öneri,,,,no,,
+wis,Wis,Bil,kısaltma,öneri,,,,no,,
+cha,Cha,Kar,kısaltma,öneri,,,,no,,
+acrobatics,Acrobatics,Akrobasi,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bAcrobatics\b,
+animal-handling,Animal Handling,Hayvan Terbiyesi,beceri,tartışmalı,Hayvanlarla İlgilenme,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bAnimal Handling\b,
+arcana,Arcana,Arkana,beceri,tartışmalı,Gizli İlimler|Büyü Bilgisi,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bArcana\b,
+athletics,Athletics,Atletizm,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bAthletics\b,
+deception,Deception,Aldatma,beceri,topluluk,Kandırma,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bDeception\b,
+history,History,Tarih,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bHistory\b,
+insight,Insight,Sezgi,beceri,topluluk,Önsezi,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bInsight\b,
+intimidation,Intimidation,Gözdağı,beceri,tartışmalı,Korkutma|Yıldırma,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bIntimidation\b,
+investigation,Investigation,Araştırma,beceri,topluluk,Soruşturma,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bInvestigation\b,
+medicine,Medicine,Tıp,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bMedicine\b,
+nature,Nature,Doğa,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bNature\b,
+perception,Perception,Algı,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bPerception\b,
+performance,Performance,Gösteri,beceri,tartışmalı,Performans,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bPerformance\b,
+persuasion,Persuasion,İkna,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bPersuasion\b,
+religion,Religion,Din,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bReligion\b,
+sleight-of-hand,Sleight of Hand,El Çabukluğu,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bSleight of Hand\b,
+stealth,Stealth,Gizlilik,beceri,topluluk,Sinsilik,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bStealth\b,
+survival,Survival,Hayatta Kalma,beceri,topluluk,,5eTürkçe beceri listesiyle karşılaştırılmalı (kaynak özetten okundu).,B,yes,\bSurvival\b,
+blinded,Blinded,Kör,durum,öneri,Körlük,Durum adları sıfat olarak: 'Kör durumunda'.,"A,K",yes,\bBlinded\b,
+charmed,Charmed,Büyülenmiş,durum,öneri,Efsunlanmış,,"F,K",yes,\bCharmed\b,
+deafened,Deafened,Sağır,durum,öneri,Sağırlık,,A,yes,\bDeafened\b,
+exhaustion,Exhaustion,Yorgunluk,durum,topluluk,Bitkinlik,,A,yes,\bExhaustion\b,
+frightened,Frightened,Korkmuş,durum,öneri,Dehşete Düşmüş,,,yes,\bFrightened\b,
+grappled,Grappled,Yakalanmış,durum,topluluk,Tutulmuş,,B,yes,\bGrappled\b,
+incapacitated,Incapacitated,Etkisiz,durum,öneri,Aciz,,,yes,\bIncapacitated\b,
+invisible,Invisible,Görünmez,durum,topluluk,,,F,yes,\bInvisible\b,
+paralyzed,Paralyzed,Felçli,durum,topluluk,Felç,,"J,K",yes,\bParalyzed\b,
+petrified,Petrified,Taşlaşmış,durum,öneri,,,,yes,\bPetrified\b,
+poisoned,Poisoned,Zehirlenmiş,durum,öneri,,,K,yes,\bPoisoned\b,
+prone,Prone,Yerde,durum,topluluk,Yere Yığılmış,,B,yes,\bProne\b,
+restrained,Restrained,Kısıtlanmış,durum,öneri,Bağlanmış,,,yes,\bRestrained\b,
+stunned,Stunned,Sersemlemiş,durum,öneri,,,K,yes,\bStunned\b,
+unconscious,Unconscious,Bilinçsiz,durum,topluluk,Baygın,,B,yes,\bUnconscious\b,
+condition,Condition,Durum,durum,topluluk,,,,yes,\b[Cc]onditions?\b,
+acid,Acid,Asit,hasar türü,topluluk,,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"F,J,N",yes,\bAcid damage\b,
+bludgeoning,Bludgeoning,Ezici,hasar türü,tartışmalı,Küt,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,K,yes,\bBludgeoning damage\b,
+cold,Cold,Soğuk,hasar türü,topluluk,Buz,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"F,N,J",yes,\bCold damage\b,
+fire,Fire,Ateş,hasar türü,topluluk,,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"A,F,J,N",yes,\bFire damage\b,
+force,Force,Kuvvet,hasar türü,öneri,Saf Enerji,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,,yes,\bForce damage\b,
+lightning,Lightning,Yıldırım,hasar türü,topluluk,Elektrik,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"J,N,F",yes,\bLightning damage\b,
+necrotic,Necrotic,Nekrotik,hasar türü,tartışmalı,Çürüme,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"N,J",yes,\bNecrotic damage\b,
+piercing,Piercing,Delici,hasar türü,topluluk,,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,K,yes,\bPiercing damage\b,
+poison,Poison,Zehir,hasar türü,topluluk,,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"A,J,N",yes,\bPoison damage\b,
+psychic,Psychic,Psişik,hasar türü,topluluk,,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"J,N",yes,\bPsychic damage\b,
+radiant,Radiant,Işıltı,hasar türü,tartışmalı,Radyant|Işık,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"N,J",yes,\bRadiant damage\b,
+slashing,Slashing,Kesici,hasar türü,topluluk,Kesme,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"K,J",yes,\bSlashing damage\b,
+thunder,Thunder,Gök Gürültüsü,hasar türü,tartışmalı,Ses,Hasar türleri büyük harfle: '2d6 Ateş hasarı'.,"N,J",yes,\bThunder damage\b,
+abjuration,Abjuration,Koruma,büyü okulu,tartışmalı,Sakınma|Abjurasyon,,"F,S,K,B",no,,
+conjuration,Conjuration,Çağırma,büyü okulu,topluluk,Konjurasyon,,"F,K,S",no,,
+divination,Divination,Kehanet,büyü okulu,topluluk,Divinasyon,,"F,K",no,,
+enchantment,Enchantment,Efsunlama,büyü okulu,tartışmalı,Büyüleme,,"K,S",no,,
+evocation,Evocation,Oluşturma,büyü okulu,tartışmalı,Evokasyon,,"A,K,B",no,,
+illusion-b-y-okulu,Illusion,İllüzyon,büyü okulu,topluluk,Yanılsama,,"B,F",no,,
+necromancy,Necromancy,Nekromansi,büyü okulu,topluluk,Ölüm İlmi,,"A,B,K",no,,
+transmutation,Transmutation,Dönüşüm,büyü okulu,tartışmalı,Transmutasyon|Başkalaşım,,"F,B,K",no,,
+school-of-magic,School of Magic,Büyü Okulu,büyü okulu,topluluk,Ekol,,"B,F,A",no,,
+tiny,Tiny,Minik,boyut,öneri,,Küçük/Orta/Büyük FRP-SRD'de var; diğerleri öneri.,A,no,,
+small,Small,Küçük,boyut,topluluk,,Küçük/Orta/Büyük FRP-SRD'de var; diğerleri öneri.,A,no,,
+medium,Medium,Orta,boyut,topluluk,,Küçük/Orta/Büyük FRP-SRD'de var; diğerleri öneri.,A,no,,
+large,Large,Büyük,boyut,topluluk,,Küçük/Orta/Büyük FRP-SRD'de var; diğerleri öneri.,A,no,,
+huge,Huge,Devasa,boyut,öneri,,Küçük/Orta/Büyük FRP-SRD'de var; diğerleri öneri.,A,no,,
+gargantuan,Gargantuan,Muazzam,boyut,öneri,,Küçük/Orta/Büyük FRP-SRD'de var; diğerleri öneri.,A,no,,
+size,Size,Boyut,boyut,topluluk,,,A,no,,
+aberration,Aberration,Garabet,yaratık türü,öneri,Aberasyon,,,no,,
+beast,Beast,Hayvan,yaratık türü,tartışmalı,Canavar,FRP-SRD 'Canavar'ı beast için kullanıyor; biz Canavar'ı 'monster' için ayırdık.,A,no,,
+celestial,Celestial,Göksel,yaratık türü,öneri,,,,no,,
+construct,Construct,Yapıt,yaratık türü,öneri,Yapay Varlık,,,no,,
+dragon,Dragon,Ejderha,yaratık türü,topluluk,,,K,no,,
+elemental,Elemental,Elemental,yaratık türü,topluluk,,,K,no,,
+fey,Fey,Peri,yaratık türü,topluluk,,,A,no,,
+fiend,Fiend,İblis,yaratık türü,tartışmalı,Şeytan|Zebani,,"K,B",no,,
+giant,Giant,Dev,yaratık türü,topluluk,,,K,no,,
+humanoid,Humanoid,İnsansı,yaratık türü,topluluk,,,"A,B",no,,
+monstrosity,Monstrosity,Ucube,yaratık türü,öneri,,,,no,,
+ooze,Ooze,Balçık,yaratık türü,öneri,,,,no,,
+plant,Plant,Bitki,yaratık türü,öneri,,,,no,,
+undead,Undead,Hortlak,yaratık türü,topluluk,Yaşayan Ölü,,"A,K,F",no,,
+barbarian,Barbarian,Barbar,sınıf,topluluk,,,"A,B,D,G,J,K",yes,\bBarbarians?\b,
+bard,Bard,Ozan,sınıf,topluluk,Bard,,"A,B,G,J,K",yes,\bBards?\b,
+cleric,Cleric,Rahip,sınıf,tartışmalı,Ruhban,FRP-SRD/FRPNET Rahip; BG3 Ruhban.,"A,B,C,H,G,J,K",yes,\bClerics?\b,
+druid,Druid,Druid,sınıf,topluluk,,,"A,B,G,H,J,K",yes,\bDruids?\b,
+fighter,Fighter,Savaşçı,sınıf,topluluk,Dövüşçü,BG3 bilinçli olarak Dövüşçü seçti.,"A,B,C,G,O,J",yes,\bFighters?\b,
+monk,Monk,Keşiş,sınıf,topluluk,,,"A,B,G,J,K",yes,\bMonks?\b,
+paladin,Paladin,Paladin,sınıf,topluluk,,,"A,B,G,J,K",yes,\bPaladins?\b,
+ranger,Ranger,Korucu,sınıf,tartışmalı,Kolcu,Yaklaşık eşit bölünmüş.,"A,G,K,B,J,O",yes,\bRangers?\b,
+rogue,Rogue,Düzenbaz,sınıf,topluluk,Hırsız,Hırsız alt sınıf (Thief) için ayrıldı.,"A,B,C,G,J,K,T",yes,\bRogues?\b,
+sorcerer,Sorcerer,Sihirbaz,sınıf,tartışmalı,Sorcerer,Çoğu oyuncu İngilizce bırakıyor; Türkçe biçim olarak Sihirbaz yerleşik.,"A,G,J,K,L,B,F,S",yes,\bSorcerers?\b,
+warlock,Warlock,Sehhar,sınıf,tartışmalı,Warlock,Topluluk çoğunlukla İngilizce 'Warlock' diyor; Türkçe tek yerleşik biçim BG3'ün 'Sehhar'ı. Karar ürün sahibinde.,"L,B,G,S",yes,\bWarlocks?\b,
+wizard,Wizard,Büyücü,sınıf,topluluk,,,"A,C,F,G,J,K",yes,\bWizards?\b,
+path-of-the-berserker,Path of the Berserker,Gözü Dönmüş Yolu,alt sınıf,öneri,,,,yes,\bPath of the Berserker\b,
+college-of-lore,College of Lore,İrfan Okulu,alt sınıf,öneri,,,,yes,\bCollege of Lore\b,
+life-domain,Life Domain,Yaşam Alanı,alt sınıf,öneri,,,,yes,\bLife Domain\b,
+circle-of-the-land,Circle of the Land,Toprak Çemberi,alt sınıf,öneri,,,,yes,\bCircle of the Land\b,
+champion,Champion,Şampiyon,alt sınıf,öneri,,,,yes,\bChampion\b,
+warrior-of-the-open-hand,Warrior of the Open Hand,Açık El Savaşçısı,alt sınıf,öneri,,,,yes,\bWarrior of the Open Hand\b,
+oath-of-devotion,Oath of Devotion,Bağlılık Yemini,alt sınıf,öneri,,,,yes,\bOath of Devotion\b,
+hunter,Hunter,Avcı,alt sınıf,öneri,,,,yes,\bHunter\b,
+thief,Thief,Hırsız,alt sınıf,öneri,,,,yes,\bThief\b,
+draconic-sorcery,Draconic Sorcery,Ejderha Sihri,alt sınıf,öneri,,,,yes,\bDraconic Sorcery\b,
+fiend-patron,Fiend Patron,İblis Hamisi,alt sınıf,öneri,,,,yes,\bFiend Patron\b,
+evoker,Evoker,Oluşturucu,alt sınıf,öneri,,,,yes,\bEvoker\b,
+dragonborn,Dragonborn,Ejderdoğan,soy,topluluk,,,"A,O,P",yes,\bDragonborn(s|es)?\b,
+dwarf,Dwarf,Cüce,soy,topluluk,,,"A,B,H,I,K,O",yes,\bDwarf(s|es)?\b,
+elf,Elf,Elf,soy,topluluk,,,"A,B,I,K,O",yes,\bElf(s|es)?\b,
+gnome,Gnome,Gnom,soy,topluluk,Gnome,,"A,K",yes,\bGnome(s|es)?\b,
+goliath,Goliath,Goliat,soy,öneri,Goliath,,B,yes,\bGoliath(s|es)?\b,
+halfling,Halfling,Buçukluk,soy,topluluk,Halfling,,"A,K,O",yes,\bHalfling(s|es)?\b,
+human,Human,İnsan,soy,topluluk,,,"A,I",yes,\bHuman(s|es)?\b,
+orc,Orc,Ork,soy,topluluk,,,"A,B,K",yes,\bOrc(s|es)?\b,
+tiefling,Tiefling,Tiefling,soy,topluluk,Şeytanımsı,,"J,O",yes,\bTiefling(s|es)?\b,
+drow,Drow,Drow,soy,öneri,Kara Elf,Elf soyu; SRD 5.2.1'de geçtiği için lisanslı.,,no,,
+high-elf,High Elf,Yüksek Elf,soy,öneri,,,,yes,,
+wood-elf,Wood Elf,Orman Elfi,soy,öneri,,,,yes,,
+forest-gnome,Forest Gnome,Orman Gnomu,soy,öneri,,,,yes,,
+rock-gnome,Rock Gnome,Kaya Gnomu,soy,öneri,,,,yes,,
+acolyte,Acolyte,Mürit,geçmiş,öneri,,,,no,,
+criminal,Criminal,Suçlu,geçmiş,öneri,,,,no,,
+sage,Sage,Bilge,geçmiş,öneri,,,,no,,
+soldier,Soldier,Asker,geçmiş,öneri,,,,no,,
+alert,Alert,Tetikte,hüner,öneri,,,,no,,
+magic-initiate,Magic Initiate,Büyü Çırağı,hüner,öneri,,,,no,,
+savage-attacker,Savage Attacker,Vahşi Saldırgan,hüner,öneri,,,,no,,
+skilled,Skilled,Becerikli,hüner,öneri,,,,no,,
+grappler,Grappler,Güreşçi,hüner,öneri,,,,no,,
+archery,Archery,Okçuluk,hüner,öneri,,,,no,,
+defense,Defense,Savunma,hüner,öneri,,,,no,,
+great-weapon-fighting,Great Weapon Fighting,Büyük Silah Dövüşü,hüner,öneri,,,,no,,
+two-weapon-fighting,Two-Weapon Fighting,İki Silahla Dövüş,hüner,öneri,,,,no,,
+boon-of-combat-prowess,Boon of Combat Prowess,Savaş Hüneri Lütfu,hüner,öneri,,,,no,,
+boon-of-dimensional-travel,Boon of Dimensional Travel,Boyutlar Arası Yolculuk Lütfu,hüner,öneri,,,,no,,
+boon-of-fate,Boon of Fate,Kader Lütfu,hüner,öneri,,,,no,,
+boon-of-irresistible-offense,Boon of Irresistible Offense,Karşı Konulmaz Saldırı Lütfu,hüner,öneri,,,,no,,
+boon-of-spell-recall,Boon of Spell Recall,Büyü Hatırlama Lütfu,hüner,öneri,,,,no,,
+boon-of-the-night-spirit,Boon of the Night Spirit,Gece Ruhu Lütfu,hüner,öneri,,,,no,,
+boon-of-truesight,Boon of Truesight,Gerçek Görüş Lütfu,hüner,öneri,,,,no,,
+ammunition,Ammunition,Mühimmat,silah özelliği,öneri,Cephane,,,no,,
+finesse,Finesse,İncelik,silah özelliği,öneri,Zarafet,,,no,,
+heavy,Heavy,Ağır,silah özelliği,topluluk,,,A,no,,
+light,Light,Hafif,silah özelliği,topluluk,,,A,no,,
+loading,Loading,Doldurma,silah özelliği,öneri,,,,no,,
+reach,Reach,Erişim,silah özelliği,topluluk,Uzanım,,A,no,,
+thrown,Thrown,Fırlatma,silah özelliği,öneri,Fırlatılabilir,,,no,,
+two-handed,Two-Handed,İki Elli,silah özelliği,tartışmalı,Çift Elli,,A,no,,
+versatile,Versatile,Çok Yönlü,silah özelliği,tartışmalı,Ayarlanabilir,,A,no,,
+cleave,Cleave,Yarma,silah ustalığı,öneri,,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,,
+graze,Graze,Sıyırma,silah ustalığı,öneri,,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,,
+nick,Nick,Çentik,silah ustalığı,öneri,,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,,
+push,Push,İtme,silah ustalığı,öneri,,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,,
+sap,Sap,Zayıflatma,silah ustalığı,öneri,Sersemletme,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,,
+slow,Slow,Yavaşlatma,silah ustalığı,öneri,,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,,
+topple,Topple,Devirme,silah ustalığı,öneri,,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,,
+vex,Vex,Taciz,silah ustalığı,öneri,Rahatsız Etme,2024 ustalık terimleri için topluluk kullanımı bulunamadı.,,no,,
+simple-weapon,Simple Weapon,Basit Silah,silah,öneri,,,,yes,\bSimple weapons?\b,
+martial-weapon,Martial Weapon,Savaş Silahı,silah,öneri,Askerî Silah,,,yes,\bMartial weapons?\b,
+light-armor,Light Armor,Hafif Zırh,zırh,topluluk,,,"A,H",yes,\bLight armor\b,
+medium-armor,Medium Armor,Orta Zırh,zırh,topluluk,,,"A,H",yes,\bMedium armor\b,
+heavy-armor,Heavy Armor,Ağır Zırh,zırh,topluluk,,,"A,H",yes,\bHeavy armor\b,
+shield,Shield,Kalkan,zırh,topluluk,,,"A,H",yes,\bShields?\b,
+club,Club,Sopa,silah,öneri,,,,no,,
+dagger,Dagger,Hançer,silah,öneri,,,,no,,
+greatclub,Greatclub,Büyük Sopa,silah,öneri,,,,no,,
+handaxe,Handaxe,El Baltası,silah,öneri,,,,no,,
+javelin,Javelin,Cirit,silah,öneri,,,,no,,
+light-hammer,Light Hammer,Hafif Çekiç,silah,öneri,,,,no,,
+mace,Mace,Topuz,silah,öneri,,,,no,,
+quarterstaff,Quarterstaff,Asa,silah,öneri,,,,no,,
+sickle,Sickle,Orak,silah,öneri,,,,no,,
+spear,Spear,Mızrak,silah,öneri,,,,no,,
+dart,Dart,Dart,silah,öneri,,,,no,,
+light-crossbow,Light Crossbow,Hafif Arbalet,silah,öneri,,,,no,,
+shortbow,Shortbow,Kısa Yay,silah,öneri,,,,no,,
+sling,Sling,Sapan,silah,öneri,,,,no,,
+battleaxe,Battleaxe,Savaş Baltası,silah,öneri,,,,no,,
+flail,Flail,Döven,silah,öneri,,,,no,,
+glaive,Glaive,Glaive,silah,öneri,,,,no,,
+greataxe,Greataxe,Büyük Balta,silah,öneri,,,,no,,
+greatsword,Greatsword,Büyük Kılıç,silah,öneri,,,,no,,
+halberd,Halberd,Teber,silah,öneri,,,,no,,
+lance,Lance,Kargı,silah,öneri,,,,no,,
+longsword,Longsword,Uzun Kılıç,silah,öneri,,,,no,,
+maul,Maul,Gürz,silah,öneri,,,,no,,
+morningstar,Morningstar,Çivili Gürz,silah,öneri,,,,no,,
+pike,Pike,Uzun Mızrak,silah,öneri,,,,no,,
+rapier,Rapier,Meç,silah,öneri,,,,no,,
+scimitar,Scimitar,Pala,silah,öneri,,,,no,,
+shortsword,Shortsword,Kısa Kılıç,silah,öneri,,,,no,,
+trident,Trident,Üç Dişli Mızrak,silah,öneri,,,,no,,
+warhammer,Warhammer,Savaş Çekici,silah,öneri,,,,no,,
+war-pick,War Pick,Savaş Kazması,silah,öneri,,,,no,,
+whip,Whip,Kırbaç,silah,öneri,,,,no,,
+blowgun,Blowgun,Üfleme Borusu,silah,öneri,,,,no,,
+hand-crossbow,Hand Crossbow,El Arbaleti,silah,öneri,,,,no,,
+heavy-crossbow,Heavy Crossbow,Ağır Arbalet,silah,öneri,,,,no,,
+longbow,Longbow,Uzun Yay,silah,öneri,,,,no,,
+musket,Musket,Misket Tüfeği,silah,öneri,,,,no,,
+pistol,Pistol,Tabanca,silah,öneri,,,,no,,
+padded-armor,Padded Armor,Kapitone Zırh,zırh,öneri,,,,no,,
+leather-armor,Leather Armor,Deri Zırh,zırh,öneri,,,,no,,
+studded-leather-armor,Studded Leather Armor,Perçinli Deri Zırh,zırh,öneri,,,,no,,
+hide-armor,Hide Armor,Post Zırh,zırh,öneri,,,,no,,
+chain-shirt,Chain Shirt,Zincir Gömlek,zırh,öneri,,,,no,,
+scale-mail,Scale Mail,Pullu Zırh,zırh,öneri,,,,no,,
+breastplate,Breastplate,Göğüslük,zırh,öneri,,,,no,,
+half-plate-armor,Half Plate Armor,Yarım Plaka Zırh,zırh,öneri,,,,no,,
+ring-mail,Ring Mail,Halkalı Zırh,zırh,öneri,,,,no,,
+chain-mail,Chain Mail,Zincir Zırh,zırh,öneri,,,,no,,
+splint-armor,Splint Armor,Lamalı Zırh,zırh,öneri,,,,no,,
+plate-armor,Plate Armor,Plaka Zırh,zırh,öneri,,,,no,,
+artisans-tools,Artisan’s Tools,Zanaatkâr Aletleri,ekipman,öneri,,,,no,,
+thieves-tools,Thieves’ Tools,Hırsız Aletleri,ekipman,öneri,,,,no,,
+herbalism-kit,Herbalism Kit,Bitki Bilimi Takımı,ekipman,öneri,,,,no,,
+musical-instrument,Musical Instrument,Müzik Aleti,ekipman,öneri,,,,no,,
+gaming-set,Gaming Set,Oyun Takımı,ekipman,öneri,,,,no,,
+holy-symbol,Holy Symbol,Kutsal Sembol,ekipman,öneri,,,,no,,
+arcane-focus,Arcane Focus,Arkana Odağı,ekipman,öneri,,,,no,,
+druidic-focus,Druidic Focus,Druid Odağı,ekipman,öneri,,,,no,,
+component-pouch,Component Pouch,Bileşen Kesesi,ekipman,öneri,,,,no,,
+explorers-pack,Explorer’s Pack,Kâşif Çantası,ekipman,öneri,,,,no,,
+healers-kit,Healer’s Kit,Şifacı Takımı,ekipman,öneri,,,,no,,
+potion-of-healing,Potion of Healing,Şifa İksiri,ekipman,öneri,,,,no,,
+spell-scroll,Spell Scroll,Büyü Parşömeni,ekipman,öneri,,,,no,,
+chapter-playing-the-game,Playing the Game,Oyunun Oynanışı,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,,
+chapter-character-creation,Character Creation,Karakter Oluşturma,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,,
+chapter-classes,Classes,Sınıflar,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,,
+chapter-character-origins,Character Origins,Karakter Kökenleri,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,,
+chapter-feats,Feats,Hünerler,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,,
+chapter-equipment,Equipment,Ekipman,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,,
+chapter-spells,Spells,Büyüler,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,,
+chapter-rules-glossary,Rules Glossary,Kurallar Sözlüğü,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,,
+chapter-gameplay-toolbox,Gameplay Toolbox,Oyun Araç Kutusu,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,,
+chapter-magic-items,Magic Items,Büyülü Eşyalar,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,,
+chapter-monsters,Monsters,Canavarlar,bölüm,öneri,,Bölüm adı; çapraz referanslarda kullanılır.,,no,,
+spell-fire-bolt,Fire Bolt,Ateş Oku,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-light,Light,Işık,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-mage-hand,Mage Hand,Büyücü Eli,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-minor-illusion,Minor Illusion,Küçük İllüzyon,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-prestidigitation,Prestidigitation,Hokkabazlık,büyü adı,öneri,,"Pilot büyü adı; ""El Çabukluğu"" (Sleight of Hand becerisi) ile çakışmasın diye değiştirildi.",,no,,
+spell-sacred-flame,Sacred Flame,Kutsal Alev,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-guidance,Guidance,Rehberlik,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-eldritch-blast,Eldritch Blast,Kadim Patlama,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-vicious-mockery,Vicious Mockery,Acımasız Alay,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-ray-of-frost,Ray of Frost,Ayaz Işını,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-shocking-grasp,Shocking Grasp,Şok Edici Kavrayış,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-thaumaturgy,Thaumaturgy,Mucizecilik,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-druidcraft,Druidcraft,Druid Sanatı,büyü adı,öneri,,"Pilot büyü adı; ""Hüner"" (Feat) ile çakışmasın diye değiştirildi.",,no,,
+spell-acid-splash,Acid Splash,Asit Sıçraması,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-bless,Bless,Kutsama,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-cure-wounds,Cure Wounds,Yaraları İyileştir,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-healing-word,Healing Word,Şifa Sözü,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-magic-missile,Magic Missile,Büyülü Füze,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-shield,Shield,Kalkan Büyüsü,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-sleep,Sleep,Uyku,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-detect-magic,Detect Magic,Büyü Algıla,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-charm-person,Charm Person,Kişiyi Büyüle,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-thunderwave,Thunderwave,Gök Gürültüsü Dalgası,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-burning-hands,Burning Hands,Yanan Eller,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-faerie-fire,Faerie Fire,Peri Ateşi,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-guiding-bolt,Guiding Bolt,Yol Gösteren Şimşek,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-command,Command,Emir,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-hunters-mark,Hunter’s Mark,Avcının İşareti,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-mage-armor,Mage Armor,Büyücü Zırhı,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-feather-fall,Feather Fall,Tüy Düşüşü,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-identify,Identify,Tanımla,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-misty-step,Misty Step,Sisli Adım,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-hold-person,Hold Person,Kişiyi Durdur,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-invisibility,Invisibility,Görünmezlik,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-spiritual-weapon,Spiritual Weapon,Ruhani Silah,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-scorching-ray,Scorching Ray,Kavurucu Işın,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-web,Web,Ağ,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-suggestion,Suggestion,Telkin,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-darkness,Darkness,Karanlık,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-lesser-restoration,Lesser Restoration,Küçük Onarım,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-fireball,Fireball,Ateş Topu,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-counterspell,Counterspell,Karşı Büyü,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-dispel-magic,Dispel Magic,Büyüyü Boz,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-fly,Fly,Uçma,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-haste,Haste,Hız Büyüsü,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-revivify,Revivify,Dirilt,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-lightning-bolt,Lightning Bolt,Yıldırım Oku,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-spirit-guardians,Spirit Guardians,Ruh Muhafızları,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-polymorph,Polymorph,Biçim Değiştir,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+spell-greater-invisibility,Greater Invisibility,Üstün Görünmezlik,büyü adı,öneri,,Pilot büyü adı; metinde *italik* geçer.,,no,,
+section-combat,Combat,Savaş,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,,
+section-exploration,Exploration,Keşif,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,,
+section-social-interaction,Social Interaction,Sosyal Etkileşim,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,,
+section-damage-and-healing,Damage and Healing,Hasar ve İyileşme,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,,
+section-level-advancement,Level Advancement,Seviye Atlama,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,,
+section-the-six-abilities,The Six Abilities,Altı Yetenek,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,,
+section-create-your-character,Create Your Character,Karakterini Oluştur,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,,
+section-combat-encounters,Combat Encounters,Savaş Karşılaşmaları,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,,
+section-animals,Animals,Hayvanlar,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,,
+section-d20-tests,D20 Tests,D20 Testleri,bölüm,öneri,,Bölüm/alt başlık adı; pilot çeviride kullanılan biçim.,,no,,
+wild-shape,Wild Shape,Vahşi Biçim,sınıf,öneri,,Druid özelliği.,,yes,\bWild Shape\b,
+see-also,See also,Ayrıca bkz.,kural,öneri,,Çapraz referans kalıbı.,,no,,
+chapter-actions,Actions,Eylemler,bölüm,öneri,,Bölüm/alt başlık adı; çapraz referanslarda kullanılır.,,no,,
+chapter-weapons,Weapons,Silahlar,bölüm,öneri,,Bölüm/alt başlık adı; çapraz referanslarda kullanılır.,,no,,
+chapter-armor,Armor,Zırh,bölüm,öneri,,Bölüm/alt başlık adı; çapraz referanslarda kullanılır.,,no,,
+chapter-casting-spells,Casting Spells,Büyü Yapma,bölüm,öneri,,Bölüm/alt başlık adı; çapraz referanslarda kullanılır.,,no,,

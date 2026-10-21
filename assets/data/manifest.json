@@ -8,7 +8,7 @@
    "count": 140,
    "tr_complete": 140,
    "tr_partial": 0,
-   "bytes": 198284
+   "bytes": 200692
   },
   "conditions": {
    "count": 15,
@@ -19,20 +19,20 @@
   "spells": {
    "count": 339,
    "tr_complete": 50,
-   "tr_partial": 29,
-   "bytes": 499637
+   "tr_partial": 0,
+   "bytes": 479555
   },
   "monsters": {
    "count": 330,
    "tr_complete": 0,
    "tr_partial": 0,
-   "bytes": 558394
+   "bytes": 555625
   },
   "classes": {
    "count": 12,
    "tr_complete": 0,
    "tr_partial": 0,
-   "bytes": 187628
+   "bytes": 187619
   },
   "subclasses": {
    "count": 12,
@@ -44,7 +44,7 @@
    "count": 9,
    "tr_complete": 0,
    "tr_partial": 0,
-   "bytes": 15164
+   "bytes": 15031
   },
   "backgrounds": {
    "count": 4,
@@ -62,7 +62,7 @@
    "count": 192,
    "tr_complete": 0,
    "tr_partial": 0,
-   "bytes": 83829
+   "bytes": 83841
   },
   "weapon_properties": {
    "count": 10,
@@ -77,5 +77,5 @@
    "bytes": 3621
   }
  },
- "total_bytes": 1682323
+ "total_bytes": 1662129
 }

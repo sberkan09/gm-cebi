@@ -108,6 +108,14 @@ def to_blocks(lines: list[Line]) -> list[Block]:
                 blocks.append(Block(type="p", text=f"**{ln.text.strip()}**"))
             i += 1
             continue
+        if _is_list_item(ln):
+            # Short GillSans term lists (e.g. the six Area of Effect shapes) become bullets
+            # instead of being glued into the following paragraph.
+            flush()
+            while i < n and _is_list_item(lines[i]):
+                blocks.append(Block(type="p", text=f"- {lines[i].text.strip()}"))
+                i += 1
+            continue
         if is_table_header(ln):
             flush()
             j = i
@@ -122,6 +130,11 @@ def to_blocks(lines: list[Line]) -> list[Block]:
         i += 1
     flush()
     return blocks
+
+
+def _is_list_item(ln: Line) -> bool:
+    return ln.font == "GillSans" and abs(ln.size - 10) < 0.1 and len(ln.text.strip()) < 40 \
+        and not ln.text.strip().endswith((".", ":"))
 
 
 def split_runins(blocks: list[Block]) -> tuple[list[Block], list[NamedText]]:
@@ -448,15 +461,22 @@ def parse_monsters(lines: list[Line]) -> list[Monster]:
     a, b = CHAPTERS["monsters"]
     chunk = lines_between(lines, a, b)
     start = section_lines(chunk, "Monsters A–Z", 258)
-    secs = segment(chunk[start:], min_level=2, max_level=3)
+    secs = segment(chunk[start:], min_level=1, max_level=3)
     out: list[Monster] = []
     group = None
+    chapter = "Monsters"
     for s in secs:
+        if s.level == 1:  # "Monsters A–Z" → "Animals": a new chapter ends any family
+            chapter = "Animals" if s.title.startswith("Animals") else "Monsters"
+            group = None
+            continue
         if s.level == 2:
             group = s.title
             continue
         if s.level == 3 and any(ln.font.startswith("Optima") for ln in s.lines):
-            out.append(parse_statblock(s, group if group != s.title else None))
+            m = parse_statblock(s, group if group != s.title else None)
+            m.source.heading = [chapter, *([m.group] if m.group else []), m.name]
+            out.append(m)
     return out
 
 
@@ -600,8 +620,16 @@ def parse_origins(lines: list[Line]) -> tuple[list[Background], list[Species]]:
                 source=src(s)))
         elif s.path[-1:] == ("Species Descriptions",):
             f, rest = _labelled_fields(s.lines, ["Creature Type", "Size", "Speed"])
-            blocks, traits = split_runins(to_blocks(rest))
-            # Paragraphs that continue a trait (no run-in label) stay as blocks.
+            blocks, traits = [], []
+            for bl in to_blocks(rest):
+                m = RUNIN_RE.match(bl.text or "") if bl.type == "p" else None
+                if m and len(m.group("name")) < 80:
+                    traits.append(NamedText(name=m.group("name").strip().rstrip("."),
+                                            text=m.group("text").strip()))
+                elif bl.type == "p" and traits:
+                    traits[-1].text += "\n\n" + (bl.text or "")  # continues the previous trait
+                else:
+                    blocks.append(bl)
             species.append(Species(
                 id=slug(s.title), name=s.title, creature_type=f["Creature Type"],
                 size=f["Size"], speed=f["Speed"], blocks=blocks, traits=traits,
@@ -646,7 +674,7 @@ def parse_feats(lines: list[Line]) -> list[Feat]:
 # ---------------------------------------------------------------- equipment
 
 COST_RE = re.compile(r"^[\d,]+ (CP|SP|EP|GP|PP)$|^Varies$")
-WEIGHT_RE = re.compile(r"lb\.$|^—$|^Varies$")
+WEIGHT_RE = re.compile(r"lb\.( \(full\))?$|^—$|^Varies$")
 PRICE_IN_TITLE = re.compile(r"^(?P<name>.+?) \((?P<cost>[^)]*)\)$")
 
 

@@ -11,7 +11,7 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-10-21 — Ayrıştırma PyMuPDF ile yazı tipi/punto sınıflandırmasına dayanır (başlık düzeyleri, koşu başlıkları, tablolar); PDF'in içerik akışı okuma sırası olarak kullanılır, yanlış yere düşen başlıklı tablolar "X table" atfına göre sahibine taşınır.
 - 2026-10-21 — Sayfa referansı PDF fiziksel sayfa numarasıdır (basılı numarayla aynı; PDF içindekiler tablosu bazı bölümlerde 1 sayfa geride, ona güvenilmez).
 - 2026-10-21 — Kapsam: brief'teki 10 veri kümesi + `subclasses` ve `weapon_properties` ayrı dosyalar. Magic Items, Gameplay Toolbox ve "Playing the Game" bölümleri Faz 0'da ayrıştırılmadı (brief listesinde yok; Faz 1 öncesi eklenebilir).
-- 2026-10-21 — Canavar aile başlıkları (ör. "Black Dragons") kayıt değil, `group` alanı; 330 istatistik bloğunun tamamı ayrı kayıt.
+- 2026-10-21 — Canavar aile başlıkları (ör. "Black Dragons") kayıt değil, `group` alanı; 330 istatistik bloğunun tamamı ayrı kayıt. Animals bölümündekilerin ailesi yok.
 - 2026-10-21 — SRD 5.2.1'in kendi içinde geçen adlar (ör. Elf soyu "Drow") CC-BY kapsamındadır ve ürün kimliği sayılmaz; yasaklı liste (`license.py`) yalnızca SRD dışı adları içerir. "Sigil" (sıradan kelime olarak geçiyor) listeden çıkarıldı.
 - 2026-10-21 — PDF'te işareti eksik basılmış tek değer (Young White Dragon, Int kurtarma "2") −2 olarak düzeltildi ve `_warnings.json`'a yazıldı.
 - 2026-10-21 — Sözlük durumları: `topluluk` (topluluk kullanımı bulundu), `öneri` (bulunamadı, biz önerdik), `tartışmalı` (topluluk bölünmüş ya da seçimimiz en yaygın biçimden ayrılıyor).
@@ -25,6 +25,19 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-10-21 — Asset biçimi: kayıt başına `en` ve tam `tr` kopyası + `tr_status`; çevrilmemiş alan İngilizce kalır (uygulama alan bazında geri düşer). Boyut bütçesi hat içinde denetlenir.
 - 2026-10-21 — CI: `flutter` işinin adımları `pubspec.yaml` yokken atlanır (job düzeyinde `if` içinde hashFiles kullanılamıyor) (Faz 0'da uygulama yok). agentgate yalnızca gözlem modunda (`fail-on-conflict: false`, test eşlemesi yok, `runner = "command"`).
 - 2026-10-21 — Python bağımlılıkları test edilen sürümlere sabitlendi (pymupdf 2.0, pydantic 2.13.5, pytest 9.1.1); CI Python 3.11.
+
+## Faz 0 inceleme düzeltmeleri (PR #2)
+
+- 2026-10-21 — Sözlük eşleşmesi önek değil: kökten sonra yalnızca sıralı Türkçe çekim ekleri (çoğul → iyelik → hâl → -ki → şart+kişi → ek-fiil) kabul edilir. Anlam değiştiren türetmeler (-lı, -lık, -sız) dışarıda; doğal olanlar terim bazında `tr_pattern` ile açılır (Avantajlı/Dezavantajlı, 5 fitlik, Loş Işıklı).
+- 2026-10-21 — Reddedilen alternatifler QC hatasıdır; başka bir terimin seçili karşılığı olan alternatif (Strength için "Kuvvet" = Force) ve terimin kendi parçası olan alternatif ("Can" ⊂ "Can Puanı") hariç. "Line" için "Hat", "feet" için "ayak" sıradan kelime olarak geçtiğinden alternatif listesinden çıkarıldı.
+- 2026-10-21 — Büyük/küçük harf kaynağı izler (Advantage → Avantaj; saving throw → kurtarma zarı) ve QC'de denetlenir. Pilot belleğindeki 64 segment buna göre mekanik olarak düzeltildi (`engine = claude-opus-5-5+casefix`).
+- 2026-10-21 — Türkçe binlik ayırıcı nokta (1.000); QC 1,000 ile 1.000'ı eşdeğer sayar.
+- 2026-10-21 — Atıf eşlemesi ikiye ayrıldı: tırnaklı kural/bölüm atıfları ve italik büyü atıfları ayrı anahtarlı ("Shield" kalkanı ≠ *Shield* büyüsü).
+- 2026-10-21 — Büyü adı çakışmaları giderildi: Prestidigitation = Hokkabazlık (El Çabukluğu becerisiyle çakışıyordu), Druidcraft = Druid Sanatı (Hüner = Feat ile çakışıyordu).
+- 2026-10-21 — Sert QC bulgulu makine çevirileri asset'e girmez; Türkçe kayıt yalnızca adı çevrilmiş ve segmentlerinin en az %80'i çevrilmişse yayımlanır (kısmen İngilizce kayıtlar `none` kalır).
+- 2026-10-21 — "Animals" bölümündeki 95 hayvan bir canavar ailesine bağlı değildir (`group = null`, başlık yolu `["Animals", ad]`).
+- 2026-10-21 — Kural sözlüğündeki terim listeleri (alan şekilleri, eylemler, durumlar, yaratık türleri) madde işaretli bloklar olarak tutulur; soy özelliklerinin devam paragrafları ait oldukları özelliğe eklenir.
+- 2026-10-21 — agentgate eylemi SHA'ya sabitlendi (`10b84ec`), Python 3.11; `pyproject.toml` bağımlılıkları `requirements.txt` ile aynı.
 
 ## Onay bekleyenler
 

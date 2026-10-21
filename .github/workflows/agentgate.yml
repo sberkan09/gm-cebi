@@ -18,8 +18,8 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-      - uses: sberkan09/agentgate@main
+          python-version: "3.11"
+      - uses: sberkan09/agentgate@10b84ec33616f3687d67752e19d0ecccc869eebd  # main as of 2026-10-21
         id: gate
         with:
           base: main

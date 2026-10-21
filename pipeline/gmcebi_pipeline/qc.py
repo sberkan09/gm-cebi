@@ -53,11 +53,11 @@ def check_references(en: str, tr: str, title_map: dict[str, str]) -> list[str]:
     for ref in re.findall(r"“([^”]+?)[,.]?”", en):
         tgt = title_map.get(ref)
         if tgt is None:
-            continue  # unknown target: chapter names are checked elsewhere
+            continue  # target not in the glossary or translated names yet: not checked
         if tgt.lower() not in tr.lower():
             issues.append(f"ref: “{ref}” → “{tgt}” bulunamadı")
     for ref in re.findall(r"(?<!\*)\*([^*]+?)\*(?!\*)", en):
-        tgt = title_map.get(ref)
+        tgt = title_map.get(f"*{ref}")
         if tgt and tgt.lower() not in tr.lower():
             issues.append(f"ref: *{ref}* → *{tgt}* bulunamadı")
     return issues

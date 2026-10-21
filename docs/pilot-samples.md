@@ -4,10 +4,10 @@
 
 ## Özet
 
-- Çevrilen benzersiz segment: **1087** (sözlükten doğrudan dolanlar hariç: 211)
-- Veri kümesine göre (ilk geçtiği yer): rules_glossary 701, spells 301, conditions 81, classes 2, species 1, monsters 1
-- QC bulgusu olmayan: **1086**, bulgulu: **1** (inceleme kuyruğunda öne alınır)
-- Üretici: `claude-opus-5-5` 1087
+- Çevrilen benzersiz segment: **1092** (sözlükten doğrudan dolanlar hariç: 256)
+- Veri kümesine göre (ilk geçtiği yer): rules_glossary 704, spells 303, conditions 81, classes 2, species 1, monsters 1
+- QC bulgusu olmayan: **1091**, bulgulu: **1** (inceleme kuyruğunda öne alınır)
+- Üretici: `claude-opus-5-5` 1028, `claude-opus-5-5+casefix` 64
 
 ## 20 rastgele örnek (tohum 7)
 
@@ -36,80 +36,80 @@
 - **EN:** If a creature can somehow see you, you don’t gain this benefit against that creature.
 - **TR:** Bir yaratık seni bir şekilde görebiliyorsa, o yaratığa karşı bu faydayı kazanmazsın.
 
-### 6. `rules_glossary/long-rest:blocks.2.text#2`
+### 6. `rules_glossary/breaking-objects:blocks.0.text#1`
 
-- **EN:** When you finish the rest, you gain the following benefits:
-- **TR:** Dinlenmeyi bitirdiğinde şu faydaları kazanırsın:
+- **EN:** If an object is exceedingly fragile, the GM may allow a creature to break it automatically with the Attack or Utilize action.
+- **TR:** Bir nesne son derece kırılgansa GM, bir yaratığın onu Saldırı ya da Kullanma eylemiyle otomatik olarak kırmasına izin verebilir.
 
-### 7. `rules_glossary/reach:blocks.0.text#0`
-
-- **EN:** A creature has a reach of 5 feet unless a rule says otherwise.
-- **TR:** Bir kural aksini söylemedikçe bir yaratığın erişimi 5 fittir.
-
-### 8. `rules_glossary/teleportation:blocks.3.text#0`
-
-- **EN:** The description of a teleportation effect tells you if you must see the teleportation’s destination.
-- **TR:** Bir ışınlanma etkisinin açıklaması, ışınlanmanın varış noktasını görmen gerekip gerekmediğini belirtir.
-
-### 9. `rules_glossary/improvised-weapons:blocks.0.text#0`
-
-- **EN:** An improvised weapon is an object wielded as a makeshift weapon, such as broken glass, a table leg, or a frying pan.
-- **TR:** Doğaçlama silah, kırık cam, masa ayağı ya da tava gibi derme çatma bir silah olarak kullanılan bir nesnedir.
-
-### 10. `rules_glossary/dead:blocks.1.text#2`
-
-- **EN:** If the creature died with any Exhaustion levels, it returns with 1 fewer level.
-- **TR:** Yaratık Yorgunluk seviyeleriyle öldüyse 1 seviye eksiğiyle geri döner.
-
-### 11. `rules_glossary/teleportation:blocks.2.text#0`
-
-- **EN:** If the destination space of your teleportation is occupied by another creature or blocked by a solid obstacle, you instead appear in the nearest unoccupied space of your choice.
-- **TR:** Işınlanmanın varış alanı başka bir yaratık tarafından doluysa ya da katı bir engelle kapalıysa, bunun yerine seçtiğin en yakın boş alanda belirirsin.
-
-### 12. `rules_glossary/study:blocks.2.rows.3.1#0`
+### 7. `rules_glossary/study:blocks.2.rows.3.1#0`
 
 - **EN:** Terrain, flora, weather, and certain creatures (Beasts, Dragons, Oozes, and Plants)
 - **TR:** Arazi, bitki örtüsü, hava durumu ve belirli yaratıklar (Hayvanlar, Ejderhalar, Balçıklar ve Bitkiler)
 
-### 13. `spells/sacred-flame:blocks.0.text#1`
+### 8. `rules_glossary/help:blocks.1.text#1`
 
-- **EN:** The target must succeed on a Dexterity saving throw or take 1d8 Radiant damage.
-- **TR:** Hedef bir Çeviklik kurtarma zarında başarılı olmalıdır, aksi hâlde 1d8 Işıltı hasarı alır.
+- **EN:** Choose one of your skill or tool proficiencies and one ally who is near enough for you to assist verbally or physically when they make an ability check.
+- **TR:** Beceri ya da alet yetkinliklerinden birini ve yetenek testi yaparken ona sözlü ya da fiziksel olarak yardım edebileceğin kadar yakında olan bir müttefikini seç.
 
-### 14. `spells/greater-invisibility:blocks.0.text#0`
+### 9. `rules_glossary/damage:blocks.0.text#0`
 
-- **EN:** A creature you touch has the Invisible condition until the spell ends.
-- **TR:** Dokunduğun bir yaratık, büyü sona erene kadar Görünmez durumunda olur.
+- **EN:** Damage represents harm that causes a creature or an object to lose Hit Points.
+- **TR:** Hasar, bir yaratığın ya da nesnenin Can Puanı kaybetmesine yol açan zarardır.
 
-### 15. `spells/thaumaturgy:blocks.6.text#1`
+### 10. `rules_glossary/action:blocks.0.text#3`
 
-- **EN:** You cause harmless tremors in the ground for 1 minute.
-- **TR:** 1 dakika boyunca zeminde zararsız sarsıntılar yaratırsın.
+- **EN:** These actions are defined elsewhere in this glossary:
+- **TR:** Bu eylemler sözlüğün başka yerlerinde tanımlanmıştır:
 
-### 16. `spells/spiritual-weapon:blocks.1.text#0`
+### 11. `rules_glossary/critical-hit:blocks.0.text#0`
 
-- **EN:** As a Bonus Action on your later turns, you can move the force up to 20 feet and repeat the attack against a creature within 5 feet of it.
-- **TR:** Sonraki sıralarında Bonus Eylem olarak kuvveti en fazla 20 fit hareket ettirebilir ve onun 5 fit yakınındaki bir yaratığa karşı saldırıyı tekrarlayabilirsin.
+- **EN:** If you roll a 20 on the d20 for an attack roll, you score a Critical Hit, and the attack hits regardless of any modifiers or the target’s AC.
+- **TR:** Bir saldırı zarında d20'de 20 atarsan Kritik Vuruş yaparsın ve saldırı, değiştiricilerden ya da hedefin ZS'sinden bağımsız olarak isabet eder.
 
-### 17. `spells/polymorph:blocks.2.text#0`
+### 12. `rules_glossary/emanation:blocks.0.text#0`
 
-- **EN:** The target is limited in the actions it can perform by the anatomy of its new form, and it can’t speak or cast spells.
-- **TR:** Hedef, yapabileceği eylemler bakımından yeni biçiminin anatomisiyle sınırlıdır; konuşamaz ve büyü yapamaz.
+- **EN:** An Emanation is an area of effect that extends in straight lines from a creature or an object in all directions.
+- **TR:** Yayılım, bir yaratıktan ya da nesneden her yöne düz çizgiler hâlinde uzanan bir etki alanıdır.
 
-### 18. `spells/polymorph:blocks.0.text#3`
+### 13. `spells/thaumaturgy:blocks.4.text#1`
 
-- **EN:** The target’s game statistics are replaced by the stat block of the chosen Beast, but the target retains its alignment, personality, creature type, Hit Points, and Hit Point Dice.
-- **TR:** Hedefin oyun istatistikleri seçilen Hayvanın İstatistik Bloğuyla değiştirilir, ancak hedef yönelimini, kişiliğini, yaratık türünü, Can Puanını ve Can Zarını korur.
+- **EN:** You instantaneously cause an unlocked door or window to fly open or slam shut.
+- **TR:** Kilitli olmayan bir kapının ya da pencerenin anında açılmasını veya çarparak kapanmasını sağlarsın.
 
-### 19. `spells/minor-illusion:blocks.3.text#2`
+### 14. `spells/darkness:blocks.1.text#0`
 
-- **EN:** The image can’t create sound, light, smell, or any other sensory effect.
-- **TR:** Görüntü ses, ışık, koku ya da başka herhangi bir duyusal etki yaratamaz.
+- **EN:** Alternatively, you cast the spell on an object that isn’t being worn or carried, causing the Darkness to fill a 15-foot Emanation originating from that object.
+- **TR:** Alternatif olarak, büyüyü giyilmeyen veya taşınmayan bir nesneye yaparsın; bu durumda Karanlık, o nesneden çıkan 15 fitlik bir Yayılımı doldurur.
 
-### 20. `spells/prestidigitation:blocks.0.text#2`
+### 15. `spells/shocking-grasp:blocks.0.text#0`
 
-- **EN:** If you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time.
-- **TR:** Bu büyüyü birden çok kez yaparsan, anlık olmayan etkilerinden en fazla üçü aynı anda etkin olabilir.
+- **EN:** Lightning springs from you to a creature that you try to touch.
+- **TR:** Senden, dokunmaya çalıştığın bir yaratığa doğru şimşek fışkırır.
+
+### 16. `spells/polymorph:blocks.0.text#4`
+
+- **EN:** See the “Animals” section of “Monsters” for a sample of Beast stat blocks.
+- **TR:** Hayvan istatistik bloğu örnekleri için “Canavarlar” bölümündeki “Hayvanlar” kısmına bak.
+
+### 17. `spells/spirit-guardians:blocks.1.text#1`
+
+- **EN:** Any other creature’s Speed is halved in the Emanation, and whenever the Emanation enters a creature’s space and whenever a creature enters the Emanation or ends its turn there, the creature must make a Wisdom saving throw.
+- **TR:** Diğer tüm yaratıkların Hızı Yayılım içinde yarıya iner; Yayılım bir yaratığın alanına her girdiğinde ve bir yaratık Yayılıma her girdiğinde ya da sırasını orada bitirdiğinde, o yaratık bir Bilgelik kurtarma zarı atmalıdır.
+
+### 18. `spells/healing-word:higher_levels#0`
+
+- **EN:** The healing increases by 2d4 for each spell slot level above 1.
+- **TR:** İyileşme, 1'in üzerindeki her büyü slotu seviyesi için 2d4 artar.
+
+### 19. `spells/minor-illusion:blocks.2.text#1`
+
+- **EN:** If you create a sound, its volume can range from a whisper to a scream.
+- **TR:** Bir ses yaratırsan, sesin şiddeti fısıltıdan çığlığa kadar değişebilir.
+
+### 20. `spells/charm-monster:blocks.0.text#1`
+
+- **EN:** It does so with Advantage if you or your allies are fighting it.
+- **TR:** Sen ya da müttefiklerin onunla dövüşüyorsanız bu zarı Avantajla atar.
 
 ## QC bulgusu kalan segmentler
 

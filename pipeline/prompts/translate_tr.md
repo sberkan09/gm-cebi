@@ -15,26 +15,31 @@ olmayan bir dil. "Siz" değil "sen" hitabı (kaynaktaki "you" = sen).
 
 1. **Sözlük zorunlu.** Segmentle birlikte gelen `terms` listesindeki her
    terim, Türkçe metinde verilen karşılığıyla (gerekirse çekim ekiyle) geçmeli.
-   Alternatif veya eş anlamlı kullanma. Kural terimleri kaynakta büyük harfle
-   başlıyorsa Türkçede de büyük harfle başlat (Avantaj, Can Puanı, Kurtarma
-   Zarı, Yerde durumu). Ek alan kısaltma ve sayılarda kesme işareti kullan:
+   Alternatif veya eş anlamlı kullanma (sözlükte reddedilen alternatifler QC'de
+   hata verir). Büyük harf kaynağı izler: terim kaynakta büyük harfle yazılmışsa
+   (Advantage, Hit Points, Prone, Bonus Action) Türkçede de büyük harfle başlar
+   (Avantaj, Can Puanı, Yerde, Bonus Eylem); kaynakta küçük harfse ("saving
+   throw", "attack roll", "area of effect") Türkçede de küçük kalır ("kurtarma
+   zarı", "saldırı zarı", "etki alanı"), cümle başı hariç. Ek alan kısaltma ve sayılarda kesme işareti kullan:
    "ZD 15'lik", "ZS'si".
 2. **Sayılar ve zarlar birebir.** 2d6+3, 1d20, 60, 1/2, +5 aynen kalır;
    sayıyı yazıyla yazma, yazıyla olanı rakama çevirme. "d" harfi Türkçede de
    "d" kalır (2d6, 2z6 değil).
-3. **Birimler:** feet/foot → fit ("30 feet" → "30 fit"), "5-foot" → "5 fitlik",
+3. **Binlik ayırıcı nokta:** 1,000 → 1.000; 7,200 → 7.200 (Türkçede virgül
+   ondalık ayırıcıdır). QC iki biçimi aynı sayı sayar.
+4. **Birimler:** feet/foot → fit ("30 feet" → "30 fit"), "5-foot" → "5 fitlik",
    mile → mil, lb. → lb. Para: GP → altın, SP → gümüş, CP → bakır,
    EP → elektrum, PP → platin ("50 GP" → "50 altın").
-4. **Biçim işaretleri aynı kalır.** `**...**` ve `*...*` sayısı ve konumu
+5. **Biçim işaretleri aynı kalır.** `**...**` ve `*...*` sayısı ve konumu
    korunur; `**Etiket.**` ile başlayan segment yine `**Türkçe Etiket.**` ile
    başlar. `- ` madde işareti korunur.
-5. **Çapraz referanslar:** “Rules Glossary” gibi tırnaklı bölüm/başlık
+6. **Çapraz referanslar:** “Rules Glossary” gibi tırnaklı bölüm/başlık
    referanslarını `terms` veya `titles` listesindeki Türkçe başlıkla çevir;
    tırnak işaretlerini (“ ”) koru. İtalik büyü adları (*Fireball*) için
    `titles` içinde karşılık varsa onu kullan, yoksa İngilizce adı italik
    bırak.
-6. **Ürün kimliği yok:** SRD dışından isim, dünya, karakter ekleme.
-7. Açıklama, not, çeviri yorumu ekleme; yalnızca çeviriyi döndür.
+7. **Ürün kimliği yok:** SRD dışından isim, dünya, karakter ekleme.
+8. Açıklama, not, çeviri yorumu ekleme; yalnızca çeviriyi döndür.
 
 ## Kalıplar
 
@@ -51,6 +56,8 @@ olmayan bir dil. "Siz" değil "sen" hitabı (kaynaktaki "you" = sen).
 - "Action" (büyü süresi) → "Eylem"; "Bonus Action" → "Bonus Eylem";
   "Reaction, which you take when …" → "Reaksiyon; …".
 - "Concentration, up to 1 minute" → "Konsantrasyon, en fazla 1 dakika".
+- "Ready" eylemi → "Hazırlanma eylemi"; büyü hazırlamak (prepare) → "hazırlamak".
+  "When you Ready a spell" → "Bir büyüyü Hazırlanma eylemiyle beklettiğinde".
 - "Self" → "Kendin"; "Touch" → "Dokunma"; "Instantaneous" → "Anlık".
 
 ## Çıktı biçimi
