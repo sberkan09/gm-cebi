@@ -60,7 +60,7 @@ class Line:
 
     @property
     def starts_paragraph(self) -> bool:
-        return self.text.startswith("\t")
+        return self.text.lstrip(" ").startswith("\t")
 
     def style(self) -> str:
         """Coarse style class used by parsers."""
@@ -106,6 +106,8 @@ def join_text(lines: list[str]) -> str:
     buf = ""
     for raw in lines:
         t = raw.replace("\t", " ").strip()
+        if buf.endswith("\u00ad"):
+            buf = buf[:-1] + "-"  # discretionary hyphen at a line break behaves like "-"
         if not t:
             continue
         styled = re.search(r"(?<=[a-z])-(\*{1,2})$", buf)
@@ -122,6 +124,7 @@ def join_text(lines: list[str]) -> str:
             buf += t
         else:
             buf += " " + t
+    buf = re.sub(r"\u00ad\s*(?=[a-z])", "", buf).replace("\u00ad", "")
     return re.sub(r"\s+", " ", buf).strip()
 
 

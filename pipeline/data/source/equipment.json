@@ -3825,7 +3825,7 @@
   "kind": "equipment",
   "category": "gear",
   "fields": {
-   "Weight": "",
+   "Weight": "5 lb. (full)",
    "Cost": "2 SP"
   },
   "blocks": [
