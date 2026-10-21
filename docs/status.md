@@ -61,6 +61,13 @@ olmadığı için atlanıyor.
 2. Pilot çeviri kalitesi ve üslup (`docs/pilot-samples.md`).
 3. Türkçe "değiştirilmiş eser" notu ve atıf metninin "Hakkında" ekranındaki biçimi (`docs/decisions.md`).
 
+## Toplu çeviri öncesi takip maddeleri (PR #2 ikinci inceleme)
+
+1. Sıradan kelime olan reddedilen alternatifler (Tür, Ses, Buz, Felç, Kesme, Koşma, Yuva, Körlük, etken) yanlış alarm üretecek; alternatif bazında "reddedilmez" işareti eklenmeli.
+2. Kısa kökler sesteş kelimeleri hâlâ geçiriyor (İn ↔ İnce, Din ↔ dinle, Küp ↔ küpe, Ork ↔ orkide…); en az Lair ve Religion için `tr_pattern`/istisna. Doğal türetmeler (Dirençli, Bağışık, fitliğine) `tr_pattern` ile açılmalı.
+3. Sayı denetimi sırasız (yer değiştirmiş sayılar geçiyor); Türkçe ondalık virgül (1,5) henüz reddediliyor.
+4. `see_also` içindeki "NPC" sözlüğe eklenmeli.
+
 ## Sonraki adımlar
 
 - Sözlük kararlarından sonra `translate qc` ile pilotu yeniden denetle, düzeltmeleri uygula.
