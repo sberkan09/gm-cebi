@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.egg-info/
+
+# Pipeline inputs/outputs that are regenerated
+pipeline/raw/
+pipeline/translations/queue/
+pipeline/translations/out/
+
+# Flutter (Phase 1)
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
