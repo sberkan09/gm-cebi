@@ -1,10 +1,11 @@
 # Durum
 
-Son güncelleme: 2026-10-21 (Faz 0 oturumu sonu)
+Son güncelleme: 2026-10-21 (Faz 0 inceleme düzeltmeleri)
 
-## Faz 0 — veri: tamamlandı, onay bekliyor
+## Faz 0 — veri: tamamlandı
 
-PR: https://github.com/sberkan09/gm-cebi/pull/1 (`claude/phase-0-data` → `main`).
+- PR #1 (veri, sözlük, pilot) birleşti.
+- PR #2: bağımsız alt ajan incelemesinin bulguları — Animals gruplaması, sözlük eşleşmesinin sıkılaştırılması, reddedilen alternatif ve büyük/küçük harf denetimi, binlik ayırıcı, liste ve paragraf ayrıştırma, yumuşak tire, asset yayımlama eşiği, CI sabitleme.
 
 ### Veri sayıları (İngilizce kaynak, `pipeline/data/source/`)
 
@@ -13,7 +14,7 @@ PR: https://github.com/sberkan09/gm-cebi/pull/1 (`claude/phase-0-data` → `main
 | rules_glossary | 140 | Kurallar Sözlüğü girdileri (durumlar hariç) |
 | conditions | 15 | Tümü |
 | spells | 339 | Büyü içindeki çağrılan yaratık blokları (4) ait oldukları büyüye eklendi |
-| monsters | 330 | Monsters A–Z + Animals, tüm istatistik blokları |
+| monsters | 330 | Monsters A–Z (235) + Animals (95); hayvanların ailesi yok |
 | classes | 12 | Temel özellikler, gelişim tabloları, büyü listeleri, sınıf özellikleri |
 | subclasses | 12 | SRD'deki 12 alt sınıf |
 | species | 9 | |
@@ -25,36 +26,38 @@ PR: https://github.com/sberkan09/gm-cebi/pull/1 (`claude/phase-0-data` → `main
 
 ### Sözlük
 
-- `pipeline/glossary.csv`: 416 çekirdek terim + 50 pilot büyü adı + 21 bölüm/başlık adı.
+- `pipeline/glossary.csv`: 416 çekirdek terim + 50 pilot büyü adı + 25 bölüm/başlık adı.
 - Durum: 116 topluluk, 257 öneri, 43 tartışmalı.
 - İnceleme belgesi: `docs/glossary-review.md` (tartışmalılar en üstte).
 
 ### Pilot çeviri
 
 - Kapsam: 15 durum + 140 kural sözlüğü girdisi + 50 büyü (`pipeline/pilot.json`).
-- 1.298 benzersiz segment (yaklaşık 14.400 İngilizce kelime): 1.087 LLM çevirisi, 211 doğrudan sözlükten.
-- QC: 1.297 temiz, 1 bulgu (henüz çevrilmemiş iki büyü adı İngilizce kaldı — beklenen).
-- Asset'ler: 205 kayıt tam Türkçe, 29 kısa büyü kısmen (paylaşılan alanlar); toplam 1,6 MB (bütçe 10 MB).
+- 1.348 benzersiz segment: 1.092 LLM çevirisi (64'ü büyük/küçük harf düzeltmesiyle), 256 doğrudan sözlükten (liste maddeleri dahil).
+- QC (sıkılaştırılmış eşleşme, reddedilen alternatif ve harf denetimiyle): 1.347 temiz, 1 bulgu (henüz sözlükte olmayan iki büyü adı İngilizce kaldı — beklenen).
+- Asset'ler: 205 kayıt tam Türkçe; kısmen İngilizce kayıt yayımlanmıyor; toplam 1,6 MB (bütçe 10 MB).
 - Örnekler: `docs/pilot-samples.md`. Tüm segmentler yan yana: `pipeline/translations/review_queue.csv`.
 
 ### Testler
 
-`pipeline/` altında 50 pytest testi; Python 3.11 ve 3.13'te geçiyor. PDF'i yeniden ayrıştırıp
+`pipeline/` altında 58 pytest testi; Python 3.11 ve 3.13'te geçiyor. PDF'i yeniden ayrıştırıp
 depodaki JSON ile birebir karşılaştıran test dahil. GitHub Actions'ta `ci` (PDF indirme + pytest)
 ve `agentgate` (gözlem modu, çakışma yok) PR #1 üzerinde yeşil; Flutter adımları `pubspec.yaml`
 olmadığı için atlanıyor.
 
 ## Bilinen sınırlamalar
 
-- **Satır sonu tireleri:** dizgide bir bileşik kelimenin kendi tiresinde satır kırılmışsa tire düşebilir (sözlüksüz ayırt edilemiyor). Taramada 1 şüpheli kaldı ("shin- and" — doğru, bilinçli).
+- **Satır sonu tireleri:** dizgide bir bileşik kelimenin kendi tiresinde satır kırılmışsa tire düşebilir (sözlüksüz ayırt edilemiyor). Yumuşak tireler (U+00AD) artık temizleniyor ve testle denetleniyor.
 - **Tablolar:** sağa hizalı sütunlu birkaç tabloda (Adventuring Gear vb.) sütunlar kayabiliyor; ekipman için ağırlık/fiyat ayrıştırıcıda düzeltiliyor, diğer tablolar için görsel kontrol gerekecek.
-- **Soy alt seçenekleri** (Forest Gnome, Rock Gnome; Goliath atalık seçenekleri) ayrı `traits` girdisi olarak duruyor; Faz 1'de üst özelliğin altına gruplanabilir.
+- **Soy alt seçenekleri** (Forest Gnome, Rock Gnome; Goliath atalık seçenekleri) ayrı `traits` girdisi olarak duruyor; Faz 1'de üst özelliğin altına gruplanabilir. Vampire zaafları ve Sphinx kükremeleri gibi canavar alt maddeleri tek özellik metninde.
+- **Spell Scroll** ekipmanda üç kayıt (Cantrip, Level 1 ve açıklamalı ana kayıt); Faz 1'de tek kayıtta birleştirilebilir.
+- **Ayrıştırılmayan sayfalar** (101–106 büyü yapma kuralları vb.) yüzünden bazı kural atıfları uygulamada karşılıksız kalacak.
 - **Magic Items**, **Gameplay Toolbox** ve **Playing the Game** bölümleri ayrıştırılmadı (Faz 0 listesinde yoktu).
 - Çeviri bu oturumda API anahtarı olmadığı için oturum içi Claude ile yapıldı; aynı talimat API arka ucuyla da çalışır (`translate api`).
 
 ## Onay bekleyenler (ürün sahibi)
 
-1. Sözlük: özellikle 43 tartışmalı terim (Güç/Kuvvet, Bilgelik, Yetkinlik, Cantrip, Sehhar, para birimleri…).
+1. Sözlük: özellikle 43 tartışmalı terim (Güç/Kuvvet, Bilgelik, Yetkinlik, Cantrip, Sehhar, para birimleri…) ve inceleme ajanının işaret ettiği "Hayvan" (Beast) ↔ "Hayvanlar" (Animals bölümü) yakınlığı.
 2. Pilot çeviri kalitesi ve üslup (`docs/pilot-samples.md`).
 3. Türkçe "değiştirilmiş eser" notu ve atıf metninin "Hakkında" ekranındaki biçimi (`docs/decisions.md`).
 

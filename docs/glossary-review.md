@@ -2,7 +2,7 @@
 
 > Üretildi: `python -m gmcebi_pipeline.report` — elle düzenleme; değişiklikleri `pipeline/glossary.csv`'ye yap.
 
-Çekirdek terim: **416** — topluluk: 116, öneri: 257, tartışmalı: 43. Ayrıca 50 pilot büyü adı ve 21 bölüm adı (en altta).
+Çekirdek terim: **416** — topluluk: 116, öneri: 257, tartışmalı: 43. Ayrıca 50 pilot büyü adı ve 25 bölüm adı (en altta).
 
 ## Nasıl incelenir
 
@@ -35,7 +35,7 @@
 | Electrum Piece | **elektrum** | — | '1 EP' → '1 elektrum'. | — |
 | Gold Piece | **altın** | AP, GP | '50 GP' → '50 altın'. | — |
 | Platinum Piece | **platin** | — | '10 PP' → '10 platin'. | — |
-| feet | **fit** | ayak, ft | Sayılar değişmez (QC). 30 feet → 30 fit. Metrik gösterim ileride uygulama ayarı olabilir. | — |
+| feet | **fit** | ft | Sayılar değişmez (QC). 30 feet → 30 fit. Metrik gösterim ileride uygulama ayarı olabilir. "5 fitlik" kabul edilir; "ayak" (vücut) normal kelime olarak serbest. | — |
 | Strength | **Güç** | Kuvvet | Topluluk yaklaşık yarı yarıya bölünmüş; BG3 'Kuvvet'. Force (hasar türü) 'Kuvvet' olduğundan Güç seçildi. | A,C,D,E,I,O,B,H,J |
 | Wisdom | **Bilgelik** | Akıl, İrfan, Sezgi | Bilgelik/Akıl/İrfan arasında uzlaşma yok; FRP-SRD ve FRPNET Bilgelik. | A,C,D,E,B,H,J |
 | Str | **Güç** | Kuv | Canavar kartı kısaltması. | — |
@@ -303,7 +303,7 @@
 | 190 | Cube | **Küp** | öneri | ✔ |  |  |  |
 | 191 | Cylinder | **Silindir** | öneri | ✔ |  |  |  |
 | 192 | Emanation | **Yayılım** | öneri | ✔ |  |  |  |
-| 193 | Line | **Çizgi** | öneri | ✔ | Hat |  |  |
+| 193 | Line | **Çizgi** | öneri | ✔ |  | "hat" sıradan kelime olarak da geçtiği için alternatif listesinden çıkarıldı. |  |
 | 194 | Sphere | **Küre** | öneri | ✔ |  |  |  |
 
 ### Büyü
@@ -624,7 +624,7 @@
 
 | # | İngilizce | Türkçe | Durum | Zorunlu | Alternatifler | Not | Kanıt |
 |---|---|---|---|---|---|---|---|
-| 414 | feet | **fit** | tartışmalı | ✔ | ayak, ft | Sayılar değişmez (QC). 30 feet → 30 fit. Metrik gösterim ileride uygulama ayarı olabilir. |  |
+| 414 | feet | **fit** | tartışmalı | ✔ | ft | Sayılar değişmez (QC). 30 feet → 30 fit. Metrik gösterim ileride uygulama ayarı olabilir. "5 fitlik" kabul edilir; "ayak" (vücut) normal kelime olarak serbest. |  |
 | 415 | mile | **mil** | öneri | ✔ |  |  |  |
 | 416 | pound (lb.) | **lb** | öneri |  | libre | Ağırlık birimi kısaltması korunur. |  |
 
@@ -647,7 +647,7 @@
 | Light | Işık | büyü adı |
 | Mage Hand | Büyücü Eli | büyü adı |
 | Minor Illusion | Küçük İllüzyon | büyü adı |
-| Prestidigitation | El Çabukluğu Büyüsü | büyü adı |
+| Prestidigitation | Hokkabazlık | büyü adı |
 | Sacred Flame | Kutsal Alev | büyü adı |
 | Guidance | Rehberlik | büyü adı |
 | Eldritch Blast | Kadim Patlama | büyü adı |
@@ -655,7 +655,7 @@
 | Ray of Frost | Ayaz Işını | büyü adı |
 | Shocking Grasp | Şok Edici Kavrayış | büyü adı |
 | Thaumaturgy | Mucizecilik | büyü adı |
-| Druidcraft | Druid Hüneri | büyü adı |
+| Druidcraft | Druid Sanatı | büyü adı |
 | Acid Splash | Asit Sıçraması | büyü adı |
 | Bless | Kutsama | büyü adı |
 | Cure Wounds | Yaraları İyileştir | büyü adı |
@@ -703,6 +703,10 @@
 | Combat Encounters | Savaş Karşılaşmaları | bölüm |
 | Animals | Hayvanlar | bölüm |
 | D20 Tests | D20 Testleri | bölüm |
+| Actions | Eylemler | bölüm |
+| Weapons | Silahlar | bölüm |
+| Armor | Zırh | bölüm |
+| Casting Spells | Büyü Yapma | bölüm |
 
 ## Kaynaklar
 
