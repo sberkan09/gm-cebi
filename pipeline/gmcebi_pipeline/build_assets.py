@@ -17,7 +17,7 @@ import json
 import re
 from pathlib import Path
 
-from .glossary import Glossary
+from .glossary import Glossary, build_title_map
 from .license import find_terms
 from .parse import RUNIN_RE
 from .segments import apply_translation
@@ -28,6 +28,7 @@ SOURCE = ROOT / "data" / "source"
 ASSETS = ROOT.parent / "assets" / "data"
 SIZE_BUDGET = 10 * 1024 * 1024
 SCHEMA_VERSION = 1
+HARD_QC = {"dice", "numbers", "markup", "product-identity", "empty"}
 
 ATTRIBUTION = (
     "This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by "
@@ -81,12 +82,18 @@ def build(out_dir: Path = ASSETS) -> dict[str, dict]:
     tm = TM()
     mapper = _Mapper(glossary)
     out_dir.mkdir(parents=True, exist_ok=True)
-    titles: dict[str, str] = {t.en: t.tr for t in glossary.terms}
+    names: list[tuple[str, str, str]] = []
     loaded = {ds: json.loads((SOURCE / f"{ds}.json").read_text(encoding="utf-8")) for ds in DATASETS}
 
     def lookup(k: str) -> str | None:
         e = tm.get(k)
-        return e.tr if e and e.tr and e.status != "rejected" else None
+        if not e or not e.tr or e.status == "rejected":
+            return None
+        # Hard QC failures (wrong numbers/dice, broken markup, product identity) never ship;
+        # term and wording warnings ship but stay in the review queue.
+        if e.status != "reviewed" and any(q.split(":")[0] in HARD_QC for q in e.qc):
+            return None
+        return e.tr
 
     # First pass: translated names feed the cross-reference title map.
     translated: dict[str, list[tuple[dict, dict | None, str]]] = {}
@@ -95,15 +102,17 @@ def build(out_dir: Path = ASSETS) -> dict[str, dict]:
         for r in recs:
             tr, done, missing = apply_translation(r, lookup, ds)
             # Records only touched by shared short segments ("Action", "60 feet")
-            # are not worth shipping as Turkish yet.
-            if done == 0 or done < (done + missing) / 2:
+            # are not worth shipping as Turkish yet: require a translated name and
+            # at least 80% of the record's segments.
+            if done == 0 or tr["name"] == r["name"] and missing or done < 0.8 * (done + missing):
                 rows.append((r, None, "none"))
                 continue
             if tr["name"] != r["name"]:
-                titles.setdefault(r["name"], tr["name"])
+                names.append((ds, r["name"], tr["name"]))
             rows.append((r, tr, "complete" if missing == 0 else "partial"))
         translated[ds] = rows
 
+    titles = build_title_map(glossary, names)
     summary: dict[str, dict] = {}
     total = 0
     for ds, rows in translated.items():
