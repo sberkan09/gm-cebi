@@ -4,7 +4,7 @@ Son güncelleme: 2026-10-21 (Faz 0 oturumu sonu)
 
 ## Faz 0 — veri: tamamlandı, onay bekliyor
 
-PR: `claude/phase-0-data` → `main`.
+PR: https://github.com/sberkan09/gm-cebi/pull/1 (`claude/phase-0-data` → `main`).
 
 ### Veri sayıları (İngilizce kaynak, `pipeline/data/source/`)
 
@@ -40,7 +40,9 @@ PR: `claude/phase-0-data` → `main`.
 ### Testler
 
 `pipeline/` altında 50 pytest testi; Python 3.11 ve 3.13'te geçiyor. PDF'i yeniden ayrıştırıp
-depodaki JSON ile birebir karşılaştıran test dahil.
+depodaki JSON ile birebir karşılaştıran test dahil. GitHub Actions'ta `ci` (PDF indirme + pytest)
+ve `agentgate` (gözlem modu, çakışma yok) PR #1 üzerinde yeşil; Flutter adımları `pubspec.yaml`
+olmadığı için atlanıyor.
 
 ## Bilinen sınırlamalar
 
