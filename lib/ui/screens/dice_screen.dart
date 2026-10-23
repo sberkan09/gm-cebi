@@ -178,7 +178,7 @@ class _DiceScreenState extends ConsumerState<DiceScreen> {
                   key: const Key('roll'),
                   onPressed: _roll,
                   icon: const Icon(Icons.casino_outlined, size: 28),
-                  label: Text('AT', style: t.labelLarge?.copyWith(fontSize: 22, letterSpacing: 2, fontWeight: FontWeight.w800)),
+                  label: const Text('AT', style: TextStyle(fontSize: 22, letterSpacing: 2, fontWeight: FontWeight.w800)),
                 ),
               ),
             ]),
@@ -202,7 +202,8 @@ class _Key extends StatelessWidget {
         child: FilledButton.tonal(
           style: FilledButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(56, 52)),
           onPressed: onTap,
-          child: Text(label, style: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 17, fontWeight: FontWeight.w700)),
+          // No colour here: the button supplies its foreground colour.
+          child: Text(label, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
         ),
       );
 }

@@ -104,13 +104,6 @@ class SettingsScreen extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           child: Text(compatibilityNotice, style: t.bodyMedium),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: Text(
-            'Uygulamanın görsel kimliği ve kodu GM Cebi\'ye aittir; Wizards of the Coast ile bir bağı yoktur.',
-            style: t.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
-          ),
-        ),
         ListTile(
           leading: const Icon(Icons.code),
           title: const Text('Açık kaynak lisansları'),

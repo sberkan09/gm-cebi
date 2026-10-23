@@ -54,7 +54,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
           final f = trFold(_filter.trim());
           final list = f.isEmpty ? all : all.where((n) => trFold('${n.title} ${n.body}').contains(f)).toList();
           return Column(children: [
-            if (all.length > 3)
+            if (all.length > 3 || _filter.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
                 child: TextField(
@@ -74,11 +74,13 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                         ),
                       ),
                     )
-                  : ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 96),
-                      itemCount: list.length,
-                      itemBuilder: (context, i) => _NoteTile(note: list[i]),
-                    ),
+                  : list.isEmpty
+                      ? Center(child: Text('Eşleşen not yok', style: t.bodyLarge?.copyWith(color: scheme.onSurfaceVariant)))
+                      : ListView.builder(
+                          padding: const EdgeInsets.only(bottom: 96),
+                          itemCount: list.length,
+                          itemBuilder: (context, i) => _NoteTile(note: list[i]),
+                        ),
             ),
           ]);
         },
@@ -122,7 +124,7 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
   ConsumerState<NoteEditorScreen> createState() => _NoteEditorScreenState();
 }
 
-class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
+class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> with WidgetsBindingObserver {
   final _title = TextEditingController();
   final _body = TextEditingController();
   bool _pinned = false;
@@ -134,7 +136,17 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _load();
+  }
+
+  /// Flush pending text when the app goes to the background (it may be killed there).
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      _debounce?.cancel();
+      _save();
+    }
   }
 
   Future<void> _load() async {
@@ -162,6 +174,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _debounce?.cancel();
     final empty = _title.text.trim().isEmpty && _body.text.trim().isEmpty;
     if (_loaded && empty) {

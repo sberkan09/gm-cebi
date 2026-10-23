@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -131,7 +130,7 @@ class _Tracker extends ConsumerWidget {
                   key: const Key('next-turn'),
                   onPressed: list.isEmpty ? null : db.nextTurn,
                   icon: const Icon(Icons.chevron_right, size: 28),
-                  label: Text('Sonraki', style: t.labelLarge?.copyWith(fontSize: 20, fontWeight: FontWeight.w700)),
+                  label: const Text('Sonraki', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                 ),
               ),
             ),
@@ -154,7 +153,8 @@ class _CombatantCard extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final data = ref.watch(referenceProvider).value?.data;
     final lang = ref.watch(currentSettingsProvider).contentLang;
-    final hpFrac = (c.hpCurrent != null && (c.hpMax ?? 0) > 0) ? (c.hpCurrent! / c.hpMax!).clamp(0.0, 1.0) : null;
+    // Never null: a null value would make the bar animate forever.
+    final hpFrac = (c.hpCurrent != null && (c.hpMax ?? 0) > 0) ? (c.hpCurrent! / c.hpMax!).clamp(0.0, 1.0) : 0.0;
     return Card(
       key: ValueKey('combatant-${c.id}'),
       shape: RoundedRectangleBorder(
@@ -202,14 +202,16 @@ class _CombatantCard extends ConsumerWidget {
                   InkWell(
                     key: ValueKey('hp-${c.id}'),
                     onTap: () => _changeHp(context, ref, c),
-                    child: Row(children: [
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 44),
+                      child: Row(children: [
                       Expanded(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(6),
                           child: LinearProgressIndicator(
                             value: hpFrac,
                             minHeight: 10,
-                            color: (hpFrac ?? 1) <= 0.5 ? scheme.error : scheme.secondary,
+                            color: hpFrac <= 0.5 ? scheme.error : scheme.secondary,
                             backgroundColor: scheme.surfaceContainerHighest,
                           ),
                         ),
@@ -217,6 +219,7 @@ class _CombatantCard extends ConsumerWidget {
                       const SizedBox(width: 10),
                       Text('CP ${c.hpCurrent}/${c.hpMax ?? '?'}', style: t.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
                     ]),
+                    ),
                   ),
                 if (c.conditionIds.isNotEmpty) ...[
                   const SizedBox(height: 6),
@@ -257,7 +260,11 @@ Future<bool?> _confirmNewEncounter(BuildContext context) => showDialog<bool>(
       ),
     );
 
-int? _int(String s) => int.tryParse(s.trim().replaceAll('−', '-'));
+/// Accepts an optional leading minus only ("5-3" is rejected, not silently dropped).
+int? _int(String s) {
+  final t = s.trim().replaceAll('−', '-');
+  return RegExp(r'^-?\d+$').hasMatch(t) ? int.parse(t) : null;
+}
 
 Future<void> _showAddSheet(BuildContext context, WidgetRef ref) async {
   final choice = await showModalBottomSheet<String>(
@@ -336,11 +343,12 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
     ),
   );
   if (ok == true && name.text.trim().isNotEmpty) {
+    final hpValue = _int(hp.text);
     await ref.read(databaseProvider).addCombatant(
           name: name.text.trim(),
           initiative: _int(init.text),
           initBonus: _int(bonus.text) ?? 0,
-          hp: _int(hp.text),
+          hp: hpValue == null || hpValue < 1 ? null : hpValue,
           ac: _int(ac.text),
           isPlayer: isPlayer,
         );
@@ -392,10 +400,7 @@ class _MonsterPickerState extends State<_MonsterPicker> {
   Widget build(BuildContext context) {
     final List<RefRecord> list = _q.trim().isEmpty
         ? widget.reference.data.sorted('monsters', widget.lang)
-        : [
-            for (final h in widget.reference.index.search(_q, limit: 200))
-              if (h.record.dataset == 'monsters') h.record,
-          ];
+        : [for (final h in widget.reference.index.search(_q, limit: 400, only: 'monsters')) h.record];
     return AlertDialog(
       title: const Text('Canavar seç'),
       contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
@@ -481,7 +486,7 @@ Future<void> _editInitiative(BuildContext context, WidgetRef ref, Combatant c) a
     ),
   );
   if (v == null) return;
-  await ref.read(databaseProvider).updateCombatant(c.copyWith(initiative: Value(_int(v))));
+  await ref.read(databaseProvider).setInitiative(c.id, _int(v));
 }
 
 Future<void> _showCombatantMenu(BuildContext context, WidgetRef ref, Combatant c) async {
@@ -524,9 +529,20 @@ Future<void> _showCombatantMenu(BuildContext context, WidgetRef ref, Combatant c
             ListTile(
               leading: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
               title: const Text('Karşılaşmadan çıkar'),
-              onTap: () {
-                ref.read(databaseProvider).removeCombatant(live.id);
-                Navigator.pop(context);
+              onTap: () async {
+                final ok = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('${live.name} çıkarılsın mı?'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
+                      FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Çıkar')),
+                    ],
+                  ),
+                );
+                if (ok != true || !context.mounted) return;
+                await ref.read(databaseProvider).removeCombatant(live.id);
+                if (context.mounted) Navigator.pop(context);
               },
             ),
           ]),

@@ -70,7 +70,7 @@ void main() {
     await settle(tester);
     await tester.scrollUntilVisible(find.byKey(const Key('attribution')), 300, scrollable: scrollableIn(const Key('settings-list')));
     final text = tester.widget<SelectableText>(find.byKey(const Key('attribution'))).data!;
-    expect(text, startsWith('This work includes material from the System Reference Document 5.2.1'));
-    expect(text, endsWith('https://creativecommons.org/licenses/by/4.0/legalcode.'));
+    // Same text the data pipeline put in the manifest (taken from the SRD PDF).
+    expect(text, testReference().data.manifest['attribution']);
   });
 }

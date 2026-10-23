@@ -99,7 +99,10 @@ class BlocksView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (final b in blocks.cast<Map<String, dynamic>>())
-            if (b['type'] == 'table') DataTableView(b) else MdParagraphView(b['text'] as String? ?? ''),
+            if (b['type'] == 'table' || b['rows'] != null)
+              DataTableView(b)
+            else if (b['text'] != null)
+              MdParagraphView(b['text'] as String),
         ],
       );
 }
