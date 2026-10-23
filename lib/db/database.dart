@@ -205,10 +205,11 @@ class AppDatabase extends _$AppDatabase {
     return id;
   }
 
-  Future<void> updateCombatant(Combatant c) async {
+  /// Sets (or clears) one combatant's initiative; only that column is written.
+  Future<void> setInitiative(int id, int? initiative) async {
     final e = await activeEncounter();
     final current = await _currentCombatantId(e);
-    await update(combatants).replace(c);
+    await (update(combatants)..where((c) => c.id.equals(id))).write(CombatantsCompanion(initiative: Value(initiative)));
     await _keepTurnOn(e, current);
   }
 
@@ -217,10 +218,16 @@ class AppDatabase extends _$AppDatabase {
     final order = await _order(e);
     final idx = order.indexWhere((c) => c.id == id);
     await (delete(combatants)..where((c) => c.id.equals(id))).go();
-    if (idx >= 0 && idx < e.turnIndex) {
-      await _setTurn(e, e.round, e.turnIndex - 1);
-    } else if (e.turnIndex >= order.length - 1) {
-      await _setTurn(e, e.round, 0);
+    final remaining = order.length - 1;
+    if (idx < 0 || remaining <= 0) {
+      if (remaining <= 0) await _setTurn(e, e.round, 0);
+      return;
+    }
+    if (idx < e.turnIndex) {
+      await _setTurn(e, e.round, e.turnIndex - 1); // same creature keeps the turn
+    } else if (idx == e.turnIndex && idx >= remaining) {
+      // The current creature was last in the order: the turn passes to the top of the next round.
+      await _setTurn(e, e.started ? e.round + 1 : e.round, 0);
     }
   }
 
@@ -245,6 +252,7 @@ class AppDatabase extends _$AppDatabase {
   /// Rolls initiative (d20 + bonus) for every non-player combatant that has none.
   Future<void> rollMissingInitiative(int Function(int bonus) rollD20) async {
     final e = await activeEncounter();
+    final current = await _currentCombatantId(e);
     final list = await (select(combatants)..where((c) => c.encounterId.equals(e.id))).get();
     await batch((b) {
       for (final c in list) {
@@ -254,7 +262,7 @@ class AppDatabase extends _$AppDatabase {
         }
       }
     });
-    await _setTurn(e, e.round, 0);
+    await _keepTurnOn(e, current);
   }
 
   Future<void> nextTurn() async {
@@ -279,14 +287,14 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// Ends the active encounter and starts an empty one. Player characters can be kept.
+  /// Deletes the active encounter (and, by cascade, its combatants) and starts
+  /// an empty one. Player characters can be carried over with full HP.
   Future<void> newEncounter({bool keepPlayers = true}) async {
     final e = await activeEncounter();
     final players = keepPlayers
         ? await (select(combatants)..where((c) => c.encounterId.equals(e.id) & c.isPlayer.equals(true))).get()
         : <Combatant>[];
     await transaction(() async {
-      await (update(encounters)..where((x) => x.id.equals(e.id))).write(const EncountersCompanion(active: Value(false)));
       final id = await into(encounters).insert(EncountersCompanion.insert(createdAt: DateTime.now()));
       for (final p in players) {
         await into(combatants).insert(p.toCompanion(false).copyWith(
@@ -297,6 +305,7 @@ class AppDatabase extends _$AppDatabase {
               hpCurrent: Value(p.hpMax),
             ));
       }
+      await (delete(encounters)..where((x) => x.id.equals(e.id))).go();
     });
   }
 

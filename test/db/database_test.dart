@@ -123,4 +123,41 @@ void main() {
     await db.addCombatant(name: 'B', initiative: 15);
     expect((await state()).current!.name, 'B');
   });
+
+  test('rolling missing initiative mid-combat keeps the turn marker', () async {
+    await db.addCombatant(name: 'A', initiative: 20);
+    await db.addCombatant(name: 'B', initiative: 10);
+    await db.nextTurn(); // B, combat started
+    await db.addCombatant(name: 'Takviye', initBonus: 0); // no initiative yet
+    await db.rollMissingInitiative((bonus) => 15); // sorts between A and B
+    final s = await state();
+    expect(s.combatants.map((c) => c.name), ['A', 'Takviye', 'B']);
+    expect(s.current!.name, 'B');
+  });
+
+  test('removing the current creature when it is last passes the turn to the next round', () async {
+    await db.addCombatant(name: 'A', initiative: 20);
+    final b = await db.addCombatant(name: 'B', initiative: 10);
+    await db.nextTurn(); // B
+    await db.removeCombatant(b);
+    final s = await state();
+    expect(s.current!.name, 'A');
+    expect(s.encounter.round, 2);
+  });
+
+  test('setInitiative writes only the initiative column', () async {
+    final id = await db.addCombatant(name: 'Goblin', hp: 7, initiative: 5);
+    await db.changeHp(id, 3);
+    await db.setInitiative(id, 12);
+    final c = (await state()).combatants.single;
+    expect(c.initiative, 12);
+    expect(c.hpCurrent, 4);
+  });
+
+  test('new encounter deletes the old one and its combatants', () async {
+    await db.addCombatant(name: 'Goblin', hp: 7);
+    await db.newEncounter(keepPlayers: false);
+    expect(await db.select(db.encounters).get(), hasLength(1));
+    expect(await db.select(db.combatants).get(), isEmpty);
+  });
 }
