@@ -53,10 +53,15 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-10-23 — Zar dili: `NdM`, `kh/kl/dh/dl/k`, `+ - * /`, parantez, `d%`; Türk oyuncular için `z` de zar harfi (2z6). En çok 100 zar, 1000 yüz. `Random.secure()`.
 - 2026-10-23 — İkon: kendi tasarımımız, mürekkep zemin üzerinde pirinç renkli genel bir yirmi yüzlü zar (`tool/make_icons.py`); bilinen bir markanın ikonografisi yok.
 - 2026-10-23 — Android en az 8.0 (minSdk 26), iOS en az 15.0. Test APK'sı debug anahtarıyla imzalı; mağaza imzası ürün sahibinde.
+- 2026-10-23 — Veri hattı yapısal değerleri (`type`: p/table) çevirmez; Türkçe kayıtların yapısı İngilizceyle aynı olmak zorunda (pytest). Uygulama `rows` taşıyan her bloğu tablo olarak çizer.
+- 2026-10-23 — Yaklaşık arama (ek kırpma) yalnızca adlarda yapılır; gövde metninde kısa kökler gürültü üretiyordu.
+- 2026-10-23 — Kısaltmalara gelen ekler harf okunuşuna göre (ZS'ye, NPC'ye); sıralamada boşluk ve noktalama harflerden önce (kelime kelime).
+- 2026-10-23 — "Yeni karşılaşma" eskisini siler (katılımcılar zincirleme silinir); inisiyatif düzenleme yalnızca o sütunu yazar; mevcut yaratık sıranın sonundaysa ve çıkarılırsa sıra sonraki tura geçer.
+- 2026-10-23 — Not editörü uygulama arka plana geçerken bekleyen metni hemen kaydeder.
 - 2026-10-23 — Widget testleri drift'in sahte-zaman bölgesinde çalışır (`runAsync` drift bağlantı kilidinde kilitleniyor); testler uygulamanın tamamını bellek içi veritabanı ve gerçek asset'lerle açar.
 
 ## Onay bekleyenler
 
-- **ONAY BEKLİYOR** — Atıf metni: SRD'nin zorunlu kıldığı İngilizce cümle README'ye ve `manifest.json`'a birebir kondu. Ek olarak Türkçe bir "değiştirilmiş eser" notu öneriliyor (CC-BY değişikliklerin belirtilmesini istiyor): "Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, değiştirilmiş bir çalışmadır." Mağaza ve "Hakkında" ekranına girmeden önce metnin onayı gerekiyor.
+- **ONAY BEKLİYOR** — Atıf metni: SRD'nin zorunlu kıldığı İngilizce cümle README'ye, `manifest.json`'a ve Hakkında ekranına birebir kondu (onay gerektirmez, lisans şartı). Ek olarak Türkçe bir "değiştirilmiş eser" notu öneriliyor (CC-BY değişikliklerin belirtilmesini istiyor): "Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, değiştirilmiş bir çalışmadır. …" Test sürümünde Hakkında ekranında **öneri metni olarak** duruyor (`lib/app_info.dart`, `translationNotice`); mağaza sürümünden önce onaylanmalı ya da değiştirilmeli. SRD, Wizards'a bu atıf dışında başka bir atıf yapılmamasını istediği için "Wizards ile bağımız yoktur" gibi ek cümleler kullanılmıyor.
 - **ONAY BEKLİYOR** — Uygulama adı: "GM Cebi" çalışma adı olarak kullanılıyor (`lib/app_info.dart`, Android etiketi, iOS `CFBundleDisplayName`).
 - **ONAY BEKLİYOR** — Paket adı: şimdilik yer tutucu `com.example.gm_cebi` (Android) / `com.example.gmCebi` (iOS). Mağazaya ilk yüklemeden önce kesinleşmeli; değiştirilecek yerler `docs/ios-testflight.md`'de.

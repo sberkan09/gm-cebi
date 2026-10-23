@@ -34,6 +34,8 @@ Listeler Türk alfabesine göre sıralanır (`trCompare`):
     a b c ç d e f g ğ h ı i j k l m n o ö p (q) r s ş t u ü v (w x) y z
 
 - Önce büyük/küçük harf duyarsız karşılaştırılır, eşitlikte küçük harf önce gelir.
+- Boşluk ve noktalama harflerden önce gelir (kelime kelime sıralama: "Ak Ejder" < "Akrep").
+- Sayılar karakter karakter karşılaştırılır ("10. Seviye" < "9. Seviye"); sayısal sıralama gerekirse ayrıca yapılır.
 - â, î, û düz ünlüyle (a, i, u) birlikte sıralanır.
 - Rakamlar harflerden önce gelir.
 - Türk alfabesinde olmayan q, w, x en yakın harflerin arasına yerleşir.
@@ -50,6 +52,7 @@ Türkçede ekler son hecedeki ünlüye ve son sese göre değişir. Basit kurall
 | Ünlüyle biten köke kaynaştırma (y, n, s) | masa**ya**, kale**nin**, Zarı**sı** |
 | Sert ünsüzden sonra d → t ("fıstıkçı şahap") | Ork'**ta**, 5'**ten** |
 | Özel ad, sayı, kısaltmaya kesme işareti | Goblin'e, ZD 15'lik, ZS'si |
+| Kısaltmaya gelen ek harf okunuşuna göre | ZS'**ye** (ze-se), NPC'**ye** (ce), GM'**ye** (me) |
 | Sayıya gelen ek okunuşa göre seçilir | 15'**e** (on beş), 40'**a** (kırk), 6'**da** (altı) |
 | Sayıdan sonra çoğul yok | **3 goblin**, ~~3 goblinler~~ (`countNoun`) |
 | Sıra sayısı noktayla | **3. tur**, 2. Seviye |

@@ -4,7 +4,7 @@ Son güncelleme: 2026-10-23 (Faz 1)
 
 ## Faz 1 — uygulama: test sürümü hazır
 
-PR: `claude/phase-1-app` → `main`.
+PR: https://github.com/sberkan09/gm-cebi/pull/3 (`claude/phase-1-app` → `main`). Bağımsız incelemenin 4 engelleyici bulgusu düzeltildi.
 
 ### Ekranlar
 
@@ -22,9 +22,11 @@ iOS hazırlığı: `docs/ios-testflight.md`. Türkçe metin kuralları: `docs/tu
 
 ### Testler
 
-- Flutter: 72 test — Türkçe metin (büyük/küçük harf, sıralama, ekler), zar ayrıştırıcı, Markdown,
-  arama (gerçek veriyle, her sorgu <100 ms), veritabanı (inisiyatif, notlar, ayarlar), bayraklar
-  ve uygulamanın tamamını açan 14 widget testi. `flutter analyze` temiz.
+- Flutter: 82 test — Türkçe metin (büyük/küçük harf, sıralama, ekler), zar ayrıştırıcı, Markdown,
+  arama (gerçek veriyle, her sorgu <100 ms; ölçüm masaüstünde), veritabanı (inisiyatif, notlar,
+  ayarlar), bayraklar, uygulamanın tamamını açan 14 widget testi ve çevrilmiş ya da tablolu her
+  kaydı iki dilde çizen bir test. `flutter analyze` temiz.
+- Pipeline: 60 pytest testi (Türkçe kayıtların yapısının İngilizceyle aynı olduğu denetimi eklendi).
 - Ekran görüntüsü testi (`test/screenshots`) gerçek yazı tipleriyle çizer; elle çalıştırılır.
 
 ## Faz 0 — veri: tamamlandı
