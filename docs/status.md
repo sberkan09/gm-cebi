@@ -1,6 +1,31 @@
 # Durum
 
-Son güncelleme: 2026-10-21 (Faz 0 inceleme düzeltmeleri)
+Son güncelleme: 2026-10-23 (Faz 1)
+
+## Faz 1 — uygulama: test sürümü hazır
+
+PR: `claude/phase-1-app` → `main`.
+
+### Ekranlar
+
+| Ekran | Durum |
+|---|---|
+| Ara | Tek kutu (ekranın altında), Türkçe + İngilizce, çevrimdışı; boşken veri kümelerine göz atma. Gerçek veride en kötü sorgu ~0,5 ms (masaüstü AOT). |
+| Kayıt sayfaları | Kural, durum, büyü (büyü kartı), canavar (istatistik bloğu), sınıf, alt sınıf, soy, geçmiş, hüner, ekipman, silah özelliği/ustalığı, terim. TR/EN tek dokunuş; çevrilmemiş kayıtta uyarı. |
+| Zar | İfade ayrıştırıcı (`2d20kh1+5`, `4d6dl1`, `(1d8+3)*2`, `d%`), zar düğmeleri, ±1, Avantaj/Dezavantaj, geçmiş. |
+| İnisiyatif (GM Paketi) | Ekle (serbest / canavar listesi / canavar sayfasından), inisiyatif atma, sıra ve tur, CP hasar/iyileştirme, durum etiketleri, yeni karşılaşma. Kalıcı (drift). |
+| Oturum notları (GM Paketi) | Liste, arama, sabitleme, kendiliğinden kaydetme, silme. |
+| Ayarlar ve Hakkında | Tema (koyu varsayılan), varsayılan içerik dili, GM Paketi durumu (+ test sürümünde test anahtarı), atıf metni, açık kaynak lisansları. |
+
+Ekran görüntüleri: `docs/screenshots/`. Test grubu notu: `docs/test-guide.md`.
+iOS hazırlığı: `docs/ios-testflight.md`. Türkçe metin kuralları: `docs/turkish-text.md`.
+
+### Testler
+
+- Flutter: 72 test — Türkçe metin (büyük/küçük harf, sıralama, ekler), zar ayrıştırıcı, Markdown,
+  arama (gerçek veriyle, her sorgu <100 ms), veritabanı (inisiyatif, notlar, ayarlar), bayraklar
+  ve uygulamanın tamamını açan 14 widget testi. `flutter analyze` temiz.
+- Ekran görüntüsü testi (`test/screenshots`) gerçek yazı tipleriyle çizer; elle çalıştırılır.
 
 ## Faz 0 — veri: tamamlandı
 
@@ -59,7 +84,8 @@ olmadığı için atlanıyor.
 
 1. Sözlük: özellikle 43 tartışmalı terim (Güç/Kuvvet, Bilgelik, Yetkinlik, Cantrip, Sehhar, para birimleri…) ve inceleme ajanının işaret ettiği "Hayvan" (Beast) ↔ "Hayvanlar" (Animals bölümü) yakınlığı.
 2. Pilot çeviri kalitesi ve üslup (`docs/pilot-samples.md`).
-3. Türkçe "değiştirilmiş eser" notu ve atıf metninin "Hakkında" ekranındaki biçimi (`docs/decisions.md`).
+3. Türkçe "değiştirilmiş eser" notu ve atıf metninin "Hakkında" ekranındaki biçimi (`docs/decisions.md`). Şu an Ayarlar ve Hakkında ekranında öneri metniyle duruyor.
+4. Uygulama adı ("GM Cebi") ve paket adı (şimdilik `com.example.gm_cebi` / `com.example.gmCebi`).
 
 ## Toplu çeviri öncesi takip maddeleri (PR #2 ikinci inceleme)
 
@@ -70,6 +96,7 @@ olmadığı için atlanıyor.
 
 ## Sonraki adımlar
 
-- Sözlük kararlarından sonra `translate qc` ile pilotu yeniden denetle, düzeltmeleri uygula.
-- Kalan veri kümelerinin (büyülerin geri kalanı, canavarlar, sınıflar…) toplu çevirisi.
-- Faz 1: Flutter uygulaması (onaydan sonra).
+- Uygulama adı ve paket adı kararı (yer tutucu: `com.example.*`), ardından mağaza imzası.
+- Test grubundan ilk geri bildirim; sözlük kararları.
+- Toplu çeviri öncesi takip maddeleri (yukarıda), ardından kalan veri kümelerinin çevirisi.
+- Faz 2 planı: ses kaydı → özet → NPC/mekân defteri; Fate desteği.
