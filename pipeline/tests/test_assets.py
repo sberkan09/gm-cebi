@@ -22,3 +22,21 @@ def test_pilot_translations_present():
     blinded = next(r for r in conds["records"] if r["id"] == "blinded")
     assert blinded["tr"]["name"] == "Kör"
     assert blinded["tr"]["tags"] == ["Durum"]
+
+
+@pytest.mark.skipif(not (ASSETS / "manifest.json").exists(), reason="assets not built")
+def test_turkish_records_keep_the_structure_of_english():
+    """Structural fields (block types, table shapes) are never translated."""
+    def shape(node):
+        if isinstance(node, dict):
+            return {k: (v if k in ("type", "kind", "id") else shape(v)) for k, v in node.items()}
+        if isinstance(node, list):
+            return [shape(v) for v in node]
+        return None
+
+    for path in ASSETS.glob("*.json"):
+        if path.name in ("manifest.json", "glossary.json"):
+            continue
+        for rec in json.loads(path.read_text(encoding="utf-8"))["records"]:
+            if rec["tr"] is not None:
+                assert shape(rec["tr"]) == shape(rec["en"]), (path.name, rec["id"])

@@ -1,6 +1,5 @@
 key,status,qc,ref,en,tr,decision,tr_fixed
 8d87b0188756c173,machine,untranslated: İngilizce kelime kalmış olabilir,rules_glossary/possession:blocks.0.text#2,Possession can be prevented by the *Protection from Evil and Good* spell and ended by the *Dispel Evil and Good* spell.,Ele geçirilme *Protection from Evil and Good* büyüsüyle önlenebilir ve *Dispel Evil and Good* büyüsüyle sona erdirilebilir.,,
-c3ee137d4f22eb06,machine,,classes/barbarian:blocks.0.type#0,table,tablo,,
 f10b9000750a8894,machine,,classes/ranger:features.3.blocks.2.text#0,**Languages.**,**Diller.**,,
 99595cc5659e7778,machine,,conditions/blinded:blocks.0.text#0,"While you have the Blinded condition, you experience the following effects.",Kör durumundayken aşağıdaki etkileri yaşarsın.,,
 11459d450cd4dea4,machine,,conditions/blinded:blocks.1.text#0,**Can’t See.**,**Göremez.**,,
