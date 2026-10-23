@@ -36,19 +36,24 @@ final _wordRe = RegExp('[a-z0-9\u00C0-\u024F]+');
 List<String> _words(String folded) => [for (final m in _wordRe.allMatches(folded)) m.group(0)!];
 
 class SearchIndex {
-  SearchIndex._(this._records, this._names, this._nameWords, this._vocab, this._postings);
+  SearchIndex._(this._records, this._names, this._nameWords, this._vocab, this._postings, this._lowerNames);
 
   final List<RefRecord> _records;
   final List<List<String>> _names; // folded names per record
   final List<List<List<String>>> _nameWords;
   final List<String> _vocab; // sorted unique words
   final List<List<int>> _postings; // record indices per vocab word, ascending
+  final List<List<String>> _lowerNames; // Turkish-lowercased names (diacritics kept)
 
   int get size => _records.length;
+
+  /// The query lowercased but with diacritics kept, for the exact-spelling bonus.
+  String _exact = '';
 
   factory SearchIndex.build(ReferenceData data) {
     final records = data.all.toList();
     final names = <List<String>>[];
+    final lowerNames = <List<String>>[];
     final nameWords = <List<List<String>>>[];
     final wordToRecs = <String, List<int>>{};
 
@@ -65,6 +70,11 @@ class SearchIndex {
         if (r.aliasTr != null) trFold(r.aliasTr!),
       }.toList();
       names.add(ns);
+      lowerNames.add([
+        trLower(r.enName),
+        if (r.trName != null) trLower(r.trName!),
+        if (r.aliasTr != null) trLower(r.aliasTr!),
+      ]);
       nameWords.add([for (final n in ns) _words(n)]);
       final seen = <String>{};
       for (final n in ns) {
@@ -78,7 +88,7 @@ class SearchIndex {
     }
     final vocab = wordToRecs.keys.toList()..sort();
     final postings = [for (final w in vocab) wordToRecs[w]!];
-    return SearchIndex._(records, names, nameWords, vocab, postings);
+    return SearchIndex._(records, names, nameWords, vocab, postings, lowerNames);
   }
 
   static const _skipKeys = {'id', 'kind', 'source'};
@@ -143,6 +153,7 @@ class SearchIndex {
     if (q.isEmpty) return const [];
     final tokens = _words(q);
     if (tokens.isEmpty) return const [];
+    _exact = trLower(query).trim().replaceAll(RegExp(r'\s+'), ' ');
     var hits = _run(q, tokens, approximate: false);
     if (hits.isEmpty) {
       // Turkish suffixes: "körlük" → "kör", "büyüleri" → "büyü".
@@ -211,6 +222,8 @@ class SearchIndex {
       s -= name.length / 100; // shorter names first
       if (s > best) best = s;
     }
+    // Same spelling including ç ğ ı ö ş ü beats a folded match ("kör" → Kör before Korucu).
+    if (best > 100 && _exact.isNotEmpty && _lowerNames[i].any((n) => n.startsWith(_exact))) best += 150;
     return best + _records[i].info.priority;
   }
 }

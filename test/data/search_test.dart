@@ -50,6 +50,12 @@ void main() {
     expect(top('drag', 30).where((k) => k.startsWith('monsters/')).length, greaterThan(5));
   });
 
+  test('exact Turkish spelling ranks above folded matches', () {
+    final keys = top('kör', 4);
+    expect(keys.take(3), containsAll(['conditions/blinded', 'rules_glossary/blindsight']));
+    expect(!keys.contains('classes/ranger') || keys.indexOf('classes/ranger') > 1, isTrue);
+  });
+
   test('body text is searchable at lower rank', () {
     final hits = index.search('tentacle');
     expect(hits.map((h) => h.record.key), contains('monsters/aboleth'));
