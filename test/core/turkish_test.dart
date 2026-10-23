@@ -34,6 +34,11 @@ void main() {
       expect(trCompare('Ok', 'Ölü') < 0, isTrue);
     });
 
+    test('word-by-word: spaces and punctuation sort first', () {
+      expect(trCompare('Ak Ejder', 'Akrep') < 0, isTrue);
+      expect(trCompare('Ağır-Zırh', 'Ağırlık') < 0, isTrue);
+    });
+
     test('case-insensitive primary order, digits first', () {
       expect(trCompare('apple', 'Banana') < 0, isTrue);
       expect(trCompare('10 fit', 'altın') < 0, isTrue);
@@ -59,6 +64,13 @@ void main() {
       expect(withCase('masa', TrCase.dative), 'masaya');
       expect(withCase('kale', TrCase.genitive), 'kalenin');
       expect(withCase('Aboleth', TrCase.ablative, apostrophe: true), "Aboleth'ten");
+    });
+
+    test('abbreviations take suffixes by letter names', () {
+      expect(withCase('ZS', TrCase.dative, apostrophe: true), "ZS'ye");
+      expect(withCase('NPC', TrCase.dative, apostrophe: true), "NPC'ye");
+      expect(withCase('ZD', TrCase.locative, apostrophe: true), "ZD'de");
+      expect(possessive3('ZS', apostrophe: true), "ZS'si");
     });
 
     test('plural and counted nouns', () {

@@ -47,8 +47,7 @@ class SearchIndex {
 
   int get size => _records.length;
 
-  /// The query lowercased but with diacritics kept, for the exact-spelling bonus.
-  String _exact = '';
+
 
   factory SearchIndex.build(ReferenceData data) {
     final records = data.all.toList();
@@ -148,19 +147,21 @@ class SearchIndex {
     }
   }
 
-  List<SearchHit> search(String query, {int limit = 60}) {
+  /// [only] restricts hits to one dataset (e.g. the monster picker).
+  List<SearchHit> search(String query, {int limit = 60, String? only}) {
     final q = trFold(query).trim().replaceAll(RegExp(r'\s+'), ' ');
     if (q.isEmpty) return const [];
     final tokens = _words(q);
     if (tokens.isEmpty) return const [];
-    _exact = trLower(query).trim().replaceAll(RegExp(r'\s+'), ' ');
-    var hits = _run(q, tokens, approximate: false);
+    final exact = trLower(query).trim().replaceAll(RegExp(r'\s+'), ' ');
+    var hits = _run(q, tokens, exact, only, approximate: false);
     if (hits.isEmpty) {
       // Turkish suffixes: "körlük" → "kör", "büyüleri" → "büyü".
+      // Names only (body prefixes of short stems are mostly noise), stems of 3+ letters.
       for (var cut = 1; cut <= 3 && hits.isEmpty; cut++) {
         final trimmed = [for (final t in tokens) t.length - cut >= 3 ? t.substring(0, t.length - cut) : t];
         if (trimmed.join() == tokens.join()) break;
-        hits = _run(trimmed.join(' '), trimmed, approximate: true);
+        hits = _run(trimmed.join(' '), trimmed, exact, only, approximate: true);
       }
     }
     // Ties: alphabetical by the folded English name (cheap; precomputed).
@@ -171,14 +172,14 @@ class SearchIndex {
     return hits.length > limit ? hits.sublist(0, limit) : hits;
   }
 
-  List<SearchHit> _run(String q, List<String> tokens, {required bool approximate}) {
+  List<SearchHit> _run(String q, List<String> tokens, String exact, String? only, {required bool approximate}) {
     final n = _records.length;
-    // AND over tokens. One-letter tokens only match names: as a body prefix
-    // they would match almost everything and cost the most.
+    // AND over tokens. One-letter tokens (and the approximate fallback) only
+    // match names: as body prefixes they would match almost everything.
     Uint8List? cand;
     for (final t in tokens) {
       final mark = Uint8List(n);
-      if (t.length == 1) {
+      if (t.length == 1 || approximate) {
         for (var i = 0; i < n; i++) {
           if (_nameWords[i].any((ws) => ws.any((w) => w.startsWith(t)))) mark[i] = 1;
         }
@@ -195,14 +196,15 @@ class SearchIndex {
     }
     final hits = <SearchHit>[];
     for (var i = 0; i < n; i++) {
-      if ((cand != null && cand[i] == 1) || _names[i].any((name) => name.contains(q))) {
-        hits.add(SearchHit(_records[i], _score(i, q, tokens), approximate: approximate, index: i));
+      if (only != null && _records[i].dataset != only) continue;
+      if ((cand != null && cand[i] == 1) || (!approximate && _names[i].any((name) => name.contains(q)))) {
+        hits.add(SearchHit(_records[i], _score(i, q, tokens, exact), approximate: approximate, index: i));
       }
     }
     return hits;
   }
 
-  double _score(int i, String q, List<String> tokens) {
+  double _score(int i, String q, List<String> tokens, String exact) {
     var best = 100.0; // body-only match
     for (var n = 0; n < _names[i].length; n++) {
       final name = _names[i][n];
@@ -223,7 +225,7 @@ class SearchIndex {
       if (s > best) best = s;
     }
     // Same spelling including ç ğ ı ö ş ü beats a folded match ("kör" → Kör before Korucu).
-    if (best > 100 && _exact.isNotEmpty && _lowerNames[i].any((n) => n.startsWith(_exact))) best += 150;
+    if (best > 100 && exact.isNotEmpty && _lowerNames[i].any((n) => n.startsWith(exact))) best += 150;
     return best + _records[i].info.priority;
   }
 }

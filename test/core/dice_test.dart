@@ -81,7 +81,7 @@ void main() {
   });
 
   group('errors are reported in Turkish', () {
-    for (final bad in ['', '2d', 'd1', '1001d6', '2d1001', '2d20kh3', '4d6dl4', '2+', '(1d6', '3x', '1d6 2']) {
+    for (final bad in ['', '2d', 'd1', '1001d6', '2d1001', '2d20kh3', '4d6dl4', '1d6dl', '2+', '(1d6', '3x', '1d6 2']) {
       test('"$bad"', () {
         expect(() => DiceExpression.parse(bad), throwsA(isA<DiceException>()));
       });
@@ -93,6 +93,8 @@ void main() {
         expect(e.message, contains('yüz sayısı'));
       }
       expect(DiceExpression.isValid('2d20kh1+5'), isTrue);
+      expect(() => roll('999999*999999*999999'), throwsA(isA<DiceException>()));
+      expect(() => roll('1d6dl'), throwsA(predicate((e) => e is DiceException && e.message.contains('Tek zar'))));
     });
   });
 }

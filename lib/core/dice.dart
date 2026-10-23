@@ -30,6 +30,14 @@ class DiceException implements Exception {
 const maxDice = 100;
 const maxSides = 1000;
 
+/// Results beyond this are rejected instead of silently overflowing.
+const maxMagnitude = 1000000000;
+
+int _checked(int v) {
+  if (v.abs() > maxMagnitude) throw DiceException('Sonuç çok büyük', 0);
+  return v;
+}
+
 enum KeepMode { keepHighest, keepLowest, dropHighest, dropLowest }
 
 /// One die group in the expression, e.g. `2d20kh1`.
@@ -189,11 +197,11 @@ class _Bin extends _Node {
     final r = right.eval(rng, out, text);
     switch (op) {
       case '+':
-        return l + r;
+        return _checked(l + r);
       case '-':
-        return l - r;
+        return _checked(l - r);
       case '*':
-        return l * r;
+        return _checked(l * r);
       default:
         if (r == 0) throw DiceException('Sıfıra bölme', 0);
         return (l / r).floor();
@@ -380,7 +388,9 @@ class _Parser {
       final keepsOrDrops = mode == KeepMode.keepHighest || mode == KeepMode.keepLowest;
       if (k < 1 || (keepsOrDrops ? k > count : k >= count)) {
         throw DiceException(
-          keepsOrDrops ? 'Tutulan zar sayısı 1 ile $count arasında olmalı' : 'Atılan zar sayısı ${count - 1} veya daha az olmalı',
+          keepsOrDrops
+              ? 'Tutulan zar sayısı 1 ile $count arasında olmalı'
+              : (count == 1 ? 'Tek zardan zar düşürülemez' : 'Düşürülen zar sayısı 1 ile ${count - 1} arasında olmalı'),
           modStart,
         );
       }

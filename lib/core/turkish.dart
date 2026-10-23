@@ -79,7 +79,9 @@ int _letterRank(String lowerChar) {
   final r = _rank[lowerChar];
   if (r != null) return r;
   final code = lowerChar.codeUnitAt(0);
-  // Digits before letters, everything else after.
+  // Spaces and punctuation first (word-by-word order: "Ak Ejder" < "Akrep"),
+  // then digits, then letters; other characters last.
+  if (code <= 0x2F || (code >= 0x3A && code <= 0x40)) return -200 + code;
   if (code >= 0x30 && code <= 0x39) return -100 + (code - 0x30);
   return 1000 + code;
 }
@@ -121,9 +123,23 @@ String numberReading(int n) {
   return ones[n % 10];
 }
 
+const _letterNames = {
+  'A': 'a', 'B': 'be', 'C': 'ce', 'Ç': 'çe', 'D': 'de', 'E': 'e', 'F': 'fe', 'G': 'ge', 'Ğ': 'yumuşak ge',
+  'H': 'he', 'I': 'ı', 'İ': 'i', 'J': 'je', 'K': 'ke', 'L': 'le', 'M': 'me', 'N': 'ne', 'O': 'o', 'Ö': 'ö',
+  'P': 'pe', 'Q': 'kü', 'R': 're', 'S': 'se', 'Ş': 'şe', 'T': 'te', 'U': 'u', 'Ü': 'ü', 'V': 've', 'W': 've',
+  'X': 'iks', 'Y': 'ye', 'Z': 'ze',
+};
+
+final _abbrevRe = RegExp(r'^[A-ZÇĞİÖŞÜ]{2,5}$');
+
+/// How the end of a word is pronounced, for choosing suffixes: numbers are
+/// read aloud ("15" → "beş"), all-caps abbreviations by letter names
+/// ("ZS" → "se", so "ZS'ye", "ZS'si").
 String _readable(String word) {
   final n = int.tryParse(word);
-  return n != null ? numberReading(n) : trLower(word);
+  if (n != null) return numberReading(n);
+  if (_abbrevRe.hasMatch(word)) return _letterNames[word[word.length - 1]] ?? trLower(word);
+  return trLower(word);
 }
 
 String? _lastVowel(String w) {

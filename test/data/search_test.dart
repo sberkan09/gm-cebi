@@ -73,6 +73,20 @@ void main() {
     expect(hits.first.record.en['name'], 'Dexterity');
   });
 
+  test('approximate fallback only matches names, not body text', () {
+    final hits = index.search('strahd'); // not in the SRD; stem "str"
+    expect(hits.every((h) => h.approximate), isTrue);
+    expect(hits.map((h) => h.record.enName), isNot(contains('Restrained')));
+    expect(hits.length, lessThan(15));
+  });
+
+  test('dataset filter', () {
+    final hits = index.search('dragon', limit: 400, only: 'monsters');
+    expect(hits, isNotEmpty);
+    expect(hits.every((h) => h.record.dataset == 'monsters'), isTrue);
+    expect(hits.length, greaterThan(30));
+  });
+
   test('empty and junk queries', () {
     expect(index.search(''), isEmpty);
     expect(index.search('   '), isEmpty);
