@@ -3,12 +3,16 @@
 Türkçe, 5e uyumlu masaüstü FRP yardımcısı (GM ve oyuncular için mobil uygulama).
 Kurallar, durumlar, büyüler ve canavarlar çevrimdışı, Türkçe ve İngilizce aranabilir.
 
-> Durum: **Faz 0 — veri.** Uygulama kodu Faz 1'de gelecek. Ayrıntı: [docs/status.md](docs/status.md).
+> Durum: **Faz 1 — uygulama (test sürümü).** Ayrıntı: [docs/status.md](docs/status.md).
+> Test grubu için: [docs/test-guide.md](docs/test-guide.md).
 
 ## Depo düzeni
 
 | Yol | İçerik |
 |---|---|
+| `lib/` | Flutter uygulaması (Riverpod, drift) |
+| `test/` | Birim ve widget testleri |
+| `android/`, `ios/` | Platform projeleri (Android 8+, iOS 15+) |
 | `pipeline/` | Python 3.11 veri hattı: SRD PDF → yapılandırılmış JSON → Türkçe çeviri → uygulama asset'leri |
 | `pipeline/glossary.csv` | Türkçe terim sözlüğü (tek gerçek kaynak) |
 | `pipeline/data/source/` | SRD'den ayrıştırılmış İngilizce kayıtlar |
@@ -16,7 +20,17 @@ Kurallar, durumlar, büyüler ve canavarlar çevrimdışı, Türkçe ve İngiliz
 | `assets/data/` | Uygulamanın okuduğu JSON (İngilizce + Türkçe) |
 | `docs/` | Kararlar, durum, veri modeli, kaynaklar, sözlük incelemesi |
 
-Hızlı başlangıç:
+Uygulama:
+
+```bash
+flutter pub get
+flutter test
+flutter run --dart-define=GMCEBI_INTERNAL=true --dart-define=GMCEBI_GM_PACK=true
+flutter build apk --release --dart-define=GMCEBI_INTERNAL=true --dart-define=GMCEBI_GM_PACK=true
+dart run build_runner build   # lib/db/database.dart değişince
+```
+
+Veri hattı:
 
 ```bash
 cd pipeline

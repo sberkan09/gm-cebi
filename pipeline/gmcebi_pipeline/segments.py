@@ -16,6 +16,8 @@ from .textutil import key, split_sentences
 
 # Never sent to translation.
 SKIP_KEYS = {"id", "kind", "source", "class_id", "subclasses", "document",
+             # Structural values ("p" / "table") must never be translated.
+             "type",
              # Derived views rebuilt from translated blocks / names at asset build time.
              "effects", "see_also"}
 # Mapped deterministically through the glossary instead of the LLM.

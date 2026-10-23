@@ -4,10 +4,10 @@
 
 ## Özet
 
-- Çevrilen benzersiz segment: **1092** (sözlükten doğrudan dolanlar hariç: 256)
-- Veri kümesine göre (ilk geçtiği yer): rules_glossary 704, spells 303, conditions 81, classes 2, species 1, monsters 1
-- QC bulgusu olmayan: **1091**, bulgulu: **1** (inceleme kuyruğunda öne alınır)
-- Üretici: `claude-opus-5-5` 1028, `claude-opus-5-5+casefix` 64
+- Çevrilen benzersiz segment: **1091** (sözlükten doğrudan dolanlar hariç: 256)
+- Veri kümesine göre (ilk geçtiği yer): rules_glossary 704, spells 303, conditions 81, species 1, monsters 1, classes 1
+- QC bulgusu olmayan: **1090**, bulgulu: **1** (inceleme kuyruğunda öne alınır)
+- Üretici: `claude-opus-5-5` 1027, `claude-opus-5-5+casefix` 64
 
 ## 20 rastgele örnek (tohum 7)
 

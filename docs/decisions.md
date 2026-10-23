@@ -39,7 +39,29 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-10-21 — Kural sözlüğündeki terim listeleri (alan şekilleri, eylemler, durumlar, yaratık türleri) madde işaretli bloklar olarak tutulur; soy özelliklerinin devam paragrafları ait oldukları özelliğe eklenir.
 - 2026-10-21 — agentgate eylemi SHA'ya sabitlendi (`10b84ec`), Python 3.11; `pyproject.toml` bağımlılıkları `requirements.txt` ile aynı.
 
+## Faz 1 — uygulama
+
+- 2026-10-23 — Flutter 3.47.7 (Dart 3.13.5) stable; CI aynı sürüme sabit. Riverpod 3.4 (kod üretimsiz), drift 2.35 + drift_flutter; sqlite3 3.x yerel kütüphaneyi derleme kancasıyla getirir (sqlite3_flutter_libs artık gerekmiyor).
+- 2026-10-23 — Referans verisi drift'e aktarılmaz: açılışta asset'lerden bir isolate içinde okunur ve bellekte arama dizini kurulur (önek ters dizini + ad içinde alt dize). Gerekçe: <100 ms arama, ilk açılışta içe aktarma yok, veri uygulama sürümüyle birlikte gelir. drift yalnızca kullanıcı verisi için: ayarlar, oturum notları, karşılaşmalar.
+- 2026-10-23 — Arama tüm veri kümelerini (terimler dahil) tek kutuda, Türkçe ve İngilizce adlar + gövde metniyle tarar; sıralama ad eşleşmesine göre. Çevrilmemiş kayıtlar sözlükteki Türkçe adla da bulunur (Dagger ↔ Hançer). Sözlükte olup kaydı olmayan terimler "Terim" kartı olarak çıkar.
+- 2026-10-23 — Arayüz tek dilli (Türkçe), metinler doğrudan widget'larda; gen-l10n kurulmadı. İçerik etiketleri (ZS, CP, Yapma Süresi…) gösterilen içeriğin diline uyar.
+- 2026-10-23 — Tek elle kullanım: alt gezinme (Ara, Zar, İnisiyatif, Notlar), arama kutusu ekranın altında, ana eylem düğmeleri altta ve en az 56 dp.
+- 2026-10-23 — Kayıt sayfasındaki TR/EN düğmesi yalnızca o sayfayı değiştirir; varsayılan dil Ayarlar'da.
+- 2026-10-23 — Özellik bayrakları: `Feature` → `Entitlement` (ücretsiz / GM Paketi / ses aboneliği). Hak `--dart-define=GMCEBI_GM_PACK` ile gelir; `GMCEBI_INTERNAL` test sürümlerinde Ayarlar'a test anahtarı ekler. Satın alma kodu yok. NPC üretici ve ses özeti yalnızca bayrak olarak ayrıldı.
+- 2026-10-23 — İnisiyatif: tek etkin karşılaşma; "Sonraki" ilk kez basılana kadar sıra imleci en üstte kalır (`started`), sonrasında yeni katılımcı eklense de aynı yaratıkta kalır. "Yeni karşılaşma" oyuncuları tam CP ile taşıyabilir.
+- 2026-10-23 — Notlar 800 ms gecikmeyle ve ekrandan çıkarken kendiliğinden kaydedilir; boş not tutulmaz.
+- 2026-10-23 — Zar dili: `NdM`, `kh/kl/dh/dl/k`, `+ - * /`, parantez, `d%`; Türk oyuncular için `z` de zar harfi (2z6). En çok 100 zar, 1000 yüz. `Random.secure()`.
+- 2026-10-23 — İkon: kendi tasarımımız, mürekkep zemin üzerinde pirinç renkli genel bir yirmi yüzlü zar (`tool/make_icons.py`); bilinen bir markanın ikonografisi yok.
+- 2026-10-23 — Android en az 8.0 (minSdk 26), iOS en az 15.0. Test APK'sı debug anahtarıyla imzalı; mağaza imzası ürün sahibinde.
+- 2026-10-23 — Veri hattı yapısal değerleri (`type`: p/table) çevirmez; Türkçe kayıtların yapısı İngilizceyle aynı olmak zorunda (pytest). Uygulama `rows` taşıyan her bloğu tablo olarak çizer.
+- 2026-10-23 — Yaklaşık arama (ek kırpma) yalnızca adlarda yapılır; gövde metninde kısa kökler gürültü üretiyordu.
+- 2026-10-23 — Kısaltmalara gelen ekler harf okunuşuna göre (ZS'ye, NPC'ye); sıralamada boşluk ve noktalama harflerden önce (kelime kelime).
+- 2026-10-23 — "Yeni karşılaşma" eskisini siler (katılımcılar zincirleme silinir); inisiyatif düzenleme yalnızca o sütunu yazar; mevcut yaratık sıranın sonundaysa ve çıkarılırsa sıra sonraki tura geçer.
+- 2026-10-23 — Not editörü uygulama arka plana geçerken bekleyen metni hemen kaydeder.
+- 2026-10-23 — Widget testleri drift'in sahte-zaman bölgesinde çalışır (`runAsync` drift bağlantı kilidinde kilitleniyor); testler uygulamanın tamamını bellek içi veritabanı ve gerçek asset'lerle açar.
+
 ## Onay bekleyenler
 
-- **ONAY BEKLİYOR** — Atıf metni: SRD'nin zorunlu kıldığı İngilizce cümle README'ye ve `manifest.json`'a birebir kondu. Ek olarak Türkçe bir "değiştirilmiş eser" notu öneriliyor (CC-BY değişikliklerin belirtilmesini istiyor): "Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, değiştirilmiş bir çalışmadır." Mağaza ve "Hakkında" ekranına girmeden önce metnin onayı gerekiyor.
-- **ONAY BEKLİYOR** — Uygulama adı "GM Cebi" ve paket adı Faz 1'de belirlenecek; henüz hiçbir yerde paket adı oluşturulmadı.
+- **ONAY BEKLİYOR** — Atıf metni: SRD'nin zorunlu kıldığı İngilizce cümle README'ye, `manifest.json`'a ve Hakkında ekranına birebir kondu (onay gerektirmez, lisans şartı). Ek olarak Türkçe bir "değiştirilmiş eser" notu öneriliyor (CC-BY değişikliklerin belirtilmesini istiyor): "Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, değiştirilmiş bir çalışmadır. …" Test sürümünde Hakkında ekranında **öneri metni olarak** duruyor (`lib/app_info.dart`, `translationNotice`); mağaza sürümünden önce onaylanmalı ya da değiştirilmeli. SRD, Wizards'a bu atıf dışında başka bir atıf yapılmamasını istediği için "Wizards ile bağımız yoktur" gibi ek cümleler kullanılmıyor.
+- **ONAY BEKLİYOR** — Uygulama adı: "GM Cebi" çalışma adı olarak kullanılıyor (`lib/app_info.dart`, Android etiketi, iOS `CFBundleDisplayName`).
+- **ONAY BEKLİYOR** — Paket adı: şimdilik yer tutucu `com.example.gm_cebi` (Android) / `com.example.gmCebi` (iOS). Mağazaya ilk yüklemeden önce kesinleşmeli; değiştirilecek yerler `docs/ios-testflight.md`'de.
