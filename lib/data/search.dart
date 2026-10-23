@@ -47,8 +47,6 @@ class SearchIndex {
 
   int get size => _records.length;
 
-
-
   factory SearchIndex.build(ReferenceData data) {
     final records = data.all.toList();
     final names = <List<String>>[];

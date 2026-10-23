@@ -26,7 +26,7 @@ iOS hazırlığı: `docs/ios-testflight.md`. Türkçe metin kuralları: `docs/tu
   arama (gerçek veriyle, her sorgu <100 ms; ölçüm masaüstünde), veritabanı (inisiyatif, notlar,
   ayarlar), bayraklar, uygulamanın tamamını açan 14 widget testi ve çevrilmiş ya da tablolu her
   kaydı iki dilde çizen bir test. `flutter analyze` temiz.
-- Pipeline: 60 pytest testi (Türkçe kayıtların yapısının İngilizceyle aynı olduğu denetimi eklendi).
+- Pipeline: 59 pytest testi (Türkçe kayıtların yapısının İngilizceyle aynı olduğu denetimi eklendi).
 - Ekran görüntüsü testi (`test/screenshots`) gerçek yazı tipleriyle çizer; elle çalıştırılır.
 
 ## Faz 0 — veri: tamamlandı

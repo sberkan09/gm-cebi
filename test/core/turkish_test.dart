@@ -37,6 +37,7 @@ void main() {
     test('word-by-word: spaces and punctuation sort first', () {
       expect(trCompare('Ak Ejder', 'Akrep') < 0, isTrue);
       expect(trCompare('Ağır-Zırh', 'Ağırlık') < 0, isTrue);
+      expect(trCompare('Dragon’s Breath', 'Dragons') < 0, isTrue);
     });
 
     test('case-insensitive primary order, digits first', () {
@@ -71,6 +72,7 @@ void main() {
       expect(withCase('NPC', TrCase.dative, apostrophe: true), "NPC'ye");
       expect(withCase('ZD', TrCase.locative, apostrophe: true), "ZD'de");
       expect(possessive3('ZS', apostrophe: true), "ZS'si");
+      expect(withCase('KURT', TrCase.dative, apostrophe: true), "KURT'a"); // a word, not letters
     });
 
     test('plural and counted nouns', () {
