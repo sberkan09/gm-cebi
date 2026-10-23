@@ -67,7 +67,10 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
             const SizedBox(height: 8),
             Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
               DatasetChip(r.info),
-              for (final tag in (c['tags'] as List?)?.cast<String>() ?? const <String>[]) Chip(label: Text(tag), visualDensity: VisualDensity.compact),
+              // Conditions all carry the "Condition" tag: redundant next to the dataset chip.
+              if (r.dataset != 'conditions')
+                for (final tag in (c['tags'] as List?)?.cast<String>() ?? const <String>[])
+                  Chip(label: Text(tag), visualDensity: VisualDensity.compact),
               if (source != null)
                 Text('SRD 5.2.1 · s. ${source['page']}', style: t.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
             ]),

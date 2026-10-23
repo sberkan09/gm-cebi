@@ -95,8 +95,11 @@ ThemeData buildTheme(Brightness brightness) {
       indicatorColor: scheme.primaryContainer,
       labelTextStyle: WidgetStatePropertyAll(text.labelMedium?.copyWith(fontWeight: FontWeight.w600)),
     ),
-    filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(minimumSize: big, textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700))),
-    outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(minimumSize: big, textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
+    // Derived from the text theme so the platform font family is kept.
+    filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(minimumSize: big, textStyle: text.labelLarge?.copyWith(fontSize: 17, fontWeight: FontWeight.w700))),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(minimumSize: big, textStyle: text.labelLarge?.copyWith(fontSize: 16, fontWeight: FontWeight.w600))),
     textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(minimumSize: big)),
     iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(minimumSize: big)),
     listTileTheme: const ListTileThemeData(minVerticalPadding: 12, contentPadding: EdgeInsets.symmetric(horizontal: 16)),
@@ -116,7 +119,7 @@ ThemeData buildTheme(Brightness brightness) {
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: scheme.primary,
       foregroundColor: scheme.onPrimary,
-      extendedTextStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+      extendedTextStyle: text.labelLarge?.copyWith(fontSize: 16, fontWeight: FontWeight.w700),
     ),
     dividerTheme: DividerThemeData(color: scheme.outlineVariant, space: 1),
   );

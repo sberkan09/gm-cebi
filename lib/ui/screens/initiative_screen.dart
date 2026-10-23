@@ -46,14 +46,6 @@ class InitiativeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        key: const Key('add-combatant'),
-        heroTag: 'fab-initiative',
-        onPressed: () => _showAddSheet(context, ref),
-        icon: const Icon(Icons.person_add_alt_1),
-        label: const Text('Ekle'),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Hata: $e')),
@@ -81,15 +73,22 @@ class _Tracker extends ConsumerWidget {
         child: Row(children: [
           Text('${state.encounter.round}. tur', key: const Key('round'), style: t.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(width: 12),
-          if (current != null)
-            Expanded(
-              child: Text(
-                'Sıra: ${current.name}',
-                key: const Key('current-turn'),
-                overflow: TextOverflow.ellipsis,
-                style: t.titleMedium?.copyWith(color: scheme.primary),
-              ),
-            ),
+          Expanded(
+            child: current == null
+                ? const SizedBox.shrink()
+                : Text(
+                    'Sıra: ${current.name}',
+                    key: const Key('current-turn'),
+                    overflow: TextOverflow.ellipsis,
+                    style: t.titleMedium?.copyWith(color: scheme.primary),
+                  ),
+          ),
+          FilledButton.tonalIcon(
+            key: const Key('add-combatant'),
+            onPressed: () => _showAddSheet(context, ref),
+            icon: const Icon(Icons.person_add_alt_1),
+            label: const Text('Ekle'),
+          ),
         ]),
       ),
       Expanded(
@@ -132,7 +131,7 @@ class _Tracker extends ConsumerWidget {
                   key: const Key('next-turn'),
                   onPressed: list.isEmpty ? null : db.nextTurn,
                   icon: const Icon(Icons.chevron_right, size: 28),
-                  label: const Text('Sonraki', style: TextStyle(fontSize: 20)),
+                  label: Text('Sonraki', style: t.labelLarge?.copyWith(fontSize: 20, fontWeight: FontWeight.w700)),
                 ),
               ),
             ),
