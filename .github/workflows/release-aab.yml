@@ -1,0 +1,95 @@
+# Store release: pushing a version tag like v1.0.0 (not v*-test*, which is the
+# test-group APK in release-apk.yml) runs the tests and builds a Play-ready
+# App Bundle signed with the upload key from repository secrets.
+# Secrets and flag policy: docs/release.md.
+name: release-aab
+on:
+  push:
+    tags:
+      - "v*"
+      - "!v*-test*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  aab:
+    runs-on: ubuntu-latest
+    env:
+      # Store builds: never GMCEBI_INTERNAL. GM pack free while there is no
+      # purchase flow (docs/release.md, "Bayraklar").
+      DART_DEFINES: --dart-define=GMCEBI_INTERNAL=false --dart-define=GMCEBI_GM_PACK=true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.7
+          cache: true
+
+      - name: Tag matches pubspec version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          name=$(sed -n 's/^version: *\([0-9.]*\)+[0-9]*$/\1/p' pubspec.yaml)
+          if [ "${GITHUB_REF_NAME}" != "v${name}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match pubspec version ${name} (expected v${name})"
+            exit 1
+          fi
+
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+      - name: Write upload keystore from secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          for v in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "${!v}" ]; then echo "::error::Repository secret for $v is not set (docs/release.md)"; exit 1; fi
+          done
+          keystore="$RUNNER_TEMP/upload-keystore.jks"
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$keystore"
+          {
+            echo "storeFile=$keystore"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+          echo "KEYSTORE_PATH=$keystore" >> "$GITHUB_ENV"
+
+      - name: Build App Bundle
+        run: flutter build appbundle --release $DART_DEFINES
+
+      - name: Check signature and flags
+        env:
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          aab=build/app/outputs/bundle/release/app-release.aab
+          verify=$(jarsigner -verify "$aab")
+          if ! grep -q '^jar verified' <<< "$verify"; then echo "$verify"; echo "::error::jarsigner could not verify $aab"; exit 1; fi
+          # Signed with the upload key, not the debug key.
+          signer=$(keytool -printcert -jarfile "$aab" | awk '/SHA256: / && !f {print $2; f=1}')
+          upload=$(keytool -list -v -keystore "$KEYSTORE_PATH" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" | awk '/SHA256: / && !f {print $2; f=1}')
+          echo "AAB signer SHA-256: $signer"
+          if [ -z "$signer" ] || [ "$signer" != "$upload" ]; then echo "::error::AAB is not signed with the upload key"; exit 1; fi
+          # Internal test switches must be compiled out (lib/features/flags.dart).
+          tool/check_store_build.sh "$aab"
+
+      - name: Remove signing material
+        if: always()
+        run: rm -f android/key.properties "$RUNNER_TEMP/upload-keystore.jks"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gm-cebi-release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 90

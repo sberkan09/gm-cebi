@@ -39,11 +39,22 @@ const builtFeatures = {
 };
 
 /// `--dart-define=GMCEBI_INTERNAL=true` for test-group builds: shows the
-/// entitlement test switches in Settings.
+/// entitlement test switches in Settings. Never set in store builds
+/// (docs/release.md); the test switches are compiled out when it is false.
 const kInternalBuild = bool.fromEnvironment('GMCEBI_INTERNAL');
 
-/// `--dart-define=GMCEBI_GM_PACK=true` unlocks the GM pack by default.
+/// `--dart-define=GMCEBI_GM_PACK=true` unlocks the GM pack for everyone using
+/// this build. Store builds set it while there is no purchase flow
+/// (docs/release.md).
 const kGmPackDefault = bool.fromEnvironment('GMCEBI_GM_PACK');
+
+/// GM-pack entitlement from the build flag and the stored test override.
+///
+/// The override is written only by the internal-build test switch. A store
+/// build ignores it, so a value left behind by an earlier internal build on
+/// the same device can never unlock (or lock) anything there.
+bool resolveGmPack({required bool? override, bool internal = kInternalBuild, bool packDefault = kGmPackDefault}) =>
+    internal ? (override ?? packDefault) : packDefault;
 
 class Entitlements {
   const Entitlements({this.gmPack = false, this.audioSubscription = false});

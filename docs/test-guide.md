@@ -1,6 +1,11 @@
 # GM Cebi — nasıl test edilir (test grubu için)
 
-**Sürüm:** 0.1.0 test sürümü (Android). iOS TestFlight daveti ayrıca gelecek.
+**Sürüm:** 1.0.0 test sürümü. Android'de iki yol var: GitHub'dan APK (aşağıda) ya da Play
+Store test daveti. iOS için TestFlight daveti ayrıca gelecek.
+
+Play Store ve TestFlight sürümlerinde test anahtarı yoktur; GM Paketi açık gelir. Aşağıdaki
+"kilitli hâli görmek için" adımı yalnızca APK sürümünde çalışır. APK ile Play sürümü farklı
+anahtarlarla imzalı olduğundan biri diğerinin üzerine kurulamaz; önce birini kaldır.
 
 ## Kurulum (Android 8 ve üstü)
 

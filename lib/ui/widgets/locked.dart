@@ -43,7 +43,9 @@ class GmPackLocked extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Tek seferlik satın alma olacak. Bu test sürümünde satın alma yok.',
+            kInternalBuild
+                ? 'Tek seferlik satın alma olacak. Bu test sürümünde satın alma yok.'
+                : 'Tek seferlik satın alma olacak. Satın alma bir sonraki sürümde gelecek.',
             style: t.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
