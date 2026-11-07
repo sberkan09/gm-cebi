@@ -2,6 +2,16 @@
 
 Son güncelleme: 2026-10-23 (Faz 1)
 
+## Savaş haritası (GM Paketi, çevrimdışı)
+
+Dal: `claude/tactical-map`. İnisiyatif ekranındaki harita simgesi → kalem/silgi, 4 renk, ızgara,
+geri al; inisiyatif katılımcıları jeton olarak (sıra numarası, sıradaki halkası, CP çubuğu); sıra
+haritadan ilerletilir. Ekran görüntüsü: `docs/screenshots/11-harita.png`.
+
+Kroki → sahne denemesi: `docs/spikes/sketch-to-scene/README.md` (V100'de harita modu 0,5 sn,
+atmosfer modu 1,6 sn; jetonlar modele gönderilmemeli). Servis tarafı neuracraft-cloud'da issue
+olarak açıldı.
+
 ## Faz 1 — uygulama: test sürümü hazır
 
 PR: https://github.com/sberkan09/gm-cebi/pull/3 (`claude/phase-1-app` → `main`). Bağımsız incelemenin 4 engelleyici bulgusu düzeltildi.

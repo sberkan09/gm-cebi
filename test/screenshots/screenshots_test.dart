@@ -6,10 +6,13 @@
 library;
 
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'package:gm_cebi/db/database.dart';
 
 import '../widget/harness.dart';
 
@@ -91,6 +94,35 @@ void main() {
     await settle(tester);
     await openTab(tester, 'Notlar');
     await shot(tester, '09-notlar');
+  });
+
+  appTest('06 battle map', gmPack: true, (tester, db) async {
+    // The bridge ambush from docs/spikes/sketch-to-scene, drawn on the map.
+    List<Offset01> wave(double x, double amp) =>
+        [for (var i = 0; i <= 12; i++) Offset01(x + amp * math.sin(i * 1.3), i / 12)];
+    List<Offset01> ring(double cx, double cy, double r) =>
+        [for (var i = 0; i <= 14; i++) Offset01(cx + r * math.cos(i * math.pi / 7), cy + r * math.sin(i * math.pi / 7))];
+    db.addStroke(wave(0.47, 0.015), color: 1);
+    db.addStroke(wave(0.61, 0.015), color: 1);
+    db.addStroke(const [Offset01(0.39, 0.43), Offset01(0.72, 0.43), Offset01(0.72, 0.55), Offset01(0.39, 0.55), Offset01(0.39, 0.43)]);
+    for (final (x, y) in [(0.16, 0.16), (0.25, 0.27), (0.12, 0.64), (0.21, 0.82), (0.84, 0.18), (0.9, 0.74), (0.78, 0.88)]) {
+      db.addStroke(ring(x, y, 0.035), color: 2);
+    }
+    final ids = <int>[];
+    for (final (n, init, hp, pc) in [('Ayla', 17, 24, true), ('Kurt', 15, 11, false), ('Doruk', 12, 30, true), ('Kurt 2', 9, 11, false)]) {
+      ids.add(await db.addCombatant(name: n, initiative: init, hp: hp, ac: 13, isPlayer: pc));
+    }
+    await settle(tester);
+    db.setTokenPosition(ids[0], const Offset01(0.29, 0.47));
+    db.setTokenPosition(ids[1], const Offset01(0.8, 0.45));
+    db.setTokenPosition(ids[2], const Offset01(0.24, 0.55));
+    db.changeHp(ids[1], 6);
+    db.nextTurn();
+    await settle(tester);
+    await openTab(tester, 'İnisiyatif');
+    await tester.tap(find.byKey(const Key('open-map')));
+    await settle(tester);
+    await shot(tester, '11-harita');
   });
 
   appTest('05 locked', (tester, db) async {

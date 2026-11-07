@@ -1,0 +1,294 @@
+{
+  "gpu": "Tesla V100-PCIE-16GB",
+  "peak_vram_gb": 4.31,
+  "images": [
+    {
+      "scene": "kopru",
+      "variant": "scribble_lcm4",
+      "seed": 7,
+      "seconds": 1.33
+    },
+    {
+      "scene": "kopru",
+      "variant": "scribble_lcm4",
+      "seed": 42,
+      "seconds": 0.53
+    },
+    {
+      "scene": "kopru",
+      "variant": "lineart_lcm4",
+      "seed": 7,
+      "seconds": 0.51
+    },
+    {
+      "scene": "kopru",
+      "variant": "lineart_lcm4",
+      "seed": 42,
+      "seconds": 0.55
+    },
+    {
+      "scene": "kopru",
+      "variant": "scribble_lcm4_jetonlu",
+      "seed": 7,
+      "seconds": 0.55
+    },
+    {
+      "scene": "kopru",
+      "variant": "scribble_lcm4_jetonlu",
+      "seed": 42,
+      "seconds": 0.57
+    },
+    {
+      "scene": "kopru",
+      "variant": "scribble_euler20",
+      "seed": 7,
+      "seconds": 1.72
+    },
+    {
+      "scene": "kopru",
+      "variant": "scribble_euler20",
+      "seed": 42,
+      "seconds": 1.61
+    },
+    {
+      "scene": "han",
+      "variant": "scribble_lcm4",
+      "seed": 7,
+      "seconds": 0.53
+    },
+    {
+      "scene": "han",
+      "variant": "scribble_lcm4",
+      "seed": 42,
+      "seconds": 0.52
+    },
+    {
+      "scene": "han",
+      "variant": "lineart_lcm4",
+      "seed": 7,
+      "seconds": 0.51
+    },
+    {
+      "scene": "han",
+      "variant": "lineart_lcm4",
+      "seed": 42,
+      "seconds": 0.53
+    },
+    {
+      "scene": "han",
+      "variant": "scribble_lcm4_jetonlu",
+      "seed": 7,
+      "seconds": 0.52
+    },
+    {
+      "scene": "han",
+      "variant": "scribble_lcm4_jetonlu",
+      "seed": 42,
+      "seconds": 0.53
+    },
+    {
+      "scene": "han",
+      "variant": "scribble_euler20",
+      "seed": 7,
+      "seconds": 1.62
+    },
+    {
+      "scene": "han",
+      "variant": "scribble_euler20",
+      "seed": 42,
+      "seconds": 1.61
+    },
+    {
+      "scene": "zindan",
+      "variant": "scribble_lcm4",
+      "seed": 7,
+      "seconds": 0.52
+    },
+    {
+      "scene": "zindan",
+      "variant": "scribble_lcm4",
+      "seed": 42,
+      "seconds": 0.52
+    },
+    {
+      "scene": "zindan",
+      "variant": "lineart_lcm4",
+      "seed": 7,
+      "seconds": 0.53
+    },
+    {
+      "scene": "zindan",
+      "variant": "lineart_lcm4",
+      "seed": 42,
+      "seconds": 0.52
+    },
+    {
+      "scene": "zindan",
+      "variant": "scribble_lcm4_jetonlu",
+      "seed": 7,
+      "seconds": 0.52
+    },
+    {
+      "scene": "zindan",
+      "variant": "scribble_lcm4_jetonlu",
+      "seed": 42,
+      "seconds": 0.5
+    },
+    {
+      "scene": "zindan",
+      "variant": "scribble_euler20",
+      "seed": 7,
+      "seconds": 1.62
+    },
+    {
+      "scene": "zindan",
+      "variant": "scribble_euler20",
+      "seed": 42,
+      "seconds": 1.64
+    },
+    {
+      "scene": "orman-yolu",
+      "variant": "scribble_lcm4",
+      "seed": 7,
+      "seconds": 0.52
+    },
+    {
+      "scene": "orman-yolu",
+      "variant": "scribble_lcm4",
+      "seed": 42,
+      "seconds": 0.51
+    },
+    {
+      "scene": "orman-yolu",
+      "variant": "lineart_lcm4",
+      "seed": 7,
+      "seconds": 0.52
+    },
+    {
+      "scene": "orman-yolu",
+      "variant": "lineart_lcm4",
+      "seed": 42,
+      "seconds": 0.51
+    },
+    {
+      "scene": "orman-yolu",
+      "variant": "scribble_lcm4_jetonlu",
+      "seed": 7,
+      "seconds": 0.51
+    },
+    {
+      "scene": "orman-yolu",
+      "variant": "scribble_lcm4_jetonlu",
+      "seed": 42,
+      "seconds": 0.5
+    },
+    {
+      "scene": "orman-yolu",
+      "variant": "scribble_euler20",
+      "seed": 7,
+      "seconds": 1.61
+    },
+    {
+      "scene": "orman-yolu",
+      "variant": "scribble_euler20",
+      "seed": 42,
+      "seconds": 1.62
+    },
+    {
+      "scene": "magara",
+      "variant": "scribble_lcm4",
+      "seed": 7,
+      "seconds": 0.5
+    },
+    {
+      "scene": "magara",
+      "variant": "scribble_lcm4",
+      "seed": 42,
+      "seconds": 0.51
+    },
+    {
+      "scene": "magara",
+      "variant": "lineart_lcm4",
+      "seed": 7,
+      "seconds": 0.52
+    },
+    {
+      "scene": "magara",
+      "variant": "lineart_lcm4",
+      "seed": 42,
+      "seconds": 0.52
+    },
+    {
+      "scene": "magara",
+      "variant": "scribble_lcm4_jetonlu",
+      "seed": 7,
+      "seconds": 0.56
+    },
+    {
+      "scene": "magara",
+      "variant": "scribble_lcm4_jetonlu",
+      "seed": 42,
+      "seconds": 0.52
+    },
+    {
+      "scene": "magara",
+      "variant": "scribble_euler20",
+      "seed": 7,
+      "seconds": 1.62
+    },
+    {
+      "scene": "magara",
+      "variant": "scribble_euler20",
+      "seed": 42,
+      "seconds": 1.63
+    },
+    {
+      "scene": "sur",
+      "variant": "scribble_lcm4",
+      "seed": 7,
+      "seconds": 0.52
+    },
+    {
+      "scene": "sur",
+      "variant": "scribble_lcm4",
+      "seed": 42,
+      "seconds": 0.51
+    },
+    {
+      "scene": "sur",
+      "variant": "lineart_lcm4",
+      "seed": 7,
+      "seconds": 0.51
+    },
+    {
+      "scene": "sur",
+      "variant": "lineart_lcm4",
+      "seed": 42,
+      "seconds": 0.51
+    },
+    {
+      "scene": "sur",
+      "variant": "scribble_lcm4_jetonlu",
+      "seed": 7,
+      "seconds": 0.52
+    },
+    {
+      "scene": "sur",
+      "variant": "scribble_lcm4_jetonlu",
+      "seed": 42,
+      "seconds": 0.51
+    },
+    {
+      "scene": "sur",
+      "variant": "scribble_euler20",
+      "seed": 7,
+      "seconds": 1.62
+    },
+    {
+      "scene": "sur",
+      "variant": "scribble_euler20",
+      "seed": 42,
+      "seconds": 1.62
+    }
+  ]
+}

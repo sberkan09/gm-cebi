@@ -9,6 +9,7 @@ import '../../providers.dart';
 import '../widgets/locked.dart';
 import 'detail_screen.dart';
 import 'dice_screen.dart';
+import 'map_screen.dart';
 
 /// Initiative tracker (GM pack). Big next/previous buttons at the bottom for
 /// one-handed use; tap HP to apply damage or healing, long-press for more.
@@ -26,6 +27,12 @@ class InitiativeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('İnisiyatif'),
         actions: [
+          IconButton(
+            key: const Key('open-map'),
+            tooltip: 'Savaş haritası',
+            icon: const Icon(Icons.map_outlined),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const MapScreen())),
+          ),
           IconButton(
             tooltip: 'Eksik inisiyatifleri at (d20 + bonus)',
             icon: const Icon(Icons.casino_outlined),

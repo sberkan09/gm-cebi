@@ -60,6 +60,13 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-10-23 — Not editörü uygulama arka plana geçerken bekleyen metni hemen kaydeder.
 - 2026-10-23 — Widget testleri drift'in sahte-zaman bölgesinde çalışır (`runAsync` drift bağlantı kilidinde kilitleniyor); testler uygulamanın tamamını bellek içi veritabanı ve gerçek asset'lerle açar.
 
+## Savaş haritası ve kroki → sahne (2026-11-07)
+
+- 2026-11-07 — Savaş haritası çevrimdışı ve GM Paketi'nde: inisiyatif ekranından açılır, karşılaşmaya aittir (yeni karşılaşma boş haritayla başlar). Çizgiler `map_strokes` tablosunda, jeton konumları `combatants.pos_x/pos_y`'de; koordinatlar 0–1 (telefon ve tablette aynı harita). Şema 2, geçiş testli.
+- 2026-11-07 — Tek jest: jetonun üstünden başlayan sürükleme jetonu taşır, diğerleri çizer ya da siler; sürükleme parmağın değdiği yerden başlar (`DragStartBehavior.down`). Silgi hareketin tüm yolunu süpürür (hızlı hareket çizginin üstünden atlamasın).
+- 2026-11-07 — Jetonlar inisiyatif sırasını, sıradakini, CP'yi ve düşenleri gösterir; sıra haritadan da ilerletilir. Palet anlamlıdır (mürekkep, su, bitki, tehlike); ileride prompt'a ipucu olabilir.
+- 2026-11-07 — Kroki → sahne denemesi (`docs/spikes/sketch-to-scene/`): jetonlar modele gönderilmez, uygulama çizer; servise yalnızca arazi gider (`renderTerrainPng`, siyah mürekkep beyaz zemin, 512²). İki mod: düzeni koruyan "harita" (scribble + LCM) ve serbest "atmosfer" (20 adım). Servis işi neuracraft-cloud issue'larında.
+
 ## Onay bekleyenler
 
 - **ONAY BEKLİYOR** — Atıf metni: SRD'nin zorunlu kıldığı İngilizce cümle README'ye, `manifest.json`'a ve Hakkında ekranına birebir kondu (onay gerektirmez, lisans şartı). Ek olarak Türkçe bir "değiştirilmiş eser" notu öneriliyor (CC-BY değişikliklerin belirtilmesini istiyor): "Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, değiştirilmiş bir çalışmadır. …" Test sürümünde Hakkında ekranında **öneri metni olarak** duruyor (`lib/app_info.dart`, `translationNotice`); mağaza sürümünden önce onaylanmalı ya da değiştirilmeli. SRD, Wizards'a bu atıf dışında başka bir atıf yapılmamasını istediği için "Wizards ile bağımız yoktur" gibi ek cümleler kullanılmıyor.

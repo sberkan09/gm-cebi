@@ -112,6 +112,9 @@ final notesProvider = StreamProvider<List<Note>>((ref) => ref.watch(databaseProv
 final encounterProvider =
     StreamProvider<EncounterState>((ref) => ref.watch(databaseProvider).watchEncounterState());
 
+/// Pen strokes of the active encounter's battle map.
+final mapStrokesProvider = StreamProvider<List<MapStroke>>((ref) => ref.watch(databaseProvider).watchStrokes());
+
 // ---------------------------------------------------------------- dice
 
 class DiceHistory extends Notifier<List<RollResult>> {

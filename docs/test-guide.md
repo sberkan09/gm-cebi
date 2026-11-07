@@ -27,8 +27,13 @@ Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
    simgesiyle canavarların inisiyatifini at, **Sonraki** ile sırayı ilerlet,
    can çubuğuna dokunup hasar/iyileştirme gir, kartın üstüne dokunup durum ekle.
    Uygulamayı kapatıp açınca karşılaşma yerinde durmalı.
-5. **Notlar** — Oturum notu al; yazdıkların kendiliğinden kaydedilir.
-6. **Genel** — Tek elle kullanım, yazı büyüklüğü, koyu/açık tema (Ayarlar).
+5. **Harita** — İnisiyatif ekranında sağ üstteki harita simgesine dokun. Parmağınla çiz
+   (renkler: mürekkep, su, bitki, tehlike), dokununca nokta bırakır; "Sil" ile sil, geri al
+   düğmesiyle son çizgiyi kaldır. Alttaki şeritten katılımcıya dokununca jetonu haritaya
+   gelir; jetonu sürükleyerek taşı, dokunarak kaldır. "Sonraki" sırayı haritadan ilerletir.
+   Tablette de dene: harita ekrana göre büyür.
+6. **Notlar** — Oturum notu al; yazdıkların kendiliğinden kaydedilir.
+7. **Genel** — Tek elle kullanım, yazı büyüklüğü, koyu/açık tema (Ayarlar).
 
 ## Bilinen eksikler (bildirmene gerek yok)
 
