@@ -65,7 +65,7 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-11-07 — Savaş haritası çevrimdışı ve GM Paketi'nde: inisiyatif ekranından açılır, karşılaşmaya aittir (yeni karşılaşma boş haritayla başlar). Çizgiler `map_strokes` tablosunda, jeton konumları `combatants.pos_x/pos_y`'de; koordinatlar 0–1 (telefon ve tablette aynı harita). Şema 2, geçiş testli.
 - 2026-11-07 — Tek jest: jetonun üstünden başlayan sürükleme jetonu taşır, diğerleri çizer ya da siler; sürükleme parmağın değdiği yerden başlar (`DragStartBehavior.down`). Silgi hareketin tüm yolunu süpürür (hızlı hareket çizginin üstünden atlamasın).
 - 2026-11-07 — Jetonlar inisiyatif sırasını, sıradakini, CP'yi ve düşenleri gösterir; sıra haritadan da ilerletilir. Palet anlamlıdır (mürekkep, su, bitki, tehlike); ileride prompt'a ipucu olabilir.
-- 2026-11-07 — Kroki → sahne denemesi (`docs/spikes/sketch-to-scene/`): jetonlar modele gönderilmez, uygulama çizer; servise yalnızca arazi gider (`renderTerrainPng`, siyah mürekkep beyaz zemin, 512²). İki mod: düzeni koruyan "harita" (scribble + LCM) ve serbest "atmosfer" (20 adım). Servis tarafındaki iş neuracraft-cloud'a issue olarak açılacak.
+- 2026-11-07 — Kroki → sahne denemesi (`docs/spikes/sketch-to-scene/`): jetonlar modele gönderilmez, uygulama çizer; servise yalnızca arazi gider (`renderTerrainPng`, siyah mürekkep beyaz zemin, 512²). İki mod: düzeni koruyan "harita" (scribble + LCM) ve serbest "atmosfer" (20 adım). Servis tarafındaki iş: neuracraft-cloud #13 (alt issue'lar #14–#21).
 
 ## Onay bekleyenler
 

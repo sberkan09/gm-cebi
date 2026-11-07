@@ -10,8 +10,8 @@ haritadan ilerletilir. Ekran görüntüsü: `docs/screenshots/11-harita.png`.
 
 Kroki → sahne denemesi: `docs/spikes/sketch-to-scene/README.md` (V100'de harita modu 0,5 sn,
 atmosfer modu 1,6 sn; jetonlar modele gönderilmemeli). Servis tarafında gerekenler (token ile kimlik doğrulama, iş şablonu, model kataloğu, prompt
-adımı, gecikme, şikâyet, faturalama, veri saklama) neuracraft-cloud için issue olarak yazıldı;
-henüz açılmadı.
+adımı, gecikme, şikâyet, faturalama, veri saklama) neuracraft-cloud'da açıldı: takip issue'su
+https://github.com/sberkan09/neuracraft-cloud/issues/13 (alt issue'lar #14–#21).
 
 ## Faz 1 — uygulama: test sürümü hazır
 
