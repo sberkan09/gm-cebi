@@ -9,8 +9,9 @@ geri al; inisiyatif katılımcıları jeton olarak (sıra numarası, sıradaki h
 haritadan ilerletilir. Ekran görüntüsü: `docs/screenshots/11-harita.png`.
 
 Kroki → sahne denemesi: `docs/spikes/sketch-to-scene/README.md` (V100'de harita modu 0,5 sn,
-atmosfer modu 1,6 sn; jetonlar modele gönderilmemeli). Servis tarafı neuracraft-cloud'da issue
-olarak açıldı.
+atmosfer modu 1,6 sn; jetonlar modele gönderilmemeli). Servis tarafında gerekenler (token ile kimlik doğrulama, iş şablonu, model kataloğu, prompt
+adımı, gecikme, şikâyet, faturalama, veri saklama) neuracraft-cloud için issue olarak yazıldı;
+henüz açılmadı.
 
 ## Faz 1 — uygulama: test sürümü hazır
 
