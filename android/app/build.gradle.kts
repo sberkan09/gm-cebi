@@ -100,3 +100,15 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+// Online scene feature (docs/online-scene.md): only builds given
+// --dart-define=NC_API_URL=… ask for network access (dartDefines: top of this file).
+val onlineSceneBuild = !dartDefines["NC_API_URL"].isNullOrBlank()
+
+androidComponents {
+    onVariants { variant ->
+        if (onlineSceneBuild) {
+            variant.sources.manifests.addStaticManifestFile("src/online/AndroidManifest.xml")
+        }
+    }
+}

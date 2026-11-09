@@ -101,7 +101,11 @@ double tokenRadius(double side) => math.max(14, side / 30);
 double eraserRadius(double side) => math.max(16, side / 28);
 
 class MapPainter extends CustomPainter {
-  MapPainter({required this.strokes, required this.tokens, required this.grid, required this.theme, this.labelStyle});
+  MapPainter({required this.strokes, required this.tokens, required this.grid, required this.theme, this.labelStyle, this.background});
+
+  /// The online picture made from the sketch: the bottom layer, under the
+  /// grid, the strokes and the tokens.
+  final ui.Image? background;
 
   final List<SketchStroke> strokes;
   final List<MapToken> tokens;
@@ -116,6 +120,15 @@ class MapPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final side = size.shortestSide;
     canvas.drawRect(Offset.zero & size, Paint()..color = theme.paper);
+    final bg = background;
+    if (bg != null) {
+      canvas.drawImageRect(
+        bg,
+        Rect.fromLTWH(0, 0, bg.width.toDouble(), bg.height.toDouble()),
+        Rect.fromLTWH(0, 0, side, side),
+        Paint()..filterQuality = FilterQuality.medium,
+      );
+    }
     if (grid) {
       final g = Paint()
         ..color = theme.grid

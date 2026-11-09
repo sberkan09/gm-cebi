@@ -3,7 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app_info.dart';
 import '../../data/reference.dart';
+import '../../data/neuracraft/errors.dart';
 import '../../features/flags.dart';
+import '../../features/online_scene/messages.dart';
+import '../../features/online_scene/online_settings.dart';
+import '../../features/online_scene/scene_controller.dart';
+import '../../features/online_scene/session_controller.dart';
 import '../../providers.dart';
 
 /// Settings, About and License.
@@ -73,6 +78,10 @@ class SettingsScreen extends ConsumerWidget {
             value: ent.gmPack,
             onChanged: (v) => notifier.setGmPackOverride(v),
           ),
+        if (ref.watch(ncClientProvider) != null) ...[
+          section('Çevrimiçi sahne'),
+          const _OnlineSceneSettings(),
+        ],
         section('Hakkında'),
         ListTile(
           leading: const Icon(Icons.info_outline),
@@ -111,5 +120,78 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ]),
     );
+  }
+}
+
+/// The optional online scene feature (only in builds configured for it).
+class _OnlineSceneSettings extends ConsumerWidget {
+  const _OnlineSceneSettings();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(onlineSettingsProvider).value;
+    if (s == null) return const SizedBox.shrink();
+    final scheme = Theme.of(context).colorScheme;
+    return Column(children: [
+      SwitchListTile(
+        key: const Key('online-enabled'),
+        secondary: const Icon(Icons.auto_awesome),
+        title: const Text('Haritadan resim üret'),
+        subtitle: const Text('Savaş haritasındaki çizimi sunucuda resme dönüştürür. Kapalıyken hiçbir şey gönderilmez.'),
+        value: s.enabled,
+        onChanged: s.authInvalid
+            ? null
+            : (v) {
+                if (!v) ref.read(sceneControllerProvider.notifier).cancel();
+                ref.read(onlineSettingsProvider.notifier).setEnabled(v);
+              },
+      ),
+      if (s.authInvalid)
+        ListTile(
+          leading: Icon(Icons.system_update, color: scheme.error),
+          title: Text(messageForReaction(NcReaction.authInvalid)),
+        ),
+      ListTile(
+        key: const Key('online-privacy'),
+        leading: const Icon(Icons.privacy_tip_outlined),
+        title: const Text('Gizlilik'),
+        subtitle: Text(s.consented ? 'Onay verildi' : 'İlk kullanımda onay istenir'),
+        onTap: () => showDialog<void>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text(consentTitle),
+            content: const SingleChildScrollView(child: Text(consentText)),
+            actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Tamam'))],
+          ),
+        ),
+      ),
+      ListTile(
+        key: const Key('online-delete'),
+        leading: const Icon(Icons.delete_outline),
+        title: const Text('Verilerimi sil'),
+        subtitle: const Text('Çevrimiçi resimler ve kurulum kimliği'),
+        onTap: () async {
+          final ok = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Veriler silinsin mi?'),
+              content: const Text(deleteDataInfo),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
+                FilledButton(key: const Key('online-delete-confirm'), onPressed: () => Navigator.pop(context, true), child: const Text('Sil')),
+              ],
+            ),
+          );
+          if (ok != true) return;
+          await ref.read(sceneControllerProvider.notifier).cancel();
+          await ref.read(onlineSessionProvider.notifier).closeNow();
+          await ref.read(databaseProvider).deleteAllScenes();
+          await ref.read(onlineSettingsProvider.notifier).resetIdentity();
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Uygulamadaki çevrimiçi veriler silindi.')));
+          }
+        },
+      ),
+    ]);
   }
 }

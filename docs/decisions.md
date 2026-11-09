@@ -80,6 +80,15 @@ olarak işaretlenir ve ürün sahibine sorulur.
 
 - 2026-11-09 — İnceleme düzeltmeleri (PR #5): şema geçişi tek transaction içinde ve adım adım kontrollü (yarım kalan geçiş bir sonraki açılışta tamamlanır); geri al silgiyi ve "Çizimi temizle"yi de geri alır (ekran içi işlem yığını); çizgiler kimliğe göre bir kez ayrıştırılır; geniş ekranda harita solda tam yükseklik, kontroller sağda; araç çubuğu dar ekranda alt satıra kayar; renk düğmeleri 44 dp ve erişilebilirlik etiketli. Takipte: iOS kenar kaydırma hareketiyle çakışma, jeton boyutu / ızgaraya oturma, katmanlı çizim (RepaintBoundary).
 
+## Çevrimiçi sahne (NeuraCraft Cloud, 2026-11-09)
+
+- 2026-11-09 — Özellik isteğe bağlı ve derleme zamanında: yalnızca `NC_API_URL` + `NC_APP_TOKEN` verilen derlemelerde görünür; verilmezse arayüzde iz yok ve Android manifestinde İnternet izni yok (`src/online/AndroidManifest.xml` yalnızca bu derlemelerde birleşir). Ayrıntı: `docs/online-scene.md`.
+- 2026-11-09 — Onay verilmeden hiçbir istek gitmez (oturum bile açılmaz). Onay metni alt işleyiciyi (Anthropic, ABD) ve saklama sürelerini söyler.
+- 2026-11-09 — Oturum harita açılınca açılır (GPU ~40 sn ısınır), heartbeat yalnızca ön planda; haritadan çıkınca 5 dk sonra kapanır (hemen geri dönen GM ısınmış GPU'yu kaybetmesin). `410`'da sessizce yenilenir; `401`'de özellik "güncelleme gerekiyor" ile kapanır.
+- 2026-11-09 — Sonuç PNG'si drift'te karşılaşmaya bağlı saklanır (`map_scenes`, şema 3; sunucu 7 gün sonra siler). Bildirilen resim yerelde hemen gizlenir.
+- 2026-11-09 — Resim indirmede 302 elle takip edilir: uygulama token'ı ve kurulum kimliği yalnızca NeuraCraft'a gider, depolama sağlayıcısına gitmez.
+- 2026-11-09 — "Verilerimi sil" yerel verileri siler ve yeni kurulum kimliği üretir; sunucu tarafı silme `partner:manage` gerektirdiği ve GM Cebi'nin sunucusu olmadığı için "en geç 7 gün" açıklaması gösterilir.
+
 ## Onay bekleyenler
 
 - **ONAY BEKLİYOR** — Atıf metni: SRD'nin zorunlu kıldığı İngilizce cümle README'ye, `manifest.json`'a ve Hakkında ekranına birebir kondu (onay gerektirmez, lisans şartı). Ek olarak Türkçe bir "değiştirilmiş eser" notu öneriliyor (CC-BY değişikliklerin belirtilmesini istiyor): "Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, değiştirilmiş bir çalışmadır. …" Test sürümünde Hakkında ekranında **öneri metni olarak** duruyor (`lib/app_info.dart`, `translationNotice`); mağaza sürümünden önce onaylanmalı ya da değiştirilmeli. SRD, Wizards'a bu atıf dışında başka bir atıf yapılmamasını istediği için "Wizards ile bağımız yoktur" gibi ek cümleler kullanılmıyor.

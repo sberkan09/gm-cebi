@@ -4,6 +4,7 @@ import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gm_cebi/app.dart';
 import 'package:gm_cebi/data/search.dart';
@@ -41,6 +42,7 @@ void appTest(
   Random? random,
   Size surface = const Size(430, 932),
   double? pixelRatio,
+  List<Override> overrides = const [],
 }) {
   testWidgets(description, (tester) async {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -54,6 +56,7 @@ void appTest(
           referenceProvider.overrideWith((ref) async => testReference()),
           entitlementsProvider.overrideWithValue(Entitlements(gmPack: gmPack)),
           diceRandomProvider.overrideWithValue(random ?? FixedRandom([10])),
+          ...overrides,
         ],
         child: const GmCebiApp(),
       ));

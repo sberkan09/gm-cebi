@@ -3,8 +3,12 @@
 # network permission (docs/release.md, docs/store/privacy-policy-*.md).
 #
 #   tool/check_store_build.sh build/app/outputs/bundle/release/app-release.aab
+#   tool/check_store_build.sh --online …   a build with the online scene feature (NC_API_URL):
+#                                          the INTERNET permission is then required, not refused
 set -euo pipefail
-aab=${1:?usage: tool/check_store_build.sh <app-release.aab>}
+online=0
+if [ "${1:-}" = "--online" ]; then online=1; shift; fi
+aab=${1:?usage: tool/check_store_build.sh [--online] <app-release.aab>}
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 unzip -q "$aab" 'base/lib/*/libapp.so' 'base/manifest/AndroidManifest.xml' -d "$work"
@@ -20,9 +24,15 @@ for so in "$work"/base/lib/*/libapp.so; do
     fi
   done
 done
-# Offline app: the release manifest must not ask for network access.
-if grep -aq 'android.permission.INTERNET' "$work/base/manifest/AndroidManifest.xml"; then
-  echo "FAIL: release manifest requests android.permission.INTERNET" >&2
+# Offline app: the release manifest must not ask for network access, unless this is a build
+# with the online scene feature (docs/online-scene.md), which needs it.
+has_internet=0
+grep -aq 'android.permission.INTERNET' "$work/base/manifest/AndroidManifest.xml" && has_internet=1
+if [ "$online" = 0 ] && [ "$has_internet" = 1 ]; then
+  echo "FAIL: release manifest requests android.permission.INTERNET (an online build? use --online)" >&2
+  fail=1
+elif [ "$online" = 1 ] && [ "$has_internet" = 0 ]; then
+  echo "FAIL: --online, but the manifest has no INTERNET permission (was NC_API_URL given?)" >&2
   fail=1
 fi
 # Signed with an upload key, never the debug key (a local build without key.properties).

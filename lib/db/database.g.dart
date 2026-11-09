@@ -2240,6 +2240,561 @@ class MapStrokesCompanion extends UpdateCompanion<MapStroke> {
   }
 }
 
+class $MapScenesTable extends MapScenes
+    with TableInfo<$MapScenesTable, MapScene> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MapScenesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _encounterIdMeta = const VerificationMeta(
+    'encounterId',
+  );
+  @override
+  late final GeneratedColumn<int> encounterId = GeneratedColumn<int>(
+    'encounter_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES encounters (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _assetIdMeta = const VerificationMeta(
+    'assetId',
+  );
+  @override
+  late final GeneratedColumn<String> assetId = GeneratedColumn<String>(
+    'asset_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pngMeta = const VerificationMeta('png');
+  @override
+  late final GeneratedColumn<Uint8List> png = GeneratedColumn<Uint8List>(
+    'png',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _modeMeta = const VerificationMeta('mode');
+  @override
+  late final GeneratedColumn<String> mode = GeneratedColumn<String>(
+    'mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _narrativeMeta = const VerificationMeta(
+    'narrative',
+  );
+  @override
+  late final GeneratedColumn<String> narrative = GeneratedColumn<String>(
+    'narrative',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _seedMeta = const VerificationMeta('seed');
+  @override
+  late final GeneratedColumn<int> seed = GeneratedColumn<int>(
+    'seed',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hiddenMeta = const VerificationMeta('hidden');
+  @override
+  late final GeneratedColumn<bool> hidden = GeneratedColumn<bool>(
+    'hidden',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("hidden" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    encounterId,
+    assetId,
+    png,
+    mode,
+    narrative,
+    seed,
+    hidden,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'map_scenes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MapScene> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('encounter_id')) {
+      context.handle(
+        _encounterIdMeta,
+        encounterId.isAcceptableOrUnknown(
+          data['encounter_id']!,
+          _encounterIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_encounterIdMeta);
+    }
+    if (data.containsKey('asset_id')) {
+      context.handle(
+        _assetIdMeta,
+        assetId.isAcceptableOrUnknown(data['asset_id']!, _assetIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_assetIdMeta);
+    }
+    if (data.containsKey('png')) {
+      context.handle(
+        _pngMeta,
+        png.isAcceptableOrUnknown(data['png']!, _pngMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pngMeta);
+    }
+    if (data.containsKey('mode')) {
+      context.handle(
+        _modeMeta,
+        mode.isAcceptableOrUnknown(data['mode']!, _modeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_modeMeta);
+    }
+    if (data.containsKey('narrative')) {
+      context.handle(
+        _narrativeMeta,
+        narrative.isAcceptableOrUnknown(data['narrative']!, _narrativeMeta),
+      );
+    }
+    if (data.containsKey('seed')) {
+      context.handle(
+        _seedMeta,
+        seed.isAcceptableOrUnknown(data['seed']!, _seedMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_seedMeta);
+    }
+    if (data.containsKey('hidden')) {
+      context.handle(
+        _hiddenMeta,
+        hidden.isAcceptableOrUnknown(data['hidden']!, _hiddenMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MapScene map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MapScene(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      encounterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}encounter_id'],
+      )!,
+      assetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset_id'],
+      )!,
+      png: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}png'],
+      )!,
+      mode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mode'],
+      )!,
+      narrative: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}narrative'],
+      )!,
+      seed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}seed'],
+      )!,
+      hidden: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}hidden'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MapScenesTable createAlias(String alias) {
+    return $MapScenesTable(attachedDatabase, alias);
+  }
+}
+
+class MapScene extends DataClass implements Insertable<MapScene> {
+  final int id;
+  final int encounterId;
+
+  /// The service's asset id (for reporting).
+  final String assetId;
+  final Uint8List png;
+
+  /// `map` or `atmosphere`.
+  final String mode;
+  final String narrative;
+  final int seed;
+
+  /// Reported by the user: never shown again.
+  final bool hidden;
+  final DateTime createdAt;
+  const MapScene({
+    required this.id,
+    required this.encounterId,
+    required this.assetId,
+    required this.png,
+    required this.mode,
+    required this.narrative,
+    required this.seed,
+    required this.hidden,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['encounter_id'] = Variable<int>(encounterId);
+    map['asset_id'] = Variable<String>(assetId);
+    map['png'] = Variable<Uint8List>(png);
+    map['mode'] = Variable<String>(mode);
+    map['narrative'] = Variable<String>(narrative);
+    map['seed'] = Variable<int>(seed);
+    map['hidden'] = Variable<bool>(hidden);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  MapScenesCompanion toCompanion(bool nullToAbsent) {
+    return MapScenesCompanion(
+      id: Value(id),
+      encounterId: Value(encounterId),
+      assetId: Value(assetId),
+      png: Value(png),
+      mode: Value(mode),
+      narrative: Value(narrative),
+      seed: Value(seed),
+      hidden: Value(hidden),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory MapScene.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MapScene(
+      id: serializer.fromJson<int>(json['id']),
+      encounterId: serializer.fromJson<int>(json['encounterId']),
+      assetId: serializer.fromJson<String>(json['assetId']),
+      png: serializer.fromJson<Uint8List>(json['png']),
+      mode: serializer.fromJson<String>(json['mode']),
+      narrative: serializer.fromJson<String>(json['narrative']),
+      seed: serializer.fromJson<int>(json['seed']),
+      hidden: serializer.fromJson<bool>(json['hidden']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'encounterId': serializer.toJson<int>(encounterId),
+      'assetId': serializer.toJson<String>(assetId),
+      'png': serializer.toJson<Uint8List>(png),
+      'mode': serializer.toJson<String>(mode),
+      'narrative': serializer.toJson<String>(narrative),
+      'seed': serializer.toJson<int>(seed),
+      'hidden': serializer.toJson<bool>(hidden),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  MapScene copyWith({
+    int? id,
+    int? encounterId,
+    String? assetId,
+    Uint8List? png,
+    String? mode,
+    String? narrative,
+    int? seed,
+    bool? hidden,
+    DateTime? createdAt,
+  }) => MapScene(
+    id: id ?? this.id,
+    encounterId: encounterId ?? this.encounterId,
+    assetId: assetId ?? this.assetId,
+    png: png ?? this.png,
+    mode: mode ?? this.mode,
+    narrative: narrative ?? this.narrative,
+    seed: seed ?? this.seed,
+    hidden: hidden ?? this.hidden,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  MapScene copyWithCompanion(MapScenesCompanion data) {
+    return MapScene(
+      id: data.id.present ? data.id.value : this.id,
+      encounterId: data.encounterId.present
+          ? data.encounterId.value
+          : this.encounterId,
+      assetId: data.assetId.present ? data.assetId.value : this.assetId,
+      png: data.png.present ? data.png.value : this.png,
+      mode: data.mode.present ? data.mode.value : this.mode,
+      narrative: data.narrative.present ? data.narrative.value : this.narrative,
+      seed: data.seed.present ? data.seed.value : this.seed,
+      hidden: data.hidden.present ? data.hidden.value : this.hidden,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MapScene(')
+          ..write('id: $id, ')
+          ..write('encounterId: $encounterId, ')
+          ..write('assetId: $assetId, ')
+          ..write('png: $png, ')
+          ..write('mode: $mode, ')
+          ..write('narrative: $narrative, ')
+          ..write('seed: $seed, ')
+          ..write('hidden: $hidden, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    encounterId,
+    assetId,
+    $driftBlobEquality.hash(png),
+    mode,
+    narrative,
+    seed,
+    hidden,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MapScene &&
+          other.id == this.id &&
+          other.encounterId == this.encounterId &&
+          other.assetId == this.assetId &&
+          $driftBlobEquality.equals(other.png, this.png) &&
+          other.mode == this.mode &&
+          other.narrative == this.narrative &&
+          other.seed == this.seed &&
+          other.hidden == this.hidden &&
+          other.createdAt == this.createdAt);
+}
+
+class MapScenesCompanion extends UpdateCompanion<MapScene> {
+  final Value<int> id;
+  final Value<int> encounterId;
+  final Value<String> assetId;
+  final Value<Uint8List> png;
+  final Value<String> mode;
+  final Value<String> narrative;
+  final Value<int> seed;
+  final Value<bool> hidden;
+  final Value<DateTime> createdAt;
+  const MapScenesCompanion({
+    this.id = const Value.absent(),
+    this.encounterId = const Value.absent(),
+    this.assetId = const Value.absent(),
+    this.png = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.narrative = const Value.absent(),
+    this.seed = const Value.absent(),
+    this.hidden = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  MapScenesCompanion.insert({
+    this.id = const Value.absent(),
+    required int encounterId,
+    required String assetId,
+    required Uint8List png,
+    required String mode,
+    this.narrative = const Value.absent(),
+    required int seed,
+    this.hidden = const Value.absent(),
+    required DateTime createdAt,
+  }) : encounterId = Value(encounterId),
+       assetId = Value(assetId),
+       png = Value(png),
+       mode = Value(mode),
+       seed = Value(seed),
+       createdAt = Value(createdAt);
+  static Insertable<MapScene> custom({
+    Expression<int>? id,
+    Expression<int>? encounterId,
+    Expression<String>? assetId,
+    Expression<Uint8List>? png,
+    Expression<String>? mode,
+    Expression<String>? narrative,
+    Expression<int>? seed,
+    Expression<bool>? hidden,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (encounterId != null) 'encounter_id': encounterId,
+      if (assetId != null) 'asset_id': assetId,
+      if (png != null) 'png': png,
+      if (mode != null) 'mode': mode,
+      if (narrative != null) 'narrative': narrative,
+      if (seed != null) 'seed': seed,
+      if (hidden != null) 'hidden': hidden,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  MapScenesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? encounterId,
+    Value<String>? assetId,
+    Value<Uint8List>? png,
+    Value<String>? mode,
+    Value<String>? narrative,
+    Value<int>? seed,
+    Value<bool>? hidden,
+    Value<DateTime>? createdAt,
+  }) {
+    return MapScenesCompanion(
+      id: id ?? this.id,
+      encounterId: encounterId ?? this.encounterId,
+      assetId: assetId ?? this.assetId,
+      png: png ?? this.png,
+      mode: mode ?? this.mode,
+      narrative: narrative ?? this.narrative,
+      seed: seed ?? this.seed,
+      hidden: hidden ?? this.hidden,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (encounterId.present) {
+      map['encounter_id'] = Variable<int>(encounterId.value);
+    }
+    if (assetId.present) {
+      map['asset_id'] = Variable<String>(assetId.value);
+    }
+    if (png.present) {
+      map['png'] = Variable<Uint8List>(png.value);
+    }
+    if (mode.present) {
+      map['mode'] = Variable<String>(mode.value);
+    }
+    if (narrative.present) {
+      map['narrative'] = Variable<String>(narrative.value);
+    }
+    if (seed.present) {
+      map['seed'] = Variable<int>(seed.value);
+    }
+    if (hidden.present) {
+      map['hidden'] = Variable<bool>(hidden.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MapScenesCompanion(')
+          ..write('id: $id, ')
+          ..write('encounterId: $encounterId, ')
+          ..write('assetId: $assetId, ')
+          ..write('png: $png, ')
+          ..write('mode: $mode, ')
+          ..write('narrative: $narrative, ')
+          ..write('seed: $seed, ')
+          ..write('hidden: $hidden, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2248,6 +2803,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $EncountersTable encounters = $EncountersTable(this);
   late final $CombatantsTable combatants = $CombatantsTable(this);
   late final $MapStrokesTable mapStrokes = $MapStrokesTable(this);
+  late final $MapScenesTable mapScenes = $MapScenesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2258,6 +2814,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     encounters,
     combatants,
     mapStrokes,
+    mapScenes,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2274,6 +2831,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('map_strokes', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'encounters',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('map_scenes', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -2683,6 +3247,24 @@ final class $$EncountersTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$MapScenesTable, List<MapScene>>
+  _mapScenesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.mapScenes,
+    aliasName: 'encounters__id__map_scenes__encounter_id',
+  );
+
+  $$MapScenesTableProcessedTableManager get mapScenesRefs {
+    final manager = $$MapScenesTableTableManager(
+      $_db,
+      $_db.mapScenes,
+    ).filter((f) => f.encounterId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_mapScenesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$EncountersTableFilterComposer
@@ -2770,6 +3352,31 @@ class $$EncountersTableFilterComposer
           }) => $$MapStrokesTableFilterComposer(
             $db: $db,
             $table: $db.mapStrokes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> mapScenesRefs(
+    Expression<bool> Function($$MapScenesTableFilterComposer f) f,
+  ) {
+    final $$MapScenesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.mapScenes,
+      getReferencedColumn: (t) => t.encounterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MapScenesTableFilterComposer(
+            $db: $db,
+            $table: $db.mapScenes,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2904,6 +3511,31 @@ class $$EncountersTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> mapScenesRefs<T extends Object>(
+    Expression<T> Function($$MapScenesTableAnnotationComposer a) f,
+  ) {
+    final $$MapScenesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.mapScenes,
+      getReferencedColumn: (t) => t.encounterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MapScenesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.mapScenes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$EncountersTableTableManager
@@ -2919,7 +3551,11 @@ class $$EncountersTableTableManager
           $$EncountersTableUpdateCompanionBuilder,
           (Encounter, $$EncountersTableReferences),
           Encounter,
-          PrefetchHooks Function({bool combatantsRefs, bool mapStrokesRefs})
+          PrefetchHooks Function({
+            bool combatantsRefs,
+            bool mapStrokesRefs,
+            bool mapScenesRefs,
+          })
         > {
   $$EncountersTableTableManager(_$AppDatabase db, $EncountersTable table)
     : super(
@@ -2977,12 +3613,17 @@ class $$EncountersTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({combatantsRefs = false, mapStrokesRefs = false}) {
+              ({
+                combatantsRefs = false,
+                mapStrokesRefs = false,
+                mapScenesRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (combatantsRefs) db.combatants,
                     if (mapStrokesRefs) db.mapStrokes,
+                    if (mapScenesRefs) db.mapScenes,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -3029,6 +3670,27 @@ class $$EncountersTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (mapScenesRefs)
+                        await $_getPrefetchedData<
+                          Encounter,
+                          $EncountersTable,
+                          MapScene
+                        >(
+                          currentTable: table,
+                          referencedTable: $$EncountersTableReferences
+                              ._mapScenesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$EncountersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).mapScenesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.encounterId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -3049,7 +3711,11 @@ typedef $$EncountersTableProcessedTableManager =
       $$EncountersTableUpdateCompanionBuilder,
       (Encounter, $$EncountersTableReferences),
       Encounter,
-      PrefetchHooks Function({bool combatantsRefs, bool mapStrokesRefs})
+      PrefetchHooks Function({
+        bool combatantsRefs,
+        bool mapStrokesRefs,
+        bool mapScenesRefs,
+      })
     >;
 typedef $$CombatantsTableCreateCompanionBuilder = CombatantsCompanion Function({
   Value<int> id,
@@ -3859,6 +4525,389 @@ typedef $$MapStrokesTableProcessedTableManager =
       MapStroke,
       PrefetchHooks Function({bool encounterId})
     >;
+typedef $$MapScenesTableCreateCompanionBuilder = MapScenesCompanion Function({
+  Value<int> id,
+  required int encounterId,
+  required String assetId,
+  required Uint8List png,
+  required String mode,
+  Value<String> narrative,
+  required int seed,
+  Value<bool> hidden,
+  required DateTime createdAt,
+});
+typedef $$MapScenesTableUpdateCompanionBuilder = MapScenesCompanion Function({
+  Value<int> id,
+  Value<int> encounterId,
+  Value<String> assetId,
+  Value<Uint8List> png,
+  Value<String> mode,
+  Value<String> narrative,
+  Value<int> seed,
+  Value<bool> hidden,
+  Value<DateTime> createdAt,
+});
+
+final class $$MapScenesTableReferences
+    extends BaseReferences<_$AppDatabase, $MapScenesTable, MapScene> {
+  $$MapScenesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $EncountersTable _encounterIdTable(_$AppDatabase db) =>
+      db.encounters.createAlias('map_scenes__encounter_id__encounters__id');
+
+  $$EncountersTableProcessedTableManager get encounterId {
+    final $_column = $_itemColumn<int>('encounter_id')!;
+
+    final manager = $$EncountersTableTableManager(
+      $_db,
+      $_db.encounters,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_encounterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$MapScenesTableFilterComposer
+    extends Composer<_$AppDatabase, $MapScenesTable> {
+  $$MapScenesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get assetId => $composableBuilder(
+    column: $table.assetId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get png => $composableBuilder(
+    column: $table.png,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get narrative => $composableBuilder(
+    column: $table.narrative,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get seed => $composableBuilder(
+    column: $table.seed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get hidden => $composableBuilder(
+    column: $table.hidden,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$EncountersTableFilterComposer get encounterId {
+    final $$EncountersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableFilterComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MapScenesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MapScenesTable> {
+  $$MapScenesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get assetId => $composableBuilder(
+    column: $table.assetId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get png => $composableBuilder(
+    column: $table.png,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get narrative => $composableBuilder(
+    column: $table.narrative,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get seed => $composableBuilder(
+    column: $table.seed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get hidden => $composableBuilder(
+    column: $table.hidden,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$EncountersTableOrderingComposer get encounterId {
+    final $$EncountersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableOrderingComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MapScenesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MapScenesTable> {
+  $$MapScenesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get assetId =>
+      $composableBuilder(column: $table.assetId, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get png =>
+      $composableBuilder(column: $table.png, builder: (column) => column);
+
+  GeneratedColumn<String> get mode =>
+      $composableBuilder(column: $table.mode, builder: (column) => column);
+
+  GeneratedColumn<String> get narrative =>
+      $composableBuilder(column: $table.narrative, builder: (column) => column);
+
+  GeneratedColumn<int> get seed =>
+      $composableBuilder(column: $table.seed, builder: (column) => column);
+
+  GeneratedColumn<bool> get hidden =>
+      $composableBuilder(column: $table.hidden, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$EncountersTableAnnotationComposer get encounterId {
+    final $$EncountersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MapScenesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MapScenesTable,
+          MapScene,
+          $$MapScenesTableFilterComposer,
+          $$MapScenesTableOrderingComposer,
+          $$MapScenesTableAnnotationComposer,
+          $$MapScenesTableCreateCompanionBuilder,
+          $$MapScenesTableUpdateCompanionBuilder,
+          (MapScene, $$MapScenesTableReferences),
+          MapScene,
+          PrefetchHooks Function({bool encounterId})
+        > {
+  $$MapScenesTableTableManager(_$AppDatabase db, $MapScenesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MapScenesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MapScenesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MapScenesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> encounterId = const Value.absent(),
+                Value<String> assetId = const Value.absent(),
+                Value<Uint8List> png = const Value.absent(),
+                Value<String> mode = const Value.absent(),
+                Value<String> narrative = const Value.absent(),
+                Value<int> seed = const Value.absent(),
+                Value<bool> hidden = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => MapScenesCompanion(
+                id: id,
+                encounterId: encounterId,
+                assetId: assetId,
+                png: png,
+                mode: mode,
+                narrative: narrative,
+                seed: seed,
+                hidden: hidden,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int encounterId,
+                required String assetId,
+                required Uint8List png,
+                required String mode,
+                Value<String> narrative = const Value.absent(),
+                required int seed,
+                Value<bool> hidden = const Value.absent(),
+                required DateTime createdAt,
+              }) => MapScenesCompanion.insert(
+                id: id,
+                encounterId: encounterId,
+                assetId: assetId,
+                png: png,
+                mode: mode,
+                narrative: narrative,
+                seed: seed,
+                hidden: hidden,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MapScenesTable, MapScene>(table),
+                  $$MapScenesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({encounterId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (encounterId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.encounterId,
+                        referencedTable: $$MapScenesTableReferences
+                            ._encounterIdTable(db),
+                        referencedColumn: $$MapScenesTableReferences
+                            ._encounterIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$MapScenesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MapScenesTable,
+      MapScene,
+      $$MapScenesTableFilterComposer,
+      $$MapScenesTableOrderingComposer,
+      $$MapScenesTableAnnotationComposer,
+      $$MapScenesTableCreateCompanionBuilder,
+      $$MapScenesTableUpdateCompanionBuilder,
+      (MapScene, $$MapScenesTableReferences),
+      MapScene,
+      PrefetchHooks Function({bool encounterId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3873,4 +4922,6 @@ class $AppDatabaseManager {
       $$CombatantsTableTableManager(_db, _db.combatants);
   $$MapStrokesTableTableManager get mapStrokes =>
       $$MapStrokesTableTableManager(_db, _db.mapStrokes);
+  $$MapScenesTableTableManager get mapScenes =>
+      $$MapScenesTableTableManager(_db, _db.mapScenes);
 }
