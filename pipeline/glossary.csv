@@ -298,9 +298,9 @@ dwarf,Dwarf,Cüce,soy,topluluk,,,"A,B,H,I,K,O",yes,\bDwarf(s|es)?\b,
 elf,Elf,Elf,soy,topluluk,,,"A,B,I,K,O",yes,\bElf(s|es)?\b,
 gnome,Gnome,Gnom,soy,topluluk,Gnome,,"A,K",yes,\bGnome(s|es)?\b,
 goliath,Goliath,Goliat,soy,öneri,Goliath,,B,yes,\bGoliath(s|es)?\b,
-halfling,Halfling,Buçukluk,soy,topluluk,Halfling,,"A,K,O",yes,\bHalfling(s|es)?\b,
+halfling,Halfling,Buçukluk,soy,topluluk,Halfling,,"A,K,O",yes,\bHalfling(s|es)?\b,buçukluk(?:ça)?
 human,Human,İnsan,soy,topluluk,,,"A,I",yes,\bHuman(s|es)?\b,
-orc,Orc,Ork,soy,topluluk,,,"A,B,K",yes,\bOrc(s|es)?\b,
+orc,Orc,Ork,soy,topluluk,,,"A,B,K",yes,\bOrc(s|es)?\b,ork(?:ça)?
 tiefling,Tiefling,Tiefling,soy,topluluk,Şeytanımsı,,"J,O",yes,\bTiefling(s|es)?\b,
 drow,Drow,Drow,soy,öneri,Kara Elf,Elf soyu; SRD 5.2.1'de geçtiği için lisanslı.,,no,,
 high-elf,High Elf,Yüksek Elf,soy,öneri,,,,yes,,

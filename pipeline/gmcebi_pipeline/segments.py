@@ -76,7 +76,7 @@ def walk(obj: Any, path: str = "") -> Iterator[tuple[str, str]]:
         yield path, obj
 
 
-_SPELL_CELL = re.compile(r"^(?P<block>(?:.+\.)?blocks\.\d+)\.rows\.\d+\.0$")
+_CELL = re.compile(r"^(?P<block>(?:.+\.)?blocks\.\d+)\.rows\.\d+\.(?P<col>\d+)$")
 
 
 def segment_ns(rec: dict, path: str, dataset: str = "") -> str:
@@ -91,12 +91,19 @@ def segment_ns(rec: dict, path: str, dataset: str = "") -> str:
         return dataset
     if path.endswith("details.Languages"):
         return "lang"
-    m = _SPELL_CELL.match(path)
+    if path == "rarity":
+        return "rarity"  # "Common" there is the rarity, not the language
+    if path.endswith("fields.Mastery"):
+        return "mastery"  # "Slow" there is the weapon mastery, not the travel pace
+    m = _CELL.match(path)
     if m:
         block = _get_path(rec, m.group("block"))
         header = block.get("header") if isinstance(block, dict) else None
-        if header and header[0] == "Spell":
+        col = int(m.group("col"))
+        if header and col == 0 and header[0] == "Spell":
             return "spells"
+        if header and col < len(header) and header[col] == "Language":
+            return "lang"  # language tables: "Giant" is the language
     return ""
 
 

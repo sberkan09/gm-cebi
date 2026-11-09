@@ -78,4 +78,23 @@ void main() {
     // Same text the data pipeline put in the manifest (taken from the SRD PDF).
     expect(text, testReference().data.manifest['attribution']);
   });
+
+  appTest('magic item: Turkish name, type line, English with one tap', (tester, db) async {
+    await tester.enterText(find.byKey(const Key('search-field')), 'dipsiz torba');
+    await settle(tester);
+    await tester.tap(find.text('Dipsiz Torba').first);
+    await settle(tester);
+    expect(find.text('Harikulade Eşya, Az Bulunur'), findsOneWidget);
+    await tester.tap(find.text('EN'));
+    await settle(tester);
+    expect(find.text('Wondrous Item, Uncommon'), findsOneWidget);
+  });
+
+  appTest('rule section from the Gameplay Toolbox', (tester, db) async {
+    await tester.enterText(find.byKey(const Key('search-field')), 'savaş karşılaşmaları');
+    await settle(tester);
+    await tester.tap(find.text('Savaş Karşılaşmaları').first);
+    await settle(tester);
+    expect(find.text('Oyun Araç Kutusu'), findsOneWidget);
+  });
 }

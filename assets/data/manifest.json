@@ -8,7 +8,7 @@
    "count": 140,
    "tr_complete": 140,
    "tr_partial": 0,
-   "bytes": 200694
+   "bytes": 200706
   },
   "conditions": {
    "count": 15,
@@ -20,7 +20,7 @@
    "count": 339,
    "tr_complete": 339,
    "tr_partial": 0,
-   "bytes": 864437
+   "bytes": 864441
   },
   "monsters": {
    "count": 330,
@@ -44,7 +44,7 @@
    "count": 9,
    "tr_complete": 9,
    "tr_partial": 0,
-   "bytes": 30407
+   "bytes": 30411
   },
   "backgrounds": {
    "count": 4,
@@ -80,14 +80,14 @@
    "count": 258,
    "tr_complete": 258,
    "tr_partial": 0,
-   "bytes": 573862
+   "bytes": 573927
   },
   "rules": {
    "count": 31,
    "tr_complete": 31,
    "tr_partial": 0,
-   "bytes": 395854
+   "bytes": 395847
   }
  },
- "total_bytes": 4080010
+ "total_bytes": 4080102
 }

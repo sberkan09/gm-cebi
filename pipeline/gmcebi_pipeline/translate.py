@@ -89,7 +89,7 @@ def cmd_queue(args) -> None:
                 if e and e.tr and e.status != "rejected":
                     continue
                 item = pending.setdefault(seg.key, {"key": seg.key, "en": seg.en, "refs": [], "terms": [],
-                                                    "ds": seg.ns if seg.ns in ("spells", "lang") else (ds if seg.ns else "")})
+                                                    "ds": seg.ns if seg.ns in ("spells", "lang", "rarity", "mastery") else (ds if seg.ns else "")})
                 if len(item["refs"]) < 3:
                     item["refs"].append(f"{ds}/{seg.ref}")
     for item in pending.values():
@@ -99,7 +99,8 @@ def cmd_queue(args) -> None:
         item["titles"] = {t: titles[t] for t in refs}
     # Segments that are exactly a glossary term are filled from the glossary.
     prefer = {"spells": "büyü adı", "conditions": "durum", "monsters": "canavar adı",
-              "magic_items": "sihirli eşya adı", "rules": "bölüm"}
+              "magic_items": "sihirli eşya adı", "rules": "bölüm", "rarity": "nadirlik",
+              "mastery": "silah ustalığı"}
     # Record-name categories only fill segments of their own dataset ("Shield" spell ≠ armor).
     own = {"büyü adı": "spells", "canavar adı": "monsters", "sihirli eşya adı": "magic_items"}
     auto = []
