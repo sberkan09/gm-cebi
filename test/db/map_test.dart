@@ -79,6 +79,7 @@ void main() {
       // Build a schema-1 file: today's schema minus what schema 2 added.
       final v2 = AppDatabase(NativeDatabase(file));
       await v2.addCombatant(name: 'Goblin', initiative: 12, hp: 7);
+      await v2.customStatement('DROP TABLE map_scenes');
       await v2.customStatement('DROP TABLE map_strokes');
       await v2.customStatement('ALTER TABLE combatants DROP COLUMN pos_x');
       await v2.customStatement('ALTER TABLE combatants DROP COLUMN pos_y');
@@ -93,10 +94,46 @@ void main() {
       await upgraded.addStroke(const [Offset01(0, 0), Offset01(1, 1)]);
       expect((await upgraded.watchStrokes().first).length, 1);
       final version = await upgraded.customSelect('PRAGMA user_version').getSingle();
-      expect(version.data.values.first, 2);
+      expect(version.data.values.first, 3);
+      await upgraded.addScene(assetId: 'a', png: Uint8List.fromList([1]), mode: 'map', narrative: '', seed: 1);
+      expect(await upgraded.watchActiveScene().first, isNotNull);
       await upgraded.close();
     } finally {
       await dir.delete(recursive: true);
     }
+  });
+
+  test('schema 2 databases get the scenes table', () async {
+    final dir = await Directory.systemTemp.createTemp('gmcebi-migration');
+    final file = File('${dir.path}/v2.sqlite');
+    try {
+      final db3 = AppDatabase(NativeDatabase(file));
+      await db3.addStroke(const [Offset01(0, 0), Offset01(1, 1)]);
+      await db3.customStatement('DROP TABLE map_scenes');
+      await db3.customStatement('PRAGMA user_version = 2');
+      await db3.close();
+      final upgraded = AppDatabase(NativeDatabase(file));
+      expect((await upgraded.watchStrokes().first).length, 1, reason: 'the map survives');
+      await upgraded.addScene(assetId: 'a', png: Uint8List.fromList([1, 2]), mode: 'atmosphere', narrative: 'köprü', seed: 7);
+      expect((await upgraded.watchActiveScene().first)!.seed, 7);
+      await upgraded.close();
+    } finally {
+      await dir.delete(recursive: true);
+    }
+  });
+
+  test('scenes: newest visible one per active encounter; hide, delete all, cascade', () async {
+    expect(await db.watchActiveScene().first, isNull);
+    final a = await db.addScene(assetId: 'a1', png: Uint8List.fromList([1]), mode: 'map', narrative: 'köprü', seed: 1);
+    final b = await db.addScene(assetId: 'a2', png: Uint8List.fromList([2]), mode: 'map', narrative: 'köprü', seed: 2);
+    expect((await db.watchActiveScene().first)!.id, b);
+    await db.hideScene(b);
+    expect((await db.watchActiveScene().first)!.id, a, reason: 'a reported picture is never shown again');
+    await db.newEncounter();
+    expect(await db.watchActiveScene().first, isNull, reason: 'a new encounter starts without a picture');
+    expect(await db.select(db.mapScenes).get(), isEmpty, reason: 'deleted with their encounter');
+    await db.addScene(assetId: 'a3', png: Uint8List.fromList([3]), mode: 'atmosphere', narrative: '', seed: 3);
+    await db.deleteAllScenes();
+    expect(await db.select(db.mapScenes).get(), isEmpty);
   });
 }

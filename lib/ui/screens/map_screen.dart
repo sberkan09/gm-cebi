@@ -5,14 +5,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../db/database.dart';
 import '../../features/flags.dart';
 import '../../features/map_sketch.dart';
+import '../../features/online_scene/online_settings.dart';
+import '../../features/online_scene/scene_controller.dart';
 import '../../providers.dart';
 import '../widgets/locked.dart';
+import '../widgets/online_scene.dart';
 
 /// Battle map of the active encounter (GM pack): a quick sketch with the
 /// initiative tracker's combatants as tokens. Works offline.
 ///
 /// One gesture does everything: a drag that starts on a token moves it,
 /// any other drag draws (or erases, in eraser mode).
+///
+/// Optional online feature (docs/online-scene.md): the terrain sketch can be
+/// turned into a picture by NeuraCraft Cloud; the picture becomes the bottom
+/// layer and the tokens stay on top. Without it, the map works the same.
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
 
@@ -49,11 +56,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final combatants = state?.combatants ?? const <Combatant>[];
     final placed = [for (final c in combatants) if (c.mapPosition != null) c];
     final unplaced = [for (final c in combatants) if (c.mapPosition == null) c];
+    final online = ref.watch(onlineFeatureVisibleProvider);
+    final sceneBusy = ref.watch(sceneControllerProvider) is SceneWorking;
+    final background = online && ref.watch(sceneVisibleProvider) ? ref.watch(sceneImageProvider).value : null;
 
-    return Scaffold(
+    return OnlineSessionScope(
+        child: Scaffold(
       appBar: AppBar(
         title: const Text('Harita'),
         actions: [
+          if (online)
+            IconButton(
+              key: const Key('scene-open'),
+              tooltip: 'Sahneyi canlandır',
+              icon: const Icon(Icons.auto_awesome),
+              onPressed: sceneBusy ? null : () => showSceneSheet(context, ref),
+            ),
           IconButton(
             key: const Key('map-undo'),
             tooltip: 'Geri al',
@@ -92,6 +110,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             _tool = _Tool.pen;
           }),
         ),
+        const SceneStatusBar(),
         Expanded(
           child: Align(
             alignment: Alignment.topCenter,
@@ -123,7 +142,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         if (hit != null) {
                           _dragId = hit.id;
                           _dragPos = hit.mapPosition;
-                        } else if (_tool == _Tool.pen) {
+                          return;
+                        }
+                        // Editing the sketch: show it rather than the picture.
+                        if (background != null) ref.read(sceneVisibleProvider.notifier).set(false);
+                        if (_tool == _Tool.pen) {
                           _drawing = [toMap(d.localPosition)];
                         } else {
                           _lastErase = toMap(d.localPosition);
@@ -158,8 +181,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     },
                     child: CustomPaint(
                       painter: MapPainter(
+                        background: background,
+                        // Over the picture the sketch is hidden: the picture was made from it.
                         strokes: [
-                          for (final s in strokes) SketchStroke(s.offsets, s.color),
+                          if (background == null)
+                            for (final s in strokes) SketchStroke(s.offsets, s.color),
                           if (_drawing != null) SketchStroke(_drawing!, _color),
                         ],
                         tokens: [
@@ -215,7 +241,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           ),
         _TurnBar(state: state),
       ]),
-    );
+    ));
   }
 
   void _finishGesture() {

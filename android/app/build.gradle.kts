@@ -1,3 +1,5 @@
+import java.util.Base64
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -47,4 +49,24 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+// Online scene feature (docs/online-scene.md): only builds given
+// --dart-define=NC_API_URL=… ask for network access. Flutter passes the
+// dart-defines to Gradle base64-encoded in the "dart-defines" property.
+val dartDefines: Map<String, String> =
+    (project.findProperty("dart-defines") as String?)
+        ?.split(",")
+        ?.filter { it.isNotBlank() }
+        ?.map { String(Base64.getDecoder().decode(it), Charsets.UTF_8) }
+        ?.associate { it.substringBefore("=") to it.substringAfter("=", "") }
+        ?: emptyMap()
+val onlineSceneBuild = !dartDefines["NC_API_URL"].isNullOrBlank()
+
+androidComponents {
+    onVariants { variant ->
+        if (onlineSceneBuild) {
+            variant.sources.manifests.addStaticManifestFile("src/online/AndroidManifest.xml")
+        }
+    }
 }

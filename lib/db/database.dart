@@ -80,6 +80,26 @@ class MapStrokes extends Table {
   DateTimeColumn get createdAt => dateTime()();
 }
 
+/// A picture made online from an encounter's map sketch (schema 3). Kept
+/// here because the service deletes results after 7 days.
+class MapScenes extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get encounterId => integer().references(Encounters, #id, onDelete: KeyAction.cascade)();
+
+  /// The service's asset id (for reporting).
+  TextColumn get assetId => text()();
+  BlobColumn get png => blob()();
+
+  /// `map` or `atmosphere`.
+  TextColumn get mode => text()();
+  TextColumn get narrative => text().withDefault(const Constant(''))();
+  IntColumn get seed => integer()();
+
+  /// Reported by the user: never shown again.
+  BoolColumn get hidden => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime()();
+}
+
 extension CombatantX on Combatant {
   List<String> get conditionIds => conditions.isEmpty ? const [] : conditions.split(',');
   bool get isDown => hpCurrent != null && hpCurrent! <= 0;
@@ -147,12 +167,12 @@ class EncounterState {
       combatants.isEmpty ? null : combatants[encounter.turnIndex.clamp(0, combatants.length - 1)];
 }
 
-@DriftDatabase(tables: [Settings, Notes, Encounters, Combatants, MapStrokes])
+@DriftDatabase(tables: [Settings, Notes, Encounters, Combatants, MapStrokes, MapScenes])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: 'gm_cebi'));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -162,6 +182,7 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(combatants, combatants.posY);
             await m.createTable(mapStrokes);
           }
+          if (from < 3) await m.createTable(mapScenes);
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
@@ -416,6 +437,40 @@ class AppDatabase extends _$AppDatabase {
         posX: Value(p?.x.clamp(0.0, 1.0)),
         posY: Value(p?.y.clamp(0.0, 1.0)),
       ));
+
+  // ------------------------------------------------------------ online scenes
+
+  /// The newest picture of the active encounter that is not hidden.
+  Stream<MapScene?> watchActiveScene() {
+    final q = select(mapScenes).join([innerJoin(encounters, encounters.id.equalsExp(mapScenes.encounterId))])
+      ..where(encounters.active.equals(true) & mapScenes.hidden.equals(false))
+      ..orderBy([OrderingTerm.desc(mapScenes.id)])
+      ..limit(1);
+    return q.watch().map((rows) => rows.isEmpty ? null : rows.first.readTable(mapScenes));
+  }
+
+  Future<int> addScene({required String assetId, required Uint8List png, required String mode, required String narrative, required int seed}) async {
+    final e = await activeEncounter();
+    return into(mapScenes).insert(MapScenesCompanion.insert(
+      encounterId: e.id,
+      assetId: assetId,
+      png: png,
+      mode: mode,
+      narrative: Value(narrative),
+      seed: seed,
+      createdAt: DateTime.now(),
+    ));
+  }
+
+  /// After a report: the picture is never shown again (kept hidden, not
+  /// deleted, so a re-download cannot bring it back by accident).
+  Future<void> hideScene(int id) =>
+      (update(mapScenes)..where((s) => s.id.equals(id))).write(const MapScenesCompanion(hidden: Value(true)));
+
+  Future<void> deleteScene(int id) => (delete(mapScenes)..where((s) => s.id.equals(id))).go();
+
+  /// "Delete my data": every online picture of every encounter.
+  Future<void> deleteAllScenes() => delete(mapScenes).go();
 
   Future<List<Combatant>> _order(Encounter e) async =>
       initiativeOrder(await (select(combatants)..where((c) => c.encounterId.equals(e.id))).get());

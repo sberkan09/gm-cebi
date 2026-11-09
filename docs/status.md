@@ -2,6 +2,16 @@
 
 Son güncelleme: 2026-10-23 (Faz 1)
 
+## Çevrimiçi sahne (isteğe bağlı, NeuraCraft Cloud)
+
+Dal: `claude/online-scene` (savaş haritası dalının üstünde). Haritadaki arazi çizimi sunucuda resme
+dönüşür, resim alt katman olur, jetonlar üstte kalır. Yalnızca `NC_API_URL` + `NC_APP_TOKEN` ile
+derlenen sürümlerde görünür; mağaza/test derlemeleri bugünkü gibi tamamen çevrimdışı.
+İstemci, oturum yöneticisi, üretim akışı, Ayarlar (aç/kapa, gizlilik, "Verilerimi sil"), Türkçe hata
+mesajları ve testler hazır; yerel neuracraft-cloud API'sine karşı `tool/nc_smoke.dart` ile uçtan uca
+denendi. Mağazaya açık derleme gitmeden önce gizlilik beyanları güncellenmeli
+(`docs/online-scene.md`, "Gizlilik ve mağaza beyanları").
+
 ## Savaş haritası (GM Paketi, çevrimdışı)
 
 Dal: `claude/tactical-map`. İnisiyatif ekranındaki harita simgesi → kalem/silgi, 4 renk, ızgara,
