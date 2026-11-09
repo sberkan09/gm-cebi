@@ -89,11 +89,37 @@ void main() {
       expect(parseXp('—'), isNull);
     });
 
+    test('a malformed first number is rejected, not guessed', () {
+      expect(parseXp('1,1000'), isNull);
+      expect(parseXp('1,10'), isNull);
+      expect(parseXp('1,100,'), 1100);
+      expect(parseXp('XP 1,100 (lair 1,400)'), 1100);
+    });
+
     test('monsterXp falls back to the challenge rating', () {
       expect(monsterXp({'cr': '1', 'xp': '200'}), 200);
       expect(monsterXp({'cr': '3', 'xp': null}), 700);
       expect(monsterXp({'cr': '1/4'}), 50);
       expect(monsterXp({'cr': '?'}), isNull);
+    });
+
+    test('monsterXp never throws on odd value types', () {
+      expect(monsterXp({'cr': 2, 'xp': 450}), 450);
+      expect(monsterXp({'cr': '1', 'xp': true}), 200);
+      expect(
+        monsterXp({
+          'cr': '1/2',
+          'xp': const ['x'],
+        }),
+        100,
+      );
+      expect(
+        monsterXp({
+          'cr': null,
+          'xp': const {'a': 1},
+        }),
+        1,
+      );
     });
 
     test('every monster in the assets has an XP; Bugbear Warrior is 200', () {

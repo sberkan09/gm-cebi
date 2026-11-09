@@ -102,14 +102,20 @@ int budgetPerCharacter(int level, Difficulty d) {
 int budgetFor(Iterable<int> levels, Difficulty d) =>
     levels.fold(0, (sum, l) => sum + budgetPerCharacter(l, d));
 
-final _xpNumber = RegExp(r'\d{1,3}(?:,\d{3})+|\d+');
+/// The first number token: digits and commas up to the first other character.
+final _xpToken = RegExp(r'\d[\d,]*');
+
+/// A well-formed XP number: plain digits or digits in ",ddd" groups.
+final _xpNumber = RegExp(r'^(?:\d+|\d{1,3}(?:,\d{3})+)$');
 
 /// The first number of a monster's XP text: "1,100" → 1100,
 /// "5,900, or 7,200 in lair" → 5900 (the normal value, not the lair one).
+/// A malformed first number ("1,1000") gives null, not a guess.
 int? parseXp(String? s) {
   if (s == null) return null;
-  final m = _xpNumber.firstMatch(s);
-  return m == null ? null : int.parse(m.group(0)!.replaceAll(',', ''));
+  final token = _xpToken.stringMatch(s)?.replaceFirst(RegExp(r',+$'), '');
+  if (token == null || !_xpNumber.hasMatch(token)) return null;
+  return int.tryParse(token.replaceAll(',', ''));
 }
 
 // dart format off
@@ -126,8 +132,9 @@ const xpByCr = <String, int>{
 // dart format on
 
 /// XP of a monster record's English content (language independent).
+/// Never throws on odd data: a number or any other value is read as text.
 int? monsterXp(Map<String, dynamic> en) =>
-    parseXp(en['xp'] as String?) ?? xpByCr[en['cr']?.toString().trim()];
+    parseXp(en['xp']?.toString()) ?? xpByCr[en['cr']?.toString().trim()];
 
 class DifficultyRating {
   const DifficultyRating({

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../db/database.dart';
 import '../../features/encounter_difficulty.dart';
 import '../../providers.dart';
 
@@ -28,10 +29,13 @@ class DifficultyChip extends StatelessWidget {
     final r = summary.rating;
     final scheme = Theme.of(context).colorScheme;
     final text = difficultyChipText(r);
+    // The merged label replaces the chip's own semantics, so the tap action
+    // is declared here too (Switch Access, keyboard, Voice Access).
     return Semantics(
       button: true,
       label: 'Karşılaşma zorluğu: $text. Ayrıntılar için dokun.',
       excludeSemantics: true,
+      onTap: () => showDifficultySheet(context),
       child: ActionChip(
         key: const Key('difficulty-chip'),
         materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -51,19 +55,39 @@ Future<void> showDifficultySheet(BuildContext context) =>
       builder: (context) => const _DifficultySheet(),
     );
 
-class _DifficultySheet extends ConsumerWidget {
+class _DifficultySheet extends ConsumerStatefulWidget {
   const _DifficultySheet();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_DifficultySheet> createState() => _DifficultySheetState();
+}
+
+class _DifficultySheetState extends ConsumerState<_DifficultySheet> {
+  /// Levels written but maybe not yet back from the database stream, so quick
+  /// taps step from the last written value instead of repeating it.
+  final _pending = <int, int>{};
+
+  int _levelOf(Combatant p) =>
+      _pending[p.id] ??
+      clampLevel(p.level ?? ref.read(currentSettingsProvider).partyLevel);
+
+  void _stepLevel(Combatant p, int delta) {
+    final v = clampLevel(_levelOf(p) + delta);
+    setState(() => _pending[p.id] = v);
+    ref.read(databaseProvider).setLevel(p.id, v);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final summary = ref.watch(encounterDifficultyProvider);
     final settings = ref.watch(currentSettingsProvider);
     final t = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
     if (summary == null) return const SizedBox(height: 120);
     final r = summary.rating;
-    final db = ref.read(databaseProvider);
     final notifier = ref.read(settingsProvider.notifier);
+    // Settings change synchronously in the notifier: read them at tap time.
+    AppSettings now() => ref.read(currentSettingsProvider);
     final levels = summary.levels;
     final minL = levels.reduce((a, b) => a < b ? a : b);
     final maxL = levels.reduce((a, b) => a > b ? a : b);
@@ -124,9 +148,9 @@ class _DifficultySheet extends ConsumerWidget {
                 ),
               const SizedBox(height: 4),
               Text(
-                'Bütçe: karakter başına TP × karakter sayısı (SRD 5.2.1, '
-                '"Combat Encounters"). Düşük altı ve Yüksek üstü tablonun '
-                'dışındadır.',
+                'Bütçe: her karakterin kendi seviyesine göre TP bütçesi '
+                'toplanır (SRD 5.2.1, "Combat Encounters"). Düşük altı ve '
+                'Yüksek üstü tablonun dışındadır.',
                 style: t.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
               ),
             ],
@@ -143,18 +167,22 @@ class _DifficultySheet extends ConsumerWidget {
                 value: settings.partySize,
                 min: minPartySize,
                 max: maxPartySize,
-                onChanged: notifier.setPartySize,
+                onStep: (d) => notifier.setPartySize(now().partySize + d),
               ),
             ] else
               for (final p in summary.players)
                 _Stepper(
                   id: 'level-${p.id}',
                   label: p.name,
-                  sublabel: p.level == null ? 'grup seviyesi' : null,
-                  value: clampLevel(p.level ?? settings.partyLevel),
+                  sublabel: p.level == null && !_pending.containsKey(p.id)
+                      ? 'grup seviyesi'
+                      : null,
+                  value:
+                      _pending[p.id] ??
+                      clampLevel(p.level ?? settings.partyLevel),
                   min: minLevel,
                   max: maxLevel,
-                  onChanged: (v) => db.setLevel(p.id, v),
+                  onStep: (d) => _stepLevel(p, d),
                 ),
             _Stepper(
               id: 'party-level',
@@ -165,7 +193,7 @@ class _DifficultySheet extends ConsumerWidget {
               value: settings.partyLevel,
               min: minLevel,
               max: maxLevel,
-              onChanged: notifier.setPartyLevel,
+              onStep: (d) => notifier.setPartyLevel(now().partyLevel + d),
             ),
             header('Canavarlar · ${groupDigits(summary.xp)} TP'),
             for (final (c, xp) in summary.monsters)
@@ -270,7 +298,7 @@ class _Stepper extends StatelessWidget {
     required this.value,
     required this.min,
     required this.max,
-    required this.onChanged,
+    required this.onStep,
     this.sublabel,
   });
 
@@ -280,7 +308,9 @@ class _Stepper extends StatelessWidget {
   final int value;
   final int min;
   final int max;
-  final ValueChanged<int> onChanged;
+
+  /// Called with -1 or +1; the owner steps from its current value.
+  final ValueChanged<int> onStep;
 
   @override
   Widget build(BuildContext context) {
@@ -306,7 +336,7 @@ class _Stepper extends StatelessWidget {
           key: Key('$id-dec'),
           tooltip: '$label: azalt',
           constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-          onPressed: value > min ? () => onChanged(value - 1) : null,
+          onPressed: value > min ? () => onStep(-1) : null,
           icon: const Icon(Icons.remove),
         ),
         Semantics(
@@ -326,7 +356,7 @@ class _Stepper extends StatelessWidget {
           key: Key('$id-inc'),
           tooltip: '$label: artır',
           constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-          onPressed: value < max ? () => onChanged(value + 1) : null,
+          onPressed: value < max ? () => onStep(1) : null,
           icon: const Icon(Icons.add),
         ),
       ],

@@ -360,13 +360,17 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
             ]),
             if (isPlayer) ...[
               const SizedBox(height: 8),
-              _levelField(level, key: const Key('combatant-level')),
+              _levelField(level, key: const Key('combatant-level'), onChanged: (_) => setState(() {})),
             ],
           ]),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
-          FilledButton(key: const Key('combatant-save'), onPressed: () => Navigator.pop(context, true), child: const Text('Ekle')),
+          FilledButton(
+            key: const Key('combatant-save'),
+            onPressed: isPlayer && _levelError(level.text) != null ? null : () => Navigator.pop(context, true),
+            child: const Text('Ekle'),
+          ),
         ],
       ),
     ),
@@ -385,18 +389,24 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
   }
 }
 
-/// A level 1–20, or null (empty or out of range: the party level is used).
+/// A level 1–20, or null (empty or out of range).
 int? _level(String s) {
   final v = int.tryParse(s.trim());
   return v == null || v < minLevel || v > maxLevel ? null : v;
 }
 
-Widget _levelField(TextEditingController c, {Key? key}) => TextField(
+/// Inline error for a typed level; empty is not an error (the party level is used).
+String? _levelError(String s) => s.trim().isEmpty || _level(s) != null ? null : '$minLevel–$maxLevel arası bir seviye gir';
+
+Widget _levelField(TextEditingController c,
+        {Key? key, required ValueChanged<String> onChanged, String helper = 'Boşsa grup seviyesi kullanılır'}) =>
+    TextField(
       key: key,
       controller: c,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(2)],
-      decoration: const InputDecoration(labelText: 'Seviye (isteğe bağlı)', helperText: 'Boşsa grup seviyesi kullanılır'),
+      onChanged: onChanged,
+      decoration: InputDecoration(labelText: 'Seviye (isteğe bağlı)', helperText: helper, errorText: _levelError(c.text)),
     );
 
 Widget _numField(TextEditingController c, String label, {Key? key}) => TextField(
@@ -535,18 +545,29 @@ Future<void> _editInitiative(BuildContext context, WidgetRef ref, Combatant c) a
 
 Future<void> _editLevel(BuildContext context, WidgetRef ref, Combatant c) async {
   final ctrl = TextEditingController(text: c.level?.toString() ?? '');
+  // '' from "Temizle" clears the level; "Kaydet" is enabled only for 1–20.
   final v = await showDialog<String>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text('${c.name} · seviye'),
-      content: _levelField(ctrl, key: const Key('level-field')),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context, ''), child: const Text('Temizle')),
-        FilledButton(key: const Key('level-save'), onPressed: () => Navigator.pop(context, ctrl.text), child: const Text('Kaydet')),
-      ],
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        title: Text('${c.name} · seviye'),
+        content: _levelField(ctrl,
+            key: const Key('level-field'),
+            helper: '"Temizle" ile grup seviyesi kullanılır',
+            onChanged: (_) => setState(() {})),
+        actions: [
+          TextButton(key: const Key('level-clear'), onPressed: () => Navigator.pop(context, ''), child: const Text('Temizle')),
+          FilledButton(
+            key: const Key('level-save'),
+            onPressed: _level(ctrl.text) == null ? null : () => Navigator.pop(context, ctrl.text),
+            child: const Text('Kaydet'),
+          ),
+        ],
+      ),
     ),
   );
   if (v == null) return;
+  if (v.isNotEmpty && _level(v) == null) return;
   await ref.read(databaseProvider).setLevel(c.id, _level(v));
 }
 

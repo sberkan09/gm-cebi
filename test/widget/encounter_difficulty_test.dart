@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gm_cebi/app.dart';
@@ -344,6 +345,118 @@ void main() {
       ),
       findsOneWidget,
     );
+    final node = tester.getSemantics(chip);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    // The accessibility tap (Switch Access, Voice Access) opens the sheet.
+    tester.semantics.tap(
+      find.semantics.byLabel(RegExp(r'^Karşılaşma zorluğu: ')),
+    );
+    await settle(tester);
+    expect(find.byKey(const Key('difficulty-sheet')), findsOneWidget);
     handle.dispose();
+  });
+
+  appTest(
+    'levels outside 1–20 are refused; only "Temizle" clears',
+    gmPack: true,
+    (tester, db) async {
+      await openTab(tester, 'İnisiyatif');
+      // Add dialog: an out-of-range level shows an error and blocks "Ekle".
+      await tester.tap(find.byKey(const Key('add-combatant')));
+      await settle(tester);
+      await tester.tap(find.text('Oyuncu ya da serbest ekle'));
+      await settle(tester);
+      await tester.enterText(find.byKey(const Key('combatant-name')), 'Ayla');
+      await tester.enterText(find.byKey(const Key('combatant-level')), '25');
+      await settle(tester);
+      expect(find.text('1–20 arası bir seviye gir'), findsOneWidget);
+      FilledButton button(String key) =>
+          tester.widget<FilledButton>(find.byKey(Key(key)));
+      expect(button('combatant-save').onPressed, isNull);
+      await tester.enterText(find.byKey(const Key('combatant-level')), '0');
+      await settle(tester);
+      expect(button('combatant-save').onPressed, isNull);
+      await tester.enterText(find.byKey(const Key('combatant-level')), '');
+      await settle(tester);
+      expect(find.text('1–20 arası bir seviye gir'), findsNothing);
+      expect(
+        button('combatant-save').onPressed,
+        isNotNull,
+        reason: 'empty is fine',
+      );
+      await tester.enterText(find.byKey(const Key('combatant-level')), '5');
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('combatant-save')));
+      await settle(tester);
+      final ayla = (await pumped(
+        tester,
+        db.select(db.combatants).get(),
+      )).single;
+      expect(ayla.level, 5);
+
+      // Edit dialog: 0, 21 and empty cannot be saved; the level stays.
+      await tester.tap(find.text('Ayla'));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('edit-level')));
+      await settle(tester);
+      for (final bad in ['0', '21', '99', '']) {
+        await tester.enterText(find.byKey(const Key('level-field')), bad);
+        await settle(tester);
+        expect(button('level-save').onPressed, isNull, reason: bad);
+        expect(
+          find.text('1–20 arası bir seviye gir'),
+          bad.isEmpty ? findsNothing : findsOneWidget,
+        );
+      }
+      await tester.tap(
+        find.byKey(const Key('level-save')),
+        warnIfMissed: false,
+      );
+      await settle(tester);
+      expect((await combatant(tester, db, ayla.id)).level, 5);
+      await tester.enterText(find.byKey(const Key('level-field')), '20');
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('level-save')));
+      await settle(tester);
+      expect((await combatant(tester, db, ayla.id)).level, 20);
+
+      await tester.tap(find.byKey(const Key('edit-level')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('level-clear')));
+      await settle(tester);
+      expect((await combatant(tester, db, ayla.id)).level, isNull);
+    },
+  );
+
+  appTest('quick taps on a level stepper are not lost', gmPack: true, (
+    tester,
+    db,
+  ) async {
+    final ayla = await pumped(
+      tester,
+      db.addCombatant(name: 'Ayla', isPlayer: true, level: 1),
+    );
+    await pumped(tester, db.addCombatant(name: 'Goblin', monsterId: goblin));
+    await openTab(tester, 'İnisiyatif');
+    await openSheet(tester);
+    final inc = find.byKey(Key('level-$ayla-inc'));
+    // Three taps before the database stream re-emits (no pump in between).
+    await tester.tap(inc);
+    await tester.tap(inc);
+    await tester.tap(inc);
+    await settle(tester);
+    expect((await combatant(tester, db, ayla)).level, 4);
+    expect(textOf(tester, 'level-$ayla-value'), '4');
+    final dec = find.byKey(Key('level-$ayla-dec'));
+    await tester.tap(dec);
+    await tester.tap(dec);
+    await settle(tester);
+    expect((await combatant(tester, db, ayla)).level, 2);
+
+    // Party settings step from the latest value too.
+    await tester.tap(find.byKey(const Key('party-level-inc')));
+    await tester.tap(find.byKey(const Key('party-level-inc')));
+    await settle(tester);
+    expect(textOf(tester, 'party-level-value'), '3');
   });
 }
