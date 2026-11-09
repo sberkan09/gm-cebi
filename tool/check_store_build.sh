@@ -25,6 +25,15 @@ if grep -aq 'android.permission.INTERNET' "$work/base/manifest/AndroidManifest.x
   echo "FAIL: release manifest requests android.permission.INTERNET" >&2
   fail=1
 fi
+# Signed with an upload key, never the debug key (a local build without key.properties).
+if keytool -printcert -jarfile "$aab" 2>/dev/null | grep -q 'CN=Android Debug'; then
+  echo "FAIL: signed with the debug key; Play rejects it (android/key.properties, docs/release.md)" >&2
+  fail=1
+fi
+if grep -aq 'gmcebi.test' "$work/base/manifest/AndroidManifest.xml"; then
+  echo "FAIL: internal test build (application id …gmcebi.test)" >&2
+  fail=1
+fi
 if grep -aq 'com.example' "$work/base/manifest/AndroidManifest.xml"; then
   echo "FAIL: placeholder package name com.example in the manifest" >&2
   fail=1

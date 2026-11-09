@@ -73,7 +73,7 @@ Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, d
 | Ad | 30 | `GM Cebi` |
 | Alt başlık | 30 | `Türkçe 5e FRP yardımcısı` |
 | Tanıtım metni | 170 | `Kural, büyü ve canavarları Türkçe ya da İngilizce ara; zar at, inisiyatif ve oturum notlarını tut. İnternetsiz, reklamsız, veri toplamaz.` |
-| Anahtar kelimeler | 100, virgülle, boşluksuz | `frp,5e,zar,büyü,canavar,inisiyatif,kural,rpg,ttrpg,gm,dm,masaüstü,rol yapma,karakter` |
+| Anahtar kelimeler | 100, virgülle ayrılır, virgülden sonra boşluk yok | `frp,5e,zar,büyü,canavar,inisiyatif,kural,rpg,ttrpg,gm,dm,masaüstü,rol yapma,karakter` |
 | Açıklama | 4000 | Yukarıdaki Play uzun açıklamasının aynısı |
 | Kategori | | Birincil: Başvuru Kaynakları (Reference); ikincil: Oyunlar → Rol Yapma ya da Masa |
 | Telif hakkı | | `2026 <senin adın ya da yayıncı adı>` |

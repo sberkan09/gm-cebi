@@ -35,9 +35,11 @@ jobs:
       - name: Tag matches pubspec version
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          name=$(sed -n 's/^version: *\([0-9.]*\)+[0-9]*$/\1/p' pubspec.yaml)
-          if [ "${GITHUB_REF_NAME}" != "v${name}" ]; then
-            echo "::error::Tag ${GITHUB_REF_NAME} does not match pubspec version ${name} (expected v${name})"
+          # v1.0.0 or, to upload a new build of the same version, v1.0.0+2.
+          version=$(sed -n 's/^version: *\([0-9.]*+[0-9]*\) *$/\1/p' pubspec.yaml)
+          name=${version%%+*}
+          if [ "${GITHUB_REF_NAME}" != "v${name}" ] && [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match pubspec version ${version} (expected v${name} or v${version})"
             exit 1
           fi
 
@@ -48,24 +50,25 @@ jobs:
       - name: Write upload keystore from secrets
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          for v in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+          for v in KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
             if [ -z "${!v}" ]; then echo "::error::Repository secret for $v is not set (docs/release.md)"; exit 1; fi
           done
           keystore="$RUNNER_TEMP/upload-keystore.jks"
-          echo "$KEYSTORE_BASE64" | base64 --decode > "$keystore"
-          {
-            echo "storeFile=$keystore"
-            echo "storePassword=$KEYSTORE_PASSWORD"
-            echo "keyAlias=$KEY_ALIAS"
-            echo "keyPassword=$KEY_PASSWORD"
-          } > android/key.properties
-          echo "KEYSTORE_PATH=$keystore" >> "$GITHUB_ENV"
+          # Tolerates line breaks and a Windows CRLF pasted into the secret.
+          printf '%s' "$KEYSTORE_BASE64" | tr -d '\r\n ' | base64 --decode > "$keystore"
+          echo "ANDROID_KEYSTORE_PATH=$keystore" >> "$GITHUB_ENV"
 
       - name: Build App Bundle
+        # The signing values go to Gradle as environment variables (android/app/build.gradle.kts),
+        # not through a properties file, so a password may contain any character.
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: flutter build appbundle --release $DART_DEFINES
 
       - name: Check signature and flags
@@ -78,7 +81,7 @@ jobs:
           if ! grep -q '^jar verified' <<< "$verify"; then echo "$verify"; echo "::error::jarsigner could not verify $aab"; exit 1; fi
           # Signed with the upload key, not the debug key.
           signer=$(keytool -printcert -jarfile "$aab" | awk '/SHA256: / && !f {print $2; f=1}')
-          upload=$(keytool -list -v -keystore "$KEYSTORE_PATH" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" | awk '/SHA256: / && !f {print $2; f=1}')
+          upload=$(keytool -list -v -keystore "$ANDROID_KEYSTORE_PATH" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" | awk '/SHA256: / && !f {print $2; f=1}')
           echo "AAB signer SHA-256: $signer"
           if [ -z "$signer" ] || [ "$signer" != "$upload" ]; then echo "::error::AAB is not signed with the upload key"; exit 1; fi
           # Internal test switches must be compiled out (lib/features/flags.dart).
@@ -86,7 +89,7 @@ jobs:
 
       - name: Remove signing material
         if: always()
-        run: rm -f android/key.properties "$RUNNER_TEMP/upload-keystore.jks"
+        run: rm -f "$RUNNER_TEMP/upload-keystore.jks"
 
       - uses: actions/upload-artifact@v4
         with:

@@ -90,28 +90,39 @@ keyAlias=upload
 keyPassword=<anahtar şifresi>
 ```
 
-`storeFile` göreli verilirse `android/app/` klasörüne göre çözülür. Sonra:
+`storeFile` göreli verilirse `android/app/` klasörüne göre çözülür. `key.properties`
+Java properties biçimindedir: şifrede `\` varsa `\\` yaz (aksi hâlde kaçış karakteri sayılır).
+Aynı değerler ortam değişkeniyle de verilebilir; dosyadan önce bunlara bakılır:
+`ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`.
+Sonra:
 
 ```bash
 flutter build appbundle --release --dart-define=GMCEBI_INTERNAL=false --dart-define=GMCEBI_GM_PACK=true
 tool/check_store_build.sh build/app/outputs/bundle/release/app-release.aab
 ```
 
-`key.properties` yoksa release derlemesi debug anahtarıyla imzalanır. Bu yalnızca
-test APK'sı içindir; Play debug imzalı AAB'yi reddeder.
+Anahtar verilmezse release derlemesi debug anahtarıyla imzalanır. Bu yalnızca test APK'sı
+içindir; Play debug imzalı AAB'yi reddeder ve `check_store_build.sh` bunu yakalar.
+
+**Dahili test derlemeleri ayrı bir uygulamadır.** `GMCEBI_INTERNAL=true` ile derlenen APK
+(GitHub'daki test APK'sı) `io.github.sberkan09.gmcebi.test` kimliğiyle ve "GM Cebi Test" adıyla
+kurulur. Böylece Play'den gelen sürümle aynı telefonda yan yana durabilir; biri diğerinin üzerine
+kurulmaya çalışılmaz ve kullanıcı verisi silinmez. Kontrol betiği `.test` kimliğini mağaza AAB'sinde
+hata sayar.
 
 ### 3. GitHub Actions (`.github/workflows/release-aab.yml`)
 
 Tetikleyici: `v1.0.0` gibi bir sürüm etiketi (`v*-test*` hariç; o test APK'sıdır) ya
 da elle çalıştırma. Adımlar:
 
-1. Etiket pubspec sürümüyle aynı mı (`v1.0.0` ↔ `version: 1.0.0+N`)?
+1. Etiket pubspec sürümüyle aynı mı? `version: 1.0.0+2` için `v1.0.0` ya da `v1.0.0+2`.
 2. `flutter analyze`, `flutter test`.
-3. Keystore secret'tan çözülür, `android/key.properties` yazılır (çalıştırıcının
-   geçici klasöründe).
+3. Keystore secret'tan çözülür (çalıştırıcının geçici klasörüne). Şifreler Gradle'a ortam
+   değişkeni olarak gider; dosya yazılmaz, şifrede her karakter kullanılabilir.
 4. `flutter build appbundle --release` (bayraklar: `INTERNAL=false`, `GM_PACK=true`).
 5. Doğrulama: `jarsigner -verify`, imzalayan sertifika yükleme anahtarı mı,
-   `tool/check_store_build.sh` (test anahtarı izi, İnternet izni, `com.example`).
+   `tool/check_store_build.sh` (test anahtarı izi, İnternet izni, debug imzası, `.test` kimliği,
+   `com.example`).
 6. İmza dosyaları silinir, AAB iş çıktısı olarak yüklenir: **`gm-cebi-release-aab`**
    (90 gün saklanır). Play'e yükleme elle yapılır.
 
@@ -132,18 +143,24 @@ base64 -w0 ~/gm-cebi-upload.jks > gm-cebi-upload.jks.base64
 # macOS
 base64 -i ~/gm-cebi-upload.jks -o gm-cebi-upload.jks.base64
 # Windows PowerShell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\gm-cebi-upload.jks")) | Set-Content gm-cebi-upload.jks.base64
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\gm-cebi-upload.jks")) | Set-Content -NoNewline gm-cebi-upload.jks.base64
 ```
 
 Dosyanın içeriğini `ANDROID_KEYSTORE_BASE64` secret'ına yapıştır, sonra `.base64`
 dosyasını sil. `gh` CLI ile: `gh secret set ANDROID_KEYSTORE_BASE64 < gm-cebi-upload.jks.base64`.
+İş akışı satır sonlarını ve boşlukları yok sayar; yapıştırırken araya giren CRLF sorun olmaz.
+
+**Önerilen koruma:** elle çalıştırma (`workflow_dispatch`) seçilen herhangi bir daldan imzalı AAB
+üretebilir. Settings → Environments altında `release` adında, onay gerektiren bir ortam açıp bu
+dört secret'ı oraya taşımak ve iş akışına `environment: release` eklemek, imzalamayı onaya bağlar.
 
 ### Sürüm çıkarma
 
 ```bash
-# pubspec.yaml: version: 1.0.0+1  (sonraki yükleme 1.0.1+2 vb.)
-git tag v1.0.0
-git push origin v1.0.0
+# pubspec.yaml: version: 1.0.0+1
+git tag v1.0.0 && git push origin v1.0.0
+# Aynı sürümün yeni bir yüklemesi: pubspec'i 1.0.0+2 yap, commit'le, sonra
+git tag v1.0.0+2 && git push origin v1.0.0+2
 ```
 
 İş bitince Actions → release-aab → çalıştırma → Artifacts → `gm-cebi-release-aab`
@@ -152,6 +169,17 @@ zip'ini indir, içindeki `app-release.aab`'yi Play Console'a yükle.
 Aynı etiket `ios-build` iş akışını da tetikler (imzasız iOS derleme denetimi).
 AAB, yerel kodun debug sembollerini kendi içinde taşır (`BUNDLE-METADATA/…/debugsymbols`).
 Play'e ayrıca sembol dosyası yüklemek gerekmez.
+
+### Üretime terfi etmeden önce
+
+Play Console'daki "Sürümü yükselt" (promote) düğmesi test kanalındaki AAB'yi olduğu gibi üretime
+taşır. Test AAB'sinde **GM Paketi ücretsiz açık** (`GMCEBI_GM_PACK=true`). Üretime çıkmadan önce:
+
+- [ ] GM Paketi kararı verildi (ücretsiz mi, satın alma mı); gerekirse `GMCEBI_GM_PACK=false` ile
+      yeni bir AAB derlendi;
+- [ ] gizlilik politikası ve mağaza metinlerindeki yer tutucular (`<E-POSTA>`, `<YAYIN TARİHİ>`,
+      geliştirici adı, telif) dolduruldu, politika herkese açık bir adreste;
+- [ ] veri güvenliği formu son derlemeyle uyumlu (çevrimiçi sahne açıksa `docs/online-scene.md`).
 
 ## Mağaza materyalleri
 

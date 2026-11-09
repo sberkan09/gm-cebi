@@ -5,6 +5,8 @@
 Writes:
   docs/store/graphics/play-icon-512.png       512×512, full square (Play applies its own mask)
   docs/store/graphics/feature-graphic-1024x500.png
+and flattens docs/store/screenshots/**/*.png to 24-bit RGB: Play asks for "JPEG or 24-bit PNG
+(no alpha)", and the screenshot test writes RGBA. Run it after the screenshot test.
 
 Requires Pillow. Uses Roboto from Flutter's bundled material fonts (not in the repo).
 """
@@ -41,6 +43,16 @@ def main(font_dir: Path):
     draw.text((x, 362), "İnternetsiz.", font=line, fill=MUTED)
     img.convert("RGB").save(OUT / "feature-graphic-1024x500.png")
     print("store graphics written to", OUT.relative_to(ROOT))
+    flatten_screenshots()
+
+
+def flatten_screenshots():
+    shots = sorted((ROOT / "docs/store/screenshots").glob("*/*.png"))
+    for f in shots:
+        im = Image.open(f)
+        if im.mode != "RGB":
+            im.convert("RGB").save(f)
+    print(f"{len(shots)} screenshots are 24-bit RGB")
 
 
 if __name__ == "__main__":
