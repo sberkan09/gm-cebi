@@ -32,7 +32,7 @@
    "count": 12,
    "tr_complete": 12,
    "tr_partial": 0,
-   "bytes": 386226
+   "bytes": 386307
   },
   "subclasses": {
    "count": 12,
@@ -56,7 +56,7 @@
    "count": 17,
    "tr_complete": 17,
    "tr_partial": 0,
-   "bytes": 23552
+   "bytes": 23016
   },
   "equipment": {
    "count": 184,
@@ -68,7 +68,7 @@
    "count": 10,
    "tr_complete": 10,
    "tr_partial": 0,
-   "bytes": 10314
+   "bytes": 9646
   },
   "weapon_mastery": {
    "count": 8,
@@ -83,11 +83,11 @@
    "bytes": 574880
   },
   "rules": {
-   "count": 34,
-   "tr_complete": 34,
+   "count": 52,
+   "tr_complete": 52,
    "tr_partial": 0,
-   "bytes": 400098
+   "bytes": 486869
   }
  },
- "total_bytes": 4085392
+ "total_bytes": 4181268
 }
