@@ -1195,6 +1195,24 @@ class $CombatantsTable extends Combatants
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _posXMeta = const VerificationMeta('posX');
+  @override
+  late final GeneratedColumn<double> posX = GeneratedColumn<double>(
+    'pos_x',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _posYMeta = const VerificationMeta('posY');
+  @override
+  late final GeneratedColumn<double> posY = GeneratedColumn<double>(
+    'pos_y',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1210,6 +1228,8 @@ class $CombatantsTable extends Combatants
     monsterId,
     sortOrder,
     createdAt,
+    posX,
+    posY,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1304,6 +1324,18 @@ class $CombatantsTable extends Combatants
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('pos_x')) {
+      context.handle(
+        _posXMeta,
+        posX.isAcceptableOrUnknown(data['pos_x']!, _posXMeta),
+      );
+    }
+    if (data.containsKey('pos_y')) {
+      context.handle(
+        _posYMeta,
+        posY.isAcceptableOrUnknown(data['pos_y']!, _posYMeta),
+      );
+    }
     return context;
   }
 
@@ -1365,6 +1397,14 @@ class $CombatantsTable extends Combatants
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      posX: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}pos_x'],
+      ),
+      posY: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}pos_y'],
+      ),
     );
   }
 
@@ -1394,6 +1434,11 @@ class Combatant extends DataClass implements Insertable<Combatant> {
   /// Tie-break for equal initiative (lower first).
   final int sortOrder;
   final DateTime createdAt;
+
+  /// Token position on the battle map, 0..1 of the map's width and height;
+  /// null while the token is not on the map. (schema 2)
+  final double? posX;
+  final double? posY;
   const Combatant({
     required this.id,
     required this.encounterId,
@@ -1408,6 +1453,8 @@ class Combatant extends DataClass implements Insertable<Combatant> {
     this.monsterId,
     required this.sortOrder,
     required this.createdAt,
+    this.posX,
+    this.posY,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1435,6 +1482,12 @@ class Combatant extends DataClass implements Insertable<Combatant> {
     }
     map['sort_order'] = Variable<int>(sortOrder);
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || posX != null) {
+      map['pos_x'] = Variable<double>(posX);
+    }
+    if (!nullToAbsent || posY != null) {
+      map['pos_y'] = Variable<double>(posY);
+    }
     return map;
   }
 
@@ -1461,6 +1514,8 @@ class Combatant extends DataClass implements Insertable<Combatant> {
           : Value(monsterId),
       sortOrder: Value(sortOrder),
       createdAt: Value(createdAt),
+      posX: posX == null && nullToAbsent ? const Value.absent() : Value(posX),
+      posY: posY == null && nullToAbsent ? const Value.absent() : Value(posY),
     );
   }
 
@@ -1483,6 +1538,8 @@ class Combatant extends DataClass implements Insertable<Combatant> {
       monsterId: serializer.fromJson<String?>(json['monsterId']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      posX: serializer.fromJson<double?>(json['posX']),
+      posY: serializer.fromJson<double?>(json['posY']),
     );
   }
   @override
@@ -1502,6 +1559,8 @@ class Combatant extends DataClass implements Insertable<Combatant> {
       'monsterId': serializer.toJson<String?>(monsterId),
       'sortOrder': serializer.toJson<int>(sortOrder),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'posX': serializer.toJson<double?>(posX),
+      'posY': serializer.toJson<double?>(posY),
     };
   }
 
@@ -1519,6 +1578,8 @@ class Combatant extends DataClass implements Insertable<Combatant> {
     Value<String?> monsterId = const Value.absent(),
     int? sortOrder,
     DateTime? createdAt,
+    Value<double?> posX = const Value.absent(),
+    Value<double?> posY = const Value.absent(),
   }) => Combatant(
     id: id ?? this.id,
     encounterId: encounterId ?? this.encounterId,
@@ -1533,6 +1594,8 @@ class Combatant extends DataClass implements Insertable<Combatant> {
     monsterId: monsterId.present ? monsterId.value : this.monsterId,
     sortOrder: sortOrder ?? this.sortOrder,
     createdAt: createdAt ?? this.createdAt,
+    posX: posX.present ? posX.value : this.posX,
+    posY: posY.present ? posY.value : this.posY,
   );
   Combatant copyWithCompanion(CombatantsCompanion data) {
     return Combatant(
@@ -1555,6 +1618,8 @@ class Combatant extends DataClass implements Insertable<Combatant> {
       monsterId: data.monsterId.present ? data.monsterId.value : this.monsterId,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      posX: data.posX.present ? data.posX.value : this.posX,
+      posY: data.posY.present ? data.posY.value : this.posY,
     );
   }
 
@@ -1573,7 +1638,9 @@ class Combatant extends DataClass implements Insertable<Combatant> {
           ..write('conditions: $conditions, ')
           ..write('monsterId: $monsterId, ')
           ..write('sortOrder: $sortOrder, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('posX: $posX, ')
+          ..write('posY: $posY')
           ..write(')'))
         .toString();
   }
@@ -1593,6 +1660,8 @@ class Combatant extends DataClass implements Insertable<Combatant> {
     monsterId,
     sortOrder,
     createdAt,
+    posX,
+    posY,
   );
   @override
   bool operator ==(Object other) =>
@@ -1610,7 +1679,9 @@ class Combatant extends DataClass implements Insertable<Combatant> {
           other.conditions == this.conditions &&
           other.monsterId == this.monsterId &&
           other.sortOrder == this.sortOrder &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.posX == this.posX &&
+          other.posY == this.posY);
 }
 
 class CombatantsCompanion extends UpdateCompanion<Combatant> {
@@ -1627,6 +1698,8 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
   final Value<String?> monsterId;
   final Value<int> sortOrder;
   final Value<DateTime> createdAt;
+  final Value<double?> posX;
+  final Value<double?> posY;
   const CombatantsCompanion({
     this.id = const Value.absent(),
     this.encounterId = const Value.absent(),
@@ -1641,6 +1714,8 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
     this.monsterId = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.posX = const Value.absent(),
+    this.posY = const Value.absent(),
   });
   CombatantsCompanion.insert({
     this.id = const Value.absent(),
@@ -1656,6 +1731,8 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
     this.monsterId = const Value.absent(),
     this.sortOrder = const Value.absent(),
     required DateTime createdAt,
+    this.posX = const Value.absent(),
+    this.posY = const Value.absent(),
   }) : encounterId = Value(encounterId),
        name = Value(name),
        createdAt = Value(createdAt);
@@ -1673,6 +1750,8 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
     Expression<String>? monsterId,
     Expression<int>? sortOrder,
     Expression<DateTime>? createdAt,
+    Expression<double>? posX,
+    Expression<double>? posY,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1688,6 +1767,8 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
       if (monsterId != null) 'monster_id': monsterId,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (createdAt != null) 'created_at': createdAt,
+      if (posX != null) 'pos_x': posX,
+      if (posY != null) 'pos_y': posY,
     });
   }
 
@@ -1705,6 +1786,8 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
     Value<String?>? monsterId,
     Value<int>? sortOrder,
     Value<DateTime>? createdAt,
+    Value<double?>? posX,
+    Value<double?>? posY,
   }) {
     return CombatantsCompanion(
       id: id ?? this.id,
@@ -1720,6 +1803,8 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
       monsterId: monsterId ?? this.monsterId,
       sortOrder: sortOrder ?? this.sortOrder,
       createdAt: createdAt ?? this.createdAt,
+      posX: posX ?? this.posX,
+      posY: posY ?? this.posY,
     );
   }
 
@@ -1765,6 +1850,12 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (posX.present) {
+      map['pos_x'] = Variable<double>(posX.value);
+    }
+    if (posY.present) {
+      map['pos_y'] = Variable<double>(posY.value);
+    }
     return map;
   }
 
@@ -1783,6 +1874,366 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
           ..write('conditions: $conditions, ')
           ..write('monsterId: $monsterId, ')
           ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('posX: $posX, ')
+          ..write('posY: $posY')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MapStrokesTable extends MapStrokes
+    with TableInfo<$MapStrokesTable, MapStroke> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MapStrokesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _encounterIdMeta = const VerificationMeta(
+    'encounterId',
+  );
+  @override
+  late final GeneratedColumn<int> encounterId = GeneratedColumn<int>(
+    'encounter_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES encounters (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _pointsMeta = const VerificationMeta('points');
+  @override
+  late final GeneratedColumn<String> points = GeneratedColumn<String>(
+    'points',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<int> color = GeneratedColumn<int>(
+    'color',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    encounterId,
+    points,
+    color,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'map_strokes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MapStroke> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('encounter_id')) {
+      context.handle(
+        _encounterIdMeta,
+        encounterId.isAcceptableOrUnknown(
+          data['encounter_id']!,
+          _encounterIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_encounterIdMeta);
+    }
+    if (data.containsKey('points')) {
+      context.handle(
+        _pointsMeta,
+        points.isAcceptableOrUnknown(data['points']!, _pointsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pointsMeta);
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MapStroke map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MapStroke(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      encounterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}encounter_id'],
+      )!,
+      points: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}points'],
+      )!,
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}color'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MapStrokesTable createAlias(String alias) {
+    return $MapStrokesTable(attachedDatabase, alias);
+  }
+}
+
+class MapStroke extends DataClass implements Insertable<MapStroke> {
+  final int id;
+  final int encounterId;
+
+  /// Points as "x,y x,y …", each coordinate 0..1 of the map's side.
+  final String points;
+
+  /// Index into the map palette (0 ink, 1 water, 2 plants, 3 danger).
+  final int color;
+  final DateTime createdAt;
+  const MapStroke({
+    required this.id,
+    required this.encounterId,
+    required this.points,
+    required this.color,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['encounter_id'] = Variable<int>(encounterId);
+    map['points'] = Variable<String>(points);
+    map['color'] = Variable<int>(color);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  MapStrokesCompanion toCompanion(bool nullToAbsent) {
+    return MapStrokesCompanion(
+      id: Value(id),
+      encounterId: Value(encounterId),
+      points: Value(points),
+      color: Value(color),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory MapStroke.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MapStroke(
+      id: serializer.fromJson<int>(json['id']),
+      encounterId: serializer.fromJson<int>(json['encounterId']),
+      points: serializer.fromJson<String>(json['points']),
+      color: serializer.fromJson<int>(json['color']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'encounterId': serializer.toJson<int>(encounterId),
+      'points': serializer.toJson<String>(points),
+      'color': serializer.toJson<int>(color),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  MapStroke copyWith({
+    int? id,
+    int? encounterId,
+    String? points,
+    int? color,
+    DateTime? createdAt,
+  }) => MapStroke(
+    id: id ?? this.id,
+    encounterId: encounterId ?? this.encounterId,
+    points: points ?? this.points,
+    color: color ?? this.color,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  MapStroke copyWithCompanion(MapStrokesCompanion data) {
+    return MapStroke(
+      id: data.id.present ? data.id.value : this.id,
+      encounterId: data.encounterId.present
+          ? data.encounterId.value
+          : this.encounterId,
+      points: data.points.present ? data.points.value : this.points,
+      color: data.color.present ? data.color.value : this.color,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MapStroke(')
+          ..write('id: $id, ')
+          ..write('encounterId: $encounterId, ')
+          ..write('points: $points, ')
+          ..write('color: $color, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, encounterId, points, color, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MapStroke &&
+          other.id == this.id &&
+          other.encounterId == this.encounterId &&
+          other.points == this.points &&
+          other.color == this.color &&
+          other.createdAt == this.createdAt);
+}
+
+class MapStrokesCompanion extends UpdateCompanion<MapStroke> {
+  final Value<int> id;
+  final Value<int> encounterId;
+  final Value<String> points;
+  final Value<int> color;
+  final Value<DateTime> createdAt;
+  const MapStrokesCompanion({
+    this.id = const Value.absent(),
+    this.encounterId = const Value.absent(),
+    this.points = const Value.absent(),
+    this.color = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  MapStrokesCompanion.insert({
+    this.id = const Value.absent(),
+    required int encounterId,
+    required String points,
+    this.color = const Value.absent(),
+    required DateTime createdAt,
+  }) : encounterId = Value(encounterId),
+       points = Value(points),
+       createdAt = Value(createdAt);
+  static Insertable<MapStroke> custom({
+    Expression<int>? id,
+    Expression<int>? encounterId,
+    Expression<String>? points,
+    Expression<int>? color,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (encounterId != null) 'encounter_id': encounterId,
+      if (points != null) 'points': points,
+      if (color != null) 'color': color,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  MapStrokesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? encounterId,
+    Value<String>? points,
+    Value<int>? color,
+    Value<DateTime>? createdAt,
+  }) {
+    return MapStrokesCompanion(
+      id: id ?? this.id,
+      encounterId: encounterId ?? this.encounterId,
+      points: points ?? this.points,
+      color: color ?? this.color,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (encounterId.present) {
+      map['encounter_id'] = Variable<int>(encounterId.value);
+    }
+    if (points.present) {
+      map['points'] = Variable<String>(points.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<int>(color.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MapStrokesCompanion(')
+          ..write('id: $id, ')
+          ..write('encounterId: $encounterId, ')
+          ..write('points: $points, ')
+          ..write('color: $color, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1796,6 +2247,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $NotesTable notes = $NotesTable(this);
   late final $EncountersTable encounters = $EncountersTable(this);
   late final $CombatantsTable combatants = $CombatantsTable(this);
+  late final $MapStrokesTable mapStrokes = $MapStrokesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1805,6 +2257,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     notes,
     encounters,
     combatants,
+    mapStrokes,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -1814,6 +2267,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('combatants', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'encounters',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('map_strokes', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -2205,6 +2665,24 @@ final class $$EncountersTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$MapStrokesTable, List<MapStroke>>
+  _mapStrokesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.mapStrokes,
+    aliasName: 'encounters__id__map_strokes__encounter_id',
+  );
+
+  $$MapStrokesTableProcessedTableManager get mapStrokesRefs {
+    final manager = $$MapStrokesTableTableManager(
+      $_db,
+      $_db.mapStrokes,
+    ).filter((f) => f.encounterId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_mapStrokesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$EncountersTableFilterComposer
@@ -2267,6 +2745,31 @@ class $$EncountersTableFilterComposer
           }) => $$CombatantsTableFilterComposer(
             $db: $db,
             $table: $db.combatants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> mapStrokesRefs(
+    Expression<bool> Function($$MapStrokesTableFilterComposer f) f,
+  ) {
+    final $$MapStrokesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.mapStrokes,
+      getReferencedColumn: (t) => t.encounterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MapStrokesTableFilterComposer(
+            $db: $db,
+            $table: $db.mapStrokes,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2376,6 +2879,31 @@ class $$EncountersTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> mapStrokesRefs<T extends Object>(
+    Expression<T> Function($$MapStrokesTableAnnotationComposer a) f,
+  ) {
+    final $$MapStrokesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.mapStrokes,
+      getReferencedColumn: (t) => t.encounterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MapStrokesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.mapStrokes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$EncountersTableTableManager
@@ -2391,7 +2919,7 @@ class $$EncountersTableTableManager
           $$EncountersTableUpdateCompanionBuilder,
           (Encounter, $$EncountersTableReferences),
           Encounter,
-          PrefetchHooks Function({bool combatantsRefs})
+          PrefetchHooks Function({bool combatantsRefs, bool mapStrokesRefs})
         > {
   $$EncountersTableTableManager(_$AppDatabase db, $EncountersTable table)
     : super(
@@ -2448,38 +2976,63 @@ class $$EncountersTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({combatantsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (combatantsRefs) db.combatants],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (combatantsRefs)
-                    await $_getPrefetchedData<
-                      Encounter,
-                      $EncountersTable,
-                      Combatant
-                    >(
-                      currentTable: table,
-                      referencedTable: $$EncountersTableReferences
-                          ._combatantsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$EncountersTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).combatantsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.encounterId == item.id,
-                          ),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({combatantsRefs = false, mapStrokesRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (combatantsRefs) db.combatants,
+                    if (mapStrokesRefs) db.mapStrokes,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (combatantsRefs)
+                        await $_getPrefetchedData<
+                          Encounter,
+                          $EncountersTable,
+                          Combatant
+                        >(
+                          currentTable: table,
+                          referencedTable: $$EncountersTableReferences
+                              ._combatantsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$EncountersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).combatantsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.encounterId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (mapStrokesRefs)
+                        await $_getPrefetchedData<
+                          Encounter,
+                          $EncountersTable,
+                          MapStroke
+                        >(
+                          currentTable: table,
+                          referencedTable: $$EncountersTableReferences
+                              ._mapStrokesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$EncountersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).mapStrokesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.encounterId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -2496,7 +3049,7 @@ typedef $$EncountersTableProcessedTableManager =
       $$EncountersTableUpdateCompanionBuilder,
       (Encounter, $$EncountersTableReferences),
       Encounter,
-      PrefetchHooks Function({bool combatantsRefs})
+      PrefetchHooks Function({bool combatantsRefs, bool mapStrokesRefs})
     >;
 typedef $$CombatantsTableCreateCompanionBuilder = CombatantsCompanion Function({
   Value<int> id,
@@ -2512,6 +3065,8 @@ typedef $$CombatantsTableCreateCompanionBuilder = CombatantsCompanion Function({
   Value<String?> monsterId,
   Value<int> sortOrder,
   required DateTime createdAt,
+  Value<double?> posX,
+  Value<double?> posY,
 });
 typedef $$CombatantsTableUpdateCompanionBuilder = CombatantsCompanion Function({
   Value<int> id,
@@ -2527,6 +3082,8 @@ typedef $$CombatantsTableUpdateCompanionBuilder = CombatantsCompanion Function({
   Value<String?> monsterId,
   Value<int> sortOrder,
   Value<DateTime> createdAt,
+  Value<double?> posX,
+  Value<double?> posY,
 });
 
 final class $$CombatantsTableReferences
@@ -2617,6 +3174,16 @@ class $$CombatantsTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get posX => $composableBuilder(
+    column: $table.posX,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get posY => $composableBuilder(
+    column: $table.posY,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2713,6 +3280,16 @@ class $$CombatantsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get posX => $composableBuilder(
+    column: $table.posX,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get posY => $composableBuilder(
+    column: $table.posY,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$EncountersTableOrderingComposer get encounterId {
     final $$EncountersTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2786,6 +3363,12 @@ class $$CombatantsTableAnnotationComposer
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
+  GeneratedColumn<double> get posX =>
+      $composableBuilder(column: $table.posX, builder: (column) => column);
+
+  GeneratedColumn<double> get posY =>
+      $composableBuilder(column: $table.posY, builder: (column) => column);
+
   $$EncountersTableAnnotationComposer get encounterId {
     final $$EncountersTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -2851,6 +3434,8 @@ class $$CombatantsTableTableManager
                 Value<String?> monsterId = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<double?> posX = const Value.absent(),
+                Value<double?> posY = const Value.absent(),
               }) => CombatantsCompanion(
                 id: id,
                 encounterId: encounterId,
@@ -2865,6 +3450,8 @@ class $$CombatantsTableTableManager
                 monsterId: monsterId,
                 sortOrder: sortOrder,
                 createdAt: createdAt,
+                posX: posX,
+                posY: posY,
               ),
           createCompanionCallback:
               ({
@@ -2881,6 +3468,8 @@ class $$CombatantsTableTableManager
                 Value<String?> monsterId = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
                 required DateTime createdAt,
+                Value<double?> posX = const Value.absent(),
+                Value<double?> posY = const Value.absent(),
               }) => CombatantsCompanion.insert(
                 id: id,
                 encounterId: encounterId,
@@ -2895,6 +3484,8 @@ class $$CombatantsTableTableManager
                 monsterId: monsterId,
                 sortOrder: sortOrder,
                 createdAt: createdAt,
+                posX: posX,
+                posY: posY,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -2961,6 +3552,313 @@ typedef $$CombatantsTableProcessedTableManager =
       Combatant,
       PrefetchHooks Function({bool encounterId})
     >;
+typedef $$MapStrokesTableCreateCompanionBuilder = MapStrokesCompanion Function({
+  Value<int> id,
+  required int encounterId,
+  required String points,
+  Value<int> color,
+  required DateTime createdAt,
+});
+typedef $$MapStrokesTableUpdateCompanionBuilder = MapStrokesCompanion Function({
+  Value<int> id,
+  Value<int> encounterId,
+  Value<String> points,
+  Value<int> color,
+  Value<DateTime> createdAt,
+});
+
+final class $$MapStrokesTableReferences
+    extends BaseReferences<_$AppDatabase, $MapStrokesTable, MapStroke> {
+  $$MapStrokesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $EncountersTable _encounterIdTable(_$AppDatabase db) =>
+      db.encounters.createAlias('map_strokes__encounter_id__encounters__id');
+
+  $$EncountersTableProcessedTableManager get encounterId {
+    final $_column = $_itemColumn<int>('encounter_id')!;
+
+    final manager = $$EncountersTableTableManager(
+      $_db,
+      $_db.encounters,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_encounterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$MapStrokesTableFilterComposer
+    extends Composer<_$AppDatabase, $MapStrokesTable> {
+  $$MapStrokesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get points => $composableBuilder(
+    column: $table.points,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$EncountersTableFilterComposer get encounterId {
+    final $$EncountersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableFilterComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MapStrokesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MapStrokesTable> {
+  $$MapStrokesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get points => $composableBuilder(
+    column: $table.points,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$EncountersTableOrderingComposer get encounterId {
+    final $$EncountersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableOrderingComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MapStrokesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MapStrokesTable> {
+  $$MapStrokesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get points =>
+      $composableBuilder(column: $table.points, builder: (column) => column);
+
+  GeneratedColumn<int> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$EncountersTableAnnotationComposer get encounterId {
+    final $$EncountersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MapStrokesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MapStrokesTable,
+          MapStroke,
+          $$MapStrokesTableFilterComposer,
+          $$MapStrokesTableOrderingComposer,
+          $$MapStrokesTableAnnotationComposer,
+          $$MapStrokesTableCreateCompanionBuilder,
+          $$MapStrokesTableUpdateCompanionBuilder,
+          (MapStroke, $$MapStrokesTableReferences),
+          MapStroke,
+          PrefetchHooks Function({bool encounterId})
+        > {
+  $$MapStrokesTableTableManager(_$AppDatabase db, $MapStrokesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MapStrokesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MapStrokesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MapStrokesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> encounterId = const Value.absent(),
+                Value<String> points = const Value.absent(),
+                Value<int> color = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => MapStrokesCompanion(
+                id: id,
+                encounterId: encounterId,
+                points: points,
+                color: color,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int encounterId,
+                required String points,
+                Value<int> color = const Value.absent(),
+                required DateTime createdAt,
+              }) => MapStrokesCompanion.insert(
+                id: id,
+                encounterId: encounterId,
+                points: points,
+                color: color,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MapStrokesTable, MapStroke>(table),
+                  $$MapStrokesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({encounterId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (encounterId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.encounterId,
+                        referencedTable: $$MapStrokesTableReferences
+                            ._encounterIdTable(db),
+                        referencedColumn: $$MapStrokesTableReferences
+                            ._encounterIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$MapStrokesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MapStrokesTable,
+      MapStroke,
+      $$MapStrokesTableFilterComposer,
+      $$MapStrokesTableOrderingComposer,
+      $$MapStrokesTableAnnotationComposer,
+      $$MapStrokesTableCreateCompanionBuilder,
+      $$MapStrokesTableUpdateCompanionBuilder,
+      (MapStroke, $$MapStrokesTableReferences),
+      MapStroke,
+      PrefetchHooks Function({bool encounterId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2973,4 +3871,6 @@ class $AppDatabaseManager {
       $$EncountersTableTableManager(_db, _db.encounters);
   $$CombatantsTableTableManager get combatants =>
       $$CombatantsTableTableManager(_db, _db.combatants);
+  $$MapStrokesTableTableManager get mapStrokes =>
+      $$MapStrokesTableTableManager(_db, _db.mapStrokes);
 }

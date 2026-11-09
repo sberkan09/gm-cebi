@@ -1,10 +1,21 @@
 # Durum
 
-Son güncelleme: 2026-11-06 (yayın hazırlığı)
+Son güncelleme: 2026-11-09 (savaş haritası, inceleme düzeltmeleri)
+
+## Savaş haritası (GM Paketi, çevrimdışı)
+
+Dal: `claude/tactical-map`. İnisiyatif ekranındaki harita simgesi → kalem/silgi, 4 renk, ızgara,
+geri al; inisiyatif katılımcıları jeton olarak (sıra numarası, sıradaki halkası, CP çubuğu); sıra
+haritadan ilerletilir. Ekran görüntüsü: `docs/screenshots/11-harita.png`.
+
+Kroki → sahne denemesi: `docs/spikes/sketch-to-scene/README.md` (V100'de harita modu 0,5 sn,
+atmosfer modu 1,6 sn; jetonlar modele gönderilmemeli). Servis tarafında gerekenler (token ile kimlik doğrulama, iş şablonu, model kataloğu, prompt
+adımı, gecikme, şikâyet, faturalama, veri saklama) neuracraft-cloud'da açıldı: takip issue'su
+https://github.com/sberkan09/neuracraft-cloud/issues/13 (alt issue'lar #14–#21).
 
 ## Yayın hazırlığı: Play kapalı/açık test ve TestFlight
 
-Dal: `claude/store-release-prep`. Ayrıntı: `docs/release.md`, `docs/ios-testflight.md`, `docs/store/`.
+PR #4 2026-11-09'da birleşti (inceleme düzeltmeleriyle). Ayrıntı: `docs/release.md`, `docs/ios-testflight.md`, `docs/store/`.
 
 - Sürüm `1.0.0+1`; paket kimliği Android ve iOS'ta `io.github.sberkan09.gmcebi` (onay bekliyor).
 - Android yükleme anahtarıyla imza (`android/key.properties`, git dışı); `release-aab` iş akışı

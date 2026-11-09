@@ -71,6 +71,15 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-11-06 — Mağaza ekran görüntüleri ayrı boyutlarda: Android 1080×1920 (Play en çok 2:1 oran kabul ediyor; mevcut 1290×2796 görüntüler 2,17), iOS 1320×2868 (6,9").
 - 2026-11-06 — Mağaza metinleri çeviri kapsamını abartmaz (15 durum, 140 kural girdisi, 50 büyü); "D&D" geçmez, yalnızca "5e uyumlu"; SRD atıf cümlesi birebir (testle denetlenir).
 
+## Savaş haritası ve kroki → sahne (2026-11-07)
+
+- 2026-11-07 — Savaş haritası çevrimdışı ve GM Paketi'nde: inisiyatif ekranından açılır, karşılaşmaya aittir (yeni karşılaşma boş haritayla başlar). Çizgiler `map_strokes` tablosunda, jeton konumları `combatants.pos_x/pos_y`'de; koordinatlar 0–1 (telefon ve tablette aynı harita). Şema 2, geçiş testli.
+- 2026-11-07 — Tek jest: jetonun üstünden başlayan sürükleme jetonu taşır, diğerleri çizer ya da siler; sürükleme parmağın değdiği yerden başlar (`DragStartBehavior.down`). Silgi hareketin tüm yolunu süpürür (hızlı hareket çizginin üstünden atlamasın).
+- 2026-11-07 — Jetonlar inisiyatif sırasını, sıradakini, CP'yi ve düşenleri gösterir; sıra haritadan da ilerletilir. Palet anlamlıdır (mürekkep, su, bitki, tehlike); ileride prompt'a ipucu olabilir.
+- 2026-11-07 — Kroki → sahne denemesi (`docs/spikes/sketch-to-scene/`): jetonlar modele gönderilmez, uygulama çizer; servise yalnızca arazi gider (`renderTerrainPng`, siyah mürekkep beyaz zemin, 512²). İki mod: düzeni koruyan "harita" (scribble + LCM) ve serbest "atmosfer" (20 adım). Servis tarafındaki iş: neuracraft-cloud #13 (alt issue'lar #14–#21).
+
+- 2026-11-09 — İnceleme düzeltmeleri (PR #5): şema geçişi tek transaction içinde ve adım adım kontrollü (yarım kalan geçiş bir sonraki açılışta tamamlanır); geri al silgiyi ve "Çizimi temizle"yi de geri alır (ekran içi işlem yığını); çizgiler kimliğe göre bir kez ayrıştırılır; geniş ekranda harita solda tam yükseklik, kontroller sağda; araç çubuğu dar ekranda alt satıra kayar; renk düğmeleri 44 dp ve erişilebilirlik etiketli. Takipte: iOS kenar kaydırma hareketiyle çakışma, jeton boyutu / ızgaraya oturma, katmanlı çizim (RepaintBoundary).
+
 ## Onay bekleyenler
 
 - **ONAY BEKLİYOR** — Atıf metni: SRD'nin zorunlu kıldığı İngilizce cümle README'ye, `manifest.json`'a ve Hakkında ekranına birebir kondu (onay gerektirmez, lisans şartı). Ek olarak Türkçe bir "değiştirilmiş eser" notu öneriliyor (CC-BY değişikliklerin belirtilmesini istiyor): "Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, değiştirilmiş bir çalışmadır. …" Test sürümünde Hakkında ekranında **öneri metni olarak** duruyor (`lib/app_info.dart`, `translationNotice`); mağaza sürümünden önce onaylanmalı ya da değiştirilmeli. SRD, Wizards'a bu atıf dışında başka bir atıf yapılmamasını istediği için "Wizards ile bağımız yoktur" gibi ek cümleler kullanılmıyor.
