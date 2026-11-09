@@ -4,16 +4,23 @@ Son güncelleme: 2026-11-09 (SRD içeriğinin tamamı Türkçe)
 
 ## Büyülü eşyalar ve kural bölümleri (dal `claude/magic-items`)
 
-- **258 büyülü eşya** (tür, nadirlik, uyumlanma, italik tür satırı, metin ve tablolar) ve **31 kural bölümü**:
-  Oyunun Oynanışı, Karakter Oluşturma, Oyun Araç Kutusu (yolculuk, lanetler ve salgınlar, çevre,
-  korku, zehirler, tuzaklar, savaş karşılaşmaları) ve büyülü eşya kuralları. Uygulamada "Büyülü
-  Eşyalar" ve "Kural Bölümleri" olarak aranır ve gezilir.
+- **258 büyülü eşya** (tür, nadirlik, uyumlanma, italik tür satırı, metin, tablolar ve gömülü stat
+  blokları: Dev Sinek, Ölüm Avatarı) ve **34 kural bölümü**: Oyunun Oynanışı, Karakter Oluşturma,
+  Oyun Araç Kutusu (yolculuk, lanetler ve salgınlar, çevre, korku, zehirler, tuzaklar, savaş
+  karşılaşmaları) ve büyülü eşya kuralları; bölüm girişleri (`playing-intro` kenar kutularıyla,
+  `magic-items-intro`, "A'dan Z'ye Büyülü Eşyalar") ayrı bölüm olarak. Uygulamada "Büyülü Eşyalar"
+  ve "Kural Bölümleri" olarak aranır ve gezilir.
+- Tablo kurucu (`structure.py`): farklı başlıklı tablo önceki tabloyu bitirir (Eylemler tablosu
+  Beceriler'e karışmıyor); başlık satırındaki farklı punto/kalınlıktaki hücreler başlık sayılır;
+  sağa/ortaya hizalı sütunlar tek sütun; birleşik hücreler span konumundan bölünür; yan yana basılmış
+  iki kopya tablo (Nadirlik | Değer | Nadirlik | Değer) alt alta dizilir. Testler her tablonun
+  dikdörtgen olduğunu ve başlık hücrelerinin dolu olduğunu denetler.
 - SRD metninin kendisinde geçen birkaç ürün adı ("D&D", "Tiamat", "yuan-ti") derlemede nötr ifadeyle
   değiştiriliyor (`TEXT_FIXUPS`, `build_source.py`).
 - Çeviri: 257 eşya adı ve 214 bölüm başlığı sözlüğe, 3.735 segment toplu çeviri, tutarlılık geçişi ve
   AI düzeltme turu (61 segment). Bağlama bağlı yeni ad alanları: nadirlik alanı ("Common" = Yaygın),
   silah ustalığı hücreleri ("Slow" = Yavaşlatma), dil tabloları ("Giant" = Devce).
-- Bellek: 14.010 segment, QC bulgusu 0. Asset'ler 3,9 MB.
+- Bellek: 14.034 segment, QC bulgusu 0. Asset'ler 3,9 MB.
 
 ## Tam çeviri (dal `claude/full-translation`)
 
