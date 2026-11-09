@@ -104,6 +104,8 @@ def segment_ns(rec: dict, path: str, dataset: str = "") -> str:
             return "spells"
         if header and col < len(header) and header[col] == "Language":
             return "lang"  # language tables: "Giant" is the language
+        if header and col < len(header) and header[col] in ("Rarity", "Item Rarity"):
+            return "rarity"  # rarity columns: "Common" is the rarity (Yaygın), not a wine (Sıradan)
     return ""
 
 
