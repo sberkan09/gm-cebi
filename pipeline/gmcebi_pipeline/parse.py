@@ -951,6 +951,34 @@ def parse_rule_sections(lines: list[Line]) -> list[RuleSection]:
         for r in recs:
             if key == "equipment":
                 r.blocks = [bl for bl in r.blocks if not (bl.type == "table" and bl.title in _ITEM_TABLES)]
+            r.blocks = _drop_empty_headings(r.blocks)
             if r.blocks:
                 out.append(r)
+    # Two chapters can have a section of the same name ("Magic Items"): the later one
+    # gets its chapter in the name so search results and lists can tell them apart.
+    # A chapter's own intro (name == chapter) keeps the plain name.
+    names = [r.name for r in out]
+    for r in out:
+        if names.count(r.name) > 1 and r.name != r.chapter:
+            r.name = f"{r.name} ({r.chapter})"
+    return out
+
+
+def _heading_level(bl: Block) -> int:
+    m = re.match(r"(#{3,4}) ", bl.text or "") if bl.type == "p" else None
+    return len(m.group(1)) if m else 0
+
+
+def _drop_empty_headings(blocks: list[Block]) -> list[Block]:
+    """Drop sub-section headings with nothing under them (e.g. "Other Tools", whose
+    entries live in the equipment dataset): followed by the end or by a heading of the
+    same or a higher level."""
+    out: list[Block] = []
+    for i, bl in enumerate(blocks):
+        lvl = _heading_level(bl)
+        if lvl:
+            nxt = next((b for b in blocks[i + 1:]), None)
+            if nxt is None or 0 < _heading_level(nxt) <= lvl:
+                continue
+        out.append(bl)
     return out

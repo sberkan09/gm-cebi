@@ -291,3 +291,11 @@ def test_equipment_rule_sections(source):
     assert not titles & {"Weapons", "Armor", "Adventuring Gear", "Airborne and Waterborne Vehicles"}
     weapons = [b.get("text") for b in rules["equipment-weapons"]["blocks"]]
     assert "#### Finesse" not in weapons and "### Properties" in weapons
+
+
+def test_rule_sections_have_unique_names_and_no_empty_headings(source):
+    names = [r["name"] for r in source["rules"]]
+    assert len(names) == len(set(names))
+    for r in source["rules"]:
+        heads = [i for i, b in enumerate(r["blocks"]) if (b.get("text") or "").startswith("###")]
+        assert not heads or heads[-1] != len(r["blocks"]) - 1, r["id"]

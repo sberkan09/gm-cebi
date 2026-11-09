@@ -4350,10 +4350,6 @@
    {
     "type": "p",
     "text": "Artisan’s Tools are each focused on crafting items and pursuing a trade. Each of these tools requires a separate proficiency."
-   },
-   {
-    "type": "p",
-    "text": "### Other Tools"
    }
   ]
  },
@@ -4776,7 +4772,7 @@
  },
  {
   "id": "equipment-magic-items",
-  "name": "Magic Items",
+  "name": "Magic Items (Equipment)",
   "source": {
    "document": "SRD 5.2.1",
    "page": 102,
