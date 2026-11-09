@@ -22,6 +22,7 @@ import argparse
 import csv
 import json
 import os
+import re
 import sys
 import urllib.request
 from pathlib import Path
@@ -97,26 +98,30 @@ def cmd_queue(args) -> None:
                 if (t.startswith("*") and f"{t}*" in item["en"]) or (not t.startswith("*") and f"“{t}" in item["en"])]
         item["titles"] = {t: titles[t] for t in refs}
     # Segments that are exactly a glossary term are filled from the glossary.
-    prefer = {"spells": "büyü adı", "conditions": "durum", "monsters": "canavar adı"}
+    prefer = {"spells": "büyü adı", "conditions": "durum", "monsters": "canavar adı",
+              "magic_items": "sihirli eşya adı", "rules": "bölüm"}
     # Record-name categories only fill segments of their own dataset ("Shield" spell ≠ armor).
-    own = {"büyü adı": "spells", "canavar adı": "monsters"}
+    own = {"büyü adı": "spells", "canavar adı": "monsters", "sihirli eşya adı": "magic_items"}
     auto = []
     for k, it in list(pending.items()):
         if it["ds"] == "lang":
             continue  # language names are not glossary terms ("Giant" ≠ Dev)
-        bullet = it["en"].startswith("- ")
-        word = it["en"][2:] if bullet else it["en"]
+        # A list bullet or a sub-section heading ("### Travel Pace") around a glossary term.
+        m = re.match(r"(- |#{3,4} )?(.*)$", it["en"], re.S)
+        prefix, word = m.group(1) or "", m.group(2)
+        heading = prefix.startswith("#")
         cands = [t for t in glossary.terms if t.en in (word, f"{word} [Action]")]
         if not cands:
             continue
-        cands.sort(key=lambda t: t.category != prefer.get(it["ds"], t.category))
-        cands = [t for t in cands if t.category not in ("bölüm",)] or cands
+        want = "bölüm" if heading else prefer.get(it["ds"])
+        cands.sort(key=lambda t: t.category != (want or t.category))
+        if not heading:
+            cands = [t for t in cands if t.category not in ("bölüm",)] or cands
         if own.get(cands[0].category, it["ds"]) != it["ds"]:
             continue
         pending.pop(k)
         auto.append(k)
-        tm.put(Entry(key=k, en=it["en"], tr=("- " if bullet else "") + cands[0].tr, engine="glossary",
-                     refs=it["refs"]))
+        tm.put(Entry(key=k, en=it["en"], tr=prefix + cands[0].tr, engine="glossary", refs=it["refs"]))
     for it in pending.values():
         it.pop("ds", None)
     if auto:

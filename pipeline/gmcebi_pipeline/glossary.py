@@ -235,8 +235,8 @@ def build_title_map(glossary: "Glossary", names: list[tuple[str, str, str]]) -> 
     """
     titles: dict[str, str] = {}
     for t in glossary.terms:
-        k = f"*{t.en}" if t.category == "büyü adı" else t.en
+        k = f"*{t.en}" if t.category in ("büyü adı", "sihirli eşya adı") else t.en
         titles.setdefault(k, t.tr)
     for ds, en, tr in names:
-        titles.setdefault(f"*{en}" if ds == "spells" else en, tr)
+        titles.setdefault(f"*{en}" if ds in ("spells", "magic_items") else en, tr)
     return titles
