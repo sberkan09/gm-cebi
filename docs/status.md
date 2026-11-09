@@ -1,6 +1,32 @@
 # Durum
 
-Son güncelleme: 2026-11-09 (savaş haritası, inceleme düzeltmeleri)
+Son güncelleme: 2026-11-09 (SRD içeriğinin tamamı Türkçe)
+
+## Tam çeviri (dal `claude/full-translation`)
+
+SRD 5.2.1'deki 1.080 kaydın tamamı Türkçe: 339 büyü, 330 canavar, 12 sınıf + 12 alt sınıf,
+9 soy, 4 geçmiş, 17 hüner, 184 ekipman, 15 durum, 140 kural sözlüğü girdisi, silah özellik ve
+ustalıkları. Asset'ler 2,9 MB (bütçe 10 MB).
+
+- **Ad geçişi:** 289 büyü, 330 canavar ve 121 ekipman adı sözlüğe eklendi (`öneri`, zorunlu değil);
+  dil adları (`dil`). Dizi kuralları: Lesser/Greater = Küçük/Üstün, Conjure = Çağır,
+  Summon = Celp Et; ejderhalar [Yaş] [Renk] Ejderha; devler "X Devi"; Devil = Şeytan.
+- **Toplu çeviri:** 7.302 segment, 64 parti; her parti içe aktarılmadan önce QC'den temiz geçti.
+  Partiler paralel çevrildiği için ikinci bir tutarlılık geçişi yapıldı: stat bloğu etiketleri,
+  kullanım sınırları ("Günde 3", "İstediği Zaman"), hasar türü dilbilgisi (Delici hasar / Ateş
+  hasarı), dil ve düzlem adları, sınıf özelliği adları tek biçime çekildi (323 segment).
+- **Bellek:** 9.647 segment, QC bulgusu 0. Kalitenin insan incelemesi yapılmadı; mağaza metinleri
+  ve Ayarlar'daki not bunu söylüyor.
+- **Veri hattı düzeltmeleri:** sınıf büyü listesi hücreleri büyü adı olarak anahtarlanıyor ("Light"
+  orada Işık, silah özelliği değil); canavarların dil satırı ayrı ad alanında ("Giant" dili ≠ Dev);
+  araç/eyer/gemi tabloları düzgün ayrıştırılıyor (eski "Speed", "Exotic", yemek satırı kayıtları
+  kalktı); "11/2 pints" → "1½".
+- **QC takip maddeleri kapandı:** `?` önekli serbest alternatifler (Tür, Buz…), kısa köklerde
+  -ce/-le eki kabul edilmiyor (ince ≠ İn), Dirençli/Bağışık/fitliğine, ondalık virgül, NPC,
+  "Grappling Hook" ve "weather conditions" yanlış alarmları, "büyü kurtarma ZD'n".
+  Sayı denetimi bilerek sırasız: Türkçede öğe dizilişi değişiyor.
+- **Uygulama:** canavar kartı ve ekipman alan başlıkları Türkçe (Beceriler, Duyular, Fiyat…);
+  Türkçe ek geri düşmesi yalnızca gövde metni eşleştiğinde de çalışıyor.
 
 ## Çevrimiçi sahne (isteğe bağlı, NeuraCraft Cloud)
 
@@ -89,8 +115,8 @@ iOS hazırlığı: `docs/ios-testflight.md`. Türkçe metin kuralları: `docs/tu
 
 ### Sözlük
 
-- `pipeline/glossary.csv`: 416 çekirdek terim + 50 pilot büyü adı + 25 bölüm/başlık adı.
-- Durum: 116 topluluk, 257 öneri, 43 tartışmalı.
+- `pipeline/glossary.csv`: 1.251 satır — çekirdek terimler, 339 büyü adı, 330 canavar adı, ekipman, 19 dil, 25 bölüm/başlık.
+- Durum: 116 topluluk, 1.092 öneri, 43 tartışmalı.
 - İnceleme belgesi: `docs/glossary-review.md` (tartışmalılar en üstte).
 
 ### Pilot çeviri
@@ -120,22 +146,16 @@ olmadığı için atlanıyor.
 
 ## Onay bekleyenler (ürün sahibi)
 
-1. Sözlük: özellikle 43 tartışmalı terim (Güç/Kuvvet, Bilgelik, Yetkinlik, Cantrip, Sehhar, para birimleri…) ve inceleme ajanının işaret ettiği "Hayvan" (Beast) ↔ "Hayvanlar" (Animals bölümü) yakınlığı.
+1. Sözlük: 740 yeni ad (büyü, canavar, ekipman) ve özellikle 43 tartışmalı terim (Güç/Kuvvet, Bilgelik, Yetkinlik, Cantrip, Sehhar, para birimleri…) ve inceleme ajanının işaret ettiği "Hayvan" (Beast) ↔ "Hayvanlar" (Animals bölümü) yakınlığı.
 2. Pilot çeviri kalitesi ve üslup (`docs/pilot-samples.md`).
 3. Türkçe "değiştirilmiş eser" notu ve atıf metninin "Hakkında" ekranındaki biçimi (`docs/decisions.md`). Şu an Ayarlar ve Hakkında ekranında öneri metniyle duruyor.
 4. Uygulama adı ("GM Cebi") ve paket adı (önerilen: `io.github.sberkan09.gmcebi`, Android ve iOS aynı; ilk yüklemeden sonra değişmez).
 5. Üretime çıkmadan önce GM Paketi'nin ücretsiz mi kalacağı (test kanallarında açık).
 
-## Toplu çeviri öncesi takip maddeleri (PR #2 ikinci inceleme)
-
-1. Sıradan kelime olan reddedilen alternatifler (Tür, Ses, Buz, Felç, Kesme, Koşma, Yuva, Körlük, etken) yanlış alarm üretecek; alternatif bazında "reddedilmez" işareti eklenmeli.
-2. Kısa kökler sesteş kelimeleri hâlâ geçiriyor (İn ↔ İnce, Din ↔ dinle, Küp ↔ küpe, Ork ↔ orkide…); en az Lair ve Religion için `tr_pattern`/istisna. Doğal türetmeler (Dirençli, Bağışık, fitliğine) `tr_pattern` ile açılmalı.
-3. Sayı denetimi sırasız (yer değiştirmiş sayılar geçiyor); Türkçe ondalık virgül (1,5) henüz reddediliyor.
-4. `see_also` içindeki "NPC" sözlüğe eklenmeli.
-
 ## Sonraki adımlar
 
 - Paket adı onayı, ardından Play iç/kapalı test ve TestFlight'a ilk yükleme (`docs/release.md`).
 - Test grubundan ilk geri bildirim; sözlük kararları.
-- Toplu çeviri öncesi takip maddeleri (yukarıda), ardından kalan veri kümelerinin çevirisi.
+- Çevirinin insan incelemesi: önce canavar kartları ve sınıf özellikleri; tartışmalı terimler ve yeni adlar (Efsuncu, Sihirci, Wight, Kâbus…) için ürün sahibi kararı.
+- Kaynakta kalan iki bozuk segment (Find Steed metnine yapışan Find the Path cümlesi, Antipathy/Sympathy'de kesik cümle) ayrıştırıcıda düzeltilmeli.
 - Faz 2 planı: ses kaydı → özet → NPC/mekân defteri; Fate desteği.

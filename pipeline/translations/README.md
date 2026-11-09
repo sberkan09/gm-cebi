@@ -17,3 +17,12 @@
   - Canavar kartı sütunları MOD SAVE → DEĞ KZ; "Recharges after a Long Rest" → "Uzun Dinlenmeden Sonra Yenilenir"
   - Bileşen kısaltmaları V, S, M → S (Sözlü), B (Bedensel), M (Malzeme)
   - Henüz sözlükte olmayan büyü adları italik ve İngilizce bırakılır (ör. *Greater Restoration*)
+
+## Tam çeviri (2026-11-09)
+
+- Talimat aynı (`prompts/translate_tr.md`); üretici `claude-opus-5-5`, oturum içi, 16 paralel çevirmen.
+- Önce ad geçişi (büyü, canavar, ekipman adları sözlüğe), sonra `translate queue` → 64 parti →
+  her parti `check_batch` ile temiz → `translate import`.
+- Paralel partilerin ayrıştığı ifadeler için tek bir üslup tablosuyla ikinci geçiş yapıldı (323
+  segment). Ortak kararlar `docs/decisions.md`'de (2026-11-09).
+- Belleğin tamamı QC'den bulgusuz geçiyor; insan incelemesi henüz yapılmadı.
