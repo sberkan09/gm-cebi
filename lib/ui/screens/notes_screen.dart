@@ -30,10 +30,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
   @override
   Widget build(BuildContext context) {
     if (!ref.watch(entitlementsProvider).allows(Feature.sessionNotes)) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Notlar'), actions: const [_NpcButton()]),
-        body: const GmPackLocked(feature: 'Oturum notları'),
-      );
+      return Scaffold(appBar: AppBar(title: const Text('Notlar')), body: const GmPackLocked(feature: 'Oturum notları'));
     }
     final notes = ref.watch(notesProvider);
     final t = Theme.of(context).textTheme;

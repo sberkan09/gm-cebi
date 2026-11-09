@@ -137,6 +137,75 @@ void main() {
     });
   });
 
+  group('consistency', () {
+    test('details that do not fit a species never go to it', () {
+      final g = NpcGenerator(Random(17));
+      for (final s in NpcSpecies.values) {
+        final foreign = {...?npcAppearancesNotFor[s]};
+        for (var i = 0; i < 300; i++) {
+          final a = g.generate(NpcFilters(species: s))[NpcField.appearance];
+          expect(foreign, isNot(contains(a)), reason: '$s: $a');
+          expect(appearancesFor(s), contains(a));
+        }
+      }
+    });
+
+    test('a locked appearance that does not fit the new species is re-rolled', () {
+      final g = NpcGenerator(Random(23));
+      final tail = npcSpeciesAppearances[NpcSpecies.tiefling]!.first;
+      final hair = npcAppearancesNotFor[NpcSpecies.ejderdogan]!.first;
+      final tiefling = g.generate(const NpcFilters(species: NpcSpecies.tiefling));
+      final withTail = tiefling.copyWith(values: {...tiefling.values, NpcField.appearance: tail});
+      final withHair = tiefling.copyWith(values: {...tiefling.values, NpcField.appearance: hair});
+      const locked = {NpcField.appearance};
+      for (var i = 0; i < 20; i++) {
+        expect(
+          g.generate(const NpcFilters(species: NpcSpecies.elf), withTail, locked)[NpcField.appearance],
+          isNot(tail),
+        );
+        expect(g.generate(const NpcFilters(species: NpcSpecies.tiefling), withTail, locked)[NpcField.appearance], tail);
+        expect(
+          g.generate(const NpcFilters(species: NpcSpecies.ejderdogan), withHair, locked)[NpcField.appearance],
+          isNot(hair),
+        );
+        expect(g.generate(const NpcFilters(species: NpcSpecies.insan), withHair, locked)[NpcField.appearance], hair);
+      }
+    });
+
+    test('no opposite traits, no epithet that contradicts a trait', () {
+      for (final rng in [Random(31), _ZeroRandom()]) {
+        final g = NpcGenerator(rng);
+        for (var i = 0; i < 2000; i++) {
+          var npc = g.generate();
+          if (i.isOdd) npc = g.reroll(g.reroll(npc, NpcField.personality), NpcField.name);
+          final traits = traitsOf(npc[NpcField.personality]);
+          for (final (a, b) in npcOppositeTraits) {
+            expect(traits.contains(a) && traits.contains(b), isFalse, reason: npc[NpcField.personality]);
+          }
+          final clashes = npcEpithetClashes[epithetOf(npc.name)] ?? const <String>{};
+          expect(traits.where(clashes.contains), isEmpty, reason: '${npc.name}: ${npc[NpcField.personality]}');
+        }
+      }
+    });
+
+    test('a family name never repeats the given name', () {
+      for (final s in NpcSpecies.values) {
+        final n = npcNames[s]!;
+        for (final given in [...n.female, ...n.male, ...n.neutral]) {
+          expect(n.family.where((f) => !trLower(f).contains(trLower(given))), isNotEmpty, reason: given);
+        }
+      }
+      final g = NpcGenerator(Random(41));
+      for (var i = 0; i < 3000; i++) {
+        var npc = g.generate();
+        if (i.isOdd) npc = g.reroll(npc, NpcField.name);
+        final words = npc.name.split(' ');
+        if (epithetOf(npc.name) != null) continue;
+        expect(trLower(words.last).contains(trLower(words.first)), isFalse, reason: npc.name);
+      }
+    });
+  });
+
   group('tables', () {
     void unique(String what, List<String> list) {
       final seen = <String>{};
@@ -195,6 +264,21 @@ void main() {
       unique('speech', npcSpeechQuirks);
       unique('hooks', npcHooks);
       unique('attitude notes', [for (final l in npcAttitudeNotes.values) ...l]);
+    });
+
+    test('exclusion and clash tables point at real entries', () {
+      for (final e in npcAppearancesNotFor.entries) {
+        for (final a in e.value) {
+          expect(npcAppearances, contains(a), reason: '${e.key}: $a');
+        }
+      }
+      for (final (a, b) in npcOppositeTraits) {
+        expect(npcTraits, containsAll([a, b]));
+      }
+      for (final e in npcEpithetClashes.entries) {
+        expect(npcEpithets, contains(e.key));
+        expect(npcTraits, containsAll(e.value));
+      }
     });
 
     test('sentences are punctuated, traits are lowercase predicates', () {
@@ -257,6 +341,7 @@ void main() {
         'legolas',
         'galadriel',
         'tolkien',
+        'tarikat',
       ];
       final all = [
         for (final n in npcNames.values) ...[...n.female, ...n.male, ...n.neutral, ...n.family],

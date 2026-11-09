@@ -48,8 +48,8 @@ const npcNames = <NpcSpecies, NameSet>{
     ],
     neutral: ['Ekin', 'Evren', 'Derin', 'Kayra', 'Erinç', 'Yansı'],
     family: [
-      'Demirelli', 'Kırçiçek', 'Taşyürek', 'Gökbilek', 'Yeldeğirmen', 'Çamdibi', 'Kuzgunoğlu', 'Bakırtaş', //
-      'Tuzcuoğlu', 'Akkavak', 'Dumanlı', 'Sarıbaşak', 'Kayaköklü', 'Ayazoğlu', 'Gümüşdere', 'Çakmaktaşı',
+      'Demirocaklı', 'Kırçiçek', 'Taşyürek', 'Gökbilek', 'Yeldeğirmen', 'Çamdibi', 'Kuzgunoğlu', 'Bakırtaş', //
+      'Tuzlakaya', 'Akkavak', 'Dumanlı', 'Sarıbaşak', 'Kayaköklü', 'Ayazoğlu', 'Gümüşdere', 'Çakmaktaşı',
       'Ocaklı', 'Yamaçlı', 'Değirmentaşı', 'Söğütlü', 'Karabaşak', 'Kartaloğlu', 'Ballıdere', 'Göktaşlı',
       'Kırlangıçlı', 'Ardıçlı', 'Pusatlı', 'Kordemir', 'Yalazoğlu', 'Taşkapılı',
     ],
@@ -79,7 +79,7 @@ const npcNames = <NpcSpecies, NameSet>{
     ],
     male: [
       'Tokdur', 'Gürbak', 'Karduk', 'Dökmer', 'Kozbak', 'Torgut', 'Bükdar', 'Gortak', //
-      'Dragmur', 'Brokkar', 'Durgan', 'Hakmur', 'Kragdin', 'Borduk', 'Grumdal',
+      'Dragmur', 'Brakdur', 'Durgan', 'Hakmur', 'Kragdin', 'Borduk', 'Grumdal',
     ],
     neutral: ['Krag', 'Dorn', 'Bukra', 'Tobrek', 'Gand'],
     family: [
@@ -111,7 +111,7 @@ const npcNames = <NpcSpecies, NameSet>{
       'Tazzi', 'Linnik', 'Biksi', 'Dorni', 'Ozzla', 'Fenzi', 'Klikka',
     ],
     male: [
-      'Bimbol', 'Tokkel', 'Nizzo', 'Zarbin', 'Dimbur', 'Fennik', 'Gobbel', 'Pazzik', //
+      'Bimbol', 'Tokkel', 'Nizzo', 'Zarbin', 'Dimbur', 'Fennik', 'Gimbek', 'Pazzik', //
       'Korbin', 'Orvik', 'Zappo', 'Ribbik', 'Tumzel', 'Vobbik', 'Kizbert',
     ],
     neutral: ['Pim', 'Zuzu', 'Tok', 'Nib', 'Fiz', 'Çıtır'],
@@ -162,7 +162,7 @@ const npcNames = <NpcSpecies, NameSet>{
   // Smoky, sharp; family names are dusk-and-ember compounds or invented houses.
   NpcSpecies.tiefling: NameSet(
     female: [
-      'Azrava', 'Selmeth', 'Zevira', 'Velkis', 'Druzella', 'Ravessa', 'Sevrine', 'Malveth', //
+      'Azrava', 'Selmeth', 'Zevira', 'Velkis', 'Kalvira', 'Ravessa', 'Sevrine', 'Malveth', //
       'Tezrin', 'Ilvexa', 'Vorena', 'Zelith', 'Ashveth', 'Kerissa', 'Moravi',
     ],
     male: [
@@ -183,9 +183,9 @@ const npcNames = <NpcSpecies, NameSet>{
     ],
     male: [
       'Tagrun', 'Kolbar', 'Udrak', 'Harmuk', 'Oskan', 'Baykor', 'Kayrak', 'Burgan', //
-      'Otrak', 'Semrek', 'Akdur', 'Tavkan', 'Gorvai', 'Ilkar', 'Mavrak',
+      'Otrak', 'Semrek', 'Akdur', 'Tavkan', 'Gorvai', 'Ilkar', 'Mavrak', 'Bora', 'Ayaz', 'Sarp', 'Yamaç',
     ],
-    neutral: ['Bora', 'Ayaz', 'Sarp', 'Tuna', 'Yamaç'],
+    neutral: ['Tuna', 'Orun', 'Tarvi', 'Ekai', 'Ulun'],
     family: [
       'Kayaomuz', 'Buzbilek', 'Zirveyürüyen', 'Taşkucak', 'Çığsesi', 'Kartalyuva', 'Doruksoylu', 'Yamaçkoşan', //
       'Fırtınasırtı', 'Uçurumbekçisi', 'Göğekuzanan', 'Granityürek', 'Bulutdelen', 'Sarpadım', 'Karkıran',
@@ -211,7 +211,8 @@ const npcOccupations = [
   'Sınır nöbetçisi', 'Ödül avcısı', 'Tapınak rahibi', 'Dilenci',
 ];
 
-/// One striking detail. Written to fit any species and gender.
+/// One striking detail, for any gender. Details that do not fit a species
+/// (hair on an Ejderdoğan) are listed in [npcAppearancesNotFor].
 const npcAppearances = [
   'Sol kaşını ikiye bölen eski bir yara izi var.',
   'Gözleri farklı renkte: biri ela, biri gri.',
@@ -220,7 +221,7 @@ const npcAppearances = [
   'Saçlarına küçük kemik boncuklar örmüş.',
   'Hep fazla büyük bir paltonun içinde kayboluyor.',
   'Kolunda soluk bir harita dövmesi var.',
-  'Ön dişlerinden biri altın kaplama.',
+  'Avucunun içinde eski bir mühür izi var.',
   'Yüzü çillerle kaplı, burnu güneşten soyulmuş.',
   'Her zaman tek eldiven takıyor.',
   'Kulağında kocaman, uyumsuz bir küpe sallanıyor.',
@@ -231,7 +232,7 @@ const npcAppearances = [
   'Kıyafeti yamalı ve her yama başka renk.',
   'Şapkasına parlak yeşil bir kuş tüyü takmış.',
   'Kemerinde irili ufaklı bir düzine kese sallanıyor.',
-  'Sesinden beklenmeyecek kadar iri yarı.',
+  'İri yarı ama sesi beklenmedik kadar ince.',
   'Saçının bir tutamı bembeyaz, geri kalanı simsiyah.',
   'Hiç kırpmadan bakan soluk mavi gözleri var.',
   'Yürürken hafifçe aksıyor ve oymalı bir bastona dayanıyor.',
@@ -250,7 +251,7 @@ const npcAppearances = [
   'Cüppesinin eteği çamur ve kurumuş yosun içinde.',
   'Hep bir şey çiğniyor: kuru üzüm, kök, ot.',
   'Kollarında eski yanık izleri var; ocak başında büyüdüğü belli.',
-  'Kıyafetleri pahalı ama birkaç beden büyük; başkasından kalmış gibi.',
+  'Kıyafetleri pahalı ama modası çoktan geçmiş.',
   'Belinde süslü ama kını boş bir kılıç kemeri var.',
   'Teni denizcilerinki gibi tuzdan ve güneşten sertleşmiş.',
   'Saçlarına minik ziller takmış; yürüdükçe çınlıyor.',
@@ -260,7 +261,25 @@ const npcAppearances = [
   'Dudağının kenarında yeni dikilmiş küçük bir yara var.',
 ];
 
-/// Extra appearance details that only make sense for one species.
+/// General details that do not fit a species: Ejderdoğanlar have scales, no
+/// hair, eyebrows or outer ears. Every entry must be in [npcAppearances].
+const npcAppearancesNotFor = <NpcSpecies, Set<String>>{
+  NpcSpecies.ejderdogan: {
+    'Saçlarına küçük kemik boncuklar örmüş.',
+    'Yüzü çillerle kaplı, burnu güneşten soyulmuş.',
+    'Saçının bir tutamı bembeyaz, geri kalanı simsiyah.',
+    'Kaşları o kadar gür ki gözlerini gölgeliyor.',
+    'Sol kaşını ikiye bölen eski bir yara izi var.',
+    'Saçını topuz yapmış, içine iki kalem sokmuş.',
+    'Saçlarına minik ziller takmış; yürüdükçe çınlıyor.',
+    'Gülümseyince yanaklarında derin gamzeler beliriyor.',
+    'Teni denizcilerinki gibi tuzdan ve güneşten sertleşmiş.',
+    'Bir kulağının ucu kesik.',
+  },
+};
+
+/// Extra appearance details that only make sense for one species. The dwarf
+/// beard line is for any gender (docs/decisions.md).
 const npcSpeciesAppearances = <NpcSpecies, List<String>>{
   NpcSpecies.insan: [
     'Elinde yıpranmış bir boncuk dizisini durmadan çeviriyor.',
@@ -310,6 +329,7 @@ const npcSpeciesAppearances = <NpcSpecies, List<String>>{
 };
 
 /// Lowercase predicates; one or two are joined ("Meraklı, kolay güler.").
+/// Pairs in [npcOppositeTraits] never appear together.
 const npcTraits = [
   'meraklı', 'kuşkucu', 'aşırı kibar', 'kolay güler', 'alıngan', 'sabırsız', 'cömert', 'cimri', //
   'dedikoduya bayılır', 'sözünün eri', 'övülmeyi sever', 'utangaç', 'gösterişçi', 'iyimser', 'karamsar',
@@ -323,6 +343,37 @@ const npcTraits = [
   'şakacı', 'vicdanlı', 'kıskanç', 'gururlu',
 ];
 
+/// Traits that contradict each other.
+const npcOppositeTraits = [
+  ('kindar', 'affedici'),
+  ('cömert', 'cimri'),
+  ('titiz', 'dağınık'),
+  ('tembel', 'çalışkan'),
+  ('kibirli', 'alçakgönüllü'),
+  ('neşeli', 'asık suratlı'),
+  ('kolay güler', 'asık suratlı'),
+  ('şakacı', 'asık suratlı'),
+  ('iyimser', 'karamsar'),
+  ('kurnaz', 'saf'),
+  ('kuşkucu', 'saf'),
+  ('utangaç', 'gösterişçi'),
+  ('aceleci', 'aşırı temkinli'),
+  ('maceraperest', 'evine düşkün'),
+  ('sözünü esirgemez', 'lafı dolandırır'),
+  ('aşırı kibar', 'sözünü esirgemez'),
+  ('sadık', 'fırsatçı'),
+];
+
+/// Epithets that contradict a trait ("Kurnaz" who is "saf").
+const npcEpithetClashes = <String, Set<String>>{
+  'Kurnaz': {'saf'},
+  'Bilge': {'saf'},
+  'Sessiz': {'dedikoduya bayılır', 'gösterişçi', 'sözünü esirgemez'},
+  'Çevik': {'tembel'},
+  'Deli': {'aşırı temkinli'},
+  'Tilki': {'saf'},
+};
+
 const npcMotivations = [
   'Borcunu ödeyip ailesinin tarlasını geri almak istiyor.',
   'Yıllar önce kaybolan kardeşini arıyor.',
@@ -334,7 +385,7 @@ const npcMotivations = [
   'Yıllar önce verdiği bir sözü tutmak zorunda olduğuna inanıyor.',
   'Dünyanın her köşesinde en az bir gece uyumak istiyor.',
   'Hastalanan çocuğu için şifa arıyor.',
-  'Kasabadaki herkesin ona borçlu olmasını istiyor; iyilikle ya da parayla.',
+  'Kasabadaki herkesin kendisine borçlu olmasını istiyor; iyilikle ya da parayla.',
   'Gördüğü tekrar eden bir rüyanın anlamını çözmek istiyor.',
   'Yıkılmaya yüz tutmuş tapınağın onarımı için para topluyor.',
   'Rakibinden daha iyi bir usta olduğunu kanıtlamak istiyor.',
@@ -394,9 +445,9 @@ const npcFlawsAndSecrets = [
   'Kıskançlık yüzünden en iyi dostunu ele verdi.',
   'Rüyalarında ona fısıldayan bir ses var.',
   'Parasını saymadan uyuyamıyor.',
-  'Kimsenin duymadığı gizli bir tarikata bağlı.',
+  'Kimsenin bilmediği gizli bir cemiyete bağlı.',
   'Yıllar önce ödünç aldığı kitabı geri vermedi; sahibi bir büyücü.',
-  'Hiçbir tartışmayı kaybetmeye tahammülü yok.',
+  'Her gece gizlice mezarlığa gidiyor.',
   'Kayıp bir mirasın tek vârisi olduğunu biliyor ama söylemiyor.',
 ];
 

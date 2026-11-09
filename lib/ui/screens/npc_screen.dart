@@ -1,31 +1,42 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/stat_input.dart';
 import '../../features/flags.dart';
 import '../../features/npc/npc_generator.dart';
 import '../../providers.dart';
 import '../widgets/locked.dart';
-import 'dice_screen.dart';
 import 'notes_screen.dart';
 
-/// Random source for NPCs: the dice source, so tests that seed the dice also
-/// make NPC generation deterministic.
-final npcRandomProvider = Provider<Random>((ref) => ref.watch(diceRandomProvider));
-
 class NpcSessionState {
-  const NpcSessionState({this.current, this.recent = const []});
+  const NpcSessionState({
+    this.current,
+    this.recent = const [],
+    this.filters = const NpcFilters(),
+    this.locked = const {},
+  });
 
   final Npc? current;
 
   /// Earlier NPCs of this session, newest first (not including [current]).
   final List<Npc> recent;
+
+  final NpcFilters filters;
+  final Set<NpcField> locked;
+
+  NpcSessionState copyWith({Npc? current, List<Npc>? recent, NpcFilters? filters, Set<NpcField>? locked}) =>
+      NpcSessionState(
+        current: current ?? this.current,
+        recent: recent ?? this.recent,
+        filters: filters ?? this.filters,
+        locked: locked ?? this.locked,
+      );
 }
 
-/// The NPC on the card and the last few before it. Kept in memory for the
-/// session only; anything worth keeping goes to the notes.
+/// The NPC on the card, the last few before it, the filters and the locks.
+/// Kept in memory for the session only (leaving the screen keeps them);
+/// anything worth keeping goes to the notes.
 class NpcSession extends Notifier<NpcSessionState> {
   static const maxRecent = 10;
 
@@ -36,16 +47,30 @@ class NpcSession extends Notifier<NpcSessionState> {
       [if (state.current != null) state.current!, ...rest].take(maxRecent).toList();
 
   /// A newly generated NPC; the previous one moves to the recent list.
-  void show(Npc npc) => state = NpcSessionState(current: npc, recent: _withCurrent(state.recent));
+  /// Returns false (and changes nothing) when it equals the current NPC,
+  /// which happens when every field is locked.
+  bool show(Npc npc) {
+    if (npc == state.current) return false;
+    state = state.copyWith(current: npc, recent: _withCurrent(state.recent));
+    return true;
+  }
 
   /// The same NPC with a changed field.
-  void update(Npc npc) => state = NpcSessionState(current: npc, recent: state.recent);
+  void update(Npc npc) => state = state.copyWith(current: npc);
 
   /// Brings back a recent NPC; the one on the card takes its place in the list.
   void restore(int index) {
     final picked = state.recent[index];
     final rest = [...state.recent]..removeAt(index);
-    state = NpcSessionState(current: picked, recent: _withCurrent(rest));
+    state = state.copyWith(current: picked, recent: _withCurrent(rest));
+  }
+
+  void setFilters(NpcFilters filters) => state = state.copyWith(filters: filters);
+
+  void toggleLock(NpcField f) {
+    final locked = {...state.locked};
+    if (!locked.remove(f)) locked.add(f);
+    state = state.copyWith(locked: locked);
   }
 }
 
@@ -61,35 +86,47 @@ class NpcScreen extends ConsumerStatefulWidget {
 }
 
 class _NpcScreenState extends ConsumerState<NpcScreen> {
-  NpcFilters _filters = const NpcFilters();
-  final Set<NpcField> _locked = {};
+  bool _saving = false;
+
+  /// The NPC last saved to the notes; saving it again is disabled until it
+  /// changes, so a double tap never makes two notes.
+  Npc? _saved;
 
   NpcGenerator get _generator => NpcGenerator(ref.read(npcRandomProvider));
 
+  NpcSession get _session => ref.read(npcSessionProvider.notifier);
+
   void _generate() {
-    final session = ref.read(npcSessionProvider.notifier);
-    final current = ref.read(npcSessionProvider).current;
-    session.show(_generator.generate(_filters, current, _locked));
+    final s = ref.read(npcSessionProvider);
+    if (!_session.show(_generator.generate(s.filters, s.current, s.locked))) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('Tüm alanlar kilitli; değişecek bir şey yok.')));
+    }
   }
 
-  void _reroll(Npc npc, NpcField f) =>
-      ref.read(npcSessionProvider.notifier).update(_generator.reroll(npc, f, _filters));
-
-  void _toggleLock(NpcField f) => setState(() => _locked.contains(f) ? _locked.remove(f) : _locked.add(f));
+  void _reroll(Npc npc, NpcField f) => _session.update(_generator.reroll(npc, f, ref.read(npcSessionProvider).filters));
 
   Future<void> _saveNote(Npc npc) async {
+    if (_saving || _saved == npc) return;
+    setState(() => _saving = true);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    final id = await ref.read(databaseProvider).createNote(title: 'NPC: ${npc.name}', body: npc.toNoteText());
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text('${npc.name} notlara kaydedildi'),
-        action: SnackBarAction(
-          label: 'Aç',
-          onPressed: () => navigator.push(MaterialPageRoute<void>(builder: (_) => NoteEditorScreen(noteId: id))),
+    try {
+      final id = await ref.read(databaseProvider).createNote(title: 'NPC: ${npc.name}', body: npc.toNoteText());
+      _saved = npc;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('${npc.name} notlara kaydedildi'),
+          action: SnackBarAction(
+            label: 'Aç',
+            onPressed: () => navigator.push(MaterialPageRoute<void>(builder: (_) => NoteEditorScreen(noteId: id))),
+          ),
         ),
-      ),
-    );
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   Future<void> _addToInitiative(Npc npc) async {
@@ -114,6 +151,7 @@ class _NpcScreenState extends ConsumerState<NpcScreen> {
     }
     final session = ref.watch(npcSessionProvider);
     final npc = session.current;
+    final locked = session.locked;
     final t = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
@@ -122,7 +160,11 @@ class _NpcScreenState extends ConsumerState<NpcScreen> {
         key: const Key('npc-list'),
         padding: const EdgeInsets.fromLTRB(12, 4, 12, 32),
         children: [
-          _Filters(filters: _filters, onChanged: (f) => setState(() => _filters = f)),
+          _Filters(
+            filters: session.filters,
+            nameLocked: npc != null && locked.contains(NpcField.name),
+            onChanged: _session.setFilters,
+          ),
           const SizedBox(height: 8),
           FilledButton.icon(
             key: const Key('npc-generate'),
@@ -143,7 +185,7 @@ class _NpcScreenState extends ConsumerState<NpcScreen> {
           ),
           if (npc != null) ...[
             const SizedBox(height: 8),
-            _NpcCard(npc: npc, locked: _locked, onReroll: (f) => _reroll(npc, f), onToggleLock: _toggleLock),
+            _NpcCard(npc: npc, locked: locked, onReroll: (f) => _reroll(npc, f), onToggleLock: _session.toggleLock),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -152,9 +194,9 @@ class _NpcScreenState extends ConsumerState<NpcScreen> {
                 FilledButton.tonalIcon(
                   key: const Key('npc-save-note'),
                   style: FilledButton.styleFrom(minimumSize: const Size(48, 48)),
-                  onPressed: () => _saveNote(npc),
-                  icon: const Icon(Icons.note_add_outlined),
-                  label: const Text('Nota kaydet'),
+                  onPressed: _saving || _saved == npc ? null : () => _saveNote(npc),
+                  icon: Icon(_saved == npc ? Icons.check : Icons.note_add_outlined),
+                  label: Text(_saved == npc ? 'Notlara kaydedildi' : 'Nota kaydet'),
                 ),
                 FilledButton.tonalIcon(
                   key: const Key('npc-add-initiative'),
@@ -180,7 +222,7 @@ class _NpcScreenState extends ConsumerState<NpcScreen> {
                   leading: const Icon(Icons.history),
                   title: Text(r.name),
                   subtitle: Text('${r.summary} · ${r[NpcField.occupation]}'),
-                  onTap: () => ref.read(npcSessionProvider.notifier).restore(i),
+                  onTap: () => _session.restore(i),
                 ),
               ),
           ],
@@ -191,21 +233,25 @@ class _NpcScreenState extends ConsumerState<NpcScreen> {
 }
 
 class _Filters extends StatelessWidget {
-  const _Filters({required this.filters, required this.onChanged});
+  const _Filters({required this.filters, required this.nameLocked, required this.onChanged});
 
   final NpcFilters filters;
+
+  /// A locked name keeps the species and gender, so those chips are disabled.
+  final bool nameLocked;
   final ValueChanged<NpcFilters> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
     final summary = [
       filters.species?.label ?? 'Rastgele soy',
       filters.gender == null ? 'Cinsiyet fark etmez' : _genderLabel(filters.gender!),
       filters.attitude?.label ?? 'Rastgele tavır',
     ].join(' · ');
 
-    Widget group<T>(String title, List<(T?, String)> options, T? selected, ValueChanged<T?> onSelect) => Padding(
+    Widget group<T>(String title, List<(T?, String)> options, T? selected, ValueChanged<T?>? onSelect) => Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +263,11 @@ class _Filters extends StatelessWidget {
             runSpacing: 2,
             children: [
               for (final (value, label) in options)
-                ChoiceChip(label: Text(label), selected: selected == value, onSelected: (_) => onSelect(value)),
+                ChoiceChip(
+                  label: Text(label),
+                  selected: selected == value,
+                  onSelected: onSelect == null ? null : (_) => onSelect(value),
+                ),
             ],
           ),
         ],
@@ -231,21 +281,38 @@ class _Filters extends StatelessWidget {
         collapsedShape: const Border(),
         leading: const Icon(Icons.tune),
         title: const Text('Filtreler'),
-        subtitle: Text(summary),
+        subtitle: Text(nameLocked ? 'Ad kilitli: soy ve cinsiyet korunuyor' : summary),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (nameLocked)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Icon(Icons.lock, size: 18, color: scheme.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Ad kilitli: soy ve cinsiyet korunuyor. Değiştirmek için adın kilidini aç.',
+                      key: const Key('npc-name-locked-hint'),
+                      style: t.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           group<NpcSpecies>(
             'Soy',
             [(null, 'Rastgele'), for (final s in NpcSpecies.values) (s, s.label)],
             filters.species,
-            (v) => onChanged(filters.copyWith(species: () => v)),
+            nameLocked ? null : (v) => onChanged(filters.copyWith(species: () => v)),
           ),
           group<NpcGender>(
             'Cinsiyet',
             [(null, 'Fark etmez'), for (final g in NpcGender.values) (g, _genderLabel(g))],
             filters.gender,
-            (v) => onChanged(filters.copyWith(gender: () => v)),
+            nameLocked ? null : (v) => onChanged(filters.copyWith(gender: () => v)),
           ),
           group<NpcAttitude>(
             'Tavır',
@@ -390,7 +457,8 @@ class _InitiativeEntry {
   final int? ac;
 }
 
-/// Name prefilled; HP, AC and initiative bonus are optional.
+/// Name prefilled; HP, AC and initiative bonus are optional. Same checks as
+/// the initiative screen's add dialog (lib/core/stat_input.dart).
 class _InitiativeDialog extends StatefulWidget {
   const _InitiativeDialog({required this.name});
 
@@ -406,6 +474,9 @@ class _InitiativeDialogState extends State<_InitiativeDialog> {
   final _ac = TextEditingController();
   final _bonus = TextEditingController(text: '0');
 
+  /// Errors show after the first "Ekle".
+  bool _tried = false;
+
   @override
   void dispose() {
     for (final c in [_name, _hp, _ac, _bonus]) {
@@ -414,18 +485,35 @@ class _InitiativeDialogState extends State<_InitiativeDialog> {
     super.dispose();
   }
 
-  static int? _int(String s) {
-    final t = s.trim().replaceAll('−', '-');
-    return RegExp(r'^-?\d+$').hasMatch(t) ? int.parse(t) : null;
+  String? get _nameError => _name.text.trim().isEmpty ? 'Ad gerekli' : null;
+  String? get _hpError => statError(_hp.text, min: 1);
+  String? get _acError => statError(_ac.text, min: 1);
+  String? get _bonusError => statError(_bonus.text);
+
+  void _changed(String _) {
+    if (_tried) setState(() {});
   }
 
-  Widget _num(TextEditingController c, String label, Key key) => TextField(
+  Widget _num(TextEditingController c, String label, Key key, String? error) => TextField(
     key: key,
     controller: c,
+    onChanged: _changed,
+    maxLength: statFieldMaxLength,
     keyboardType: const TextInputType.numberWithOptions(signed: true),
     inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[-−0-9]'))],
-    decoration: InputDecoration(labelText: label),
+    decoration: InputDecoration(labelText: label, counterText: '', errorText: _tried ? error : null, errorMaxLines: 2),
   );
+
+  void _save() {
+    if (_nameError != null || _hpError != null || _acError != null || _bonusError != null) {
+      setState(() => _tried = true);
+      return;
+    }
+    Navigator.pop(
+      context,
+      _InitiativeEntry(_name.text.trim(), parseStat(_bonus.text) ?? 0, parseStat(_hp.text), parseStat(_ac.text)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -438,37 +526,27 @@ class _InitiativeDialogState extends State<_InitiativeDialog> {
             TextField(
               key: const Key('npc-init-name'),
               controller: _name,
+              onChanged: _changed,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Ad'),
+              decoration: InputDecoration(labelText: 'Ad', errorText: _tried ? _nameError : null),
             ),
             const SizedBox(height: 8),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _num(_hp, 'Can Puanı', const Key('npc-init-hp'))),
+                Expanded(child: _num(_hp, 'Can Puanı', const Key('npc-init-hp'), _hpError)),
                 const SizedBox(width: 8),
-                Expanded(child: _num(_ac, 'ZS', const Key('npc-init-ac'))),
+                Expanded(child: _num(_ac, 'ZS', const Key('npc-init-ac'), _acError)),
               ],
             ),
             const SizedBox(height: 8),
-            _num(_bonus, 'İnis. bonusu', const Key('npc-init-bonus')),
+            _num(_bonus, 'İnis. bonusu', const Key('npc-init-bonus'), _bonusError),
           ],
         ),
       ),
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Vazgeç')),
-        FilledButton(
-          key: const Key('npc-init-save'),
-          onPressed: () {
-            final name = _name.text.trim();
-            if (name.isEmpty) return;
-            final hp = _int(_hp.text);
-            Navigator.pop(
-              context,
-              _InitiativeEntry(name, _int(_bonus.text) ?? 0, hp == null || hp < 1 ? null : hp, _int(_ac.text)),
-            );
-          },
-          child: const Text('Ekle'),
-        ),
+        FilledButton(key: const Key('npc-init-save'), onPressed: _save, child: const Text('Ekle')),
       ],
     );
   }
