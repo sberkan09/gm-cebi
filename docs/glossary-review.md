@@ -233,7 +233,7 @@
 | 145 | Restrained | **Kısıtlanmış** | öneri | ✔ | Bağlanmış |  |  |
 | 146 | Stunned | **Sersemlemiş** | öneri | ✔ |  |  | K |
 | 147 | Unconscious | **Bilinçsiz** | topluluk | ✔ | Baygın |  | B |
-| 148 | Condition | **Durum** | topluluk | ✔ |  | "weather conditions" (hava koşulları) hariç. |  |
+| 148 | Condition | **Durum** | topluluk | ✔ |  | "weather conditions" / "unhealthy conditions" (koşullar) hariç. |  |
 
 ### Eylem
 
@@ -2059,7 +2059,7 @@
 | Verbal (V) | Sözlü (S) | bölüm |
 | Somatic (S) | Bedensel (B) | bölüm |
 | Material (M) | Malzeme (M) | bölüm |
-| Identifying an Ongoing Spell | Süren Bir Büyüyü Tanımlama | bölüm |
+| Identifying an Ongoing Spell | Süren Bir Büyüyü Tanıma | bölüm |
 | Effects | Etkiler | bölüm |
 | Targets | Hedefler | bölüm |
 | Combining Spell Effects | Büyü Etkilerini Birleştirme | bölüm |

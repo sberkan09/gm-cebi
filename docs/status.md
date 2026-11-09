@@ -16,7 +16,13 @@ Son güncelleme: 2026-11-09 (SRD içeriğinin tamamı Türkçe)
 - Formül satırları ("Spell save DC = …") kendi paragrafı; alt satırı ("+ Proficiency Bonus")
   artık kaybolmuyor.
 - Çeviri: 76 yeni bölüm başlığı ve 7 yaşam tarzı düzeyi sözlüğe (başlıklar sözlükten doluyor);
-  kalan 379 segment çeviri bekliyor (4 parti). Asset'ler çeviri bitince yeniden üretilecek.
+  379 segment toplu çeviri (4 parti, her biri QC'den temiz) ve AI düzeltme turu (18 segment: ör.
+  "Armor Class benefit" → "avantaj" Advantage terimiyle karışıyordu; "Massive Damage"de "artan
+  hasar" yerine "geriye kalan hasar").
+- Bağlam ad alanı: başlığı "Rarity" olan tablo sütunları nadirlik anahtarıyla ("Common" = Yaygın);
+  düz "Common" hücresi şarap kalitesi ("Sıradan"). Sözlük: "Dodge out of harm's way" Kaçınma eylemi
+  sayılmıyor, "unhealthy conditions" Durum terimi sayılmıyor.
+- Bellek: 14.488 segment, QC bulgusu 0. 52 kural bölümünün tamamı Türkçe; asset'ler 4,0 MB.
 
 ## Büyülü eşyalar ve kural bölümleri (dal `claude/magic-items`)
 

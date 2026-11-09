@@ -32,7 +32,7 @@
    "count": 12,
    "tr_complete": 12,
    "tr_partial": 0,
-   "bytes": 386307
+   "bytes": 386310
   },
   "subclasses": {
    "count": 12,
@@ -86,8 +86,8 @@
    "count": 52,
    "tr_complete": 52,
    "tr_partial": 0,
-   "bytes": 486869
+   "bytes": 486820
   }
  },
- "total_bytes": 4181268
+ "total_bytes": 4181219
 }
