@@ -22,6 +22,10 @@ flutter run \
   manifestinde **İnternet izni de yok**. `android/app/build.gradle.kts`, `NC_API_URL` verildiğinde
   `src/online/AndroidManifest.xml`'i (yalnızca `INTERNET`) birleştirir. Yerelde iki release APK
   derlenip `aapt2 dump permissions` ile doğrulandı.
+- **Test APK (GitHub):** `release-apk` iş akışı (`v*-test*` etiketi), depoda `NC_API_URL` değişkeni
+  ve `NC_APP_TOKEN` gizli değeri (Settings → Secrets and variables → Actions) varsa çevrimiçi sahneyi
+  açar; yoksa APK eskisi gibi tamamen çevrimdışıdır. Play ve TestFlight derlemeleri gizlilik beyanları
+  güncellenene kadar çevrimdışı kalır.
 - **Token'ı depoya koyma.** Uygulama token'ı (`nc_app_…`) uygulamanın içinde gider ve APK'den
   çıkarılabilir. Bu yüzden yetkisi dar tutulur (`jobs:submit, jobs:read, assets:read`). Servis
   kurulum başına günlük kota ve dakikada 240 istek sınırı uygular. `partner:manage` token'ı **asla**
@@ -57,6 +61,8 @@ Uygulamanın istemcisini gerçek sunucuya karşı deneyen betik:
 
 ```bash
 NC_API_URL=http://127.0.0.1:8080 NC_APP_TOKEN=nc_app_… dart run tool/nc_smoke.dart path/to/sketch.png [out.png]
+# canlı servis: kota ve sahte-token adımlarını atlar (GPU harcamaz)
+NC_SMOKE_PRODUCTION=1 NC_API_URL=https://api.neuracraft.app NC_APP_TOKEN=… dart run tool/nc_smoke.dart sketch.png out.png
 ```
 
 Betik şunları sırayla dener:
@@ -163,10 +169,19 @@ hazırlığı (PR #4) çevrimdışı derleme içindir.
   desteklemeyi bırakırsa işler genel hata mesajıyla reddedilir. `supportsSketchToScene()` hazır,
   ama henüz uygulama açılışında çağrılmıyor.
 
-- **Bildirim ve gizleme:** servis belgesi "bildirilen resim herkes için gizlenir" diyor. Bugünkü
-  neuracraft-cloud kodu (`5bb960e`) bildirimi kaydediyor (`reported_at`), ama
-  `GET /v1/assets/{id}/content` sahibine resmi vermeye devam ediyor (`tool/nc_smoke.dart` bunu
-  gösteriyor). Uygulama yerel kopyayı her durumda gizliyor. Servis tarafında düzeltilmeli.
-- **Kalite:** gerçek GPU ve gerçek modellerle bu dalda deneme yapılmadı; yerel deneme küçük test
-  modelleriyle. Kalite ve süre için neuracraft-cloud `docs/reports/sketch-to-scene.md`.
+- **Bildirim ve gizleme:** neuracraft-cloud #40'tan beri bildirilen resim sahibinden de gizleniyor
+  (`GET /v1/assets/{id}/content` → 404, işin `outputs` listesinden ve `GET /v1/assets`'ten düşüyor;
+  inceleme temiz çıkarsa geri geliyor). Uygulama yerel kopyayı yine her durumda gizliyor.
+- **Canlı servis (2026-11-09, `https://api.neuracraft.app`):** `tool/nc_smoke.dart`
+  (`NC_SMOKE_PRODUCTION=1`) tüm adımları geçti.
+  - Kapasite: oturum açılınca `warming` (eta 90 sn), 96 sn'de `ready`. Servise göre normal soğuk
+    başlangıç 40–60 sn; ana veri merkezi dışındaki GPU'da +30 sn.
+  - İş: map modu, Türkçe tarif, 7,2 sn'de bitti (6 adım); 512×512 PNG yönlendirmeyle indi.
+  - Bildirim sonrası resim 404; iptal `cancelled`; hata kodları beklendiği gibi.
+  - Stok yokken kapasite `unavailable: no GPU available at the provider` ve iş
+    `503 job.no_gpu_worker` döndü. Servis artık GPU türlerini sırayla deniyor (neuracraft-cloud #41).
+- **Kalite:** düzen korunuyor (nehir kıyıları, köprü, daireler aynı yerde), ama ilk denemede sonuç
+  kuşbakışı bir savaş haritası değil, yandan bir sahne gibi; daireler ağaç yerine yuvarlak nesnelere
+  dönüştü. Map modunun istemi ve örnek çizimler neuracraft-cloud tarafında ayarlanmalı
+  (`docs/reports/sketch-to-scene.md`).
 - **Cihaz:** gerçek telefon ya da tablette denenmedi.
