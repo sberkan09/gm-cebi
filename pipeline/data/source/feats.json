@@ -476,7 +476,6 @@
   "source": {
    "document": "SRD 5.2.1",
    "page": 88,
-   "page_end": 89,
    "heading": [
     "Feats",
     "Feat Descriptions",
@@ -498,7 +497,7 @@
    },
    {
     "type": "p",
-    "text": "**Truesight.** You have Truesight with a range of 60 feet. **Selling Equipment** Equipment fetches half its cost when sold. In contrast, trade goods and valuables—like gems and art objects—retain their full value in the marketplace. “Magic Items” has prices for magic items."
+    "text": "**Truesight.** You have Truesight with a range of 60 feet."
    }
   ]
  }

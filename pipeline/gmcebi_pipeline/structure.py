@@ -32,6 +32,59 @@ def heading_level(line: Line) -> int | None:
     return None
 
 
+# ---------------------------------------------------------------- sidebars
+# Boxed sidebars ("Heroic Inspiration", "Marching Order") have a small-caps GillSans 11pt
+# title and GillSans 9pt body text; no other text in the SRD uses 9pt GillSans. The layout
+# engine emits a sidebar wherever the box happens to sit in the content stream, often in the
+# middle of a sentence that runs on from one column to the next.
+
+def is_sidebar_title(line: Line) -> bool:
+    return "SC700" in line.font and abs(line.size - 11) < 0.3 and heading_level(line) is None
+
+
+def is_sidebar_body(line: Line) -> bool:
+    return line.font.startswith("GillSans") and abs(line.size - 9.0) < 0.05
+
+
+def is_sidebar(line: Line) -> bool:
+    return is_sidebar_title(line) or is_sidebar_body(line)
+
+
+def lift_sidebars(lines: list[Line]) -> list[Line]:
+    """Move each sidebar out of the text it interrupts to the end of that (sub)section.
+
+    A sidebar is re-emitted just before the next heading of level 1-4, so the paragraph it
+    split reads continuously and the text after the sidebar's own "### Title" is only the
+    sidebar. A sidebar printed on the opening page of a chapter, which the content stream
+    puts before the chapter title, is moved after that title (it opens the chapter).
+    """
+    out: list[Line] = []
+    pending: list[Line] = []
+    i, n = 0, len(lines)
+    while i < n:
+        ln = lines[i]
+        if is_sidebar_title(ln):
+            pending.append(ln)
+            i += 1
+            while i < n and is_sidebar_body(lines[i]):
+                pending.append(lines[i])
+                i += 1
+            continue
+        lvl = heading_level(ln)
+        if pending and lvl is not None and lvl <= 4:
+            if lvl == 1 and all(p.page == ln.page for p in pending):
+                out.append(ln)
+                out += pending
+            else:
+                out += pending
+                out.append(ln)
+            pending = []
+        else:
+            out.append(ln)
+        i += 1
+    return out + pending
+
+
 def segment(lines: list[Line], min_level: int = 1, max_level: int = 5,
             keep_preamble: bool = False) -> list[Section]:
     """Split lines into a flat list of sections, each with its heading path.
@@ -146,12 +199,20 @@ def tidy_markdown(text: str) -> str:
 def md_paragraphs(lines: list[Line]) -> list[str]:
     """Paragraphs (markdown) split on tab-indent / bullet markers."""
     paras: list[list[str]] = []
+    prev: Line | None = None
     for ln in lines:
         raw = ln.text
         first = ln.spans[0]
         new = (raw.lstrip(" ").startswith("\t") or raw.lstrip().startswith("•")
                # Bold (not bold-italic) run-in sub-options such as "Forest Gnome."
-               or (first.font.endswith("-Bold") and first.text.strip().endswith(".")))
+               or (first.font.endswith("-Bold") and first.text.strip().endswith("."))
+               # "Rituals" + "." as two spans, after a finished sentence (not a bold
+               # creature name wrapped onto the next line: "**Riding**" / "**Horse**.").
+               or (first.font.endswith("-Bold") and raw[len(first.text):].startswith(".")
+                   and prev is not None and prev.text.rstrip().endswith((".", ":")))
+               # Sidebar text never continues a main-text paragraph, or the reverse.
+               or (prev is not None and is_sidebar_body(prev) != is_sidebar_body(ln)))
+        prev = ln
         if new or not paras:
             paras.append([])
         paras[-1].append(line_markdown(ln))
@@ -161,17 +222,27 @@ def md_paragraphs(lines: list[Line]) -> list[str]:
 # ---------------------------------------------------------------- tables
 
 def is_table_line(ln: Line) -> bool:
-    return ln.font.startswith("GillSans") and 8.9 <= ln.size <= 9.9 and "SC700" not in ln.font
+    # 9pt GillSans is sidebar text, never a table cell (tables use 9.2-9.8pt).
+    return ln.font.startswith("GillSans") and 9.1 <= ln.size <= 9.9 and "SC700" not in ln.font
 
 
 def is_table_header(ln: Line) -> bool:
     return ln.font.startswith("GillSans-SemiBold") and abs(ln.size - 9.2) < 0.15
 
 
+def _on_baseline(ln: Line, ref: Line | None) -> bool:
+    """A header cell set in another weight or size ("Speed", "Cost") on a header row."""
+    return ref is not None and ln.page == ref.page and abs(ln.y0 - ref.y0) < 2
+
+
 def _header_text(lines: list[Line], i: int) -> str:
     """Normalised text of the header row group starting at lines[i]."""
-    group = []
-    while i < len(lines) and is_table_header(lines[i]):
+    group: list[Line] = []
+    ref: Line | None = None
+    while i < len(lines) and (is_table_header(lines[i])
+                              or (is_table_line(lines[i]) and _on_baseline(lines[i], ref))):
+        if is_table_header(lines[i]):
+            ref = lines[i]
         group.append(lines[i])
         i += 1
     txt = " ".join(ln.text for ln in sorted(group, key=lambda l: (round(l.y0), l.x0)))
@@ -187,12 +258,15 @@ def table_end(lines: list[Line], i: int) -> int:
     """
     head = _header_text(lines, i)
     j, seen_body = i, False
+    ref: Line | None = None
     while j < len(lines) and is_table_line(lines[j]):
-        if is_table_header(lines[j]):
+        ln = lines[j]
+        if is_table_header(ln):
             if seen_body and _header_text(lines, j) != head:
                 break
+            ref = ln
             seen_body = False
-        else:
+        elif not _on_baseline(ln, ref):
             seen_body = True
         j += 1
     return j

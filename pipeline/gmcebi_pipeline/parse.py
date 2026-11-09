@@ -34,6 +34,8 @@ from .structure import (
     build_table,
     heading_level,
     is_table_header,
+    is_sidebar,
+    is_sidebar_title,
     is_table_line,
     line_markdown,
     relocate_tables,
@@ -89,8 +91,12 @@ def src(sec: Section, lines: Iterable[Line] | None = None) -> SourceRef:
                      heading=[*sec.path, sec.title])
 
 
-def to_blocks(lines: list[Line]) -> list[Block]:
-    """Paragraphs and tables. h5 lines directly above a table become its title."""
+def to_blocks(lines: list[Line], sidebar_level: int = 3) -> list[Block]:
+    """Paragraphs and tables. h5 lines directly above a table become its title.
+
+    A sidebar title (see lift_sidebars) becomes a heading paragraph with `sidebar_level`
+    hashes: "### Title" in a section's own text, "#### Title" inside a "###" sub-section.
+    """
     blocks: list[Block] = []
     buf: list[Line] = []
     pending_title: str | None = None
@@ -111,6 +117,23 @@ def to_blocks(lines: list[Line]) -> list[Block]:
             else:
                 blocks.append(Block(type="p", text=f"**{ln.text.strip()}**"))
             i += 1
+            continue
+        if is_sidebar_title(ln):
+            flush()
+            blocks.append(Block(type="p", text=f"{'#' * sidebar_level} {ln.text.strip()}"))
+            i += 1
+            continue
+        if _is_formula(ln):
+            # A centred formula ("Spell save DC = 8 + ...") wraps onto short GillSans lines
+            # that would otherwise read as list items; it is a paragraph of its own.
+            flush()
+            parts = [ln]
+            i += 1
+            while (i < n and lines[i].font in ("GillSans", "GillSans-SemiBold")
+                   and abs(lines[i].size - 10) < 0.1 and not _is_formula(lines[i])):
+                parts.append(lines[i])
+                i += 1
+            blocks.append(Block(type="p", text=tidy_markdown(join_text([line_markdown(x) for x in parts]))))
             continue
         if _is_list_item(ln):
             # Short GillSans term lists (e.g. the six Area of Effect shapes) become bullets
@@ -136,6 +159,15 @@ def to_blocks(lines: list[Line]) -> list[Block]:
         i += 1
     flush()
     return blocks
+
+
+def main_text(lines: list[Line]) -> list[Line]:
+    """Lines without sidebars (for plain-text fields that can't hold a sidebar heading)."""
+    return [ln for ln in lines if not is_sidebar(ln)]
+
+
+def _is_formula(ln: Line) -> bool:
+    return ln.font.startswith("GillSans-SemiBold") and abs(ln.size - 10) < 0.1 and " = " in ln.text
 
 
 def _is_list_item(ln: Line) -> bool:
@@ -559,7 +591,7 @@ def parse_classes(lines: list[Line]) -> tuple[list[CharacterClass], list[Subclas
                 continue
             fm = FEATURE_RE.match(s.title)
             if fm and (cur_sub is not None or h3.endswith("Class Features")):
-                f = Feature(level=int(fm.group(1)), name=fm.group(2), blocks=to_blocks(s.lines))
+                f = Feature(level=int(fm.group(1)), name=fm.group(2), blocks=to_blocks(s.lines, 4))
                 (cur_sub.features if cur_sub else features).append(f)
                 if cur_sub:
                     cur_sub.source.page_end = s.last_page
@@ -716,10 +748,10 @@ def parse_equipment(lines: list[Line]) -> tuple[list[EquipmentItem], list[Weapon
         parent = s.path[-1] if s.path else ""
         if s.level == 4 and parent == "Properties":
             props.append(WeaponProperty(id=slug(s.title), name=s.title,
-                                        text="\n\n".join(md_paragraphs(s.lines)), source=src(s)))
+                                        text="\n\n".join(md_paragraphs(main_text(s.lines))), source=src(s)))
         elif s.level == 4 and parent == "Mastery Properties":
             masteries.append(WeaponMastery(id=slug(s.title), name=s.title,
-                                           text="\n\n".join(md_paragraphs(s.lines)), source=src(s)))
+                                           text="\n\n".join(md_paragraphs(main_text(s.lines))), source=src(s)))
         elif s.level == 5 and s.title in ("Weapons", "Armor"):
             t = build_table(s.title, [ln for ln in s.lines if is_table_line(ln)])
             sub = None
@@ -844,32 +876,30 @@ def parse_magic_items(lines: list[Line]) -> list[MagicItem]:
     return items
 
 
-# Chapters kept as readable rule sections: (chapter key, display name, stop heading). Item
-# entries start at the first h4 after the stop heading; its own intro is still a section.
+# Chapters kept as readable rule sections: (chapter key, display name, stop heading, end
+# heading). Item entries start at the first h4 after the stop heading; its own intro is
+# still a section (dropped if it has no text). The end heading (the next chapter's title)
+# cuts a chapter whose last page is shared with the next one.
 RULE_CHAPTERS = [
-    ("playing", "Playing the Game", None),
-    ("creation", "Character Creation", None),
-    ("toolbox", "Gameplay Toolbox", None),
-    ("magic_items", "Magic Items", "Magic Items A–Z"),
+    ("playing", "Playing the Game", None, None),
+    ("creation", "Character Creation", None, None),
+    ("equipment", "Equipment", None, "Spells"),
+    ("spells", "Spells", "Spell Descriptions", None),
+    ("toolbox", "Gameplay Toolbox", None, None),
+    ("magic_items", "Magic Items", "Magic Items A–Z", None),
 ]
 
+# Equipment chapter: entries and tables already in the equipment, weapon_properties and
+# weapon_mastery datasets are left out of its rule sections (their sidebars are kept).
+_ENTRY_PARENTS = {"Properties", "Mastery Properties", "Artisan’s Tools", "Other Tools",
+                  "Adventuring Gear"}
+_ITEM_TABLES = {"Weapons", "Armor", "Adventuring Gear", "Mounts and Other Animals",
+                "Tack, Harness, and Drawn Vehicles", "Airborne and Waterborne Vehicles"}
 
-def _is_sidebar_title(ln: Line) -> bool:
-    return "SC700" in ln.font and abs(ln.size - 11) < 0.3 and heading_level(ln) is None
 
-
-def intro_blocks(lines: list[Line]) -> list[Block]:
-    """Chapter intro text; a sidebar title ("Round Down") becomes a "### " heading."""
-    blocks: list[Block] = []
-    buf: list[Line] = []
-    for ln in lines:
-        if _is_sidebar_title(ln):
-            blocks += to_blocks(buf)
-            buf = []
-            blocks.append(Block(type="p", text=f"### {ln.text.strip()}"))
-        else:
-            buf.append(ln)
-    return blocks + to_blocks(buf)
+def _sub_level(level: int) -> int:
+    """Heading level for a sidebar inside a section of `level` (the app renders ### / ####)."""
+    return min(level + 1, 4)
 
 
 def parse_rule_sections(lines: list[Line]) -> list[RuleSection]:
@@ -879,9 +909,11 @@ def parse_rule_sections(lines: list[Line]) -> list[RuleSection]:
     above the chapter title) becomes a first section "<key>-intro" named after the chapter.
     """
     out: list[RuleSection] = []
-    for key, chapter, stop in RULE_CHAPTERS:
+    for key, chapter, stop, end_title in RULE_CHAPTERS:
         a, b = CHAPTERS[key]
         chunk = lines_between(lines, a, b)
+        if end_title:
+            chunk = chunk[:section_lines(chunk, end_title, b)]
         if stop:
             k = section_lines(chunk, stop, a) + 1
             while k < len(chunk) and heading_level(chunk[k]) != 4:
@@ -890,9 +922,10 @@ def parse_rule_sections(lines: list[Line]) -> list[RuleSection]:
         secs = relocate_tables(segment(chunk, max_level=4, keep_preamble=True))
         intro = [ln for s in secs[:next((n for n, s in enumerate(secs) if s.level == 2), len(secs))]
                  for ln in s.lines]
+        recs: list[RuleSection] = []
         if intro:
-            out.append(RuleSection(
-                id=slug(f"{key}-intro"), name=chapter, chapter=chapter, blocks=intro_blocks(intro),
+            recs.append(RuleSection(
+                id=slug(f"{key}-intro"), name=chapter, chapter=chapter, blocks=to_blocks(intro),
                 source=SourceRef(page=intro[0].page,
                                  page_end=intro[-1].page if intro[-1].page != intro[0].page else None,
                                  heading=[chapter])))
@@ -903,13 +936,21 @@ def parse_rule_sections(lines: list[Line]) -> list[RuleSection]:
             if s.level == 2:
                 cur = RuleSection(id=slug(f"{key}-{s.title}"), name=s.title, chapter=chapter,
                                   blocks=to_blocks(s.lines), source=src(s))
-                out.append(cur)
+                recs.append(cur)
                 continue
             if cur is None:
                 continue
+            if key == "equipment" and s.level == 4 and s.path[-1:] and s.path[-1] in _ENTRY_PARENTS:
+                cur.blocks.extend(to_blocks([ln for ln in s.lines if is_sidebar(ln)], _sub_level(3)))
+                continue
             cur.blocks.append(Block(type="p", text=f"{'#' * s.level} {s.title}"))
-            cur.blocks.extend(to_blocks(s.lines))
+            cur.blocks.extend(to_blocks(s.lines, _sub_level(s.level)))
             end = max([s.page] + [ln.page for ln in s.lines])
             if end > (cur.source.page_end or cur.source.page):
                 cur.source.page_end = end
+        for r in recs:
+            if key == "equipment":
+                r.blocks = [bl for bl in r.blocks if not (bl.type == "table" and bl.title in _ITEM_TABLES)]
+            if r.blocks:
+                out.append(r)
     return out

@@ -2,6 +2,22 @@
 
 Son güncelleme: 2026-11-09 (SRD içeriğinin tamamı Türkçe)
 
+## Kenar kutuları ve kalan SRD bölümleri (dal `claude/srd-remaining`, #19, #20)
+
+- Bölüm ortasındaki 15 kenar kutusu (GillSans 9 pt metin, 11 pt küçük büyük harf başlık) kestiği
+  paragraftan çıkarılıp bulunduğu alt bölümün sonuna "### / #### Başlık" olarak taşınıyor
+  (`lift_sidebars`). Kural bölümleri, Paladin ve Büyücü sınıf özellikleri, Doğruluk Lütfu hüneri ve
+  Hafif silah özelliği düzeldi.
+- **18 yeni kural bölümü** (toplam 52): Büyüler bölümünün başı (s. 104–106: büyü edinme, hazırlama,
+  büyü yapma kuralları) ve Ekipman bölümünün düzyazısı (sikkeler, silah/zırh/alet yetkinliği,
+  binekler ve taşıtlar, yaşam giderleri, yiyecek/konaklama tablosu, kiralık yardımcılar, büyü
+  hizmetleri, büyülü eşya kullanımı, zanaat, iksir ve parşömen). Ekipman veri kümelerinde zaten
+  bulunan eşya girdileri ve tabloları tekrarlanmıyor.
+- Formül satırları ("Spell save DC = …") kendi paragrafı; alt satırı ("+ Proficiency Bonus")
+  artık kaybolmuyor.
+- Çeviri: 76 yeni bölüm başlığı ve 7 yaşam tarzı düzeyi sözlüğe (başlıklar sözlükten doluyor);
+  kalan 379 segment çeviri bekliyor (4 parti). Asset'ler çeviri bitince yeniden üretilecek.
+
 ## Büyülü eşyalar ve kural bölümleri (dal `claude/magic-items`)
 
 - **258 büyülü eşya** (tür, nadirlik, uyumlanma, italik tür satırı, metin, tablolar ve gömülü stat

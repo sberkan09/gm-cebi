@@ -6158,7 +6158,19 @@
      },
      {
       "type": "p",
-      "text": "**Breaking Your Oath** A Paladin tries to hold to the highest standards of conduct, but even the most dedicated are fallible. Sometimes a Paladin transgresses their oath."
+      "text": "As a Bonus Action, you can touch a creature (which could be yourself) and draw power from the pool of healing to restore a number of Hit Points to that creature, up to the maximum amount remaining in the pool."
+     },
+     {
+      "type": "p",
+      "text": "You can also expend 5 Hit Points from the pool of healing power to remove the Poisoned condition from the creature; those points don’t also restore Hit Points to the creature."
+     },
+     {
+      "type": "p",
+      "text": "#### Breaking Your Oath"
+     },
+     {
+      "type": "p",
+      "text": "A Paladin tries to hold to the highest standards of conduct, but even the most dedicated are fallible. Sometimes a Paladin transgresses their oath."
      },
      {
       "type": "p",
@@ -6167,14 +6179,6 @@
      {
       "type": "p",
       "text": "If your Paladin unrepentantly violates their oath, talk to your GM. Your Paladin should probably take a more appropriate subclass or even abandon the class and adopt another one."
-     },
-     {
-      "type": "p",
-      "text": "As a Bonus Action, you can touch a creature (which could be yourself) and draw power from the pool of healing to restore a number of Hit Points to that creature, up to the maximum amount remaining in the pool."
-     },
-     {
-      "type": "p",
-      "text": "You can also expend 5 Hit Points from the pool of healing power to remove the Poisoned condition from the creature; those points don’t also restore Hit Points to the creature."
      }
     ]
    },
@@ -12098,22 +12102,6 @@
      },
      {
       "type": "p",
-      "text": "**Expanding and Replacing a Spellbook** The spells you add to your spellbook as you gain levels reflect your ongoing magical research, but you might find other spells during your adventures that you can add to the book. You could discover a Wizard spell on a *Spell Scroll*, for example, and then copy it into your spellbook."
-     },
-     {
-      "type": "p",
-      "text": "**Copying a Spell into the Book.** When you find a level 1+ Wizard spell, you can copy it into your spellbook if it’s of a level you can prepare and if you have time to copy it. For each level of the spell, the transcription takes 2 hours and costs 50 GP. Afterward you can prepare the spell like the other spells in your spellbook."
-     },
-     {
-      "type": "p",
-      "text": "**Copying the Book.** You can copy a spell from your spellbook into another book. This is like copying a new spell into your spellbook but faster, since you already know how to cast the spell. You need spend only 1 hour and 10 GP for each level of the copied spell."
-     },
-     {
-      "type": "p",
-      "text": "If you lose your spellbook, you can use the same procedure to transcribe the Wizard spells that you have prepared into a new spellbook. Filling out the remainder of the new book requires you to find new spells to do so. For this reason, many wizards keep a backup spellbook."
-     },
-     {
-      "type": "p",
       "text": "When you reach Wizard levels 4 and 10, you learn another Wizard cantrip of your choice, as shown in the Cantrips column of the Wizard Features table."
      },
      {
@@ -12155,6 +12143,26 @@
      {
       "type": "p",
       "text": "**Spellcasting Focus.** You can use an Arcane Focus or your spellbook as a Spellcasting Focus for your Wizard spells."
+     },
+     {
+      "type": "p",
+      "text": "#### Expanding and Replacing a Spellbook"
+     },
+     {
+      "type": "p",
+      "text": "The spells you add to your spellbook as you gain levels reflect your ongoing magical research, but you might find other spells during your adventures that you can add to the book. You could discover a Wizard spell on a *Spell Scroll*, for example, and then copy it into your spellbook."
+     },
+     {
+      "type": "p",
+      "text": "**Copying a Spell into the Book.** When you find a level 1+ Wizard spell, you can copy it into your spellbook if it’s of a level you can prepare and if you have time to copy it. For each level of the spell, the transcription takes 2 hours and costs 50 GP. Afterward you can prepare the spell like the other spells in your spellbook."
+     },
+     {
+      "type": "p",
+      "text": "**Copying the Book.** You can copy a spell from your spellbook into another book. This is like copying a new spell into your spellbook but faster, since you already know how to cast the spell. You need spend only 1 hour and 10 GP for each level of the copied spell."
+     },
+     {
+      "type": "p",
+      "text": "If you lose your spellbook, you can use the same procedure to transcribe the Wizard spells that you have prepared into a new spellbook. Filling out the remainder of the new book requires you to find new spells to do so. For this reason, many wizards keep a backup spellbook."
      }
     ]
    },
