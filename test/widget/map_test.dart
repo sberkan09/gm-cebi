@@ -1,8 +1,15 @@
+import 'dart:ui' as ui;
+
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gm_cebi/db/database.dart';
+import 'package:gm_cebi/features/online_scene/online_settings.dart';
+import 'package:gm_cebi/features/online_scene/scene_controller.dart';
+import 'package:gm_cebi/providers.dart';
+import 'package:gm_cebi/ui/widgets/online_scene.dart';
 
 import 'harness.dart';
 
@@ -396,4 +403,161 @@ void main() {
     expect(mapView(tester).getMaxScaleOnAxis(), closeTo(1, 0.001));
     expect(find.byKey(const Key('map-fit')), findsNothing);
   });
+
+  appTest('pen mode turned off by the user stays off when the stylus touches again', gmPack: true, (tester, db) async {
+    await openMap(tester);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    await penLine(tester, canvas, 0.2, 0.7, 0.3);
+    expect(penModeOn(tester), isTrue);
+    await tester.tap(find.byKey(const Key('map-pen-mode')));
+    await settle(tester);
+    expect(penModeOn(tester), isFalse);
+    await penLine(tester, canvas, 0.2, 0.7, 0.5);
+    expect(penModeOn(tester), isFalse, reason: 'the user turned it off');
+    expect(await strokesOf(tester, db), hasLength(2), reason: 'the stylus still draws');
+    expect((await pumped(tester, db.readSettings()))['mapPenMode'], 'false');
+  });
+
+  appTest('an explicit "off" from an earlier launch is not overridden by the stylus', gmPack: true, (tester, db) async {
+    await pumped(tester, db.writeSetting('mapPenMode', 'false'));
+    // As on the next launch: the settings are read again.
+    ProviderScope.containerOf(tester.element(find.byType(MaterialApp))).invalidate(settingsProvider);
+    await settle(tester);
+    await openMap(tester);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    await penLine(tester, canvas, 0.2, 0.7, 0.3);
+    expect(penModeOn(tester), isFalse);
+  });
+
+  appTest('pen mode off, eraser tool: a pinch starting on a line does not erase it', gmPack: true, (tester, db) async {
+    await openMap(tester);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    await penLine(tester, canvas, 0.2, 0.8, 0.5, kind: PointerDeviceKind.touch);
+    expect(await strokesOf(tester, db), hasLength(1));
+    await tester.tap(find.text('Sil'));
+    await settle(tester);
+    // The first finger lands on the line.
+    await pinch(tester, at(canvas, 0.5, 0.5) + const Offset(40, 0), 40, 80);
+    expect(mapView(tester).getMaxScaleOnAxis(), greaterThan(1.5));
+    expect(await strokesOf(tester, db), hasLength(1), reason: 'a pinch does not erase');
+    await tester.tap(find.byKey(const Key('map-undo')));
+    await settle(tester);
+    expect(await strokesOf(tester, db), isEmpty, reason: 'no erase undo step: undo removes the line itself');
+  });
+
+  appTest('pen mode off: a second finger after an erase began puts the erased line back', gmPack: true, (tester, db) async {
+    await openMap(tester);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    await penLine(tester, canvas, 0.2, 0.8, 0.5, kind: PointerDeviceKind.touch);
+    await tester.tap(find.text('Sil'));
+    await settle(tester);
+    final a = await tester.startGesture(at(canvas, 0.5, 0.3));
+    await a.moveTo(at(canvas, 0.5, 0.45));
+    await a.moveTo(at(canvas, 0.5, 0.55));
+    await settle(tester);
+    expect(await strokesOf(tester, db), isEmpty, reason: 'the finger dragged across the line');
+    final b = await tester.startGesture(at(canvas, 0.8, 0.8));
+    await b.moveTo(at(canvas, 0.9, 0.9));
+    await a.up();
+    await b.up();
+    await settle(tester);
+    expect(await strokesOf(tester, db), hasLength(1), reason: 'the dropped gesture leaves no trace');
+  });
+
+  appTest('a pinch over the scene picture keeps the picture', gmPack: true, overrides: [
+    onlineFeatureVisibleProvider.overrideWithValue(true),
+    activeSceneIdProvider.overrideWithValue(1),
+    sceneImageProvider.overrideWith((ref, id) async => _sceneImage),
+  ], (tester, db) async {
+    _sceneImage = await tester.runAsync(() => createTestImage(width: 8, height: 8));
+    await openMap(tester);
+    final container = ProviderScope.containerOf(tester.element(find.byKey(const Key('map-canvas'))));
+    expect(container.read(sceneVisibleProvider), isTrue);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    await pinch(tester, canvas.center, 40, 80);
+    expect(mapView(tester).getMaxScaleOnAxis(), greaterThan(1.5));
+    expect(container.read(sceneVisibleProvider), isTrue, reason: 'zooming does not hide the picture');
+    // Drawing does (the sketch is shown while editing).
+    await tester.dragFrom(at(canvas, 0.2, 0.2), const Offset(60, 0));
+    await settle(tester);
+    expect(container.read(sceneVisibleProvider), isFalse);
+  });
+
+  appTest('pen mode: a two-finger zoom is kept when the stylus lands while the fingers are still down', gmPack: true, (tester, db) async {
+    await openMap(tester);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    await tester.tap(find.byKey(const Key('map-pen-mode')));
+    await settle(tester);
+    final c = canvas.center;
+    final a = await tester.startGesture(c - const Offset(40, 0));
+    final b = await tester.startGesture(c + const Offset(40, 0));
+    for (var i = 1; i <= 4; i++) {
+      await a.moveTo(c - Offset(40.0 + 10 * i, 0));
+      await b.moveTo(c + Offset(40.0 + 10 * i, 0));
+    }
+    await tester.pump();
+    final zoomed = mapView(tester).getMaxScaleOnAxis();
+    expect(zoomed, greaterThan(1.5));
+    final pen = await tester.createGesture(kind: PointerDeviceKind.stylus);
+    await pen.down(at(canvas, 0.1, 0.8));
+    await pen.moveTo(at(canvas, 0.3, 0.8));
+    await pen.up();
+    await a.up();
+    await b.up();
+    await settle(tester);
+    expect(mapView(tester).getMaxScaleOnAxis(), closeTo(zoomed, 0.001));
+    expect(await strokesOf(tester, db), hasLength(1));
+  });
+
+  appTest('a hovering stylus does not rebuild the map layer', gmPack: true, (tester, db) async {
+    await openMap(tester);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    CustomPainter? mapPainter() =>
+        tester.widget<CustomPaint>(find.descendant(of: find.byKey(const Key('map-view')), matching: find.byType(CustomPaint))).painter;
+    final before = mapPainter();
+    final pen = await tester.createGesture(kind: PointerDeviceKind.stylus);
+    await pen.addPointer(location: at(canvas, 0.5, 0.5));
+    for (var i = 1; i <= 10; i++) {
+      await pen.moveTo(at(canvas, 0.5 + i / 100, 0.5));
+      await tester.pump();
+    }
+    expect(find.byKey(const ValueKey('map-hover-pen')), findsOneWidget);
+    expect(identical(mapPainter(), before), isTrue, reason: 'only the cursor layer was rebuilt');
+    await pen.removePointer();
+    await tester.pump();
+  });
+
+  appTest('zoomed in, a token from the tray lands in the part of the map in view', gmPack: true, (tester, db) async {
+    final goblin = await db.addCombatant(name: 'Goblin', initiative: 15, hp: 7);
+    await openMap(tester);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    // Zoom 2x about the top-left quarter's centre: the view is map 0…0.5.
+    await pinch(tester, at(canvas, 0.25, 0.25), 20, 40);
+    final view = mapView(tester);
+    final s = view.getMaxScaleOnAxis();
+    final left = -view.getTranslation().x / canvas.width / s, top = -view.getTranslation().y / canvas.width / s;
+    await tester.tap(find.byKey(ValueKey('tray-$goblin')));
+    await settle(tester);
+    final p = (await combatant(tester, db, goblin)).mapPosition!;
+    expect(p.x, inInclusiveRange(left, left + 1 / s));
+    expect(p.y, inInclusiveRange(top, top + 1 / s));
+  });
+
+  // Wide layout: the toolbar lives in the side column (280–400 dp).
+  for (final scale in [1.0, 1.3, 1.6]) {
+    for (final size in [const Size(820, 560), const Size(1280, 800)]) {
+      appTest('the toolbar fits at text scale $scale on ${size.width.toInt()}x${size.height.toInt()}', gmPack: true, surface: size, (tester, db) async {
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        try {
+          await openMap(tester);
+          expect(tester.takeException(), isNull, reason: 'no overflow');
+          expect(find.byKey(const Key('map-pen-mode')), findsOneWidget);
+        } finally {
+          tester.platformDispatcher.clearTextScaleFactorTestValue();
+        }
+      });
+    }
+  }
 }
+
+ui.Image? _sceneImage;

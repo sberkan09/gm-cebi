@@ -39,7 +39,10 @@ class MapScreen extends ConsumerStatefulWidget {
 enum _Tool { pen, eraser }
 
 /// What the pointers on the map are doing.
-enum _Gesture { none, draw, erase, token, pan, pinch, ignore }
+enum _Gesture { none, pending, draw, erase, token, pan, pinch, ignore }
+
+/// A hovering stylus: where, and whether it would erase.
+typedef _Hover = ({Offset at, bool erases});
 
 /// One undoable change to the drawing.
 sealed class _Op {
@@ -88,7 +91,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   Offset _pan = Offset.zero;
 
   /// Pointer routing (see [_onDown]): the gesture, the pointer that owns it
-  /// (none for a pinch) and whether that pointer is a stylus.
+  /// (none for a pinch) and whether that pointer is a stylus. A finger with
+  /// pen mode off is [_Gesture.pending] until it moves or lifts, so the start
+  /// of a pinch has no side effects (no erase, the picture stays).
   _Gesture _gesture = _Gesture.none;
   int? _pointer;
   bool _byStylus = false;
@@ -107,10 +112,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   Offset _pinchFocal = Offset.zero, _pinchPan = Offset.zero;
   double _pinchSpan = 1, _pinchScale = 1;
 
-  /// A hovering stylus: where, and whether it would erase.
-  Offset? _hoverAt;
-  bool _hoverErases = false;
+  /// A hovering stylus (its own listenable: hover events come at 120–240 Hz).
+  final _hover = ValueNotifier<_Hover?>(null);
   Timer? _hoverTimer;
+
+  /// Bumped on pointer moves: repaints the canvas without rebuilding the screen.
+  final _canvasTick = ValueNotifier<int>(0);
 
   /// From the last build, for the pointer handlers.
   double _side = 1;
@@ -134,6 +141,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   void dispose() {
     _hoverTimer?.cancel();
+    _hover.dispose();
+    _canvasTick.dispose();
     super.dispose();
   }
 
@@ -260,94 +269,103 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         _strokes = strokes;
         _placed = placed;
         _hasBackground = background != null;
-        final hover = _hoverAt;
 
         return Semantics(
           container: true,
           label: 'Savaş haritası, ${placed.length} jeton${current == null ? '' : ', sıra: ${current.name}'}',
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Stack(children: [
-              MouseRegion(
-                opaque: false,
-                onExit: (_) => _clearHover(),
-                // A raw listener, not a GestureDetector: pointers are routed by
-                // kind (stylus or finger) and count, and a stroke starts on
-                // pointer-down, exactly where the pen touched (no touch slop).
-                child: Listener(
-                  key: const Key('map-canvas'),
-                  behavior: HitTestBehavior.opaque,
-                  onPointerDown: _onDown,
-                  onPointerMove: _onMove,
-                  onPointerUp: _onUp,
-                  onPointerCancel: (e) => _onUp(e, cancelled: true),
-                  onPointerHover: _onHover,
-                  child: SizedBox.square(
-                    dimension: side,
-                    child: Stack(children: [
-                      Transform(
-                        key: const Key('map-view'),
-                        transform: Matrix4.diagonal3Values(_scale, _scale, 1)..setTranslationRaw(_pan.dx * side, _pan.dy * side, 0),
-                        child: CustomPaint(
-                          painter: MapPainter(
-                            background: background,
-                            // Over the picture the sketch is hidden: the picture was made from it.
-                            strokes: [
-                              if (background == null)
-                                for (final s in strokes)
-                                  if (!_erasing.containsKey(s.id)) SketchStroke(_points(s), s.color),
-                              if (_drawing != null) SketchStroke(_drawing!, _color),
-                            ],
-                            tokens: [
-                              for (final c in placed)
-                                MapToken(
-                                  position: c.id == _dragId ? _dragPos! : c.mapPosition!,
-                                  order: combatants.indexOf(c) + 1,
-                                  label: c.name,
-                                  isPlayer: c.isPlayer,
-                                  isCurrent: current?.id == c.id,
-                                  isDown: c.isDown,
-                                  hpFraction: (c.hpCurrent != null && (c.hpMax ?? 0) > 0) ? (c.hpCurrent! / c.hpMax!).clamp(0.0, 1.0) : null,
-                                ),
-                            ],
-                            grid: _grid,
-                            theme: theme,
-                            labelStyle: Theme.of(context).textTheme.labelLarge,
-                          ),
-                          size: Size.square(side),
-                        ),
-                      ),
-                      if (hover != null)
-                        IgnorePointer(
+            // Pointer moves repaint only this, not the whole screen.
+            child: ValueListenableBuilder<int>(
+              valueListenable: _canvasTick,
+              builder: (context, _, _) => Stack(children: [
+                MouseRegion(
+                  opaque: false,
+                  onExit: (_) => _clearHover(),
+                  // A raw listener, not a GestureDetector: pointers are routed
+                  // by kind (stylus or finger) and count; a stylus stroke
+                  // starts on pointer-down, exactly where the pen touched.
+                  child: Listener(
+                    key: const Key('map-canvas'),
+                    behavior: HitTestBehavior.opaque,
+                    onPointerDown: _onDown,
+                    onPointerMove: _onMove,
+                    onPointerUp: _onUp,
+                    onPointerCancel: (e) => _onUp(e, cancelled: true),
+                    onPointerHover: _onHover,
+                    child: SizedBox.square(
+                      dimension: side,
+                      child: Stack(children: [
+                        Transform(
+                          key: const Key('map-view'),
+                          transform: Matrix4.diagonal3Values(_scale, _scale, 1)..setTranslationRaw(_pan.dx * side, _pan.dy * side, 0),
                           child: CustomPaint(
-                            key: ValueKey(_hoverErases ? 'map-hover-eraser' : 'map-hover-pen'),
-                            painter: _CursorPainter(
-                              at: hover,
-                              eraser: _hoverErases,
-                              // On screen: the eraser keeps its size when zoomed, the pen line grows with the map.
-                              radius: _hoverErases ? eraserRadius(side) : strokeWidth(side) * _scale / 2,
-                              color: theme.palette[_color],
-                              outline: scheme.onSurface,
+                            painter: MapPainter(
+                              background: background,
+                              // Over the picture the sketch is hidden: the picture was made from it.
+                              strokes: [
+                                if (background == null)
+                                  for (final s in strokes)
+                                    if (!_erasing.containsKey(s.id)) SketchStroke(_points(s), s.color),
+                                if (_drawing != null) SketchStroke(_drawing!, _color),
+                              ],
+                              tokens: [
+                                for (final c in placed)
+                                  MapToken(
+                                    position: c.id == _dragId ? _dragPos! : c.mapPosition!,
+                                    order: combatants.indexOf(c) + 1,
+                                    label: c.name,
+                                    isPlayer: c.isPlayer,
+                                    isCurrent: current?.id == c.id,
+                                    isDown: c.isDown,
+                                    hpFraction: (c.hpCurrent != null && (c.hpMax ?? 0) > 0) ? (c.hpCurrent! / c.hpMax!).clamp(0.0, 1.0) : null,
+                                  ),
+                              ],
+                              grid: _grid,
+                              theme: theme,
+                              labelStyle: Theme.of(context).textTheme.labelLarge,
                             ),
                             size: Size.square(side),
                           ),
                         ),
-                    ]),
+                        // The hover cursor has its own listenable: a hovering
+                        // stylus (120–240 events a second) repaints only this.
+                        ValueListenableBuilder<_Hover?>(
+                          valueListenable: _hover,
+                          builder: (context, h, _) => h == null
+                              ? const SizedBox.shrink()
+                              : IgnorePointer(
+                                  child: CustomPaint(
+                                    key: ValueKey(h.erases ? 'map-hover-eraser' : 'map-hover-pen'),
+                                    painter: _CursorPainter(
+                                      at: h.at,
+                                      eraser: h.erases,
+                                      // On screen: the eraser keeps its size when zoomed, the pen line grows with the map.
+                                      radius: h.erases ? eraserRadius(side) : strokeWidth(side) * _scale / 2,
+                                      color: theme.palette[_color],
+                                      outline: scheme.onSurface,
+                                    ),
+                                    size: Size.square(side),
+                                  ),
+                                ),
+                        ),
+                      ]),
+                    ),
                   ),
                 ),
-              ),
-              if (_scale > 1.001)
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: IconButton.filledTonal(
-                    key: const Key('map-fit'),
-                    tooltip: 'Haritayı sığdır',
-                    icon: const Icon(Icons.fit_screen),
-                    onPressed: () => setState(() => _setView(1, Offset.zero)),
+                if (_scale > 1.001)
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: IconButton.filledTonal(
+                      key: const Key('map-fit'),
+                      tooltip: 'Haritayı sığdır',
+                      icon: const Icon(Icons.fit_screen),
+                      onPressed: () => setState(() => _setView(1, Offset.zero)),
+                    ),
                   ),
-                ),
-            ]),
+              ]),
+            ),
           ),
         );
       }),
@@ -355,6 +373,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   // ------------------------------------------------------------ pointers
+
+  void _repaint() => _canvasTick.value++;
 
   /// Screen (canvas-local) position → map units, through the view transform.
   Offset01 _toMap(Offset local) {
@@ -387,19 +407,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       e.kind == PointerDeviceKind.invertedStylus || (e.kind == PointerDeviceKind.stylus && e.buttons & kSecondaryStylusButton != 0);
 
   /// Routes a new pointer:
-  /// - a stylus always draws or erases (and turns pen mode on the first time);
-  ///   it wins over whatever fingers or a palm were doing;
-  /// - one finger: on a token it moves the token; elsewhere it draws, or in
-  ///   pen mode pans the map (palm rejection);
-  /// - a second finger: pinch to zoom and pan; a stroke the first finger began
-  ///   is dropped.
+  /// - a stylus always draws or erases at once (and turns pen mode on the first
+  ///   time, unless the user decided); it wins over whatever fingers or a palm
+  ///   were doing;
+  /// - one finger: on a token it moves the token; elsewhere, in pen mode, it
+  ///   pans the map (palm rejection); otherwise it is pending until it moves
+  ///   past the touch slop (draw or erase) or lifts (a dot, or a tap-erase);
+  /// - a second finger: pinch to zoom and pan. A pending finger had no effect
+  ///   yet; a stroke or erase the first finger began is dropped.
   void _onDown(PointerDownEvent e) {
     if (_isStylus(e.kind)) {
       _clearHover();
-      if (!ref.read(currentSettingsProvider).penMode) ref.read(settingsProvider.notifier).setPenMode(true);
+      ref.read(settingsProvider.notifier).stylusSeen();
       if (_penActive) return; // one pen at a time
-      _dropTouchGesture(keepView: false);
-      _start(e);
+      _dropTouchGesture(revertPalmPan: true);
+      _begin(e.pointer, e.localPosition, stylus: true, erases: _stylusErases(e));
       return;
     }
     if (e.kind == PointerDeviceKind.mouse && e.buttons & kPrimaryMouseButton == 0) return; // right/middle click
@@ -407,23 +429,31 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (_penActive) return; // a palm resting while the pen draws
     if (_touches.length == 1) {
       _viewAtTouch = (_scale, _pan);
-      if (!ref.read(currentSettingsProvider).penMode || _tokenAt(e.localPosition) != null) {
-        _start(e);
+      final local = e.localPosition;
+      if (_tokenAt(local) != null) {
+        _begin(e.pointer, local, stylus: false, erases: false);
+      } else if (ref.read(currentSettingsProvider).penMode) {
+        _startPan(e.pointer, local);
+      } else if (e.kind == PointerDeviceKind.touch) {
+        _gesture = _Gesture.pending;
+        _pointer = e.pointer;
+        _byStylus = false;
+        _downAt = local;
+        _moved = false;
       } else {
-        _startPan(e.pointer, e.localPosition);
+        _begin(e.pointer, local, stylus: false, erases: false); // a mouse cannot pinch: no need to wait
       }
     } else if (_touches.length == 2) {
-      _dropTouchGesture(keepView: true);
+      _dropTouchGesture(revertPalmPan: false);
       _startPinch();
     }
   }
 
-  void _start(PointerDownEvent e) {
-    final local = e.localPosition;
-    final erases = _stylusErases(e);
+  /// Starts drawing, erasing or moving a token at [local].
+  void _begin(int pointer, Offset local, {required bool stylus, required bool erases}) {
     final hit = erases ? null : _tokenAt(local);
-    _pointer = e.pointer;
-    _byStylus = _isStylus(e.kind);
+    _pointer = pointer;
+    _byStylus = stylus;
     _downAt = local;
     _moved = false;
     setState(() {
@@ -477,16 +507,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final s = (_pinchScale * span / _pinchSpan).clamp(1.0, 4.0);
     // The map point that was under the fingers' midpoint stays under it.
     final m = (_pinchFocal / _side - _pinchPan) / _pinchScale;
-    setState(() => _setView(s, focal / _side - m * s));
+    _setView(s, focal / _side - m * s);
+    _repaint();
   }
 
-  /// Drops what the fingers were doing: a stroke the palm (or the first of
-  /// two fingers) began, a token drag; a pan or zoom is undone unless
-  /// [keepView]. What an eraser already removed stays one undo step.
-  void _dropTouchGesture({required bool keepView}) {
+  /// Drops what the fingers were doing, leaving no trace: a stroke the palm
+  /// (or the first of two fingers) began, a token drag, and anything its
+  /// eraser removed is put back. With [revertPalmPan], a one-finger pan (a
+  /// palm resting before the stylus touched) is undone too; a two-finger
+  /// zoom is deliberate and stays.
+  void _dropTouchGesture({required bool revertPalmPan}) {
     final view = _viewAtTouch;
-    if (!keepView && view != null && (_gesture == _Gesture.pan || _gesture == _Gesture.pinch)) _setView(view.$1, view.$2);
-    _commitErase();
+    if (revertPalmPan && view != null && _gesture == _Gesture.pan) _setView(view.$1, view.$2);
+    if (_erasing.isNotEmpty) {
+      ref.read(databaseProvider).restoreStrokes(_erasing.values.toList());
+      _erasing.clear();
+    }
     setState(() {
       _gesture = _touches.isEmpty ? _Gesture.none : _Gesture.ignore;
       _pointer = null;
@@ -508,22 +544,27 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final local = e.localPosition;
     // A finger may wobble a little during a tap; a stylus is precise.
     if ((local - _downAt).distance > (e.kind == PointerDeviceKind.touch ? kTouchSlop : 4)) _moved = true;
-    setState(() {
-      switch (_gesture) {
-        case _Gesture.token:
-          _dragPos = _toMap(local);
-        case _Gesture.draw:
-          _drawing!.add(_toMap(local));
-        case _Gesture.erase:
-          final to = _toMap(local);
-          _erase(_lastErase ?? to, to);
-          _lastErase = to;
-        case _Gesture.pan:
-          _setView(_scale, _panStart + (local - _panFrom) / _side);
-        case _Gesture.none || _Gesture.pinch || _Gesture.ignore:
-          break;
-      }
-    });
+    if (_gesture == _Gesture.pending) {
+      if (!_moved) return;
+      // A real drag, not the start of a pinch: draw (or erase) from where the finger touched.
+      _begin(e.pointer, _downAt, stylus: false, erases: false);
+      _moved = true;
+    }
+    switch (_gesture) {
+      case _Gesture.token:
+        _dragPos = _toMap(local);
+      case _Gesture.draw:
+        _drawing!.add(_toMap(local));
+      case _Gesture.erase:
+        final to = _toMap(local);
+        _erase(_lastErase ?? to, to);
+        _lastErase = to;
+      case _Gesture.pan:
+        _setView(_scale, _panStart + (local - _panFrom) / _side);
+      case _Gesture.none || _Gesture.pending || _Gesture.pinch || _Gesture.ignore:
+        return;
+    }
+    _repaint();
   }
 
   void _onUp(PointerEvent e, {bool cancelled = false}) {
@@ -534,9 +575,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         if (_touches.length >= 2) {
           _startPinch(); // a third finger lifted: go on with the other two
         } else if (_touches.length == 1 && ref.read(currentSettingsProvider).penMode) {
-          // Pen mode: the finger that stayed keeps panning.
+          // Pen mode: the finger that stayed keeps panning. The zoom so far was
+          // deliberate: a stylus landing now keeps it.
           final rest = _touches.entries.single;
           _startPan(rest.key, rest.value);
+          _viewAtTouch = (_scale, _pan);
           _moved = true;
         } else {
           _gesture = _touches.isEmpty ? _Gesture.none : _Gesture.ignore;
@@ -548,6 +591,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (_touches.isEmpty && _gesture == _Gesture.ignore) _gesture = _Gesture.none;
       return;
     }
+    if (_gesture == _Gesture.pending) {
+      if (cancelled) {
+        _dropTouchGesture(revertPalmPan: false);
+        return;
+      }
+      // A tap: a dot, or a tap of the eraser.
+      _begin(e.pointer, _downAt, stylus: false, erases: false);
+    }
     _finishGesture(tap: !_moved && !cancelled, cancelled: cancelled);
   }
 
@@ -557,16 +608,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     // hover stops.
     _hoverTimer?.cancel();
     _hoverTimer = Timer(const Duration(seconds: 2), _clearHover);
-    setState(() {
-      _hoverAt = e.localPosition;
-      _hoverErases = _stylusErases(e) || _tool == _Tool.eraser;
-    });
+    _hover.value = (at: e.localPosition, erases: _stylusErases(e) || _tool == _Tool.eraser);
   }
 
   void _clearHover() {
     _hoverTimer?.cancel();
     _hoverTimer = null;
-    if (_hoverAt != null && mounted) setState(() => _hoverAt = null);
+    if (mounted) _hover.value = null;
   }
 
   Widget _tray(List<Combatant> unplaced, List<Combatant> combatants, List<Combatant> placed, Axis axis) {
@@ -635,7 +683,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         db.addStroke(pts, color: _color).then((id) {
           if (mounted) setState(() => _pushUndo(_Added(id)));
         });
-      case _Gesture.none || _Gesture.draw || _Gesture.erase || _Gesture.pan || _Gesture.pinch || _Gesture.ignore:
+      case _Gesture.none || _Gesture.pending || _Gesture.draw || _Gesture.erase || _Gesture.pan || _Gesture.pinch || _Gesture.ignore:
         break;
     }
     _commitErase();
@@ -671,17 +719,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     setState(() => _pushUndo(_Removed(rows)));
   }
 
-  /// New tokens line up along the bottom edge, left to right.
+  /// New tokens line up along the bottom edge of the part of the map in view
+  /// (all of it unless zoomed in), left to right.
   Offset01 _freeSpot(List<Combatant> placed) {
+    // The visible square in map units: screen 0…1 through the view transform.
+    final left = -_pan.dx / _scale, top = -_pan.dy / _scale, size = 1 / _scale;
+    final tol = 0.04 * size;
+    Offset01 inView(double x, double y) => Offset01(left + x * size, top + y * size);
     for (var i = 0; i < 40; i++) {
-      final p = Offset01(0.08 + (i % 10) * 0.093, 0.92 - (i ~/ 10) * 0.09);
+      final p = inView(0.08 + (i % 10) * 0.093, 0.92 - (i ~/ 10) * 0.09);
       final taken = placed.any((c) {
         final q = c.mapPosition!;
-        return (q.x - p.x).abs() < 0.04 && (q.y - p.y).abs() < 0.04;
+        return (q.x - p.x).abs() < tol && (q.y - p.y).abs() < tol;
       });
       if (!taken) return p;
     }
-    return const Offset01(0.5, 0.5);
+    return inView(0.5, 0.5);
   }
 
   Future<void> _showTokenMenu(BuildContext context, Combatant c) async {
@@ -759,28 +812,27 @@ class _Toolbar extends StatelessWidget {
         spacing: 8,
         runSpacing: 4,
         children: [
-          Row(mainAxisSize: MainAxisSize.min, children: [
-            SegmentedButton<_Tool>(
-              segments: const [
-                ButtonSegment(value: _Tool.pen, icon: Icon(Icons.edit), label: Text('Çiz')),
-                ButtonSegment(value: _Tool.eraser, icon: Icon(Icons.auto_fix_normal), label: Text('Sil')),
-              ],
-              selected: {tool},
-              onSelectionChanged: (v) => onTool(v.first),
+          SegmentedButton<_Tool>(
+            segments: const [
+              ButtonSegment(value: _Tool.pen, icon: Icon(Icons.edit), label: Text('Çiz')),
+              ButtonSegment(value: _Tool.eraser, icon: Icon(Icons.auto_fix_normal), label: Text('Sil')),
+            ],
+            selected: {tool},
+            onSelectionChanged: (v) => onTool(v.first),
+          ),
+          // Pen mode: only the stylus draws, fingers pan and zoom. Its own
+          // Wrap child, so with large text it moves down instead of overflowing.
+          Semantics(
+            toggled: penMode,
+            child: IconButton(
+              key: const Key('map-pen-mode'),
+              tooltip: 'Kalem modu',
+              isSelected: penMode,
+              icon: const Icon(Icons.draw_outlined),
+              selectedIcon: const Icon(Icons.draw),
+              onPressed: () => onPenMode(!penMode),
             ),
-            // Pen mode: only the stylus draws, fingers pan and zoom.
-            Semantics(
-              toggled: penMode,
-              child: IconButton(
-                key: const Key('map-pen-mode'),
-                tooltip: 'Kalem modu',
-                isSelected: penMode,
-                icon: const Icon(Icons.draw_outlined),
-                selectedIcon: const Icon(Icons.draw),
-                onPressed: () => onPenMode(!penMode),
-              ),
-            ),
-          ]),
+          ),
           Row(mainAxisSize: MainAxisSize.min, children: [
             for (var i = 0; i < mapPaletteNames.length; i++)
               Semantics(
