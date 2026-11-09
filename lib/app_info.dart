@@ -24,6 +24,6 @@ const srdAttribution =
 /// approval (docs/decisions.md).
 const translationNotice =
     'Türkçe metinler SRD 5.2.1\'in çevirisidir ve orijinal metinden türetilmiş, değiştirilmiş bir '
-    'çalışmadır. Çeviriler henüz tamamlanmamıştır; çevrilmemiş kayıtlar İngilizce gösterilir.';
+    'çalışmadır. Çeviriler makine desteklidir ve gözden geçirilmeye devam etmektedir.';
 
 const compatibilityNotice = 'GM Cebi 5e uyumludur (“5E compatible”).';
