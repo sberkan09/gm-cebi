@@ -8,7 +8,7 @@
    "count": 140,
    "tr_complete": 140,
    "tr_partial": 0,
-   "bytes": 200702
+   "bytes": 200694
   },
   "conditions": {
    "count": 15,
@@ -20,13 +20,13 @@
    "count": 339,
    "tr_complete": 339,
    "tr_partial": 0,
-   "bytes": 864428
+   "bytes": 864437
   },
   "monsters": {
    "count": 330,
    "tr_complete": 330,
    "tr_partial": 0,
-   "bytes": 1123219
+   "bytes": 1123222
   },
   "classes": {
    "count": 12,
@@ -78,16 +78,16 @@
   },
   "magic_items": {
    "count": 258,
-   "tr_complete": 0,
+   "tr_complete": 258,
    "tr_partial": 0,
-   "bytes": 286887
+   "bytes": 573862
   },
   "rules": {
    "count": 31,
-   "tr_complete": 0,
+   "tr_complete": 31,
    "tr_partial": 0,
-   "bytes": 190255
+   "bytes": 395854
   }
  },
- "total_bytes": 3526208
+ "total_bytes": 4080010
 }
