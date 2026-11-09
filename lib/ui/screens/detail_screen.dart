@@ -270,7 +270,7 @@ class MonsterStatBlock extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            for (final e in details.entries) line(e.key, e.value),
+            for (final e in details.entries) line(l.fieldLabel(e.key), e.value),
             line(l.cr, cr.length == 1 ? '${cr.first}' : '${cr.first} (${cr.skip(1).join('; ')})'),
           ]),
         ),
@@ -420,7 +420,7 @@ class GenericView extends StatelessWidget {
       if (c['prerequisite'] != null) ['**${l.prerequisite}**', c['prerequisite'] as String],
       if (c['fields'] != null)
         for (final e in (c['fields'] as Map<String, dynamic>).entries)
-          if ((e.value as String).isNotEmpty) ['**${e.key}**', e.value as String],
+          if ((e.value as String).isNotEmpty) ['**${l.fieldLabel(e.key)}**', e.value as String],
     ];
     final seeAlso = (c['see_also'] as List?)?.cast<String>() ?? const <String>[];
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
