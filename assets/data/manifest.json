@@ -18,64 +18,64 @@
   },
   "spells": {
    "count": 339,
-   "tr_complete": 50,
+   "tr_complete": 339,
    "tr_partial": 0,
-   "bytes": 479555
+   "bytes": 864450
   },
   "monsters": {
    "count": 330,
-   "tr_complete": 0,
-   "tr_partial": 0,
-   "bytes": 555625
+   "tr_complete": 191,
+   "tr_partial": 121,
+   "bytes": 1094946
   },
   "classes": {
    "count": 12,
-   "tr_complete": 0,
+   "tr_complete": 12,
    "tr_partial": 0,
-   "bytes": 187619
+   "bytes": 386296
   },
   "subclasses": {
    "count": 12,
-   "tr_complete": 0,
+   "tr_complete": 12,
    "tr_partial": 0,
-   "bytes": 34751
+   "bytes": 71503
   },
   "species": {
    "count": 9,
-   "tr_complete": 0,
+   "tr_complete": 9,
    "tr_partial": 0,
-   "bytes": 15031
+   "bytes": 30409
   },
   "backgrounds": {
    "count": 4,
-   "tr_complete": 0,
+   "tr_complete": 4,
    "tr_partial": 0,
-   "bytes": 2402
+   "bytes": 4535
   },
   "feats": {
    "count": 17,
-   "tr_complete": 0,
+   "tr_complete": 17,
    "tr_partial": 0,
-   "bytes": 12121
+   "bytes": 23552
   },
   "equipment": {
-   "count": 192,
-   "tr_complete": 0,
+   "count": 184,
+   "tr_complete": 184,
    "tr_partial": 0,
-   "bytes": 83841
+   "bytes": 159697
   },
   "weapon_properties": {
    "count": 10,
-   "tr_complete": 0,
+   "tr_complete": 10,
    "tr_partial": 0,
-   "bytes": 5216
+   "bytes": 10314
   },
   "weapon_mastery": {
    "count": 8,
-   "tr_complete": 0,
+   "tr_complete": 8,
    "tr_partial": 0,
-   "bytes": 3621
+   "bytes": 6947
   }
  },
- "total_bytes": 1662129
+ "total_bytes": 3019149
 }
