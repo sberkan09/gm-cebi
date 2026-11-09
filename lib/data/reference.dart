@@ -33,7 +33,7 @@ const datasets = <DatasetInfo>[
   DatasetInfo('species', 'Soy', 'Soylar', 11),
   DatasetInfo('backgrounds', 'Geçmiş', 'Geçmişler', 9),
   DatasetInfo('feats', 'Hüner', 'Hünerler', 10),
-  DatasetInfo('magic_items', 'Sihirli Eşya', 'Sihirli Eşyalar', 13),
+  DatasetInfo('magic_items', 'Büyülü Eşya', 'Büyülü Eşyalar', 13),
   DatasetInfo('equipment', 'Ekipman', 'Ekipman', 7),
   DatasetInfo('weapon_mastery', 'Silah Ustalığı', 'Silah Ustalıkları', 6),
   DatasetInfo('weapon_properties', 'Silah Özelliği', 'Silah Özellikleri', 6),
