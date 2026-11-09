@@ -50,6 +50,8 @@ def _parse(pdf: Path) -> dict[str, list[Record]]:
         "equipment": equipment,
         "weapon_properties": props,
         "weapon_mastery": masteries,
+        "magic_items": parse.parse_magic_items(lines),
+        "rules": parse.parse_rule_sections(lines),
     }
 
 

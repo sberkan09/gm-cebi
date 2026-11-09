@@ -17,9 +17,11 @@ from .models import (
     EquipmentItem,
     Feat,
     Feature,
+    MagicItem,
     Monster,
     NamedText,
     RuleEntry,
+    RuleSection,
     SourceRef,
     Species,
     Spell,
@@ -789,3 +791,82 @@ def parse_equipment(lines: list[Line]) -> tuple[list[EquipmentItem], list[Weapon
                               subcategory=parent if cat == "tool" else None,
                               fields=f, blocks=blocks, source=src(s)))
     return list(items.values()), props, masteries
+
+
+ITEM_CATEGORIES = ("Armor", "Potion", "Ring", "Rod", "Scroll", "Staff", "Wand", "Weapon", "Wondrous Item")
+ITEM_HEAD_RE = re.compile(
+    r"^(?P<cat>" + "|".join(ITEM_CATEGORIES) + r")(?: \((?P<sub>[^)]*)\))?,\s*(?P<rest>.+)$", re.S)
+_HEAD_DONE = re.compile(r"(Common|Uncommon|Rare|Legendary|Artifact|Varies|\))\s*$")
+_HEAD_CONT = re.compile(r"^(\(|or\b|Rare|Very|Legendary|Uncommon|Common|Artifact|Requires)")
+ATTUNE_RE = re.compile(r"\s*\((?P<att>Requires Attunement[^)]*)\)\s*$")
+
+
+def parse_magic_items(lines: list[Line]) -> list[MagicItem]:
+    a, b = CHAPTERS["magic_items"]
+    chunk = lines_between(lines, a, b)
+    start = section_lines(chunk, "Magic Items A–Z", 209)
+    secs = relocate_tables(segment(chunk[start:], min_level=4, max_level=4))
+    items: list[MagicItem] = []
+    for s in secs:
+        if s.level != 4:
+            continue
+        ls = s.lines
+        i = 0
+        head = []
+        while i < len(ls) and "Italic" in ls[i].font and ls[i].font.startswith("Cambria"):
+            # Body text may open with the item's own (italic) name: stop once the header
+            # looks complete and the next line doesn't continue a rarity list.
+            if head and _HEAD_DONE.search(join_text(head)) and not _HEAD_CONT.match(ls[i].text.strip()):
+                break
+            head.append(ls[i].text)
+            i += 1
+        head_txt = join_text(head).strip()
+        m = ITEM_HEAD_RE.match(head_txt)
+        if not m:
+            raise ValueError(f"Bad magic item header for {s.title!r}: {head_txt!r} (p{s.page})")
+        rest = m.group("rest").strip()
+        att = ATTUNE_RE.search(rest)
+        rarity = rest[:att.start()].strip() if att else rest
+        items.append(MagicItem(
+            id=slug(s.title), name=s.title, category=m.group("cat"), rarity=rarity,
+            attunement=att.group("att") if att else None, type_line=head_txt,
+            blocks=to_blocks(ls[i:]), source=src(s)))
+    return items
+
+
+# Chapters kept as readable rule sections: (chapter key, display name, first page, stop heading).
+RULE_CHAPTERS = [
+    ("playing", "Playing the Game", None),
+    ("creation", "Character Creation", None),
+    ("toolbox", "Gameplay Toolbox", None),
+    ("magic_items", "Magic Items", "Magic Items A–Z"),
+]
+
+
+def parse_rule_sections(lines: list[Line]) -> list[RuleSection]:
+    """One record per level-2 section; level-3/4 sub-sections become heading paragraphs."""
+    out: list[RuleSection] = []
+    for key, chapter, stop in RULE_CHAPTERS:
+        a, b = CHAPTERS[key]
+        chunk = lines_between(lines, a, b)
+        if stop:
+            chunk = chunk[:section_lines(chunk, stop, a)]
+        secs = relocate_tables(segment(chunk, max_level=4))
+        cur: RuleSection | None = None
+        cur_lines: list[Line] = []
+        for s in secs:
+            if s.level <= 1:
+                continue
+            if s.level == 2:
+                cur = RuleSection(id=slug(f"{key}-{s.title}"), name=s.title, chapter=chapter,
+                                  blocks=to_blocks(s.lines), source=src(s))
+                out.append(cur)
+                continue
+            if cur is None:
+                continue
+            cur.blocks.append(Block(type="p", text=f"{'#' * s.level} {s.title}"))
+            cur.blocks.extend(to_blocks(s.lines))
+            end = max([s.page] + [ln.page for ln in s.lines])
+            if end > (cur.source.page_end or cur.source.page):
+                cur.source.page_end = end
+    return out

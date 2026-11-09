@@ -38,7 +38,7 @@ ATTRIBUTION = (
 )
 
 DATASETS = ["rules_glossary", "conditions", "spells", "monsters", "classes", "subclasses", "species",
-            "backgrounds", "feats", "equipment", "weapon_properties", "weapon_mastery"]
+            "backgrounds", "feats", "equipment", "weapon_properties", "weapon_mastery", "magic_items", "rules"]
 
 
 class _Mapper:
@@ -66,6 +66,8 @@ def _post_tr(ds: str, en: dict, tr: dict, mapper: _Mapper, titles: dict[str, str
         tags = {"Condition": "Durum", "Action": "Eylem", "Hazard": "Tehlike",
                 "Area of Effect": "Etki Alanı", "Attitude": "Tavır"}
         tr["tags"] = [tags.get(t, mapper.map(t)) for t in en["tags"]]
+    if ds == "magic_items":
+        tr["category"] = mapper.map(en["category"], "sihirli eşya türü")
     if "see_also" in en:
         tr["see_also"] = [titles.get(s, s) for s in en["see_also"]]
     if ds == "conditions":
