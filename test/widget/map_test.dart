@@ -108,4 +108,59 @@ void main() {
     c = await combatant(tester, db, goblin);
     expect(c.mapPosition, isNull);
   });
+
+  appTest('undo brings back what the eraser and "clear" removed', gmPack: true, (tester, db) async {
+    await openMap(tester);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    await tester.dragFrom(canvas.topLeft + Offset(canvas.width * 0.2, canvas.height * 0.3), Offset(canvas.width * 0.5, 0));
+    await settle(tester);
+    await tester.dragFrom(canvas.topLeft + Offset(canvas.width * 0.2, canvas.height * 0.7), Offset(canvas.width * 0.5, 0));
+    await settle(tester);
+    expect(await strokesOf(tester, db), hasLength(2));
+
+    // Erase the upper line by mistake, then undo: it is back, the lower one untouched.
+    await tester.tap(find.text('Sil'));
+    await settle(tester);
+    await tester.dragFrom(canvas.topLeft + Offset(canvas.width * 0.45, canvas.height * 0.1), Offset(0, canvas.height * 0.4));
+    await settle(tester);
+    expect(await strokesOf(tester, db), hasLength(1));
+    await tester.tap(find.byKey(const Key('map-undo')));
+    await settle(tester);
+    expect(await strokesOf(tester, db), hasLength(2));
+
+    // Clear everything, then undo.
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await settle(tester);
+    await tester.tap(find.text('Çizimi temizle'));
+    await settle(tester);
+    await tester.tap(find.text('Temizle'));
+    await settle(tester);
+    expect(await strokesOf(tester, db), isEmpty);
+    await tester.tap(find.byKey(const Key('map-undo')));
+    await settle(tester);
+    expect(await strokesOf(tester, db), hasLength(2));
+
+    // Undo the drawing itself, newest first.
+    await tester.tap(find.byKey(const Key('map-undo')));
+    await settle(tester);
+    expect(await strokesOf(tester, db), hasLength(1));
+  });
+
+  appTest('landscape tablet: the map takes the full height, controls on the side', gmPack: true, surface: const Size(1280, 800), (tester, db) async {
+    await db.addCombatant(name: 'Goblin', initiative: 15, hp: 7);
+    await openMap(tester);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    expect(canvas.height, greaterThan(600), reason: 'nearly the full height of an 800 dp screen');
+    expect(canvas.width, closeTo(canvas.height, 0.5));
+    final tray = tester.getRect(find.byKey(const Key('token-tray')));
+    expect(tray.left, greaterThan(canvas.right), reason: 'the tray is in the side column');
+  });
+
+  appTest('a 320 dp phone: the toolbar wraps instead of overflowing', gmPack: true, surface: const Size(320, 640), (tester, db) async {
+    await openMap(tester);
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('map-color-3')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('map-color-3')));
+    await settle(tester);
+  });
 }

@@ -1,6 +1,6 @@
 # Durum
 
-Son güncelleme: 2026-10-23 (Faz 1)
+Son güncelleme: 2026-11-09 (savaş haritası, inceleme düzeltmeleri)
 
 ## Savaş haritası (GM Paketi, çevrimdışı)
 

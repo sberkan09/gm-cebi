@@ -156,13 +156,16 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onUpgrade: (m, from, to) async {
+        // One transaction, and every step checks first: drift writes the new
+        // user_version only after this callback, so a migration interrupted
+        // half way (app killed) must be able to run again on the next start.
+        onUpgrade: (m, from, to) => transaction(() async {
           if (from < 2) {
-            await m.addColumn(combatants, combatants.posX);
-            await m.addColumn(combatants, combatants.posY);
-            await m.createTable(mapStrokes);
+            if (!await _hasColumn('combatants', 'pos_x')) await m.addColumn(combatants, combatants.posX);
+            if (!await _hasColumn('combatants', 'pos_y')) await m.addColumn(combatants, combatants.posY);
+            await m.createTable(mapStrokes); // CREATE TABLE IF NOT EXISTS
           }
-        },
+        }),
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
         },
@@ -391,7 +394,16 @@ class AppDatabase extends _$AppDatabase {
     ));
   }
 
+  Future<bool> _hasColumn(String table, String column) async {
+    final rows = await customSelect('PRAGMA table_info($table)').get();
+    return rows.any((r) => r.data['name'] == column);
+  }
+
   Future<void> deleteStrokes(Iterable<int> ids) => (delete(mapStrokes)..where((s) => s.id.isIn(ids))).go();
+
+  /// Puts deleted strokes back with their ids (undo of the eraser or "clear").
+  Future<void> restoreStrokes(Iterable<MapStroke> rows) =>
+      batch((b) => b.insertAll(mapStrokes, rows, mode: InsertMode.insertOrIgnore));
 
   /// Removes the newest stroke of the active map (undo).
   Future<void> undoStroke() async {
@@ -416,6 +428,13 @@ class AppDatabase extends _$AppDatabase {
         posX: Value(p?.x.clamp(0.0, 1.0)),
         posY: Value(p?.y.clamp(0.0, 1.0)),
       ));
+
+  /// "Jetonları kaldır": every token of the active encounter off the map, in one write.
+  Future<void> clearTokenPositions() async {
+    final e = await activeEncounter();
+    await (update(combatants)..where((c) => c.encounterId.equals(e.id)))
+        .write(const CombatantsCompanion(posX: Value(null), posY: Value(null)));
+  }
 
   Future<List<Combatant>> _order(Encounter e) async =>
       initiativeOrder(await (select(combatants)..where((c) => c.encounterId.equals(e.id))).get());
