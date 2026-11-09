@@ -94,3 +94,30 @@ def test_title_map_keeps_spell_and_rule_apart(glossary):
     titles = build_title_map(glossary, [])
     assert titles["*Shield"] == "Kalkan Büyüsü"
     assert titles["Shield"] == "Kalkan"
+
+
+def test_ordinary_word_alternatives_are_not_rejected(glossary):
+    """A '?'-prefixed alternative is documented but allowed ("Tür" = type, "Buz" = ice)."""
+    assert glossary.check("Choose a Species.", "Bir Soy seç; bu türün bir özelliği.") == []
+    assert glossary.check("takes 2d6 Cold damage", "2d6 Soğuk hasarı alır; buz kaplar.") == []
+    issues = glossary.check("Choose a Species.", "Bir Soy seç, Irk değil.")
+    assert any(i.startswith("term-alt:species") for i in issues)
+
+
+def test_short_roots_do_not_match_common_words(glossary):
+    assert glossary.check("in its Lair", "ince bir yolda")
+    assert glossary.check("Make a Religion check.", "Dinle ve bir test yap.")
+    assert glossary.check("in its Lair", "İninde") == []
+    assert glossary.check("Make a Religion check.", "Bir Din testi yap.") == []
+
+
+def test_natural_derivations(glossary):
+    good = [
+        ("It has Resistance to Fire damage.", "Ateş hasarına karşı Dirençlidir."),
+        ("It has Immunity to Poison.", "Zehre Bağışıktır."),
+        ("within a 10-foot radius", "10 fitliğine kadar"),
+        ("An NPC joins.", "Bir NPC katılır."),
+    ]
+    for en, tr in good:
+        issues = [i for i in glossary.check(en, tr) if not i.startswith("term:poison")]
+        assert issues == [], (en, tr, issues)

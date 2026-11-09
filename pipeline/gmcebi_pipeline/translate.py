@@ -97,7 +97,9 @@ def cmd_queue(args) -> None:
                 if (t.startswith("*") and f"{t}*" in item["en"]) or (not t.startswith("*") and f"“{t}" in item["en"])]
         item["titles"] = {t: titles[t] for t in refs}
     # Segments that are exactly a glossary term are filled from the glossary.
-    prefer = {"spells": "büyü adı", "conditions": "durum"}
+    prefer = {"spells": "büyü adı", "conditions": "durum", "monsters": "canavar adı"}
+    # Record-name categories only fill segments of their own dataset ("Shield" spell ≠ armor).
+    own = {"büyü adı": "spells", "canavar adı": "monsters"}
     auto = []
     for k, it in list(pending.items()):
         bullet = it["en"].startswith("- ")
@@ -107,7 +109,7 @@ def cmd_queue(args) -> None:
             continue
         cands.sort(key=lambda t: t.category != prefer.get(it["ds"], t.category))
         cands = [t for t in cands if t.category not in ("bölüm",)] or cands
-        if it["ds"] != "spells" and cands[0].category == "büyü adı":
+        if own.get(cands[0].category, it["ds"]) != it["ds"]:
             continue
         pending.pop(k)
         auto.append(k)
