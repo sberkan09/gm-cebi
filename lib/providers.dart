@@ -45,7 +45,7 @@ final referenceProvider = FutureProvider<Reference>((ref) => loadReferenceFromAs
 // ---------------------------------------------------------------- settings
 
 class AppSettings {
-  const AppSettings({this.contentLang = Lang.tr, this.themeMode = ThemeMode.dark, this.gmPackOverride});
+  const AppSettings({this.contentLang = Lang.tr, this.themeMode = ThemeMode.dark, this.gmPackOverride, this.penMode = false});
 
   /// Default language of detail pages (each page has a one-tap toggle).
   final Lang contentLang;
@@ -56,11 +56,16 @@ class AppSettings {
   /// Internal builds only: test switch for the GM pack entitlement.
   final bool? gmPackOverride;
 
-  AppSettings copyWith({Lang? contentLang, ThemeMode? themeMode, bool? gmPackOverride, bool clearOverride = false}) =>
+  /// Battle map "Kalem modu": only a stylus draws; fingers pan, zoom and move
+  /// tokens (palm rejection). Turned on by the first stylus touch.
+  final bool penMode;
+
+  AppSettings copyWith({Lang? contentLang, ThemeMode? themeMode, bool? gmPackOverride, bool clearOverride = false, bool? penMode}) =>
       AppSettings(
         contentLang: contentLang ?? this.contentLang,
         themeMode: themeMode ?? this.themeMode,
         gmPackOverride: clearOverride ? null : (gmPackOverride ?? this.gmPackOverride),
+        penMode: penMode ?? this.penMode,
       );
 }
 
@@ -74,6 +79,7 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
       contentLang: m['contentLang'] == 'en' ? Lang.en : Lang.tr,
       themeMode: switch (m['themeMode']) { 'light' => ThemeMode.light, 'system' => ThemeMode.system, _ => ThemeMode.dark },
       gmPackOverride: switch (m['gmPackOverride']) { 'true' => true, 'false' => false, _ => null },
+      penMode: m['mapPenMode'] == 'true',
     );
   }
 
@@ -92,6 +98,11 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
   Future<void> setGmPackOverride(bool? v) async {
     state = AsyncData(_current.copyWith(gmPackOverride: v, clearOverride: v == null));
     await _db.writeSetting('gmPackOverride', v?.toString());
+  }
+
+  Future<void> setPenMode(bool v) async {
+    state = AsyncData(_current.copyWith(penMode: v));
+    await _db.writeSetting('mapPenMode', '$v');
   }
 }
 
