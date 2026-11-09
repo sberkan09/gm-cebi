@@ -76,13 +76,37 @@ def walk(obj: Any, path: str = "") -> Iterator[tuple[str, str]]:
         yield path, obj
 
 
+_SPELL_CELL = re.compile(r"^(?P<block>(?:.+\.)?blocks\.\d+)\.rows\.\d+\.0$")
+
+
+def segment_ns(rec: dict, path: str, dataset: str = "") -> str:
+    """Namespace for segments whose meaning depends on where they occur.
+
+    Record names are keyed per dataset ("Shield" spell ≠ "Shield" armor); the first
+    column of class spell-list tables holds spell names ("Light" there is the spell,
+    not the weapon property); stat-block language lists are their own namespace
+    ("Giant" there is the language, not the creature type).
+    """
+    if path == "name":
+        return dataset
+    if path.endswith("details.Languages"):
+        return "lang"
+    m = _SPELL_CELL.match(path)
+    if m:
+        block = _get_path(rec, m.group("block"))
+        header = block.get("header") if isinstance(block, dict) else None
+        if header and header[0] == "Spell":
+            return "spells"
+    return ""
+
+
 def record_segments(rec: dict, dataset: str = "") -> list[Segment]:
     segs: list[Segment] = []
     for path, value in walk(rec):
         leaf = path.rsplit(".", 1)[-1]
         if leaf.isdigit():  # list element, e.g. table cell or ability score list
             leaf = path.rsplit(".", 2)[-2]
-        ns = dataset if path == "name" else ""
+        ns = segment_ns(rec, path, dataset)
         for i, piece in enumerate(_pieces(leaf, value)):
             segs.append(Segment(rec["id"], path, i, piece, ns))
     return segs
@@ -124,7 +148,7 @@ def apply_translation(rec: dict, tm_lookup, dataset: str = "") -> tuple[dict, in
         ok = True
         for para in paras:
             pieces = split_sentences(para) if leaf in PROSE_KEYS else [para]
-            ns = dataset if path == "name" else ""
+            ns = segment_ns(rec, path, dataset)
             trs = [tm_lookup(segment_key(p, ns)) for p in pieces]
             done += sum(t is not None for t in trs)
             missing += sum(t is None for t in trs)

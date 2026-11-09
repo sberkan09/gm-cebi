@@ -88,7 +88,7 @@ def cmd_queue(args) -> None:
                 if e and e.tr and e.status != "rejected":
                     continue
                 item = pending.setdefault(seg.key, {"key": seg.key, "en": seg.en, "refs": [], "terms": [],
-                                                    "ds": ds if seg.ns else ""})
+                                                    "ds": seg.ns if seg.ns in ("spells", "lang") else (ds if seg.ns else "")})
                 if len(item["refs"]) < 3:
                     item["refs"].append(f"{ds}/{seg.ref}")
     for item in pending.values():
@@ -102,6 +102,8 @@ def cmd_queue(args) -> None:
     own = {"büyü adı": "spells", "canavar adı": "monsters"}
     auto = []
     for k, it in list(pending.items()):
+        if it["ds"] == "lang":
+            continue  # language names are not glossary terms ("Giant" ≠ Dev)
         bullet = it["en"].startswith("- ")
         word = it["en"][2:] if bullet else it["en"]
         cands = [t for t in glossary.terms if t.en in (word, f"{word} [Action]")]
