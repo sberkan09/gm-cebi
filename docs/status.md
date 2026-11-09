@@ -16,7 +16,8 @@ ustalıkları. Asset'ler 2,9 MB (bütçe 10 MB).
   kullanım sınırları ("Günde 3", "İstediği Zaman"), hasar türü dilbilgisi (Delici hasar / Ateş
   hasarı), dil ve düzlem adları, sınıf özelliği adları tek biçime çekildi (323 segment).
 - **Bellek:** 9.647 segment, QC bulgusu 0. Kalitenin insan incelemesi yapılmadı; mağaza metinleri
-  ve Ayarlar'daki not bunu söylüyor.
+  ve Ayarlar'daki not bunu söylüyor. Canavar ve sınıf metinlerinde bir AI düzeltme turu yapıldı (74 segment);
+  insan incelemesi için öncelik sırası ve açık kararlar `docs/translation-review.md`'de.
 - **Veri hattı düzeltmeleri:** sınıf büyü listesi hücreleri büyü adı olarak anahtarlanıyor ("Light"
   orada Işık, silah özelliği değil); canavarların dil satırı ayrı ad alanında ("Giant" dili ≠ Dev);
   araç/eyer/gemi tabloları düzgün ayrıştırılıyor (eski "Speed", "Exotic", yemek satırı kayıtları
