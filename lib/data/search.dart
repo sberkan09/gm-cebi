@@ -153,13 +153,19 @@ class SearchIndex {
     if (tokens.isEmpty) return const [];
     final exact = trLower(query).trim().replaceAll(RegExp(r'\s+'), ' ');
     var hits = _run(q, tokens, exact, only, approximate: false);
-    if (hits.isEmpty) {
-      // Turkish suffixes: "körlük" → "kör", "büyüleri" → "büyü".
+    // No name matched (only body text, or nothing): try Turkish suffixes on names,
+    // "körün" → "kör", "büyüleri" → "büyü". Body hits stay, ranked below them.
+    if (!hits.any((h) => h.score - h.record.info.priority > _bodyScore)) {
+      var approx = <SearchHit>[];
       // Names only (body prefixes of short stems are mostly noise), stems of 3+ letters.
-      for (var cut = 1; cut <= 3 && hits.isEmpty; cut++) {
+      for (var cut = 1; cut <= 3 && approx.isEmpty; cut++) {
         final trimmed = [for (final t in tokens) t.length - cut >= 3 ? t.substring(0, t.length - cut) : t];
         if (trimmed.join() == tokens.join()) break;
-        hits = _run(trimmed.join(' '), trimmed, exact, only, approximate: true);
+        approx = _run(trimmed.join(' '), trimmed, exact, only, approximate: true);
+      }
+      if (approx.isNotEmpty) {
+        final seen = {for (final h in approx) h.index};
+        hits = [...approx, for (final h in hits) if (!seen.contains(h.index)) h];
       }
     }
     // Ties: alphabetical by the folded English name (cheap; precomputed).
@@ -202,8 +208,10 @@ class SearchIndex {
     return hits;
   }
 
+  static const _bodyScore = 100.0;
+
   double _score(int i, String q, List<String> tokens, String exact) {
-    var best = 100.0; // body-only match
+    var best = _bodyScore; // body-only match
     for (var n = 0; n < _names[i].length; n++) {
       final name = _names[i][n];
       final words = _nameWords[i][n];

@@ -36,14 +36,19 @@ void main() {
     expect(find.textContaining('Casting Time', findRichText: true), findsOneWidget);
   });
 
-  appTest('untranslated monster shows the English stat block with a note', (tester, db) async {
+  appTest('monster stat block in Turkish, English with one tap', (tester, db) async {
     await tester.enterText(find.byKey(const Key('search-field')), 'aboleth');
     await settle(tester);
     await tester.tap(find.text('Aboleth').first);
     await settle(tester);
-    expect(find.byKey(const Key('untranslated-banner')), findsOneWidget);
+    expect(find.byKey(const Key('untranslated-banner')), findsNothing);
     expect(find.byKey(const Key('ability-table')), findsOneWidget);
+    expect(find.text('Efsanevi Eylemler'), findsOneWidget);
+    expect(find.textContaining('Duyular', findRichText: true), findsOneWidget); // detail rows get Turkish labels
+    await tester.tap(find.text('EN'));
+    await settle(tester);
     expect(find.text('Legendary Actions'), findsOneWidget);
+    expect(find.textContaining('Senses', findRichText: true), findsOneWidget);
     // GM pack locked: no "add to initiative".
     expect(find.byKey(const Key('add-to-initiative')), findsNothing);
   });

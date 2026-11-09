@@ -4,10 +4,10 @@
 
 ## Özet
 
-- Çevrilen benzersiz segment: **1091** (sözlükten doğrudan dolanlar hariç: 256)
-- Veri kümesine göre (ilk geçtiği yer): rules_glossary 704, spells 303, conditions 81, species 1, monsters 1, classes 1
-- QC bulgusu olmayan: **1090**, bulgulu: **1** (inceleme kuyruğunda öne alınır)
-- Üretici: `claude-opus-5-5` 1027, `claude-opus-5-5+casefix` 64
+- Çevrilen benzersiz segment: **8398** (sözlükten doğrudan dolanlar hariç: 1249)
+- Veri kümesine göre (ilk geçtiği yer): monsters 2741, spells 2601, classes 1305, rules_glossary 704, equipment 344, subclasses 331, species 167, conditions 81, feats 72, weapon_properties 26, backgrounds 13, weapon_mastery 13
+- QC bulgusu olmayan: **8398**, bulgulu: **0** (inceleme kuyruğunda öne alınır)
+- Üretici: `claude-opus-5-5` 8334, `claude-opus-5-5+casefix` 64
 
 ## 20 rastgele örnek (tohum 7)
 
@@ -36,83 +36,78 @@
 - **EN:** If a creature can somehow see you, you don’t gain this benefit against that creature.
 - **TR:** Bir yaratık seni bir şekilde görebiliyorsa, o yaratığa karşı bu faydayı kazanmazsın.
 
-### 6. `rules_glossary/breaking-objects:blocks.0.text#1`
+### 6. `rules_glossary/difficult-terrain:blocks.6.text#0`
 
-- **EN:** If an object is exceedingly fragile, the GM may allow a creature to break it automatically with the Attack or Utilize action.
-- **TR:** Bir nesne son derece kırılgansa GM, bir yaratığın onu Saldırı ya da Kullanma eylemiyle otomatik olarak kırmasına izin verebilir.
+- **EN:** - A narrow opening sized for a creature one size smaller than you
+- **TR:** - Senden bir boyut küçük bir yaratığa göre boyutlanmış dar bir açıklık
 
-### 7. `rules_glossary/study:blocks.2.rows.3.1#0`
+### 7. `rules_glossary/hostile:blocks.0.text#1`
 
-- **EN:** Terrain, flora, weather, and certain creatures (Beasts, Dragons, Oozes, and Plants)
-- **TR:** Arazi, bitki örtüsü, hava durumu ve belirli yaratıklar (Hayvanlar, Ejderhalar, Balçıklar ve Bitkiler)
+- **EN:** You have Disadvantage on an ability check to influence a Hostile creature.
+- **TR:** Düşmanca bir yaratığı etkilemek için yaptığın yetenek testinde Dezavantajın vardır.
 
-### 8. `rules_glossary/help:blocks.1.text#1`
+### 8. `rules_glossary/help:blocks.2.text#2`
 
-- **EN:** Choose one of your skill or tool proficiencies and one ally who is near enough for you to assist verbally or physically when they make an ability check.
-- **TR:** Beceri ya da alet yetkinliklerinden birini ve yetenek testi yaparken ona sözlü ya da fiziksel olarak yardım edebileceğin kadar yakında olan bir müttefikini seç.
+- **EN:** This benefit expires at the start of your next turn.
+- **TR:** Bu fayda bir sonraki sıranın başında sona erer.
 
-### 9. `rules_glossary/damage:blocks.0.text#0`
+### 9. `rules_glossary/ready:blocks.1.text#0`
 
-- **EN:** Damage represents harm that causes a creature or an object to lose Hit Points.
-- **TR:** Hasar, bir yaratığın ya da nesnenin Can Puanı kaybetmesine yol açan zarardır.
+- **EN:** First, you decide what perceivable circumstance will trigger your Reaction.
+- **TR:** Önce, hangi algılanabilir durumun Reaksiyonunu tetikleyeceğine karar verirsin.
 
-### 10. `rules_glossary/action:blocks.0.text#3`
+### 10. `rules_glossary/influence:blocks.0.text#3`
 
-- **EN:** These actions are defined elsewhere in this glossary:
-- **TR:** Bu eylemler sözlüğün başka yerlerinde tanımlanmıştır:
+- **EN:** The GM then determines whether the monster feels willing, unwilling, or hesitant due to your interaction; this determination establishes whether an ability check is necessary, as explained below.
+- **TR:** Ardından GM, etkileşimin sonucunda canavarın istekli, isteksiz ya da tereddütlü olduğuna karar verir; bu karar, aşağıda açıklandığı gibi bir yetenek testinin gerekip gerekmediğini belirler.
 
-### 11. `rules_glossary/critical-hit:blocks.0.text#0`
+### 11. `rules_glossary/unoccupied-space:blocks.0.text#0`
 
-- **EN:** If you roll a 20 on the d20 for an attack roll, you score a Critical Hit, and the attack hits regardless of any modifiers or the target’s AC.
-- **TR:** Bir saldırı zarında d20'de 20 atarsan Kritik Vuruş yaparsın ve saldırı, değiştiricilerden ya da hedefin ZS'sinden bağımsız olarak isabet eder.
+- **EN:** A space is unoccupied if no creatures are in it and it isn’t completely filled by objects.
+- **TR:** İçinde hiçbir yaratık yoksa ve nesnelerle tamamen dolu değilse bir alan boştur.
 
-### 12. `rules_glossary/emanation:blocks.0.text#0`
+### 12. `rules_glossary/sphere:blocks.0.text#0`
 
-- **EN:** An Emanation is an area of effect that extends in straight lines from a creature or an object in all directions.
-- **TR:** Yayılım, bir yaratıktan ya da nesneden her yöne düz çizgiler hâlinde uzanan bir etki alanıdır.
+- **EN:** A Sphere is an area of effect that extends in straight lines from a point of origin outward in all directions.
+- **TR:** Küre, bir başlangıç noktasından her yöne doğru düz çizgiler hâlinde uzanan bir etki alanıdır.
 
-### 13. `spells/thaumaturgy:blocks.4.text#1`
+### 13. `spells/summon-dragon:blocks.18.text#2`
 
-- **EN:** You instantaneously cause an unlocked door or window to fly open or slam shut.
-- **TR:** Kilitli olmayan bir kapının ya da pencerenin anında açılmasını veya çarparak kapanmasını sağlarsın.
+- **EN:** *Failure:* 2d6 damage of a type this spirit has Resistance to (your choice when you cast the spell).
+- **TR:** *Başarısızlık:* Bu ruhun Dirence sahip olduğu bir türde 2d6 hasar (seçimini büyüyü yaptığında yaparsın).
 
-### 14. `spells/darkness:blocks.1.text#0`
+### 14. `spells/thunderwave:blocks.1.text#0`
 
-- **EN:** Alternatively, you cast the spell on an object that isn’t being worn or carried, causing the Darkness to fill a 15-foot Emanation originating from that object.
-- **TR:** Alternatif olarak, büyüyü giyilmeyen veya taşınmayan bir nesneye yaparsın; bu durumda Karanlık, o nesneden çıkan 15 fitlik bir Yayılımı doldurur.
+- **EN:** In addition, unsecured objects that are entirely within the Cube are pushed 10 feet away from you, and a thunderous boom is audible within 300 feet.
+- **TR:** Ayrıca tamamen Küpün içinde kalan sabitlenmemiş nesneler senden 10 fit uzağa itilir ve 300 fit öteden duyulabilen gürleyen bir patlama sesi çıkar.
 
-### 15. `spells/shocking-grasp:blocks.0.text#0`
+### 15. `spells/conjure-minor-elementals:blocks.0.text#2`
 
-- **EN:** Lightning springs from you to a creature that you try to touch.
-- **TR:** Senden, dokunmaya çalıştığın bir yaratığa doğru şimşek fışkırır.
+- **EN:** This damage is Acid, Cold, Fire, or Lightning (your choice when you make the attack).
+- **TR:** Bu hasar Asit, Soğuk, Ateş veya Yıldırım hasarıdır (saldırıyı yaptığında sen seçersin).
 
-### 16. `spells/polymorph:blocks.0.text#4`
+### 16. `spells/gate:blocks.2.text#0`
 
-- **EN:** See the “Animals” section of “Monsters” for a sample of Beast stat blocks.
-- **TR:** Hayvan istatistik bloğu örnekleri için “Canavarlar” bölümündeki “Hayvanlar” kısmına bak.
+- **EN:** Deities and other planar rulers can prevent portals created by this spell from opening in their presence or anywhere within their domains.
+- **TR:** Tanrılar ve diğer düzlem hükümdarları, bu büyüyle yaratılan portalların kendi huzurlarında ya da hükmettikleri alanların herhangi bir yerinde açılmasını engelleyebilir.
 
-### 17. `spells/spirit-guardians:blocks.1.text#1`
+### 17. `spells/shillelagh:blocks.0.text#1`
 
-- **EN:** Any other creature’s Speed is halved in the Emanation, and whenever the Emanation enters a creature’s space and whenever a creature enters the Emanation or ends its turn there, the creature must make a Wisdom saving throw.
-- **TR:** Diğer tüm yaratıkların Hızı Yayılım içinde yarıya iner; Yayılım bir yaratığın alanına her girdiğinde ve bir yaratık Yayılıma her girdiğinde ya da sırasını orada bitirdiğinde, o yaratık bir Bilgelik kurtarma zarı atmalıdır.
+- **EN:** For the duration, you can use your spellcasting ability instead of Strength for the attack and damage rolls of melee attacks using that weapon, and the weapon’s damage die becomes a d8.
+- **TR:** Süre boyunca, o silahla yapılan yakın dövüş saldırılarının saldırı ve hasar zarlarında Güç yerine büyü yeteneğini kullanabilirsin; ayrıca silahın hasar zarı d8 olur.
 
-### 18. `spells/healing-word:higher_levels#0`
+### 18. `spells/earthquake:blocks.3.text#3`
 
-- **EN:** The healing increases by 2d4 for each spell slot level above 1.
-- **TR:** İyileşme, 1'in üzerindeki her büyü slotu seviyesi için 2d4 artar.
+- **EN:** Each fissure is 1d10 × 10 feet deep and 10 feet wide, and it extends from one edge of the spell’s area to another edge.
+- **TR:** Her yarık 1d10 × 10 fit derinliğinde ve 10 fit genişliğindedir ve büyünün alanının bir kenarından diğer kenarına uzanır.
 
-### 19. `spells/minor-illusion:blocks.2.text#1`
+### 19. `spells/wish:blocks.1.text#0`
 
-- **EN:** If you create a sound, its volume can range from a whisper to a scream.
-- **TR:** Bir ses yaratırsan, sesin şiddeti fısıltıdan çığlığa kadar değişebilir.
+- **EN:** The basic use of this spell is to duplicate any other spell of level 8 or lower.
+- **TR:** Bu büyünün temel kullanımı, 8. veya daha düşük seviyeli herhangi bir başka büyüyü kopyalamaktır.
 
-### 20. `spells/charm-monster:blocks.0.text#1`
+### 20. `spells/sanctuary:blocks.0.text#1`
 
-- **EN:** It does so with Advantage if you or your allies are fighting it.
-- **TR:** Sen ya da müttefiklerin onunla dövüşüyorsanız bu zarı Avantajla atar.
+- **EN:** Until the spell ends, any creature who targets the warded creature with an attack roll or a damaging spell must succeed on a Wisdom saving throw or either choose a new target or lose the attack or spell.
+- **TR:** Büyü sona erene kadar, korunan yaratığı bir saldırı zarı ya da hasar veren bir büyüyle hedef alan her yaratık bir Bilgelik kurtarma zarında başarılı olmalıdır; aksi hâlde ya yeni bir hedef seçer ya da saldırıyı veya büyüyü boşa harcar.
 
-## QC bulgusu kalan segmentler
-
-| Yer | EN | TR | Bulgu |
-|---|---|---|---|
-| `rules_glossary/possession:blocks.0.text#2` | Possession can be prevented by the *Protection from Evil and Good* spell and ended by the *Dispel Evil and Good* spell. | Ele geçirilme *Protection from Evil and Good* büyüsüyle önlenebilir ve *Dispel Evil and Good* büyüsüyle sona erdirilebilir. | untranslated: İngilizce kelime kalmış olabilir |
