@@ -60,8 +60,20 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-10-23 — Not editörü uygulama arka plana geçerken bekleyen metni hemen kaydeder.
 - 2026-10-23 — Widget testleri drift'in sahte-zaman bölgesinde çalışır (`runAsync` drift bağlantı kilidinde kilitleniyor); testler uygulamanın tamamını bellek içi veritabanı ve gerçek asset'lerle açar.
 
+## Yayın hazırlığı (Play kapalı/açık test, TestFlight)
+
+- 2026-11-06 — Sürüm `1.0.0+1`; `appVersion` ile pubspec'in uyumu testle denetlenir.
+- 2026-11-06 — Mağaza derlemeleri (Play test kanalları, TestFlight): `GMCEBI_INTERNAL=false`, `GMCEBI_GM_PACK=true` (satın alma yok, test kullanıcıları GM Paketi'ni denemeli; test kanalındaki derleme üretime aynen terfi ettirilebildiği için test anahtarı hiçbir mağaza derlemesinde yok). Test APK'sı (GitHub ön-sürümü) değişmedi: ikisi de `true`.
+- 2026-11-06 — Test anahtarının veritabanına yazdığı `gmPackOverride` yalnızca `GMCEBI_INTERNAL` derlemelerinde okunur (`resolveGmPack`). Önceden mağaza derlemesi de okuyordu; test derlemesinden güncellenen cihazda GM Paketi bedava açık kalabiliyordu.
+- 2026-11-06 — Android imzası: Play App Signing + yükleme anahtarı. `android/key.properties` (git dışı) varsa release onunla, yoksa debug anahtarıyla imzalanır (yalnızca test APK'sı). CI keystore'u base64 secret'tan yazar ve iş sonunda siler.
+- 2026-11-06 — `release-aab` iş akışı `v*` etiketinde (`v*-test*` hariç) test + imzalı AAB; imzalayanın yükleme anahtarı olduğu, test anahtarının derlemeden silindiği, İnternet izni ve `com.example` olmadığı `tool/check_store_build.sh` ile denetlenir. Play'e yükleme elle.
+- 2026-11-06 — İkonlar için `flutter_launcher_icons` eklenmedi: `tool/make_icons.py` Android (legacy, adaptive, monochrome) ve iOS setinin tamamını zaten üretiyor. Play 512 px ikon ve öne çıkan görsel `tool/make_store_graphics.py` ile.
+- 2026-11-06 — Mağaza ekran görüntüleri ayrı boyutlarda: Android 1080×1920 (Play en çok 2:1 oran kabul ediyor; mevcut 1290×2796 görüntüler 2,17), iOS 1320×2868 (6,9").
+- 2026-11-06 — Mağaza metinleri çeviri kapsamını abartmaz (15 durum, 140 kural girdisi, 50 büyü); "D&D" geçmez, yalnızca "5e uyumlu"; SRD atıf cümlesi birebir (testle denetlenir).
+
 ## Onay bekleyenler
 
 - **ONAY BEKLİYOR** — Atıf metni: SRD'nin zorunlu kıldığı İngilizce cümle README'ye, `manifest.json`'a ve Hakkında ekranına birebir kondu (onay gerektirmez, lisans şartı). Ek olarak Türkçe bir "değiştirilmiş eser" notu öneriliyor (CC-BY değişikliklerin belirtilmesini istiyor): "Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, değiştirilmiş bir çalışmadır. …" Test sürümünde Hakkında ekranında **öneri metni olarak** duruyor (`lib/app_info.dart`, `translationNotice`); mağaza sürümünden önce onaylanmalı ya da değiştirilmeli. SRD, Wizards'a bu atıf dışında başka bir atıf yapılmamasını istediği için "Wizards ile bağımız yoktur" gibi ek cümleler kullanılmıyor.
 - **ONAY BEKLİYOR** — Uygulama adı: "GM Cebi" çalışma adı olarak kullanılıyor (`lib/app_info.dart`, Android etiketi, iOS `CFBundleDisplayName`).
-- **ONAY BEKLİYOR** — Paket adı: şimdilik yer tutucu `com.example.gm_cebi` (Android) / `com.example.gmCebi` (iOS). Mağazaya ilk yüklemeden önce kesinleşmeli; değiştirilecek yerler `docs/ios-testflight.md`'de.
+- **ONAY BEKLİYOR** — Paket adı: `io.github.sberkan09.gmcebi` (Android ve iOS aynı; `sberkan09.github.io` alanının tersi). Yer tutucu `com.example.*` Play'de reddedildiği için önerildi. İlk mağaza yüklemesinden sonra değiştirilemez; başka bir kimlik istenirse değiştirilecek yerler `docs/release.md`'de.
+- **ONAY BEKLİYOR** — Üretime (herkese açık) çıkmadan önce: GM Paketi satın alma gelene kadar ücretsiz mi verilecek, yoksa üretim satın almayı mı bekleyecek? Test kanallarında açık (`docs/release.md`, "Bayraklar").

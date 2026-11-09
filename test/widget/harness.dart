@@ -39,11 +39,14 @@ void appTest(
   Future<void> Function(WidgetTester tester, AppDatabase db) body, {
   bool gmPack = false,
   Random? random,
+  Size surface = const Size(430, 932),
+  double? pixelRatio,
 }) {
   testWidgets(description, (tester) async {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
     final db = AppDatabase(NativeDatabase.memory());
-    await tester.binding.setSurfaceSize(const Size(430, 932));
+    if (pixelRatio != null) tester.view.devicePixelRatio = pixelRatio;
+    await tester.binding.setSurfaceSize(surface);
     try {
       await tester.pumpWidget(ProviderScope(
         overrides: [
@@ -62,6 +65,7 @@ void appTest(
       await tester.pump(const Duration(seconds: 1));
       await closing;
       await tester.binding.setSurfaceSize(null);
+      if (pixelRatio != null) tester.view.resetDevicePixelRatio();
     }
   }, timeout: const Timeout(Duration(seconds: 90)));
 }

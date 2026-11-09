@@ -102,7 +102,7 @@ final currentSettingsProvider = Provider<AppSettings>((ref) => ref.watch(setting
 
 final entitlementsProvider = Provider<Entitlements>((ref) {
   final s = ref.watch(currentSettingsProvider);
-  return Entitlements(gmPack: s.gmPackOverride ?? kGmPackDefault);
+  return Entitlements(gmPack: resolveGmPack(override: s.gmPackOverride));
 });
 
 // ---------------------------------------------------------------- user data
