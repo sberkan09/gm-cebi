@@ -42,12 +42,16 @@ Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
    gelir; jetonu sürükleyerek taşı; jetona dokunup "Haritadan kaldır" ile kaldır. "Sonraki" sırayı haritadan ilerletir.
    Tablette de dene: harita ekrana göre büyür.
 6. **Notlar** — Oturum notu al; yazdıkların kendiliğinden kaydedilir.
-7. **Genel** — Tek elle kullanım, yazı büyüklüğü, koyu/açık tema (Ayarlar).
+7. **NPC üretici** — Notlar ekranında sağ üstteki maske simgesine dokun, **NPC üret**'e bas.
+   Bir alana dokununca yalnızca o alan değişir; kilit simgesiyle alanı sabitle, sonra
+   **Yeniden üret**. Filtrelerden soy, cinsiyet ve tavrı seç. **Nota kaydet** ve
+   **İnisiyatife ekle**'yi dene. İsimler ve tablolar masada doğal okunuyor mu, söyle.
+8. **Genel** — Tek elle kullanım, yazı büyüklüğü, koyu/açık tema (Ayarlar).
 
 ## Bilinen eksikler (bildirmene gerek yok)
 
 - Çeviri şimdilik durumlar, kurallar sözlüğü ve 50 büyüde. Canavarların, sınıfların, ekipmanın ve geri kalan büyülerin tamamı İngilizce.
-- Satın alma yok; NPC üretici sonraki sürümde.
+- Satın alma yok.
 - Sihirli eşyalar ve bazı kural bölümleri henüz uygulamada değil.
 
 ## Geri bildirim

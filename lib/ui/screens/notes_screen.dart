@@ -8,6 +8,7 @@ import '../../db/database.dart';
 import '../../features/flags.dart';
 import '../../providers.dart';
 import '../widgets/locked.dart';
+import 'npc_screen.dart';
 
 const _months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 
@@ -29,13 +30,16 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
   @override
   Widget build(BuildContext context) {
     if (!ref.watch(entitlementsProvider).allows(Feature.sessionNotes)) {
-      return Scaffold(appBar: AppBar(title: const Text('Notlar')), body: const GmPackLocked(feature: 'Oturum notları'));
+      return Scaffold(
+        appBar: AppBar(title: const Text('Notlar'), actions: const [_NpcButton()]),
+        body: const GmPackLocked(feature: 'Oturum notları'),
+      );
     }
     final notes = ref.watch(notesProvider);
     final t = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Oturum Notları')),
+      appBar: AppBar(title: const Text('Oturum Notları'), actions: const [_NpcButton()]),
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('new-note'),
         heroTag: 'fab-notes',
@@ -87,6 +91,19 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       ),
     );
   }
+}
+
+/// Entry to the NPC generator: NPCs made at the table usually end up in the notes.
+class _NpcButton extends StatelessWidget {
+  const _NpcButton();
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+        key: const Key('open-npc'),
+        tooltip: 'NPC üret',
+        icon: const Icon(Icons.theater_comedy_outlined),
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const NpcScreen())),
+      );
 }
 
 class _NoteTile extends StatelessWidget {

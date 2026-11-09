@@ -67,7 +67,7 @@ class SettingsScreen extends ConsumerWidget {
         ListTile(
           leading: Icon(ent.gmPack ? Icons.lock_open : Icons.lock_outline, color: scheme.primary),
           title: Text(ent.gmPack ? 'Açık' : 'Kilitli'),
-          subtitle: const Text('İnisiyatif takibi, oturum notları, NPC üretici (yakında). Satın alma sonraki sürümde.'),
+          subtitle: const Text('İnisiyatif takibi, oturum notları, NPC üretici. Satın alma sonraki sürümde.'),
         ),
         if (kInternalBuild)
           SwitchListTile(

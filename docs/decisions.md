@@ -89,6 +89,11 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-11-09 — Resim indirmede 302 elle takip edilir: uygulama token'ı ve kurulum kimliği yalnızca NeuraCraft'a gider, depolama sağlayıcısına gitmez.
 - 2026-11-09 — "Verilerimi sil" yerel verileri siler ve yeni kurulum kimliği üretir; sunucu tarafı silme `partner:manage` gerektirdiği ve GM Cebi'nin sunucusu olmadığı için "en geç 7 gün" açıklaması gösterilir.
 
+## NPC üretici (2026-11-09)
+
+- 2026-11-09 — NPC tabloları (`lib/features/npc/npc_tables.dart`) tamamen özgün içeriktir: hiçbir yayımlanmış kitabın isim ya da özellik tablosu kopyalanmaz veya çevrilmez; ürün kimliği adları, dünya/mekân adları, tanrılar ve adı geçen karakterler kullanılmaz. Oyun içeriğinden yalnızca SRD 5.2.1 soy adları (sözlükteki Türkçeleriyle) ve Etkileme eyleminin tavırları (Dostça/Kayıtsız/Düşmanca) alınır. Yasaklı adlar ve en az liste boyları testle denetlenir.
+- 2026-11-09 — NPC üretici GM Paketi'nde, Notlar ekranının üst çubuğundan açılır (yeni sekme yok). Üretim çevrimdışı ve zarla aynı `Random`'ı kullanır (testlerde tohumlu). Son 10 NPC yalnızca oturum boyunca bellekte; kalıcı olması istenen NPC "Nota kaydet" ile not olur, şema değişmez.
+
 ## Onay bekleyenler
 
 - **ONAY BEKLİYOR** — Atıf metni: SRD'nin zorunlu kıldığı İngilizce cümle README'ye, `manifest.json`'a ve Hakkında ekranına birebir kondu (onay gerektirmez, lisans şartı). Ek olarak Türkçe bir "değiştirilmiş eser" notu öneriliyor (CC-BY değişikliklerin belirtilmesini istiyor): "Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, değiştirilmiş bir çalışmadır. …" Test sürümünde Hakkında ekranında **öneri metni olarak** duruyor (`lib/app_info.dart`, `translationNotice`); mağaza sürümünden önce onaylanmalı ya da değiştirilmeli. SRD, Wizards'a bu atıf dışında başka bir atıf yapılmamasını istediği için "Wizards ile bağımız yoktur" gibi ek cümleler kullanılmıyor.
