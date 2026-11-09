@@ -1,5 +1,40 @@
 [
  {
+  "id": "playing-intro",
+  "name": "Playing the Game",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 5,
+   "heading": [
+    "Playing the Game"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Playing the Game",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "### Exceptions Supersede General Rules"
+   },
+   {
+    "type": "p",
+    "text": "General rules govern each part of the game. For example, the combat rules tell you that melee attacks use Strength and ranged attacks use Dexterity. That’s a general rule, and a general rule is in effect as long as something in the game doesn’t explicitly say otherwise."
+   },
+   {
+    "type": "p",
+    "text": "The game also includes elements—class features, feats, weapon properties, spells, magic items, monster abilities, and the like—that sometimes contradict a general rule. When an exception and a general rule disagree, the exception wins. For example, if a feature says you can make melee attacks using your Charisma, you can do so, even though that statement disagrees with the general rule."
+   },
+   {
+    "type": "p",
+    "text": "### Round Down"
+   },
+   {
+    "type": "p",
+    "text": "Whenever you divide or multiply a number in the game, round down if you end up with a fraction, even if the fraction is one-half or greater. Some rules make an exception and tell you to round up."
+   }
+  ]
+ },
+ {
   "id": "playing-rhythm-of-play",
   "name": "Rhythm of Play",
   "source": {
@@ -569,7 +604,7 @@
   "source": {
    "document": "SRD 5.2.1",
    "page": 8,
-   "page_end": 10,
+   "page_end": 9,
    "heading": [
     "Playing the Game",
     "Proficiency"
@@ -758,46 +793,6 @@
       "Survival",
       "Wisdom",
       "Follow tracks, forage, find a trail, or avoid natural hazards."
-     ],
-     [
-      "Disengage",
-      "Your movement doesn’t provoke Opportunity Attacks for the rest of the turn."
-     ],
-     [
-      "Dodge",
-      "Until the start of your next turn, attack rolls against you have Disadvantage, and you make Dexterity saving throws with Advantage. You lose this benefit if you have the Incapacitated condition or if your Speed is 0."
-     ],
-     [
-      "Help",
-      "Help another creature’s ability check or attack roll, or administer first aid."
-     ],
-     [
-      "Hide",
-      "Make a Dexterity (Stealth) check."
-     ],
-     [
-      "Influence",
-      "Make a Charisma (Deception, Intimidation, Performance, or Persuasion) or Wisdom (Animal Handling) check to alter a creature’s attitude."
-     ],
-     [
-      "Magic",
-      "Cast a spell, use a magic item, or use a magical feature."
-     ],
-     [
-      "Ready",
-      "Prepare to take an action in response to a trigger you define."
-     ],
-     [
-      "Search",
-      "Make a Wisdom (Insight, Medicine, Perception, or Survival) check."
-     ],
-     [
-      "Study",
-      "Make an Intelligence (Arcana, History, Investigation, Nature, or Religion) check."
-     ],
-     [
-      "Utilize",
-      "Use a nonmagical object."
      ]
     ]
    },
@@ -873,6 +868,46 @@
      [
       "Dash",
       "For the rest of the turn, give yourself extra movement equal to your Speed."
+     ],
+     [
+      "Disengage",
+      "Your movement doesn’t provoke Opportunity Attacks for the rest of the turn."
+     ],
+     [
+      "Dodge",
+      "Until the start of your next turn, attack rolls against you have Disadvantage, and you make Dexterity saving throws with Advantage. You lose this benefit if you have the Incapacitated condition or if your Speed is 0."
+     ],
+     [
+      "Help",
+      "Help another creature’s ability check or attack roll, or administer first aid."
+     ],
+     [
+      "Hide",
+      "Make a Dexterity (Stealth) check."
+     ],
+     [
+      "Influence",
+      "Make a Charisma (Deception, Intimidation, Performance, or Persuasion) or Wisdom (Animal Handling) check to alter a creature’s attitude."
+     ],
+     [
+      "Magic",
+      "Cast a spell, use a magic item, or use a magical feature."
+     ],
+     [
+      "Ready",
+      "Prepare to take an action in response to a trigger you define."
+     ],
+     [
+      "Search",
+      "Make a Wisdom (Insight, Medicine, Perception, or Survival) check."
+     ],
+     [
+      "Study",
+      "Make an Intelligence (Arcana, History, Investigation, Nature, or Religion) check."
+     ],
+     [
+      "Utilize",
+      "Use a nonmagical object."
      ]
     ]
    },
@@ -2042,8 +2077,8 @@
     ],
     "rows": [
      [
-      "Barbarian Battle",
-      "",
+      "Barbarian",
+      "Battle",
       "Strength",
       "Average"
      ],
@@ -2180,8 +2215,8 @@
       "Soldier"
      ],
      [
-      "Constitution Soldier",
-      ""
+      "Constitution",
+      "Soldier"
      ],
      [
       "Intelligence",
@@ -2761,13 +2796,9 @@
     "title": "Level 1 Hit Points by Class",
     "header": [
      "Class",
-     ""
+     "Hit Point Maximum"
     ],
     "rows": [
-     [
-      "",
-      "Hit Point Maximum"
-     ],
      [
       "Barbarian",
       "12 + Con. modifier"
@@ -2777,12 +2808,8 @@
       "10 + Con. modifier"
      ],
      [
-      "Bard, Cleric, Druid, Monk,",
+      "Bard, Cleric, Druid, Monk, Rogue, or Warlock",
       "8 + Con. modifier"
-     ],
-     [
-      "Rogue, or Warlock",
-      ""
      ],
      [
       "Sorcerer or Wizard",
@@ -2881,128 +2908,107 @@
     "header": [
      "Level",
      "Experience Points",
-     "",
      "Proficiency Bonus"
     ],
     "rows": [
      [
       "1",
-      "",
       "0",
       "+2"
      ],
      [
       "2",
-      "",
       "300",
       "+2"
      ],
      [
       "3",
-      "",
       "900",
       "+2"
      ],
      [
       "4",
       "2,700",
-      "",
       "+2"
      ],
      [
       "5",
       "6,500",
-      "",
       "+3"
      ],
      [
       "6",
       "14,000",
-      "",
       "+3"
      ],
      [
       "7",
       "23,000",
-      "",
       "+3"
      ],
      [
       "8",
       "34,000",
-      "",
       "+3"
      ],
      [
       "9",
       "48,000",
-      "",
       "+4"
      ],
      [
       "10",
       "64,000",
-      "",
       "+4"
      ],
      [
       "11",
       "85,000",
-      "",
       "+4"
      ],
      [
       "12",
       "100,000",
-      "",
       "+4"
      ],
      [
       "13",
       "120,000",
-      "",
       "+5"
      ],
      [
       "14",
       "140,000",
-      "",
       "+5"
      ],
      [
       "15",
       "165,000",
-      "",
       "+5"
      ],
      [
       "16",
       "195,000",
-      "",
       "+5"
      ],
      [
       "17",
       "225,000",
-      "",
       "+6"
      ],
      [
       "18",
       "265,000",
-      "",
       "+6"
      ],
      [
       "19",
       "305,000",
-      "",
       "+6"
      ],
      [
       "20",
       "355,000",
-      "",
       "+6"
      ]
     ]
@@ -3028,13 +3034,9 @@
     "title": "Fixed Hit Points by Class",
     "header": [
      "Class",
-     ""
+     "Hit Points per Level"
     ],
     "rows": [
-     [
-      "",
-      "Hit Points per Level"
-     ],
      [
       "Barbarian",
       "7 + Con. modifier"
@@ -3044,12 +3046,8 @@
       "6 + Con. modifier"
      ],
      [
-      "Bard, Cleric, Druid, Monk,",
+      "Bard, Cleric, Druid, Monk, Rogue, or Warlock",
       "5 + Con. modifier"
-     ],
-     [
-      "Rogue, or Warlock",
-      ""
      ],
      [
       "Sorcerer or Wizard",
@@ -4040,158 +4038,98 @@
     "header": [
      "Terrain",
      "Maximum Pace",
-     "",
-     "",
-     "",
-     "",
-     "",
-     "",
-     "",
-     ""
+     "Encounter Distance",
+     "Foraging DC",
+     "Navigation DC",
+     "Search DC"
     ],
     "rows": [
      [
-      "",
-      "",
-      "Encounter Distance",
-      "",
-      "Foraging DC",
-      "",
-      "Navigation DC",
-      "",
-      "Search DC",
-      ""
-     ],
-     [
       "Arctic",
       "Fast*",
-      "",
       "6d6 × 10 feet",
-      "",
       "20",
-      "",
       "10",
-      "",
       "10"
      ],
      [
       "Coastal",
       "Normal",
-      "",
       "2d10 × 10 feet",
-      "",
       "10",
-      "",
       "5",
-      "",
       "15"
      ],
      [
       "Desert",
       "Normal",
-      "",
       "6d6 × 10 feet",
-      "",
       "20",
-      "",
       "10",
-      "",
       "10"
      ],
      [
       "Forest",
       "Normal",
-      "",
       "2d8 × 10 feet",
-      "",
       "10",
-      "",
       "15",
-      "",
       "15"
      ],
      [
       "Grassland",
       "Fast",
-      "",
       "6d6 × 10 feet",
-      "",
       "15",
-      "",
       "5",
-      "",
       "15"
      ],
      [
       "Hill",
       "Normal",
-      "",
       "2d10 × 10 feet",
-      "",
       "15",
-      "",
       "10",
-      "",
       "15"
      ],
      [
       "Mountain",
       "Slow",
-      "",
       "4d10 × 10 feet",
-      "",
       "20",
-      "",
       "15",
-      "",
       "20"
      ],
      [
       "Swamp",
       "Slow",
-      "",
       "2d8 × 10 feet",
-      "",
       "10",
-      "",
       "15",
-      "",
       "20"
      ],
      [
       "Underdark",
       "Normal",
-      "",
       "2d6 × 10 feet",
-      "",
       "20",
-      "",
       "10",
-      "",
       "20"
      ],
      [
       "Urban",
       "Normal",
-      "",
       "2d6 × 10 feet",
-      "",
       "20",
-      "",
       "15",
-      "",
       "15"
      ],
      [
       "Waterborne",
       "Special†",
-      "",
       "6d6 × 10 feet",
-      "",
       "15",
-      "",
       "10",
-      "",
       "15"
      ]
     ]
@@ -5581,6 +5519,25 @@
   ]
  },
  {
+  "id": "magic-items-intro",
+  "name": "Magic Items",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 204,
+   "heading": [
+    "Magic Items"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Magic Items",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "Magic items are gleaned from the hoards of felled monsters or discovered in long-lost vaults. Such items grant capabilities a character could rarely have otherwise, or they complement their owner’s capabilities in wondrous ways."
+   }
+  ]
+ },
+ {
   "id": "magic-items-magic-item-categories",
   "name": "Magic Item Categories",
   "source": {
@@ -5856,39 +5813,33 @@
     "type": "table",
     "title": "Magic Item Rarities and Values",
     "header": [
-     "Rarity"
+     "Rarity",
+     "Value*"
     ],
     "rows": [
      [
-      "Value*"
-     ],
-     [
-      "",
-      "",
-      "",
-      "",
-      "Value*"
-     ],
-     [
       "Common",
-      "100 GP",
-      "Very Rare",
-      "40,000 GP",
-      ""
+      "100 GP"
      ],
      [
       "Uncommon",
-      "400 GP",
-      "Legendary",
-      "200,000 GP",
-      ""
+      "400 GP"
      ],
      [
       "Rare",
-      "4,000 GP",
+      "4,000 GP"
+     ],
+     [
+      "Very Rare",
+      "40,000 GP"
+     ],
+     [
+      "Legendary",
+      "200,000 GP"
+     ],
+     [
       "Artifact",
-      "Priceless",
-      ""
+      "Priceless"
      ]
     ]
    },
@@ -6141,39 +6092,33 @@
     "header": [
      "Item Rarity",
      "Time*",
-     "",
      "Cost*"
     ],
     "rows": [
      [
       "Common",
       "5 days",
-      "",
       "50 GP"
      ],
      [
       "Uncommon",
       "10 days",
-      "",
       "200 GP"
      ],
      [
       "Rare",
       "50 days",
-      "2,000 GP",
-      ""
+      "2,000 GP"
      ],
      [
       "Very Rare",
       "125 days",
-      "20,000 GP",
-      ""
+      "20,000 GP"
      ],
      [
       "Legendary",
       "250 days",
-      "100,000 GP",
-      ""
+      "100,000 GP"
      ]
     ]
    },
@@ -6239,40 +6184,44 @@
     "title": "Sentient Item’s Alignment",
     "header": [
      "1d100",
-     "Alignment",
-     "1d100",
      "Alignment"
     ],
     "rows": [
      [
       "01–15",
-      "Lawful Good",
+      "Lawful Good"
+     ],
+     [
+      "16–35",
+      "Neutral Good"
+     ],
+     [
+      "36–50",
+      "Chaotic Good"
+     ],
+     [
+      "51–63",
+      "Lawful Neutral"
+     ],
+     [
+      "64–73",
+      "Neutral"
+     ],
+     [
       "74–85",
       "Chaotic Neutral"
      ],
      [
-      "16–35",
-      "Neutral Good",
       "86–89",
       "Lawful Evil"
      ],
      [
-      "36–50",
-      "Chaotic Good",
       "90–96",
       "Neutral Evil"
      ],
      [
-      "51–63",
-      "Lawful Neutral",
       "97–00",
       "Chaotic Evil"
-     ],
-     [
-      "64–73",
-      "Neutral",
-      "",
-      ""
      ]
     ]
    },
@@ -6433,6 +6382,30 @@
    {
     "type": "p",
     "text": "- Attempt to take control of its bearer, whereupon the bearer makes a Charisma saving throw (DC 12 plus the item’s Charisma modifier). On a failed save, the bearer has the Charmed condition for 1d12 hours. While Charmed in this way, the bearer must try to follow the item’s commands. If the bearer takes damage, it repeats the save, ending the effect on a success. Whether or not the attempt to control its bearer succeeds, the item can’t use this power again until the next dawn."
+   }
+  ]
+ },
+ {
+  "id": "magic-items-magic-items-az",
+  "name": "Magic Items A–Z",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 209,
+   "heading": [
+    "Magic Items",
+    "Magic Items A–Z"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Magic Items",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "Magic items are presented in alphabetical order."
+   },
+   {
+    "type": "p",
+    "text": "If a magic item description capitalizes a creature’s name and presents it in **bold** type, that’s a visual cue pointing you to the creature’s stat block. Unless the text states otherwise, the stat block is in “Monsters.” How to read and use a stat block is explained in “Monsters.”"
    }
   ]
  }

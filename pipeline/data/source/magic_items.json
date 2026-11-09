@@ -72,50 +72,62 @@
     "type": "table",
     "header": [
      "1d100",
-     "Creature Type",
-     "1d100",
      "Creature Type"
     ],
     "rows": [
      [
       "01–10",
-      "Aberrations",
+      "Aberrations"
+     ],
+     [
+      "11–15",
+      "Beasts"
+     ],
+     [
+      "16–20",
+      "Celestials"
+     ],
+     [
+      "21–25",
+      "Constructs"
+     ],
+     [
+      "26–35",
+      "Dragons"
+     ],
+     [
+      "36–45",
+      "Elementals"
+     ],
+     [
+      "46–50",
+      "Humanoids"
+     ],
+     [
       "51–60",
       "Fey"
      ],
      [
-      "11–15",
-      "Beasts",
       "61–70",
       "Fiends"
      ],
      [
-      "16–20",
-      "Celestials",
       "71–75",
       "Giants"
      ],
      [
-      "21–25",
-      "Constructs",
       "76–80",
       "Monstrosities"
      ],
      [
-      "26–35",
-      "Dragons",
       "81–85",
       "Oozes"
      ],
      [
-      "36–45",
-      "Elementals",
       "86–90",
       "Plants"
      ],
      [
-      "46–50",
-      "Humanoids",
       "91–00",
       "Undead"
      ]
@@ -409,38 +421,46 @@
     "type": "table",
     "header": [
      "1d10",
-     "Damage Type",
-     "1d10",
      "Damage Type"
     ],
     "rows": [
      [
       "1",
-      "Acid",
+      "Acid"
+     ],
+     [
+      "2",
+      "Cold"
+     ],
+     [
+      "3",
+      "Fire"
+     ],
+     [
+      "4",
+      "Force"
+     ],
+     [
+      "5",
+      "Lightning"
+     ],
+     [
       "6",
       "Necrotic"
      ],
      [
-      "2",
-      "Cold",
       "7",
       "Poison"
      ],
      [
-      "3",
-      "Fire",
       "8",
       "Psychic"
      ],
      [
-      "4",
-      "Force",
       "9",
       "Radiant"
      ],
      [
-      "5",
-      "Lightning",
       "10",
       "Thunder"
      ]
@@ -684,32 +704,38 @@
     "title": "Gray Bag of Tricks",
     "header": [
      "1d8",
-     "Creature",
-     "1d8",
      "Creature"
     ],
     "rows": [
      [
       "1",
-      "Weasel",
+      "Weasel"
+     ],
+     [
+      "2",
+      "Giant Rat"
+     ],
+     [
+      "3",
+      "Badger"
+     ],
+     [
+      "4",
+      "Boar"
+     ],
+     [
       "5",
       "Panther"
      ],
      [
-      "2",
-      "Giant Rat",
       "6",
       "Giant Badger"
      ],
      [
-      "3",
-      "Badger",
       "7",
       "Dire Wolf"
      ],
      [
-      "4",
-      "Boar",
       "8",
       "Giant Elk"
      ]
@@ -720,32 +746,38 @@
     "title": "Rust Bag of Tricks",
     "header": [
      "1d8",
-     "Creature",
-     "1d8",
      "Creature"
     ],
     "rows": [
      [
       "1",
-      "Rat",
+      "Rat"
+     ],
+     [
+      "2",
+      "Owl"
+     ],
+     [
+      "3",
+      "Mastiff"
+     ],
+     [
+      "4",
+      "Goat"
+     ],
+     [
       "5",
       "Giant Goat"
      ],
      [
-      "2",
-      "Owl",
       "6",
       "Giant Boar"
      ],
      [
-      "3",
-      "Mastiff",
       "7",
       "Lion"
      ],
      [
-      "4",
-      "Goat",
       "8",
       "Brown Bear"
      ]
@@ -756,32 +788,38 @@
     "title": "Tan Bag of Tricks",
     "header": [
      "1d8",
-     "Creature",
-     "1d8",
      "Creature"
     ],
     "rows": [
      [
       "1",
-      "Jackal",
+      "Jackal"
+     ],
+     [
+      "2",
+      "Ape"
+     ],
+     [
+      "3",
+      "Baboon"
+     ],
+     [
+      "4",
+      "Axe Beak"
+     ],
+     [
       "5",
       "Black Bear"
      ],
      [
-      "2",
-      "Ape",
       "6",
       "Giant Weasel"
      ],
      [
-      "3",
-      "Baboon",
       "7",
       "Giant Hyena"
      ],
      [
-      "4",
-      "Axe Beak",
       "8",
       "Tiger"
      ]
@@ -1273,56 +1311,70 @@
     "type": "table",
     "header": [
      "1d100",
-     "Outer Plane",
-     "1d100",
      "Outer Plane"
     ],
     "rows": [
      [
       "01–05",
-      "Abyss",
+      "Abyss"
+     ],
+     [
+      "06–10",
+      "Acheron"
+     ],
+     [
+      "11–17",
+      "Arborea"
+     ],
+     [
+      "18–25",
+      "Arcadia"
+     ],
+     [
+      "26–33",
+      "Beastlands"
+     ],
+     [
+      "34–41",
+      "Bytopia"
+     ],
+     [
+      "42–46",
+      "Carceri"
+     ],
+     [
+      "47–54",
+      "Elysium"
+     ],
+     [
       "55–59",
       "Gehenna"
      ],
      [
-      "06–10",
-      "Acheron",
       "60–64",
       "Hades"
      ],
      [
-      "11–17",
-      "Arborea",
       "65–69",
       "Limbo"
      ],
      [
-      "18–25",
-      "Arcadia",
       "70–77",
       "Mechanus"
      ],
      [
-      "26–33",
-      "Beastlands",
       "78–85",
       "Mount Celestia"
      ],
      [
-      "34–41",
-      "Bytopia",
       "86–90",
       "Nine Hells"
      ],
      [
-      "42–46",
-      "Carceri",
       "91–95",
       "Pandemonium"
      ],
      [
-      "47–54",
-      "Elysium",
       "96–00",
       "Ysgard"
      ]
@@ -2287,38 +2339,46 @@
     "type": "table",
     "header": [
      "Dragon",
-     "Resistance",
-     "Dragon",
      "Resistance"
     ],
     "rows": [
      [
       "Black",
-      "Acid",
-      "Gold",
-      "Fire"
+      "Acid"
      ],
      [
       "Blue",
-      "Lightning",
-      "Green",
-      "Poison"
+      "Lightning"
      ],
      [
       "Brass",
-      "Fire",
-      "Red",
       "Fire"
      ],
      [
       "Bronze",
-      "Lightning",
+      "Lightning"
+     ],
+     [
+      "Copper",
+      "Acid"
+     ],
+     [
+      "Gold",
+      "Fire"
+     ],
+     [
+      "Green",
+      "Poison"
+     ],
+     [
+      "Red",
+      "Fire"
+     ],
+     [
       "Silver",
       "Cold"
      ],
      [
-      "Copper",
-      "Acid",
       "White",
       "Cold"
      ]
@@ -2892,7 +2952,7 @@
    },
    {
     "type": "p",
-    "text": "**Ebony Fly (Rare).** This ebony statuette, carved in the likeness of a horsefly, can become a **Giant Fly** (see the accompanying stat block) for up to 12 hours and can be ridden as a mount. Once it has been used, it can’t be used again until 2 days have passed. **Giant Fly** *Large Beast, Unaligned* **AC** 11 **Initiative** +1 (11) **HP** 19 (3d10 + 3) **Speed** 30 ft., Fly 60 ft. MOD SAVE MOD SAVE MOD SAVE **Str** 14 +2 +2 **Dex** 13 +1 +1 **Con** 13 +1 +1 **Int** 2 −4 −4 **Wis** 10 +0 +0 **Cha** 3 −4 −4 **Senses** Darkvision 60 ft., Passive Perception 10 **Languages** None **CR** 0 (XP 0; PB +2)"
+    "text": "**Ebony Fly (Rare).** This ebony statuette, carved in the likeness of a horsefly, can become a **Giant Fly** (see the accompanying stat block) for up to 12 hours and can be ridden as a mount. Once it has been used, it can’t be used again until 2 days have passed."
    },
    {
     "type": "p",
@@ -2937,6 +2997,89 @@
    {
     "type": "p",
     "text": "**Silver Raven (Uncommon).** This silver statuette of a raven can become a **Raven** for up to 12 hours. Once it has been used, it can’t be used again until 2 days have passed. While in raven form, the figurine grants you the ability to cast *Animal Messenger* on it."
+   },
+   {
+    "type": "p",
+    "text": "### Giant Fly"
+   },
+   {
+    "type": "p",
+    "text": "*Large Beast, Unaligned*"
+   },
+   {
+    "type": "p",
+    "text": "**AC** 11"
+   },
+   {
+    "type": "p",
+    "text": "**Initiative** +1 (11)"
+   },
+   {
+    "type": "p",
+    "text": "**HP** 19 (3d10 + 3)"
+   },
+   {
+    "type": "p",
+    "text": "**Speed** 30 ft., Fly 60 ft."
+   },
+   {
+    "type": "table",
+    "header": [
+     "",
+     "Score",
+     "Mod",
+     "Save"
+    ],
+    "rows": [
+     [
+      "Str",
+      "14",
+      "+2",
+      "+2"
+     ],
+     [
+      "Dex",
+      "13",
+      "+1",
+      "+1"
+     ],
+     [
+      "Con",
+      "13",
+      "+1",
+      "+1"
+     ],
+     [
+      "Int",
+      "2",
+      "−4",
+      "−4"
+     ],
+     [
+      "Wis",
+      "10",
+      "+0",
+      "+0"
+     ],
+     [
+      "Cha",
+      "3",
+      "−4",
+      "−4"
+     ]
+    ]
+   },
+   {
+    "type": "p",
+    "text": "**Senses** Darkvision 60 ft., Passive Perception 10"
+   },
+   {
+    "type": "p",
+    "text": "**Languages** None"
+   },
+   {
+    "type": "p",
+    "text": "**CR** 0 (XP 0; PB +2)"
    }
   ]
  },
@@ -4191,44 +4334,32 @@
      "1d20",
      "Golem",
      "Time",
-     "",
-     ""
+     "Cost"
     ],
     "rows": [
-     [
-      "",
-      "",
-      "",
-      "",
-      "Cost"
-     ],
      [
       "1–5",
       "Clay Golem",
       "30 days",
-      "65,000 GP",
-      ""
+      "65,000 GP"
      ],
      [
       "6–17",
       "Flesh Golem",
       "60 days",
-      "50,000 GP",
-      ""
+      "50,000 GP"
      ],
      [
       "18",
       "Iron Golem",
       "120 days",
-      "100,000 GP",
-      ""
+      "100,000 GP"
      ],
      [
       "19–20",
       "Stone Golem",
       "90 days",
-      "80,000 GP",
-      ""
+      "80,000 GP"
      ]
     ]
    }
@@ -4623,7 +4754,114 @@
    },
    {
     "type": "p",
-    "text": "**Void.** Your soul is drawn from your body and contained in an object in a place of the GM’s choice. One or more powerful beings guard the place. While your soul is trapped in this way, your body is inert, ceases aging, and requires no food, air, or water. A *Wish* spell can’t return your soul to your body, but the spell reveals the location of the object that holds your soul. You draw no more cards. **Avatar of Death** *Medium Undead, Neutral evil* **AC** 20 **Initiative** +3 (13) **HP** Half the HP maximum of its summoner **Speed** 60 ft., Fly 60 ft. (hover) MOD SAVE MOD SAVE MOD SAVE **Str** 16 +3 +3 **Dex** 16 +3 +3 **Con** 16 +3 +3 **Int** 16 +3 +3 **Wis** 16 +3 +3 **Cha** 16 +3 +3 **Immunities** Necrotic, Poison; Charmed, Exhaustion, Frightened, Paralyzed, Petrified, Poisoned, Unconscious **Senses** Truesight 60 ft., Passive Perception 13 **Languages** All languages known to its summoner **CR** None (XP 0; PB equals its summoner’s) Traits **Incorporeal Movement.** The avatar can move through other creatures and objects as if they were Difficult Terrain. It takes 5 (1d10) Force damage if it ends its turn inside an object. Actions **Multiattack.** The avatar makes a number of Reaping Scythe attacks equal to half the summoner’s Proficiency Bonus (rounded up). **Reaping Scythe.** *Melee Attack Roll:* Automatic hit, reach 5 ft. *Hit:* 7 (1d8 + 3) Slashing damage plus 4 (1d8) Necrotic damage."
+    "text": "**Void.** Your soul is drawn from your body and contained in an object in a place of the GM’s choice. One or more powerful beings guard the place. While your soul is trapped in this way, your body is inert, ceases aging, and requires no food, air, or water. A *Wish* spell can’t return your soul to your body, but the spell reveals the location of the object that holds your soul. You draw no more cards."
+   },
+   {
+    "type": "p",
+    "text": "### Avatar of Death"
+   },
+   {
+    "type": "p",
+    "text": "*Medium Undead, Neutral evil*"
+   },
+   {
+    "type": "p",
+    "text": "**AC** 20"
+   },
+   {
+    "type": "p",
+    "text": "**Initiative** +3 (13)"
+   },
+   {
+    "type": "p",
+    "text": "**HP** Half the HP maximum of its summoner"
+   },
+   {
+    "type": "p",
+    "text": "**Speed** 60 ft., Fly 60 ft. (hover)"
+   },
+   {
+    "type": "table",
+    "header": [
+     "",
+     "Score",
+     "Mod",
+     "Save"
+    ],
+    "rows": [
+     [
+      "Str",
+      "16",
+      "+3",
+      "+3"
+     ],
+     [
+      "Dex",
+      "16",
+      "+3",
+      "+3"
+     ],
+     [
+      "Con",
+      "16",
+      "+3",
+      "+3"
+     ],
+     [
+      "Int",
+      "16",
+      "+3",
+      "+3"
+     ],
+     [
+      "Wis",
+      "16",
+      "+3",
+      "+3"
+     ],
+     [
+      "Cha",
+      "16",
+      "+3",
+      "+3"
+     ]
+    ]
+   },
+   {
+    "type": "p",
+    "text": "**Immunities** Necrotic, Poison; Charmed, Exhaustion, Frightened, Paralyzed, Petrified, Poisoned, Unconscious"
+   },
+   {
+    "type": "p",
+    "text": "**Senses** Truesight 60 ft., Passive Perception 13"
+   },
+   {
+    "type": "p",
+    "text": "**Languages** All languages known to its summoner"
+   },
+   {
+    "type": "p",
+    "text": "**CR** None (XP 0; PB equals its summoner’s)"
+   },
+   {
+    "type": "p",
+    "text": "#### Traits"
+   },
+   {
+    "type": "p",
+    "text": "**Incorporeal Movement.** The avatar can move through other creatures and objects as if they were Difficult Terrain. It takes 5 (1d10) Force damage if it ends its turn inside an object."
+   },
+   {
+    "type": "p",
+    "text": "#### Actions"
+   },
+   {
+    "type": "p",
+    "text": "**Multiattack.** The avatar makes a number of Reaping Scythe attacks equal to half the summoner’s Proficiency Bonus (rounded up)."
+   },
+   {
+    "type": "p",
+    "text": "**Reaping Scythe.** *Melee Attack Roll:* Automatic hit, reach 5 ft. *Hit:* 7 (1d8 + 3) Slashing damage plus 4 (1d8) Necrotic damage."
    }
   ]
  },
@@ -5586,38 +5824,46 @@
     "type": "table",
     "header": [
      "1d10",
-     "Damage Type",
-     "1d10",
      "Damage Type"
     ],
     "rows": [
      [
       "1",
-      "Acid",
+      "Acid"
+     ],
+     [
+      "2",
+      "Cold"
+     ],
+     [
+      "3",
+      "Fire"
+     ],
+     [
+      "4",
+      "Force"
+     ],
+     [
+      "5",
+      "Lightning"
+     ],
+     [
       "6",
       "Necrotic"
      ],
      [
-      "2",
-      "Cold",
       "7",
       "Poison"
      ],
      [
-      "3",
-      "Fire",
       "8",
       "Psychic"
      ],
      [
-      "4",
-      "Force",
       "9",
       "Radiant"
      ],
      [
-      "5",
-      "Lightning",
       "10",
       "Thunder"
      ]
@@ -6208,20 +6454,22 @@
     "type": "table",
     "header": [
      "Number of Spheres",
-     "Lightning Damage",
-     "Number of Spheres",
      "Lightning Damage"
     ],
     "rows": [
      [
       "1",
-      "4d12",
+      "4d12"
+     ],
+     [
+      "2",
+      "5d4"
+     ],
+     [
       "3",
       "2d6"
      ],
      [
-      "2",
-      "5d4",
       "4",
       "2d4"
      ]
@@ -7452,22 +7700,20 @@
     "type": "table",
     "header": [
      "Spell",
-     "Charge Cost",
-     "Spell",
      "Charge Cost"
     ],
     "rows": [
      [
       "Burning Hands",
-      "1",
-      "Wall of Fire",
-      "4"
+      "1"
      ],
      [
       "Fireball",
-      "3",
-      "",
-      ""
+      "3"
+     ],
+     [
+      "Wall of Fire",
+      "4"
      ]
     ]
    },
@@ -7505,20 +7751,22 @@
     "type": "table",
     "header": [
      "Spell",
-     "Charge Cost",
-     "Spell",
      "Charge Cost"
     ],
     "rows": [
      [
       "Cone of Cold",
-      "5",
+      "5"
+     ],
+     [
+      "Fog Cloud",
+      "1"
+     ],
+     [
       "Ice Storm",
       "4"
      ],
      [
-      "Fog Cloud",
-      "1",
       "Wall of Ice",
       "4"
      ]
@@ -7554,23 +7802,19 @@
     "type": "table",
     "header": [
      "Spell",
-     "",
      "Charge Cost"
     ],
     "rows": [
      [
       "Cure Wounds",
-      "1 charge per spell level (maximum 4 for a level 4",
-      "spell)"
+      "1 charge per spell level (maximum 4 for a level 4 spell)"
      ],
      [
       "Lesser Restoration",
-      "",
       "2"
      ],
      [
       "Mass Cure Wounds",
-      "",
       "5"
      ]
     ]

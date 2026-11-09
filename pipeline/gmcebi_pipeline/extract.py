@@ -22,6 +22,8 @@ class Span:
     text: str
     font: str
     size: float
+    x0: float = 0.0  # left/right edge on the page (table cells merged into one line)
+    x1: float = 0.0
 
     @property
     def bold(self) -> bool:
@@ -88,7 +90,7 @@ def load_lines(pdf_path: Path | str) -> list[Line]:
         for block in page.get_text("dict")["blocks"]:
             for raw in block.get("lines", []):
                 spans = [
-                    Span(s["text"], s["font"], round(s["size"], 1))
+                    Span(s["text"], s["font"], round(s["size"], 1), round(s["bbox"][0], 1), round(s["bbox"][2], 1))
                     for s in raw["spans"]
                     if s["text"]
                 ]

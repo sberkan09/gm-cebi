@@ -32,11 +32,18 @@ def heading_level(line: Line) -> int | None:
     return None
 
 
-def segment(lines: list[Line], min_level: int = 1, max_level: int = 5) -> list[Section]:
-    """Split lines into a flat list of sections, each with its heading path."""
+def segment(lines: list[Line], min_level: int = 1, max_level: int = 5,
+            keep_preamble: bool = False) -> list[Section]:
+    """Split lines into a flat list of sections, each with its heading path.
+
+    Lines before the first heading are dropped unless `keep_preamble` is set; then they
+    come first as a level-0 section with an empty title (only if there are any).
+    """
     out: list[Section] = []
     stack: list[tuple[int, str]] = []
     cur = Section(0, "", lines[0].page if lines else 0)
+    if keep_preamble:
+        out.append(cur)
     for ln in lines:
         lvl = heading_level(ln)
         if lvl is not None and min_level <= lvl <= max_level:
@@ -61,6 +68,8 @@ def segment(lines: list[Line], min_level: int = 1, max_level: int = 5) -> list[S
             out.append(cur)
         else:
             cur.lines.append(ln)
+    if keep_preamble and not out[0].lines:
+        out.pop(0)
     return out
 
 
@@ -77,9 +86,7 @@ def relocate_tables(secs: list[Section]) -> list[Section]:
         while i < len(sec.lines):
             ln = sec.lines[i]
             if ln.style() == "h5" and i + 1 < len(sec.lines) and is_table_header(sec.lines[i + 1]):
-                j = i + 1
-                while j < len(sec.lines) and is_table_line(sec.lines[j]):
-                    j += 1
+                j = table_end(sec.lines, i + 1)
                 title = ln.text.strip()
                 needle = f"{title} table"
                 own = needle.lower() in re.sub(r"\s+", " ", texts[si]).lower() or sec.title == title
@@ -161,6 +168,41 @@ def is_table_header(ln: Line) -> bool:
     return ln.font.startswith("GillSans-SemiBold") and abs(ln.size - 9.2) < 0.15
 
 
+def _header_text(lines: list[Line], i: int) -> str:
+    """Normalised text of the header row group starting at lines[i]."""
+    group = []
+    while i < len(lines) and is_table_header(lines[i]):
+        group.append(lines[i])
+        i += 1
+    txt = " ".join(ln.text for ln in sorted(group, key=lambda l: (round(l.y0), l.x0)))
+    return re.sub(r"[^a-z0-9]+", "", txt.lower())
+
+
+def table_end(lines: list[Line], i: int) -> int:
+    """End (exclusive) of the table whose header row starts at lines[i].
+
+    The run continues over table lines, including a repeated header row (the table
+    resumes after a page or column break). A header row with different text is a new
+    table that only happens to follow in the content stream, so it ends this one.
+    """
+    head = _header_text(lines, i)
+    j, seen_body = i, False
+    while j < len(lines) and is_table_line(lines[j]):
+        if is_table_header(lines[j]):
+            if seen_body and _header_text(lines, j) != head:
+                break
+            seen_body = False
+        else:
+            seen_body = True
+        j += 1
+    return j
+
+
+def same_header(a: list[str], b: list[str]) -> bool:
+    norm = lambda h: re.sub(r"[^a-z0-9]+", "", " ".join(h).lower())  # noqa: E731
+    return bool(a) and norm(a) == norm(b)
+
+
 @dataclass
 class Table:
     title: str
@@ -169,9 +211,38 @@ class Table:
     page: int
 
 
+def _header_ids(lines: list[Line]) -> set[int]:
+    """Header-row lines. Cells set in another weight or size ("Cost", "Encounter
+    Distance") count too: they sit on the baseline of a header-font line."""
+    at = [(h.page, h.y0) for h in lines if is_table_header(h)]
+    return {id(ln) for ln in lines
+            if is_table_header(ln) or any(p == ln.page and abs(y - ln.y0) < 2 for p, y in at)}
+
+
+def _split_merged(ln: Line, anchors: list[float]) -> list[Line]:
+    """Split a line that holds two cells ("Barbarian" + "Battle") where a span starts
+    exactly at a later column's anchor after a gap."""
+    out: list[Line] = []
+    start = 0
+    for k, sp in enumerate(ln.spans):
+        if (k and sp.text.strip() and not ln.spans[k - 1].text.strip()
+                and any(a > ln.x0 + 14 and abs(sp.x0 - a) <= 3 for a in anchors)):
+            out.append(ln.spans[start:k])
+            start = k
+    if not out:
+        return [ln]
+    out.append(ln.spans[start:])
+    pieces = []
+    for spans in out:
+        spans = [sp for sp in spans if sp.text.strip()] or spans
+        pieces.append(Line(ln.page, spans[0].x0 if pieces else ln.x0, ln.y0, spans, spans[-1].x1))
+    return pieces
+
+
 def _build_segment(lines: list[Line]) -> tuple[list[str], list[list[str]]]:
-    head = [ln for ln in lines if is_table_header(ln)]
-    body = sorted((ln for ln in lines if not is_table_header(ln)), key=lambda l: l.y0)
+    hid = _header_ids(lines)
+    head = [ln for ln in lines if id(ln) in hid]
+    body = sorted((ln for ln in lines if id(ln) not in hid), key=lambda l: l.y0)
     xs = sorted({round(ln.x0) for ln in body} or {round(h.x0) for h in head})
     anchors: list[float] = []
     for x in xs:
@@ -179,13 +250,37 @@ def _build_segment(lines: list[Line]) -> tuple[list[str], list[list[str]]]:
             anchors.append(x)
     if not anchors:
         return [], []
+    body = [piece for ln in body for piece in _split_merged(ln, anchors)]
 
-    def col(x: float) -> int:
+    raw = list(anchors)
+
+    def raw_col(x: float) -> int:
         idx = 0
-        for i, a in enumerate(anchors):
+        for i, a in enumerate(raw):
             if x >= a - 6:
                 idx = i
         return idx
+
+    # Right-aligned or centred columns ("2,700" / "355,000") start at varying x: neighbouring
+    # anchors whose lines all share one right edge or one centre are a single column.
+    members: list[list[Line]] = [[] for _ in anchors]
+    for ln in body:
+        members[raw_col(ln.x0)].append(ln)
+    groups: list[list[int]] = []
+    for i in range(len(anchors)):
+        if groups and members[i]:
+            union = [ln for g in groups[-1] for ln in members[g]] + members[i]
+            r = [ln.x1 for ln in union]
+            c = [(ln.x0 + ln.x1) / 2 for ln in union]
+            if max(r) - min(r) <= 2 or max(c) - min(c) <= 3:
+                groups[-1].append(i)
+                continue
+        groups.append([i])
+    gmap = {i: n for n, g in enumerate(groups) for i in g}
+    anchors = [anchors[g[0]] for g in groups]
+
+    def col(x: float) -> int:
+        return gmap[raw_col(x)]
 
     centers: list[list[float]] = [[] for _ in anchors]
     for ln in body:
@@ -219,7 +314,10 @@ def _build_segment(lines: list[Line]) -> tuple[list[str], list[list[str]]]:
         cols = {col(ln.x0) for ln in cl}
         only_first = cols == {0}
         lower_start = cl[0].text.strip()[:1].islower()
-        starts_row = 0 in cols and not (only_first and lower_start and rows)
+        # A first-column line that continues a wrapped cell ("Bard, Cleric, Druid, Monk," /
+        # "Rogue, or Warlock") starts lower-case or follows a trailing comma.
+        after_comma = bool(rows and rows[-1][0] and rows[-1][0][-1].rstrip().endswith(","))
+        starts_row = 0 in cols and not (only_first and (lower_start or after_comma) and rows)
         if starts_row or not rows:
             rows.append([[] for _ in anchors])
         for ln in sorted(cl, key=lambda l: l.x0):
@@ -230,15 +328,19 @@ def _build_segment(lines: list[Line]) -> tuple[list[str], list[list[str]]]:
 
 
 def build_table(title: str, lines: list[Line]) -> Table:
-    """Rebuild a table; a repeated header (page/column break) starts a new segment."""
+    """Rebuild a table; a repeated header (page/column break) starts a new segment.
+
+    Callers cut `lines` with table_end(), so every header row here repeats the first.
+    """
     page = lines[0].page if lines else 0
     segments: list[list[Line]] = []
     seen_body = False
+    hid = _header_ids(lines)
     for ln in lines:
-        if is_table_header(ln) and (seen_body or not segments):
+        if id(ln) in hid and (seen_body or not segments):
             segments.append([])
             seen_body = False
-        if not is_table_header(ln):
+        if id(ln) not in hid:
             seen_body = True
         if not segments:
             segments.append([])
@@ -250,6 +352,11 @@ def build_table(title: str, lines: list[Line]) -> Table:
         if not header:
             header = h
         rows += r
+    # Two copies of a narrow table side by side (Rarity | Value | Rarity | Value): stack them.
+    half = len(header) // 2
+    if half >= 2 and len(header) % 2 == 0 and header[:half] == header[half:] and all(header):
+        rows = [r[:half] for r in rows] + [r[half:] for r in rows if any(r[half:])]
+        header = header[:half]
     return Table(title, header, rows, page)
 
 
@@ -274,9 +381,7 @@ def split_blocks(lines: list[Line]) -> list[dict]:
     while i < n:
         ln = lines[i]
         if is_table_header(ln):
-            j = i
-            while j < n and is_table_line(lines[j]):
-                j += 1
+            j = table_end(lines, i)
             flush_para()
             t = build_table("", lines[i:j])
             blocks.append({"type": "table", "header": t.header, "rows": t.rows, "page": t.page})

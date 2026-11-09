@@ -121,3 +121,11 @@ def test_natural_derivations(glossary):
     for en, tr in good:
         issues = [i for i in glossary.check(en, tr) if not i.startswith("term:poison")]
         assert issues == [], (en, tr, issues)
+
+
+def test_halfling_pattern_softens_k(glossary):
+    """tr_pattern rows replace the automatic k→ğ softening, so they must spell it out."""
+    term = next(t for t in glossary.terms if t.id == "halfling")
+    for form in ("Buçukluk", "Buçukluklar", "Buçukluğu", "Buçukluğun", "Buçuklukça"):
+        assert term.found_in_tr(form), form
+    assert not term.found_in_tr("buçuklu")

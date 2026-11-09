@@ -8,7 +8,7 @@ from gmcebi_pipeline.models import DATASETS
 EXPECTED = {
     "conditions": 15, "spells": 339, "monsters": 330, "classes": 12, "subclasses": 12,
     "species": 9, "backgrounds": 4, "feats": 17, "weapon_mastery": 8, "weapon_properties": 10,
-    "magic_items": 258, "rules": 31,
+    "magic_items": 258, "rules": 34,
 }
 
 
@@ -103,3 +103,91 @@ def test_magic_items_and_rule_sections(source):
     assert enc["chapter"] == "Gameplay Toolbox"
     assert any(b.get("text") == "### Combat Encounter Difficulty" for b in enc["blocks"])
     assert any(b["type"] == "table" for b in enc["blocks"])
+
+
+def _tables(obj):
+    if isinstance(obj, dict):
+        if obj.get("type") == "table":
+            yield obj
+        for v in obj.values():
+            yield from _tables(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            yield from _tables(v)
+
+
+# Tables that are genuinely ragged or have a blank header cell in the PDF: (dataset, record
+# id, table title) → reason. None at present. The ability table of a stat block has a blank
+# first header cell by design.
+RAGGED_TABLES: dict[tuple[str, str, str | None], str] = {}
+STAT_BLOCK_HEADER = ["", "Score", "Mod", "Save"]
+
+
+@pytest.mark.parametrize("name", DATASETS)
+def test_tables_are_rectangular(source, name):
+    """Every header cell is filled and every row has as many cells as the header."""
+    bad = []
+    for rec in source[name]:
+        for t in _tables(rec):
+            if (name, rec["id"], t.get("title")) in RAGGED_TABLES:
+                continue
+            h = t["header"]
+            if ("" in h and h != STAT_BLOCK_HEADER) or any(len(r) != len(h) for r in t["rows"]):
+                bad.append((rec["id"], t.get("title"), h))
+    assert not bad, bad
+
+
+def _table(rec, title=None):
+    return next(t for t in _tables(rec) if title is None or t.get("title") == title)
+
+
+def test_rule_tables(source):
+    rules = {r["id"]: r for r in source["rules"]}
+    # A different header ends a table: the Actions table keeps all twelve actions.
+    skills = _table(rules["playing-proficiency"], "Skills")
+    actions = _table(rules["playing-actions"], "Actions")
+    assert len(skills["rows"]) == 18 and all(len(r) == 3 for r in skills["rows"])
+    assert len(actions["rows"]) == 12 and [actions["rows"][0][0], actions["rows"][-1][0]] == ["Attack", "Utilize"]
+    rarity = _table(rules["magic-items-magic-item-rarity"], "Magic Item Rarities and Values")
+    assert rarity["header"] == ["Rarity", "Value*"]
+    assert rarity["rows"][3:] == [["Very Rare", "40,000 GP"], ["Legendary", "200,000 GP"], ["Artifact", "Priceless"]]
+    craft = _table(rules["magic-items-crafting-magic-items"], "Magic Item Crafting Time and Cost")
+    assert craft["rows"][0] == ["Common", "5 days", "50 GP"] and craft["rows"][2] == ["Rare", "50 days", "2,000 GP"]
+    adv = _table(rules["creation-level-advancement"], "Character Advancement")
+    assert adv["header"] == ["Level", "Experience Points", "Proficiency Bonus"]
+    assert adv["rows"][3] == ["4", "2,700", "+2"]
+    hp = _table(rules["creation-create-your-character"], "Level 1 Hit Points by Class")
+    assert hp["rows"][2] == ["Bard, Cleric, Druid, Monk, Rogue, or Warlock", "8 + Con. modifier"]
+    overview = _table(rules["creation-create-your-character"], "Class Overview")
+    assert overview["rows"][0] == ["Barbarian", "Battle", "Strength", "Average"]
+    terrain = _table(rules["toolbox-travel-pace"], "Travel Terrain")
+    assert terrain["header"][2:] == ["Encounter Distance", "Foraging DC", "Navigation DC", "Search DC"]
+    assert terrain["rows"][0] == ["Arctic", "Fast*", "6d6 × 10 feet", "20", "10", "10"]
+    items = {i["id"]: i for i in source["magic_items"]}
+    assert _table(items["staff-of-healing"])["rows"][0] == [
+        "Cure Wounds", "1 charge per spell level (maximum 4 for a level 4 spell)"]
+    assert _table(items["manual-of-golems"])["header"] == ["1d20", "Golem", "Time", "Cost"]
+    # Two copies of a narrow table printed side by side are stacked.
+    assert len(_table(items["dragon-scale-mail"])["rows"]) == 10
+
+
+def test_chapter_intros(source):
+    rules = {r["id"]: r for r in source["rules"]}
+    intro = rules["playing-intro"]
+    assert intro["name"] == "Playing the Game" and list(rules)[0] == "playing-intro"
+    texts = [b["text"] for b in intro["blocks"]]
+    assert texts[0] == "### Exceptions Supersede General Rules" and "### Round Down" in texts
+    assert rules["magic-items-intro"]["blocks"][0]["text"].startswith("Magic items are gleaned")
+    az = rules["magic-items-magic-items-az"]["blocks"]
+    assert az[0]["text"] == "Magic items are presented in alphabetical order."
+
+
+def test_magic_item_stat_blocks(source):
+    items = {i["id"]: i for i in source["magic_items"]}
+    for item, name, ac in [("figurine-of-wondrous-power", "Giant Fly", "**AC** 11"),
+                           ("mysterious-deck", "Avatar of Death", "**AC** 20")]:
+        blocks = items[item]["blocks"]
+        texts = [b.get("text") for b in blocks]
+        i = texts.index(f"### {name}")
+        assert texts[i + 2] == ac
+        assert any(b["type"] == "table" and b["header"] == STAT_BLOCK_HEADER for b in blocks[i:])

@@ -26,38 +26,46 @@
     "title": "Draconic Ancestors",
     "header": [
      "Dragon",
-     "Damage Type",
-     "Dragon",
      "Damage Type"
     ],
     "rows": [
      [
       "Black",
-      "Acid",
-      "Gold",
-      "Fire"
+      "Acid"
      ],
      [
       "Blue",
-      "Lightning",
-      "Green",
-      "Poison"
+      "Lightning"
      ],
      [
       "Brass",
-      "Fire",
-      "Red",
       "Fire"
      ],
      [
       "Bronze",
-      "Lightning",
+      "Lightning"
+     ],
+     [
+      "Copper",
+      "Acid"
+     ],
+     [
+      "Gold",
+      "Fire"
+     ],
+     [
+      "Green",
+      "Poison"
+     ],
+     [
+      "Red",
+      "Fire"
+     ],
+     [
       "Silver",
       "Cold"
      ],
      [
-      "Copper",
-      "Acid",
       "White",
       "Cold"
      ]

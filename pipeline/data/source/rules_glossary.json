@@ -536,34 +536,36 @@
     "title": "Object Armor Class",
     "header": [
      "AC",
-     "Substance",
-     "AC",
      "Substance"
     ],
     "rows": [
      [
       "11",
-      "Cloth, paper, rope",
+      "Cloth, paper, rope"
+     ],
+     [
+      "13",
+      "Crystal, glass, ice"
+     ],
+     [
+      "15",
+      "Wood"
+     ],
+     [
+      "17",
+      "Stone"
+     ],
+     [
       "19",
       "Iron, steel"
      ],
      [
-      "13",
-      "Crystal, glass, ice",
       "21",
       "Mithral"
      ],
      [
-      "15",
-      "Wood",
       "23",
       "Adamantine"
-     ],
-     [
-      "17",
-      "Stone",
-      "",
-      ""
      ]
     ]
    },
@@ -2929,26 +2931,30 @@
     "title": "Food Needs per Day",
     "header": [
      "Size",
-     "Food",
-     "Size",
      "Food"
     ],
     "rows": [
      [
       "Tiny",
-      "1/4 pound",
+      "1/4 pound"
+     ],
+     [
+      "Small",
+      "1 pound"
+     ],
+     [
+      "Medium",
+      "1 pound"
+     ],
+     [
       "Large",
       "4 pounds"
      ],
      [
-      "Small",
-      "1 pound",
       "Huge",
       "16 pounds"
      ],
      [
-      "Medium",
-      "1 pound",
       "Gargantuan",
       "64 pounds"
      ]

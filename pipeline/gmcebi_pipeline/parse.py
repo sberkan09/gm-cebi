@@ -37,6 +37,8 @@ from .structure import (
     is_table_line,
     line_markdown,
     relocate_tables,
+    same_header,
+    table_end,
     md_paragraphs,
     segment,
     tidy_markdown,
@@ -120,11 +122,13 @@ def to_blocks(lines: list[Line]) -> list[Block]:
             continue
         if is_table_header(ln):
             flush()
-            j = i
-            while j < n and is_table_line(lines[j]):
-                j += 1
+            j = table_end(lines, i)
             t = build_table(pending_title or "", lines[i:j])
-            blocks.append(Block(type="table", title=t.title or None, header=t.header, rows=t.rows))
+            prev = blocks[-1] if blocks else None
+            if not pending_title and prev is not None and prev.type == "table" and same_header(prev.header or [], t.header):
+                prev.rows += t.rows  # the rest of a table split by a page/column break
+            else:
+                blocks.append(Block(type="table", title=t.title or None, header=t.header, rows=t.rows))
             pending_title = None
             i = j
             continue
@@ -315,7 +319,7 @@ def statblock_blocks(lines: list[Line]) -> list[Block]:
 
 
 def _pull_statblocks(lines: list[Line]) -> tuple[list[Line], list[tuple[str, list[Line]]]]:
-    """Remove h3 stat blocks (Optima/GillSans runs) embedded in the spell chapter."""
+    """Remove h3 stat blocks (Optima/GillSans runs) embedded in spell or magic item text."""
     rest: list[Line] = []
     blocks: list[tuple[str, list[Line]]] = []
     i = 0
@@ -827,14 +831,21 @@ def parse_magic_items(lines: list[Line]) -> list[MagicItem]:
         rest = m.group("rest").strip()
         att = ATTUNE_RE.search(rest)
         rarity = rest[:att.start()].strip() if att else rest
+        # An embedded creature stat block (Giant Fly, Avatar of Death) renders like a spell's
+        # summoned creature: a "### Name" heading and structured blocks after the item text.
+        body, statblocks = _pull_statblocks(ls[i:])
+        blocks = to_blocks(body)
+        for title, sb_lines in statblocks:
+            blocks += [Block(type="p", text=f"### {title}")] + statblock_blocks(sb_lines)
         items.append(MagicItem(
             id=slug(s.title), name=s.title, category=m.group("cat"), rarity=rarity,
             attunement=att.group("att") if att else None, type_line=head_txt,
-            blocks=to_blocks(ls[i:]), source=src(s)))
+            blocks=blocks, source=src(s)))
     return items
 
 
-# Chapters kept as readable rule sections: (chapter key, display name, first page, stop heading).
+# Chapters kept as readable rule sections: (chapter key, display name, stop heading). Item
+# entries start at the first h4 after the stop heading; its own intro is still a section.
 RULE_CHAPTERS = [
     ("playing", "Playing the Game", None),
     ("creation", "Character Creation", None),
@@ -843,17 +854,49 @@ RULE_CHAPTERS = [
 ]
 
 
+def _is_sidebar_title(ln: Line) -> bool:
+    return "SC700" in ln.font and abs(ln.size - 11) < 0.3 and heading_level(ln) is None
+
+
+def intro_blocks(lines: list[Line]) -> list[Block]:
+    """Chapter intro text; a sidebar title ("Round Down") becomes a "### " heading."""
+    blocks: list[Block] = []
+    buf: list[Line] = []
+    for ln in lines:
+        if _is_sidebar_title(ln):
+            blocks += to_blocks(buf)
+            buf = []
+            blocks.append(Block(type="p", text=f"### {ln.text.strip()}"))
+        else:
+            buf.append(ln)
+    return blocks + to_blocks(buf)
+
+
 def parse_rule_sections(lines: list[Line]) -> list[RuleSection]:
-    """One record per level-2 section; level-3/4 sub-sections become heading paragraphs."""
+    """One record per level-2 section; level-3/4 sub-sections become heading paragraphs.
+
+    Text before the first level-2 heading (the chapter intro and any sidebars printed
+    above the chapter title) becomes a first section "<key>-intro" named after the chapter.
+    """
     out: list[RuleSection] = []
     for key, chapter, stop in RULE_CHAPTERS:
         a, b = CHAPTERS[key]
         chunk = lines_between(lines, a, b)
         if stop:
-            chunk = chunk[:section_lines(chunk, stop, a)]
-        secs = relocate_tables(segment(chunk, max_level=4))
+            k = section_lines(chunk, stop, a) + 1
+            while k < len(chunk) and heading_level(chunk[k]) != 4:
+                k += 1
+            chunk = chunk[:k]
+        secs = relocate_tables(segment(chunk, max_level=4, keep_preamble=True))
+        intro = [ln for s in secs[:next((n for n, s in enumerate(secs) if s.level == 2), len(secs))]
+                 for ln in s.lines]
+        if intro:
+            out.append(RuleSection(
+                id=slug(f"{key}-intro"), name=chapter, chapter=chapter, blocks=intro_blocks(intro),
+                source=SourceRef(page=intro[0].page,
+                                 page_end=intro[-1].page if intro[-1].page != intro[0].page else None,
+                                 heading=[chapter])))
         cur: RuleSection | None = None
-        cur_lines: list[Line] = []
         for s in secs:
             if s.level <= 1:
                 continue
