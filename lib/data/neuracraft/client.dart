@@ -31,6 +31,8 @@ class NeuraCraftClient {
     required this.endUser,
     this.timeout = const Duration(seconds: 20),
     this.pollInterval = const Duration(seconds: 1),
+    this.eventIdleTimeout = const Duration(seconds: 45),
+    this.pollRetries = 5,
   }) : _http = httpClient;
 
   final http.Client _http;
@@ -45,6 +47,14 @@ class NeuraCraftClient {
 
   /// Polling period when server-sent events are not available.
   final Duration pollInterval;
+
+  /// An event stream silent this long is taken as dead (the server pings
+  /// every 15 s), and polling takes over.
+  final Duration eventIdleTimeout;
+
+  /// Network errors tolerated in a row while polling (backing off from
+  /// [pollInterval]) before the wait gives up.
+  final int pollRetries;
 
   Map<String, String> get _auth => {
         'Authorization': 'Bearer ${config.appToken}',
@@ -132,8 +142,18 @@ class NeuraCraftClient {
       // fall back to polling below
     }
     if (finished) return;
+    var failures = 0;
     while (true) {
-      final job = await getJob(jobId);
+      final NcJob job;
+      try {
+        job = await getJob(jobId);
+        failures = 0;
+      } on NcNetworkException {
+        // Polling is the fallback for a shaky network: back off and retry.
+        if (++failures > pollRetries) rethrow;
+        await Future<void>.delayed(pollInterval * (1 << (failures - 1)));
+        continue;
+      }
       yield NcJobSnapshot(job);
       if (job.state.isFinished) return;
       await Future<void>.delayed(pollInterval);
@@ -158,7 +178,9 @@ class NeuraCraftClient {
     }
     final data = StringBuffer();
     try {
-      await for (final line in res.stream.transform(utf8.decoder).transform(const LineSplitter())) {
+      // Pings are lines too, so a live stream is never idle this long.
+      final lines = res.stream.transform(utf8.decoder).transform(const LineSplitter()).timeout(eventIdleTimeout);
+      await for (final line in lines) {
         if (line.isEmpty) {
           if (data.isNotEmpty) {
             final e = parseEvent(data.toString());

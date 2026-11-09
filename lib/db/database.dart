@@ -449,10 +449,14 @@ class AppDatabase extends _$AppDatabase {
     return q.watch().map((rows) => rows.isEmpty ? null : rows.first.readTable(mapScenes));
   }
 
-  Future<int> addScene({required String assetId, required Uint8List png, required String mode, required String narrative, required int seed}) async {
-    final e = await activeEncounter();
+  /// Stores a picture with [encounterId] (the encounter the sketch belonged
+  /// to; default the active one). Nothing is stored if that encounter is gone.
+  Future<int?> addScene({required String assetId, required Uint8List png, required String mode, required String narrative, required int seed, int? encounterId}) async {
+    final id = encounterId ?? (await activeEncounter()).id;
+    final exists = await (select(encounters)..where((e) => e.id.equals(id))).getSingleOrNull();
+    if (exists == null) return null;
     return into(mapScenes).insert(MapScenesCompanion.insert(
-      encounterId: e.id,
+      encounterId: id,
       assetId: assetId,
       png: png,
       mode: mode,

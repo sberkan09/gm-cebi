@@ -173,10 +173,14 @@ void main() {
       ctl(c).release();
       a.elapse(OnlineSessionController.closeGrace - const Duration(seconds: 1));
       expect(server.count('DELETE /v1/sessions/s1'), 0);
+      final beatsBefore = server.count('POST /v1/sessions/s1/heartbeat');
       ctl(c).acquire(); // back to the map within the grace period
+      a.flushMicrotasks();
+      expect(server.count('POST /v1/sessions/s1/heartbeat'), beatsBefore + 1, reason: 'an immediate beat on return');
       a.elapse(const Duration(minutes: 10));
       expect(server.count('DELETE /v1/sessions/s1'), 0);
       expect(server.count('POST /v1/sessions'), 1, reason: 'the warm session is reused');
+      expect(server.count('POST /v1/sessions/s1/heartbeat'), beatsBefore + 1 + 5, reason: 'heartbeats run again every 120 s');
 
       ctl(c).release();
       a.elapse(OnlineSessionController.closeGrace);
@@ -265,6 +269,29 @@ void main() {
       c.read(onlineSessionProvider.notifier).acquire();
       a.flushMicrotasks();
       expect(c.read(onlineSessionProvider).phase, SessionPhase.idle);
+      c.dispose();
+    });
+  });
+
+  test('a 410 that arrives as the app goes to the background opens nothing until resume', () {
+    fakeAsync((a) {
+      final c = make();
+      settle(c, a);
+      ctl(c).acquire();
+      a.flushMicrotasks();
+      // The beat is on its way; the app goes to the background before it answers.
+      server.override = (r) {
+        server.override = null;
+        ctl(c).setForeground(false);
+        return FakeServer.error(410, 'session.closed');
+      };
+      a.elapse(const Duration(seconds: 120)); // the heartbeat fires and gets 410
+      a.flushMicrotasks();
+      a.elapse(const Duration(minutes: 5));
+      expect(server.count('POST /v1/sessions'), 1, reason: 'no new session in the background');
+      ctl(c).setForeground(true);
+      tick(a);
+      expect(server.count('POST /v1/sessions'), 2, reason: 'opened again on resume');
       c.dispose();
     });
   });

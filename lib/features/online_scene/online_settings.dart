@@ -106,6 +106,8 @@ final onlineFeatureVisibleProvider = Provider<bool>((ref) {
 
 /// …and the user agreed to send sketches: sessions may be opened.
 final onlineFeatureActiveProvider = Provider<bool>((ref) {
-  final s = ref.watch(onlineSettingsProvider).value;
-  return ref.watch(onlineFeatureVisibleProvider) && (s?.consented ?? false);
+  // Visible first: in an offline-only build the settings (and so the install
+  // id) are never even loaded.
+  if (!ref.watch(onlineFeatureVisibleProvider)) return false;
+  return ref.watch(onlineSettingsProvider).value?.consented ?? false;
 });

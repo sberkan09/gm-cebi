@@ -12,7 +12,7 @@ String _hhmm(DateTime t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toS
 /// The message shown for a failed request or job.
 String messageFor(NcException e) {
   if (e is NcJobFailed) {
-    if (e.flagged) return 'Bu çizim ya da tarif için resim üretilemedi, farklı dene.';
+    if (e.flagged) return 'Bu çizim ya da tarif için resim üretilemedi; başka bir çizim ya da tarif dene.';
     if (e.unchecked) return 'İçerik kontrolü yapılamadı, tekrar dene.';
     return 'Resim üretilemedi.';
   }
@@ -52,6 +52,7 @@ String capacityLabel(OnlineSessionState s) {
     case SessionPhase.failed:
       return s.error == NcReaction.offline ? 'Çevrimdışı' : 'Şu an kullanılamıyor';
     case SessionPhase.open:
+      if (s.error == NcReaction.offline) return 'Bağlantı sorunlu';
       return switch (s.capacity) {
         NcCapacityReady() => 'Hazır',
         NcCapacityWarming(:final etaSeconds?) => 'Hazırlanıyor (~$etaSeconds sn)',

@@ -294,6 +294,61 @@ void main() {
     });
   });
 
+  group('flaky networks', () {
+    test('a silent event stream (no pings) is taken as dead: polling takes over', () async {
+      var polls = 0;
+      final c = NeuraCraftClient(
+        httpClient: MockClient.streaming((r, _) async {
+          if (r.url.path.endsWith('/events')) {
+            return http.StreamedResponse(StreamController<List<int>>().stream, 200, headers: {'content-type': 'text/event-stream'});
+          }
+          polls++;
+          return http.StreamedResponse(Stream.value(utf8.encode(jsonEncode({'job': jobJson('succeeded')}))), 200);
+        }),
+        config: config,
+        endUser: () => installId,
+        pollInterval: const Duration(milliseconds: 1),
+        eventIdleTimeout: const Duration(milliseconds: 50),
+      );
+      final last = await c.watchJob('job-1').last;
+      expect((last as NcJobSnapshot).job.state, NcJobState.succeeded);
+      expect(polls, 1);
+    });
+
+    test('pings keep a slow event stream alive', () async {
+      final ctl = StreamController<List<int>>();
+      final c = NeuraCraftClient(
+        httpClient: MockClient.streaming((r, _) async => http.StreamedResponse(ctl.stream, 200, headers: {'content-type': 'text/event-stream'})),
+        config: config,
+        endUser: () => installId,
+        eventIdleTimeout: const Duration(milliseconds: 80),
+      );
+      final got = c.watchJob('job-1').toList();
+      for (var i = 0; i < 4; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 40));
+        ctl.add(utf8.encode(': ping\n\n'));
+      }
+      ctl.add(utf8.encode('data: ${jsonEncode({'type': 'job', 'job': jobJson('succeeded')})}\n\n'));
+      final events = await got;
+      expect((events.single as NcJobSnapshot).job.state, NcJobState.succeeded);
+      await ctl.close();
+    });
+
+    test('polling rides out a few network errors, then gives up', () async {
+      var n = 0;
+      final c = clientWith(MockClient.streaming((r, _) async {
+        if (r.url.path.endsWith('/events')) throw http.ClientException('no SSE');
+        n++;
+        if (n <= 3) throw http.ClientException('flaky');
+        return http.StreamedResponse(Stream.value(utf8.encode(jsonEncode({'job': jobJson('succeeded')}))), 200);
+      }));
+      expect(((await c.watchJob('job-1').last) as NcJobSnapshot).job.state, NcJobState.succeeded);
+
+      final dead = clientWith(MockClient.streaming((r, _) async => throw http.ClientException('offline')));
+      await expectLater(dead.watchJob('job-1').toList(), throwsA(isA<NcNetworkException>()));
+    });
+  });
+
   group('downloading a result', () {
     test('follows the redirect by hand and never sends the token to storage', () async {
       final seen = <http.BaseRequest>[];

@@ -127,7 +127,7 @@ void main() {
     final a = await db.addScene(assetId: 'a1', png: Uint8List.fromList([1]), mode: 'map', narrative: 'köprü', seed: 1);
     final b = await db.addScene(assetId: 'a2', png: Uint8List.fromList([2]), mode: 'map', narrative: 'köprü', seed: 2);
     expect((await db.watchActiveScene().first)!.id, b);
-    await db.hideScene(b);
+    await db.hideScene(b!);
     expect((await db.watchActiveScene().first)!.id, a, reason: 'a reported picture is never shown again');
     await db.newEncounter();
     expect(await db.watchActiveScene().first, isNull, reason: 'a new encounter starts without a picture');

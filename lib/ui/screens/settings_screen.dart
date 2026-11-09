@@ -7,6 +7,7 @@ import '../../data/neuracraft/errors.dart';
 import '../../features/flags.dart';
 import '../../features/online_scene/messages.dart';
 import '../../features/online_scene/online_settings.dart';
+import '../../features/online_scene/scene_controller.dart';
 import '../../features/online_scene/session_controller.dart';
 import '../../providers.dart';
 
@@ -138,7 +139,12 @@ class _OnlineSceneSettings extends ConsumerWidget {
         title: const Text('Haritadan resim üret'),
         subtitle: const Text('Savaş haritasındaki çizimi sunucuda resme dönüştürür. Kapalıyken hiçbir şey gönderilmez.'),
         value: s.enabled,
-        onChanged: s.authInvalid ? null : (v) => ref.read(onlineSettingsProvider.notifier).setEnabled(v),
+        onChanged: s.authInvalid
+            ? null
+            : (v) {
+                if (!v) ref.read(sceneControllerProvider.notifier).cancel();
+                ref.read(onlineSettingsProvider.notifier).setEnabled(v);
+              },
       ),
       if (s.authInvalid)
         ListTile(
@@ -177,6 +183,7 @@ class _OnlineSceneSettings extends ConsumerWidget {
             ),
           );
           if (ok != true) return;
+          await ref.read(sceneControllerProvider.notifier).cancel();
           await ref.read(onlineSessionProvider.notifier).closeNow();
           await ref.read(databaseProvider).deleteAllScenes();
           await ref.read(onlineSettingsProvider.notifier).resetIdentity();

@@ -110,7 +110,15 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
     _users++;
     _closeTimer?.cancel();
     _closeTimer = null;
-    if (_active) _ensureOpen();
+    if (!_active) return;
+    if (state.sessionId != null && _users == 1) {
+      // Back on the map within the grace period: release() stopped the
+      // heartbeats, so restart them (and refresh the capacity now).
+      unawaited(_beat());
+      _startHeartbeat();
+    } else {
+      _ensureOpen();
+    }
   }
 
   /// The map screen closed. The session ends [closeGrace] later unless the
@@ -153,7 +161,8 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
   Future<void> sessionClosed() async {
     _heartbeat?.cancel();
     state = state.copyWith(clearSession: true, phase: SessionPhase.idle);
-    await ensureOpen();
+    // Not from the background: the next resume opens one if the map is still open.
+    if (_foreground) await ensureOpen();
   }
 
   /// The service rejected the app token.

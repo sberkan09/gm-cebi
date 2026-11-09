@@ -58,7 +58,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final unplaced = [for (final c in combatants) if (c.mapPosition == null) c];
     final online = ref.watch(onlineFeatureVisibleProvider);
     final sceneBusy = ref.watch(sceneControllerProvider) is SceneWorking;
-    final background = online && ref.watch(sceneVisibleProvider) ? ref.watch(sceneImageProvider).value : null;
+    final sceneId = online && ref.watch(sceneVisibleProvider) ? ref.watch(activeSceneIdProvider) : null;
+    final background = sceneId == null ? null : ref.watch(sceneImageProvider(sceneId)).value;
 
     return OnlineSessionScope(
         child: Scaffold(

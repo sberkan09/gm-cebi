@@ -3,8 +3,6 @@
 /// consent, and the report sheet.
 library;
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,6 +28,7 @@ class OnlineSessionScope extends ConsumerStatefulWidget {
 class _OnlineSessionScopeState extends ConsumerState<OnlineSessionScope> {
   late final OnlineSessionController _session;
   late final AppLifecycleListener _lifecycle;
+  bool _acquired = false;
 
   @override
   void initState() {
@@ -37,7 +36,9 @@ class _OnlineSessionScopeState extends ConsumerState<OnlineSessionScope> {
     _session = ref.read(onlineSessionProvider.notifier);
     // After the first frame: opening changes provider state.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _session.acquire();
+      if (!mounted) return;
+      _acquired = true;
+      _session.acquire();
     });
     _lifecycle = AppLifecycleListener(onStateChange: (s) {
       switch (s) {
@@ -54,7 +55,7 @@ class _OnlineSessionScopeState extends ConsumerState<OnlineSessionScope> {
   @override
   void dispose() {
     _lifecycle.dispose();
-    _session.release();
+    if (_acquired) _session.release();
     super.dispose();
   }
 
@@ -71,15 +72,6 @@ class SceneVisibility extends Notifier<bool> {
 
 final sceneVisibleProvider = NotifierProvider<SceneVisibility, bool>(SceneVisibility.new);
 
-/// The active scene decoded for painting; disposed when it changes.
-final sceneImageProvider = FutureProvider<ui.Image?>((ref) async {
-  final scene = ref.watch(activeSceneProvider).value;
-  if (scene == null) return null;
-  final codec = await ui.instantiateImageCodec(scene.png);
-  final image = (await codec.getNextFrame()).image;
-  ref.onDispose(image.dispose);
-  return image;
-});
 
 /// Above the map: the job in progress, the last error, or the server status;
 /// and the picture's actions once there is one.

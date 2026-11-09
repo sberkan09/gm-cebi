@@ -11,6 +11,7 @@ library;
 
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,6 +82,15 @@ class SceneController extends Notifier<SceneJobState> {
   /// Shortened in tests.
   static Duration retrySoonDelay = const Duration(seconds: 3);
 
+  /// Retrying cannot help: a dead token, a used-up quota, a refused text, a bug.
+  static const _notRetryable = {
+    NcReaction.authInvalid,
+    NcReaction.dailyQuota,
+    NcReaction.allowanceExhausted,
+    NcReaction.bug,
+    NcReaction.textRefused,
+  };
+
   StreamSubscription<NcJobEvent>? _watch;
 
   /// The wait in progress, finished by [cancel] so [generate] never hangs.
@@ -107,7 +117,16 @@ class SceneController extends Notifier<SceneJobState> {
     final client = ref.read(ncClientProvider);
     if (client == null) return;
     state = const SceneWorking(ScenePhase.sending);
+    // The service counts UTF-16 units (JavaScript length), as Dart's length
+    // does; a text field counts characters, so emoji could slip past it.
+    if (narrative.trim().length > maxNarrativeChars) {
+      state = const SceneFailed('Tarif çok uzun; en çok $maxNarrativeChars karakter olabilir.', retryable: false);
+      return;
+    }
     try {
+      // The picture belongs to the encounter whose sketch is sent, even if a
+      // new encounter starts while it is being made.
+      final encounterId = (await ref.read(databaseProvider).activeEncounter()).id;
       final png = await ref.read(sketchExporterProvider)();
       if (png == null) {
         state = const SceneFailed('Önce haritaya araziyi çiz.', retryable: false);
@@ -118,7 +137,12 @@ class SceneController extends Notifier<SceneJobState> {
       while (true) {
         final seed = ref.read(sceneRandomProvider).nextInt(1 << 31);
         final job = await _submit(client, png, mode, narrative, seed);
-        if (gen != _generation) return;
+        if (gen != _generation) {
+          // Cancelled while the sketch was on its way: stop the job too, so
+          // it neither runs nor counts against the daily quota.
+          unawaited(client.cancelJob(job.id).catchError((_) {}));
+          return;
+        }
         _jobId = job.id;
         state = SceneWorking(ScenePhase.queued, jobId: job.id);
         final done = await _wait(client, job.id, gen);
@@ -128,7 +152,8 @@ class SceneController extends Notifier<SceneJobState> {
           final out = done.outputs.first;
           final bytes = await client.downloadAsset(out.assetId);
           if (gen != _generation) return;
-          await ref.read(databaseProvider).addScene(assetId: out.assetId, png: bytes, mode: mode.name, narrative: narrative.trim(), seed: seed);
+          await ref.read(databaseProvider).addScene(
+              assetId: out.assetId, png: bytes, mode: mode.name, narrative: narrative.trim(), seed: seed, encounterId: encounterId);
           state = const SceneIdle();
           return;
         }
@@ -147,11 +172,18 @@ class SceneController extends Notifier<SceneJobState> {
     } on NcException catch (e) {
       if (gen != _generation) return;
       if (e.reaction == NcReaction.authInvalid) ref.read(onlineSessionProvider.notifier).authRejected();
-      state = SceneFailed(messageFor(e), retryable: !const {NcReaction.authInvalid, NcReaction.dailyQuota, NcReaction.allowanceExhausted, NcReaction.bug}.contains(e.reaction));
+      if (e is NcApiException && e.reaction == NcReaction.bug) debugPrint('NeuraCraft rejected the request: ${e.code} ${e.params}');
+      state = SceneFailed(messageFor(e), retryable: !_notRetryable.contains(e.reaction));
     } on TimeoutException {
       if (gen != _generation) return;
       unawaited(_cancelOnServer(client));
       state = SceneFailed(messageForReaction(NcReaction.offline));
+    } catch (e, st) {
+      // Anything else (unexpected JSON, a database error…): never leave the
+      // map stuck on "sending".
+      debugPrint('scene generation failed: $e\n$st');
+      if (gen != _generation) return;
+      state = SceneFailed(messageForReaction(NcReaction.bug), retryable: false);
     } finally {
       if (gen == _generation) _jobId = null;
     }
@@ -249,11 +281,35 @@ class SceneController extends Notifier<SceneJobState> {
 
 final sceneControllerProvider = NotifierProvider<SceneController, SceneJobState>(SceneController.new);
 
-/// The picture shown under the active encounter's map, if any.
+/// The picture shown under the active encounter's map, if any. The query
+/// joins encounters, so it re-emits on every turn; `distinct` (equality by
+/// id) keeps that from rebuilding anything.
 final activeSceneProvider = StreamProvider<MapSceneView?>((ref) => ref
     .watch(databaseProvider)
     .watchActiveScene()
-    .map((s) => s == null ? null : MapSceneView(id: s.id, assetId: s.assetId, png: s.png, mode: s.mode, narrative: s.narrative)));
+    .map((s) => s == null ? null : MapSceneView(id: s.id, assetId: s.assetId, png: s.png, mode: s.mode, narrative: s.narrative))
+    .distinct());
+
+/// Id of the picture shown under the map (null: none).
+final activeSceneIdProvider = Provider<int?>((ref) => ref.watch(activeSceneProvider.select((s) => s.value?.id)));
+
+/// A scene's picture decoded for painting, per scene id. autoDispose: the
+/// image is freed only once nothing watches that id any more, i.e. after
+/// the map has moved on to another id (whose entry starts empty), so a freed
+/// image is never painted.
+final sceneImageProvider = FutureProvider.autoDispose.family<ui.Image?, int>((ref, id) async {
+  final row = await (ref.read(databaseProvider).select(ref.read(databaseProvider).mapScenes)..where((s) => s.id.equals(id))).getSingleOrNull();
+  if (row == null) return null;
+  final codec = await ui.instantiateImageCodec(row.png);
+  final image = (await codec.getNextFrame()).image;
+  codec.dispose();
+  if (!ref.mounted) {
+    image.dispose();
+    return null;
+  }
+  ref.onDispose(image.dispose);
+  return image;
+});
 
 @immutable
 class MapSceneView {
@@ -263,6 +319,12 @@ class MapSceneView {
   final Uint8List png;
   final String mode;
   final String narrative;
+
+  /// A stored scene never changes; its id identifies it.
+  @override
+  bool operator ==(Object other) => other is MapSceneView && other.id == id;
+  @override
+  int get hashCode => id.hashCode;
 }
 
 /// Reports a picture: hidden locally at once, sent to the service when
@@ -270,11 +332,15 @@ class MapSceneView {
 Future<String?> reportScene(AppDatabase db, NeuraCraftClient? client, MapSceneView scene, ReportReason reason, {String? note}) async {
   await db.hideScene(scene.id);
   if (client == null) return null;
+  var n = note?.trim();
+  if (n != null && n.length > maxReportNoteChars) n = n.substring(0, maxReportNoteChars);
   try {
-    await client.report(scene.assetId, reason, note: note);
+    await client.report(scene.assetId, reason, note: n);
     return null;
   } on NcException catch (e) {
     // Hidden here anyway; the server deletes it within 7 days.
     return e.reaction == NcReaction.notFound ? null : 'Resim gizlendi, ama bildirim gönderilemedi.';
+  } catch (_) {
+    return 'Resim gizlendi, ama bildirim gönderilemedi.';
   }
 }

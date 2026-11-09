@@ -27,7 +27,7 @@ flutter run \
   kurulum başına günlük kota ve dakikada 240 istek sınırı uygular. `partner:manage` token'ı **asla**
   uygulamaya girmez.
 - **Debug derlemeleri** düz `http` ile yerel API'ye bağlanabilir (`src/debug`: cleartext). Release
-  derlemeleri `https` ister.
+  derlemelerinde `NC_API_URL` `https` değilse özellik kapalı sayılır (`NcConfig.isConfigured`).
 - **iOS:** `https` için ek ayar gerekmiyor. Simülatörde `http://localhost` denenirse ATS ayarı
   gerekebilir. Mağaza derlemesine istisna eklenmedi.
 
@@ -90,8 +90,11 @@ Betik şunları sırayla dener:
   açmak geç kalır. Onay verilmeden hiç açılmaz, yani kurulum kimliği bile gönderilmez.
 - **Heartbeat:** `heartbeatSeconds`'ta bir, yalnızca uygulama ön plandayken
   (`AppLifecycleState.resumed`). Arka planda durur, dönünce hemen bir heartbeat gider.
-- **`410 session.closed`:** sessizce yeni oturum açılır. İş gönderirken gelirse istek bir kez
-  tekrarlanır.
+- **`410 session.closed`:** sessizce yeni oturum açılır (uygulama arka plandaysa ön plana dönünce).
+  Sunucu bugün 410'u yalnızca heartbeat'te döndürüyor; iş gönderiminde gelirse diye istek bir kez
+  tekrarlanacak şekilde de hazır.
+- **Haritaya geri dönüş:** bekleme süresi içinde haritaya dönülürse aynı oturum sürer; hemen bir
+  heartbeat gider ve heartbeat'ler yeniden başlar.
 - **Kapanış:** haritadan çıkıldıktan **5 dakika sonra** `DELETE`. GM haritayı kapatıp hemen geri
   açarsa ısınmış GPU boşa gitmesin diye. Özellik kapatılınca ya da "Verilerimi sil" denince oturum
   hemen kapanır.
@@ -103,7 +106,14 @@ Betik şunları sırayla dener:
   zemin, 512×512.
 - Varsayılan mod `map`. Tarif boşsa genel bir İngilizce prompt gider (servis `narrative` ya da
   `prompt` istiyor). İstemci her işte bildiği şablon sürümünü (`version: 1`) gönderir.
-- **Bekleme:** SSE ile. Akış açılamazsa ya da erken koparsa saniyede bir yoklamaya düşülür.
+- **Bekleme:** SSE ile. Akış açılamazsa, erken koparsa ya da 45 sn boyunca hiç satır gelmezse
+  (sunucu 15 sn'de bir ping atar) saniyede bir yoklamaya düşülür. Yoklama ağ hatalarında geri
+  çekilerek 5 kez yeniden dener. Sunucu ilk olayı gönderip sonra abone olduğu için, arada biten bir
+  işin son olayı kaçabilir; bu da sessizlik süresiyle yakalanır.
+- **İptal:** gönderim sürerken iptal edilirse, dönen iş sunucuda da hemen iptal edilir (koşmaz,
+  kotadan düşmez). Ayarlar'dan kapatma ve "Verilerimi sil" de süren işi iptal eder.
+- **Karşılaşma:** resim, çizimin ait olduğu karşılaşmaya kaydedilir. İş sürerken yeni karşılaşma
+  başlarsa resim yeni karşılaşmaya eklenmez.
 - **Yeniden deneme:**
   - `limit.concurrent_jobs` / `rate_limited`: 3 sn bekleyip en çok 2 kez;
   - beklenmeyen iş hatası: yeni seed ile 1 kez, sonra sessizce vazgeç;
@@ -147,6 +157,10 @@ hazırlığı (PR #4) çevrimdışı derleme içindir.
   silinir" diye açıklar. Eski kimlik artık bu kuruluma bağlanamaz.
 
 ## Bilinen sınırlar
+
+- **Şablon sürümü kontrolü:** istemci her işte `version: 1` gönderiyor; sunucu bir gün sürüm 1'i
+  desteklemeyi bırakırsa işler genel hata mesajıyla reddedilir. `supportsSketchToScene()` hazır,
+  ama henüz uygulama açılışında çağrılmıyor.
 
 - **Bildirim ve gizleme:** servis belgesi "bildirilen resim herkes için gizlenir" diyor. Bugünkü
   neuracraft-cloud kodu (`5bb960e`) bildirimi kaydediyor (`reported_at`), ama

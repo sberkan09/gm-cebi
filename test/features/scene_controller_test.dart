@@ -51,6 +51,12 @@ class Server {
   int sessions = 0;
   bool hangEvents = false;
 
+  /// When set, the submit answer waits for this.
+  Completer<void>? holdSubmit;
+
+  /// When set, the events stream is this controller's (the test drives it).
+  StreamController<List<int>>? events;
+
   Future<http.StreamedResponse> handle(http.BaseRequest r) async {
     calls.add('${r.method} ${r.url.path}');
     final p = r.url.path;
@@ -63,10 +69,12 @@ class Server {
     }
     if (p == '/v1/presets/sketch_to_scene/jobs') {
       bodies.add(jsonDecode((r as http.Request).body) as Map<String, dynamic>);
+      if (holdSubmit != null) await holdSubmit!.future;
       if (submit.isNotEmpty) return submit.removeAt(0)();
       return jsonStream({'job': job('queued')}, 201);
     }
     if (p.endsWith('/events')) {
+      if (this.events != null) return http.StreamedResponse(this.events!.stream, 200, headers: {'content-type': 'text/event-stream'});
       if (hangEvents) {
         return http.StreamedResponse(StreamController<List<int>>().stream, 200, headers: {'content-type': 'text/event-stream'});
       }
@@ -194,7 +202,7 @@ void main() {
     await make(Server(finals: [job('failed', error: 'content.flagged')]));
     await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
     final f = st() as SceneFailed;
-    expect(f.message, 'Bu çizim ya da tarif için resim üretilemedi, farklı dene.');
+    expect(f.message, 'Bu çizim ya da tarif için resim üretilemedi; başka bir çizim ya da tarif dene.');
     expect(f.retryable, isTrue);
     expect(server.count('POST /v1/presets/sketch_to_scene/jobs'), 1);
     expect(await db.watchActiveScene().first, isNull);
@@ -304,8 +312,59 @@ void main() {
         httpClient: MockClient((r) async => throw http.ClientException('offline')),
         config: const NcConfig(baseUrl: 'http://nc.test', appToken: 't'),
         endUser: () => 'i');
-    final view = MapSceneView(id: id, assetId: 'asset-2', png: scenePng, mode: 'map', narrative: '');
+    final view = MapSceneView(id: id!, assetId: 'asset-2', png: scenePng, mode: 'map', narrative: '');
     expect(await reportScene(db, failing, view, ReportReason.other), 'Resim gizlendi, ama bildirim gönderilemedi.');
     expect(await db.watchActiveScene().first, isNull);
+  });
+
+  test('cancel while the sketch is on its way also cancels the job on the server', () async {
+    await make(Server()..holdSubmit = Completer<void>());
+    final running = ctl().generate(mode: SceneMode.map, narrative: 'köprü');
+    while (server.bodies.isEmpty) {
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+    }
+    await ctl().cancel(); // still "sending": no job id yet
+    server.holdSubmit!.complete();
+    await running;
+    for (var i = 0; i < 20 && !server.calls.any((x) => x.endsWith('/cancel')); i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    }
+    expect(server.calls.where((x) => x.endsWith('/cancel')), hasLength(1), reason: 'the job must not run or count against the quota');
+    expect(st(), isA<SceneIdle>());
+  });
+
+  test('an unexpected answer never leaves the map stuck on "sending"', () async {
+    await make(Server(submit: [() => jsonStream({'unexpected': true}, 201)]));
+    await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
+    final f = st() as SceneFailed;
+    expect(f.message, 'Bir hata oluştu, resim üretilemedi.');
+  });
+
+  test('a description over 500 UTF-16 units (emoji) is refused before sending', () async {
+    await make(Server());
+    await ctl().generate(mode: SceneMode.map, narrative: '🌲' * 300); // 300 characters, 600 units
+    expect((st() as SceneFailed).message, contains('en çok 500'));
+    expect(server.calls, isEmpty);
+  });
+
+  test('content.text_refused offers no retry (the same text would be refused again)', () async {
+    await make(Server(submit: [() => err(400, 'content.text_refused', {'field': 'narrative'})]));
+    await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
+    expect((st() as SceneFailed).retryable, isFalse);
+  });
+
+  test('a picture finishing after a new encounter started is not given to the new encounter', () async {
+    await make(Server()..events = StreamController<List<int>>());
+    final running = ctl().generate(mode: SceneMode.map, narrative: 'köprü');
+    while (st() is! SceneWorking || (st() as SceneWorking).phase != ScenePhase.queued) {
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+    }
+    await db.newEncounter(); // the GM starts the next fight meanwhile
+    final done = {'id': 'j', 'state': 'succeeded', 'outputs': [{'name': 'scene.png', 'assetId': 'asset-1', 'bytes': 64}]};
+    server.events!.add(utf8.encode('data: ${jsonEncode({'type': 'job', 'job': done})}\n\n'));
+    await server.events!.close();
+    await running;
+    expect(await db.watchActiveScene().first, isNull, reason: 'the new encounter has no picture');
+    expect(await db.select(db.mapScenes).get(), isEmpty, reason: 'the old encounter is gone, so nothing is kept');
   });
 }

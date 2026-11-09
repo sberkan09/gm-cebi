@@ -7,6 +7,10 @@
 /// fully offline. Never commit a real token.
 library;
 
+/// Same as Flutter's kReleaseMode, without importing Flutter (this layer is
+/// plain Dart, so tool/nc_smoke.dart runs with `dart run`).
+const _releaseMode = bool.fromEnvironment('dart.vm.product');
+
 class NcConfig {
   const NcConfig({required this.baseUrl, required this.appToken});
 
@@ -22,7 +26,10 @@ class NcConfig {
   /// An app token (`nc_app_…`): scopes jobs:submit, jobs:read, assets:read.
   final String appToken;
 
-  bool get isConfigured => baseUrl.isNotEmpty && appToken.isNotEmpty;
+  /// Release builds only talk https; plain http (a developer's machine) is
+  /// for debug and profile builds.
+  bool get isConfigured =>
+      baseUrl.isNotEmpty && appToken.isNotEmpty && (!_releaseMode || Uri.tryParse(baseUrl)?.scheme == 'https');
 
   Uri uri(String path) {
     final base = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
