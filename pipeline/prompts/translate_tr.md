@@ -63,3 +63,18 @@ olmayan bir dil. "Siz" değil "sen" hitabı (kaynaktaki "you" = sen).
 ## Çıktı biçimi
 
 Her girdi satırı için bir JSON satırı: `{"key": "...", "tr": "..."}`.
+
+## İnceleme turundan çıkan kurallar (2026-11-09)
+
+- turn = sıra, round = tur: "once per turn" → "sırada bir kez", "on each of your turns" → "her
+  sıranda", "this turn" → "bu sırada" (yalın "bu sıra" değil).
+- Olumsuz koşullarda "ve/veya" kapsamına dikkat: "neither worn nor carried" → "kimsenin giymediği ve
+  taşımadığı"; "unless A or B" → "A ya da B olmadıkça".
+- Stat bloğu etiketleri: *Başarısızlık:* / *Başarı:* / *Tetikleyici:* / *Karşılık:*; "(Günde 3)",
+  "**İstediği Zaman:**", "(Yenilenme 5–6)", "(İninde 4)", "(kurtulma ZD'si 14)".
+- Hasar: sıfat türler yalın (Delici, Kesici, Ezici, Soğuk, Nekrotik, Psişik hasar), isim türler -ı
+  ile (Ateş, Asit, Zehir, Yıldırım, Gök Gürültüsü, Kuvvet, Işıltı hasarı).
+- Bir eylem ya da özellik metinde anılırken başlıktaki adıyla anılır. Seviye listeleri sıra
+  noktasıyla: "8., 12. ve 16.".
+- Evasion = Sıyrılma (Kaçınma, Dodge eylemi); pact = ahit; Restoration (canavar özelliği) =
+  "X Yenilenme(si)"; Regeneration = Rejenerasyon.
