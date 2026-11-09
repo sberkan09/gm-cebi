@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/reference.dart';
 import '../../db/database.dart';
+import '../../features/encounter_difficulty.dart';
 import '../../features/flags.dart';
 import '../../providers.dart';
+import '../widgets/encounter_difficulty.dart';
 import '../widgets/locked.dart';
 import 'detail_screen.dart';
 import 'dice_screen.dart';
@@ -73,10 +75,12 @@ class _Tracker extends ConsumerWidget {
     final db = ref.read(databaseProvider);
     final list = state.combatants;
     final current = state.current;
+    final difficulty = ref.watch(encounterDifficultyProvider);
     return Column(children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-        child: Row(children: [
+        // Narrow screen with large text: "Ekle" becomes an icon button.
+        child: LayoutBuilder(builder: (context, box) => Row(children: [
           Text('${state.encounter.round}. tur', key: const Key('round'), style: t.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(width: 12),
           Expanded(
@@ -89,14 +93,27 @@ class _Tracker extends ConsumerWidget {
                     style: t.titleMedium?.copyWith(color: scheme.primary),
                   ),
           ),
-          FilledButton.tonalIcon(
-            key: const Key('add-combatant'),
-            onPressed: () => _showAddSheet(context, ref),
-            icon: const Icon(Icons.person_add_alt_1),
-            label: const Text('Ekle'),
-          ),
-        ]),
+          if (box.maxWidth < MediaQuery.textScalerOf(context).scale(260))
+            IconButton.filledTonal(
+              key: const Key('add-combatant'),
+              tooltip: 'Ekle',
+              onPressed: () => _showAddSheet(context, ref),
+              icon: const Icon(Icons.person_add_alt_1),
+            )
+          else
+            FilledButton.tonalIcon(
+              key: const Key('add-combatant'),
+              onPressed: () => _showAddSheet(context, ref),
+              icon: const Icon(Icons.person_add_alt_1),
+              label: const Text('Ekle'),
+            ),
+        ])),
       ),
+      if (difficulty != null && difficulty.hasRating)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+          child: Align(alignment: AlignmentDirectional.centerStart, child: DifficultyChip(summary: difficulty)),
+        ),
       Expanded(
         child: list.isEmpty
             ? Center(
@@ -307,6 +324,7 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
   final bonus = TextEditingController(text: '0');
   final hp = TextEditingController();
   final ac = TextEditingController();
+  final level = TextEditingController();
   var isPlayer = true;
   final ok = await showDialog<bool>(
     context: context,
@@ -340,6 +358,10 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
               const SizedBox(width: 8),
               Expanded(child: _numField(ac, 'ZS')),
             ]),
+            if (isPlayer) ...[
+              const SizedBox(height: 8),
+              _levelField(level, key: const Key('combatant-level')),
+            ],
           ]),
         ),
         actions: [
@@ -358,9 +380,24 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
           hp: hpValue == null || hpValue < 1 ? null : hpValue,
           ac: _int(ac.text),
           isPlayer: isPlayer,
+          level: isPlayer ? _level(level.text) : null,
         );
   }
 }
+
+/// A level 1–20, or null (empty or out of range: the party level is used).
+int? _level(String s) {
+  final v = int.tryParse(s.trim());
+  return v == null || v < minLevel || v > maxLevel ? null : v;
+}
+
+Widget _levelField(TextEditingController c, {Key? key}) => TextField(
+      key: key,
+      controller: c,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(2)],
+      decoration: const InputDecoration(labelText: 'Seviye (isteğe bağlı)', helperText: 'Boşsa grup seviyesi kullanılır'),
+    );
 
 Widget _numField(TextEditingController c, String label, {Key? key}) => TextField(
       key: key,
@@ -496,6 +533,23 @@ Future<void> _editInitiative(BuildContext context, WidgetRef ref, Combatant c) a
   await ref.read(databaseProvider).setInitiative(c.id, _int(v));
 }
 
+Future<void> _editLevel(BuildContext context, WidgetRef ref, Combatant c) async {
+  final ctrl = TextEditingController(text: c.level?.toString() ?? '');
+  final v = await showDialog<String>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('${c.name} · seviye'),
+      content: _levelField(ctrl, key: const Key('level-field')),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context, ''), child: const Text('Temizle')),
+        FilledButton(key: const Key('level-save'), onPressed: () => Navigator.pop(context, ctrl.text), child: const Text('Kaydet')),
+      ],
+    ),
+  );
+  if (v == null) return;
+  await ref.read(databaseProvider).setLevel(c.id, _level(v));
+}
+
 Future<void> _showCombatantMenu(BuildContext context, WidgetRef ref, Combatant c) async {
   final data = ref.read(referenceProvider).value?.data;
   final lang = ref.read(currentSettingsProvider).contentLang;
@@ -527,6 +581,14 @@ Future<void> _showCombatantMenu(BuildContext context, WidgetRef ref, Combatant c
             if (live.hpCurrent != null)
               ListTile(leading: const Icon(Icons.favorite_outline), title: const Text('Hasar / iyileştirme'), onTap: () => _changeHp(context, ref, live)),
             ListTile(leading: const Icon(Icons.flag_outlined), title: const Text('İnisiyatifi değiştir'), onTap: () => _editInitiative(context, ref, live)),
+            if (live.isPlayer)
+              ListTile(
+                key: const Key('edit-level'),
+                leading: const Icon(Icons.trending_up),
+                title: const Text('Seviye'),
+                subtitle: Text(live.level == null ? 'Girilmedi (grup seviyesi kullanılır)' : '${live.level}. seviye'),
+                onTap: () => _editLevel(context, ref, live),
+              ),
             if (monster != null)
               ListTile(
                 leading: const Icon(Icons.menu_book_outlined),
