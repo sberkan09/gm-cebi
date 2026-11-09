@@ -9,7 +9,7 @@ library;
 const appName = 'GM Cebi';
 
 /// Keep in sync with `version:` in pubspec.yaml.
-const appVersion = '0.1.0';
+const appVersion = '1.0.0';
 
 const appTagline = '5e uyumlu Türkçe FRP yardımcısı';
 

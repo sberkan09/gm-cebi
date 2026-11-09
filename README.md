@@ -5,6 +5,7 @@ Kurallar, durumlar, büyüler ve canavarlar çevrimdışı, Türkçe ve İngiliz
 
 > Durum: **Faz 1 — uygulama (test sürümü).** Ayrıntı: [docs/status.md](docs/status.md).
 > Test grubu için: [docs/test-guide.md](docs/test-guide.md).
+> Mağaza sürümü (Play, TestFlight): [docs/release.md](docs/release.md), [docs/ios-testflight.md](docs/ios-testflight.md).
 
 ## Depo düzeni
 

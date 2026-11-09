@@ -24,4 +24,21 @@ void main() {
     expect(all.allows(Feature.sessionAudioSummary), isFalse);
     expect(const Entitlements().isLocked(Feature.npcGenerator), isFalse);
   });
+
+  test('store builds ignore a test override left by an internal build', () {
+    // Internal build: the Settings test switch wins over the build default.
+    expect(resolveGmPack(override: true, internal: true, packDefault: false), isTrue);
+    expect(resolveGmPack(override: false, internal: true, packDefault: true), isFalse);
+    expect(resolveGmPack(override: null, internal: true, packDefault: true), isTrue);
+    // Store build: only the build flag counts.
+    expect(resolveGmPack(override: true, internal: false, packDefault: false), isFalse);
+    expect(resolveGmPack(override: false, internal: false, packDefault: true), isTrue);
+    expect(resolveGmPack(override: null, internal: false, packDefault: false), isFalse);
+  });
+
+  test('plain test runs are built like a store build', () {
+    // `flutter test` passes no --dart-define: the test switches stay compiled out.
+    expect(kInternalBuild, isFalse);
+    expect(kGmPackDefault, isFalse);
+  });
 }

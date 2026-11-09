@@ -275,7 +275,9 @@ Future<Uint8List> renderTerrainPng(List<SketchStroke> strokes, {int size = 512})
   final canvas = Canvas(recorder);
   MapPainter(strokes: strokes, tokens: const [], grid: false, theme: MapTheme.export)
       .paint(canvas, Size.square(size.toDouble()));
-  final image = await recorder.endRecording().toImage(size, size);
+  final picture = recorder.endRecording();
+  final image = await picture.toImage(size, size);
+  picture.dispose();
   final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
   image.dispose();
   return bytes!.buffer.asUint8List();

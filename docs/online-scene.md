@@ -145,8 +145,9 @@ hazırlığı (PR #4) çevrimdışı derleme içindir.
 - **Apple App Privacy:** "Data Not Collected" artık doğru değil. User Content (Photos, Other) ve
   Identifiers (Device ID) beyan edilmeli; "Used to Track You": hayır.
 - **Google Play yapay zeka içerik politikası:** uygulama içi "Bildir" düğmesi var (resim menüsü).
-- **Mağaza kontrol betiği:** PR #4'teki `tool/check_store_build.sh` İnternet iznini hata sayar.
-  Çevrimiçi derleme için betiğe bir istisna (`--online`) eklenmeli. İki PR birleşince yapılacak.
+- **Mağaza kontrol betiği:** `tool/check_store_build.sh` İnternet iznini hata sayar. Çevrimiçi
+  derleme için `tool/check_store_build.sh --online <aab>` kullanılır; bu seçenekle izin *beklenir*.
+  `release-aab` iş akışı bugün çevrimdışı derlediği için seçeneksiz çalışır.
 
 ### "Verilerimi sil"
 

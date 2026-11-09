@@ -103,6 +103,52 @@ void main() {
     }
   });
 
+  test('an interrupted schema 1 → 2 upgrade runs again on the next start', () async {
+    final dir = await Directory.systemTemp.createTemp('gmcebi-migration');
+    final file = File('${dir.path}/half.sqlite');
+    try {
+      // Schema 1 plus pos_x only: the app was killed after the first step.
+      final v2 = AppDatabase(NativeDatabase(file));
+      await v2.addCombatant(name: 'Goblin', hp: 7);
+      await v2.customStatement('DROP TABLE map_strokes');
+      await v2.customStatement('ALTER TABLE combatants DROP COLUMN pos_y');
+      await v2.customStatement('PRAGMA user_version = 1');
+      await v2.close();
+
+      final upgraded = AppDatabase(NativeDatabase(file));
+      final s = await upgraded.watchEncounterState().first;
+      expect(s.combatants.single.name, 'Goblin');
+      await upgraded.setTokenPosition(s.combatants.single.id, const Offset01(0.2, 0.2));
+      await upgraded.addStroke(const [Offset01(0, 0), Offset01(1, 1)]);
+      expect((await upgraded.watchStrokes().first).length, 1);
+      await upgraded.close();
+    } finally {
+      await dir.delete(recursive: true);
+    }
+  });
+
+  test('restoreStrokes puts erased strokes back with their ids; clearTokenPositions in one go', () async {
+    final a = await db.addStroke(const [Offset01(0.1, 0.1), Offset01(0.2, 0.2)], color: 2);
+    final b = await db.addStroke(const [Offset01(0.5, 0.5)]);
+    final rows = await db.watchStrokes().first;
+    await db.clearStrokes();
+    expect(await db.watchStrokes().first, isEmpty);
+    await db.restoreStrokes(rows);
+    final back = await db.watchStrokes().first;
+    expect(back.map((s) => s.id), [a, b]);
+    expect(back.first.color, 2);
+    await db.restoreStrokes(rows); // twice: nothing duplicated
+    expect((await db.watchStrokes().first).length, 2);
+
+    final x = await db.addCombatant(name: 'A');
+    final y = await db.addCombatant(name: 'B');
+    await db.setTokenPosition(x, const Offset01(0.1, 0.1));
+    await db.setTokenPosition(y, const Offset01(0.2, 0.2));
+    await db.clearTokenPositions();
+    final cs = (await db.watchEncounterState().first).combatants;
+    expect(cs.every((c) => c.mapPosition == null), isTrue);
+  });
+
   test('schema 2 databases get the scenes table', () async {
     final dir = await Directory.systemTemp.createTemp('gmcebi-migration');
     final file = File('${dir.path}/v2.sqlite');
