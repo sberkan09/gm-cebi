@@ -685,6 +685,10 @@ def _weight_cost(cells: list[str]) -> tuple[str, str]:
     return weight, cost
 
 
+_SHIP_COLUMNS = ["Speed", "Crew", "Passengers", "Cargo (Tons)", "AC", "HP", "Damage Threshold", "Cost"]
+_SUB_ROWS = {"Saddle": ("Exotic", "Military", "Riding")}
+
+
 def parse_equipment(lines: list[Line]) -> tuple[list[EquipmentItem], list[WeaponProperty], list[WeaponMastery]]:
     a, b = CHAPTERS["equipment"]
     chunk = lines_between(lines, a, b)
@@ -733,18 +737,37 @@ def parse_equipment(lines: list[Line]) -> tuple[list[EquipmentItem], list[Weapon
                                           "Airborne and Waterborne Vehicles"):
             t = build_table(s.title, [ln for ln in s.lines if is_table_line(ln)])
             cat = {"Adventuring Gear": "gear", "Mounts and Other Animals": "mount"}.get(s.title, "vehicle")
+            group = ""  # "Saddle" row with no cells: its indented sub-rows become "Saddle, Exotic"
             for r in t.rows:
-                if not r[0] or r[0] in ("Weight",):
+                if not r[0] or r[0] in ("Weight", "Speed"):
                     continue
                 cells = [c for c in r[1:] if c]
                 f: dict[str, str] = {}
-                if cat == "gear":
+                name = r[0]
+                if s.title == "Airborne and Waterborne Vehicles":
+                    # The header spans several PDF lines and the table region also catches
+                    # rows of the next page's food table; only full ship rows are kept.
+                    if len(cells) < 7:
+                        continue
+                    f = dict(zip(_SHIP_COLUMNS, r[1:8] + [cells[-1]]))
+                elif s.title == "Tack, Harness, and Drawn Vehicles":
+                    if not cells:
+                        group = name
+                        continue
+                    if group and name in _SUB_ROWS.get(group, ()):
+                        name = f"{group}, {name}"
+                    else:
+                        group = ""
+                    f["Weight"], f["Cost"] = _weight_cost(r[1:])
+                    if not f["Weight"] and len(cells) > 1:
+                        f["Weight"] = cells[0]  # "—" for stabling
+                elif cat == "gear":
                     f["Weight"], f["Cost"] = _weight_cost(r[1:])
                 else:
                     hdr = [h for h in t.header[1:] if h]
                     for k, v in zip(hdr + ["Cost"] * 3, cells):
                         f.setdefault(k, v)
-                add(EquipmentItem(id=slug(r[0]), name=r[0], category=cat, fields=f,
+                add(EquipmentItem(id=slug(name), name=name, category=cat, fields=f,
                                   source=SourceRef(page=s.page, heading=["Equipment", s.title])))
         elif s.level == 4 and (parent in ("Artisan’s Tools", "Other Tools") or "Adventuring Gear" in s.path):
             m = PRICE_IN_TITLE.match(s.title)
