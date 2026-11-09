@@ -13,9 +13,24 @@ atmosfer modu 1,6 sn; jetonlar modele gönderilmemeli). Servis tarafında gereke
 adımı, gecikme, şikâyet, faturalama, veri saklama) neuracraft-cloud'da açıldı: takip issue'su
 https://github.com/sberkan09/neuracraft-cloud/issues/13 (alt issue'lar #14–#21).
 
+## Yayın hazırlığı: Play kapalı/açık test ve TestFlight
+
+PR #4 2026-11-09'da birleşti (inceleme düzeltmeleriyle). Ayrıntı: `docs/release.md`, `docs/ios-testflight.md`, `docs/store/`.
+
+- Sürüm `1.0.0+1`; paket kimliği Android ve iOS'ta `io.github.sberkan09.gmcebi` (onay bekliyor).
+- Android yükleme anahtarıyla imza (`android/key.properties`, git dışı); `release-aab` iş akışı
+  `v*` etiketinde test + imzalı AAB üretir ve denetler. Yerelde atılık bir anahtarla derlendi ve doğrulandı
+  (imzalayan = yükleme anahtarı; test anahtarı izi yok; İnternet izni yok). `GMCEBI_INTERNAL=true`
+  derlemesinde aynı denetim beklendiği gibi başarısız oldu.
+- Bayraklar: mağaza derlemesi `GMCEBI_INTERNAL=false`, `GMCEBI_GM_PACK=true`. Test anahtarının
+  kayıtlı tercihi artık mağaza derlemesinde okunmuyor (sızıntı düzeltildi, testli).
+- Mağaza materyalleri: TR/EN açıklamalar, gizlilik politikası, Play veri güvenliği taslağı, 512 px ikon,
+  öne çıkan görsel, 6+6 ekran görüntüsü.
+- Mağaza hesapları, keystore, secret'lar ve yükleme ürün sahibinde (`docs/release.md`).
+
 ## Faz 1 — uygulama: test sürümü hazır
 
-PR: https://github.com/sberkan09/gm-cebi/pull/3 (`claude/phase-1-app` → `main`). Bağımsız incelemenin 4 engelleyici bulgusu düzeltildi.
+PR #3 (`claude/phase-1-app` → `main`) 2026-10-23'te birleşti. Bağımsız incelemenin 4 engelleyici bulgusu düzeltildi.
 
 ### Ekranlar
 
@@ -33,7 +48,7 @@ iOS hazırlığı: `docs/ios-testflight.md`. Türkçe metin kuralları: `docs/tu
 
 ### Testler
 
-- Flutter: 82 test — Türkçe metin (büyük/küçük harf, sıralama, ekler), zar ayrıştırıcı, Markdown,
+- Flutter: 86 test (yayın hazırlığıyla +4: bayrak sızıntısı, sürüm uyumu, atıf metni) — Türkçe metin (büyük/küçük harf, sıralama, ekler), zar ayrıştırıcı, Markdown,
   arama (gerçek veriyle, her sorgu <100 ms; ölçüm masaüstünde), veritabanı (inisiyatif, notlar,
   ayarlar), bayraklar, uygulamanın tamamını açan 14 widget testi ve çevrilmiş ya da tablolu her
   kaydı iki dilde çizen bir test. `flutter analyze` temiz.
@@ -98,7 +113,8 @@ olmadığı için atlanıyor.
 1. Sözlük: özellikle 43 tartışmalı terim (Güç/Kuvvet, Bilgelik, Yetkinlik, Cantrip, Sehhar, para birimleri…) ve inceleme ajanının işaret ettiği "Hayvan" (Beast) ↔ "Hayvanlar" (Animals bölümü) yakınlığı.
 2. Pilot çeviri kalitesi ve üslup (`docs/pilot-samples.md`).
 3. Türkçe "değiştirilmiş eser" notu ve atıf metninin "Hakkında" ekranındaki biçimi (`docs/decisions.md`). Şu an Ayarlar ve Hakkında ekranında öneri metniyle duruyor.
-4. Uygulama adı ("GM Cebi") ve paket adı (şimdilik `com.example.gm_cebi` / `com.example.gmCebi`).
+4. Uygulama adı ("GM Cebi") ve paket adı (önerilen: `io.github.sberkan09.gmcebi`, Android ve iOS aynı; ilk yüklemeden sonra değişmez).
+5. Üretime çıkmadan önce GM Paketi'nin ücretsiz mi kalacağı (test kanallarında açık).
 
 ## Toplu çeviri öncesi takip maddeleri (PR #2 ikinci inceleme)
 
@@ -109,7 +125,7 @@ olmadığı için atlanıyor.
 
 ## Sonraki adımlar
 
-- Uygulama adı ve paket adı kararı (yer tutucu: `com.example.*`), ardından mağaza imzası.
+- Paket adı onayı, ardından Play iç/kapalı test ve TestFlight'a ilk yükleme (`docs/release.md`).
 - Test grubundan ilk geri bildirim; sözlük kararları.
 - Toplu çeviri öncesi takip maddeleri (yukarıda), ardından kalan veri kümelerinin çevirisi.
 - Faz 2 planı: ses kaydı → özet → NPC/mekân defteri; Fate desteği.

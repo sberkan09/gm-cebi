@@ -55,3 +55,14 @@ app.*.map.json
 /android/app/release
 # Widget Preview related
 .widget_preview/
+
+# Signing material: never commit (docs/release.md)
+key.properties
+*.jks
+*.keystore
+*.keystore.base64
+*.jks.base64
+*.p12
+*.p8
+*.mobileprovision
+*.cer
