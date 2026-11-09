@@ -174,6 +174,8 @@ IconData datasetIcon(String dataset) => switch (dataset) {
       'feats' => Icons.star_outline,
       'equipment' => Icons.backpack_outlined,
       'weapon_mastery' || 'weapon_properties' => Icons.gavel_outlined,
+      'magic_items' => Icons.diamond_outlined,
+      'rules' => Icons.library_books_outlined,
       'terms' => Icons.translate,
       _ => Icons.article_outlined,
     };

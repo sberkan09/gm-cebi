@@ -75,7 +75,19 @@
    "tr_complete": 8,
    "tr_partial": 0,
    "bytes": 6947
+  },
+  "magic_items": {
+   "count": 258,
+   "tr_complete": 0,
+   "tr_partial": 0,
+   "bytes": 286887
+  },
+  "rules": {
+   "count": 31,
+   "tr_complete": 0,
+   "tr_partial": 0,
+   "bytes": 190255
   }
  },
- "total_bytes": 3047325
+ "total_bytes": 3526208
 }

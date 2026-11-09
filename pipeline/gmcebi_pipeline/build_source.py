@@ -15,8 +15,19 @@ from .models import Record
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "source"
 
-# Known extraction artefacts in the PDF text (a superscript fraction read as digits).
-TEXT_FIXUPS = {"holds up to 11/2 pints": "holds up to 1½ pints"}
+# Known extraction artefacts in the PDF text (a superscript fraction read as digits), and
+# trademarks / product names the SRD text itself mentions: the app never shows them
+# (license.py), so the sentence is made neutral. The result is a modified work (CC-BY 4.0
+# notice in lib/app_info.dart).
+TEXT_FIXUPS = {
+    "holds up to 11/2 pints": "holds up to 1½ pints",
+    "to advance the worship of Tiamat,": "to advance the worship of an evil dragon god,",
+    "Dragon deities such as Tiamat are unaffected": "Dragon deities are unaffected",
+    "The three main pillars of D&D play are": "The three main pillars of play are",
+    "each time you sit down to play D&D)": "each time you sit down to play)",
+    "seasoned D&D players": "seasoned players",
+    "a yuan-ti with a snakelike tail": "a creature with a snakelike tail",
+}
 
 
 def _fixup(rec: Record) -> Record:

@@ -424,6 +424,12 @@ class GenericView extends StatelessWidget {
     ];
     final seeAlso = (c['see_also'] as List?)?.cast<String>() ?? const <String>[];
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      // Magic item category/rarity line; chapter of a rule section.
+      if (c['type_line'] is String)
+        Text(c['type_line'] as String, key: const Key('item-type-line'),
+            style: t.titleMedium?.copyWith(fontStyle: FontStyle.italic)),
+      if (c['kind'] == 'rule_section' && c['chapter'] is String)
+        Text(c['chapter'] as String, style: t.titleMedium?.copyWith(fontStyle: FontStyle.italic)),
       if (c['category'] is String && c['kind'] == 'feat')
         Text(l.lang == Lang.tr ? '${c['category']} Hüneri' : '${c['category']} Feat',
             style: t.titleMedium?.copyWith(fontStyle: FontStyle.italic)),

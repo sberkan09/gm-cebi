@@ -8,6 +8,7 @@ from gmcebi_pipeline.models import DATASETS
 EXPECTED = {
     "conditions": 15, "spells": 339, "monsters": 330, "classes": 12, "subclasses": 12,
     "species": 9, "backgrounds": 4, "feats": 17, "weapon_mastery": 8, "weapon_properties": 10,
+    "magic_items": 258, "rules": 31,
 }
 
 
@@ -87,3 +88,18 @@ def test_vehicle_tables(source):
     assert eq["cart"]["fields"] == {"Weight": "200 lb.", "Cost": "15 GP"}
     # Header cells and rows of the food table that leaked into the ship table are gone.
     assert not {"speed", "exotic", "comfortable", "common", "saddle"} & set(eq)
+
+
+def test_magic_items_and_rule_sections(source):
+    items = {i["id"]: i for i in source["magic_items"]}
+    assert items["bag-of-holding"]["category"] == "Wondrous Item"
+    assert items["bag-of-holding"]["rarity"] == "Uncommon" and "attunement" not in items["bag-of-holding"]
+    assert items["holy-avenger"]["attunement"] == "Requires Attunement by a Paladin"
+    assert items["armor-1-2-or-3"]["rarity"] == "Rare (+1), Very Rare (+2), or Legendary (+3)"
+    # Body text that opens with the item's italic name is not swallowed into the header.
+    assert items["dragon-scale-mail"]["type_line"] == "Armor (Scale Mail), Very Rare (Requires Attunement)"
+    rules = {r["id"]: r for r in source["rules"]}
+    enc = rules["toolbox-combat-encounters"]
+    assert enc["chapter"] == "Gameplay Toolbox"
+    assert any(b.get("text") == "### Combat Encounter Difficulty" for b in enc["blocks"])
+    assert any(b["type"] == "table" for b in enc["blocks"])

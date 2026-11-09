@@ -33,9 +33,11 @@ const datasets = <DatasetInfo>[
   DatasetInfo('species', 'Soy', 'Soylar', 11),
   DatasetInfo('backgrounds', 'Geçmiş', 'Geçmişler', 9),
   DatasetInfo('feats', 'Hüner', 'Hünerler', 10),
+  DatasetInfo('magic_items', 'Sihirli Eşya', 'Sihirli Eşyalar', 13),
   DatasetInfo('equipment', 'Ekipman', 'Ekipman', 7),
   DatasetInfo('weapon_mastery', 'Silah Ustalığı', 'Silah Ustalıkları', 6),
   DatasetInfo('weapon_properties', 'Silah Özelliği', 'Silah Özellikleri', 6),
+  DatasetInfo('rules', 'Kural Bölümü', 'Kural Bölümleri', 4),
   DatasetInfo('terms', 'Terim', 'Terimler', 5),
 ];
 
@@ -44,7 +46,7 @@ final Map<String, DatasetInfo> datasetById = {for (final d in datasets) d.id: d}
 /// Asset file names (without the `terms` pseudo-dataset built from the glossary).
 const assetDatasets = [
   'rules_glossary', 'conditions', 'spells', 'monsters', 'classes', 'subclasses', 'species',
-  'backgrounds', 'feats', 'equipment', 'weapon_properties', 'weapon_mastery',
+  'backgrounds', 'feats', 'equipment', 'weapon_properties', 'weapon_mastery', 'magic_items', 'rules',
 ];
 
 class GlossaryTerm {
