@@ -97,20 +97,28 @@ Future<void> main(List<String> args) async {
   check(bad?.code == 'partner.end_user_required' && bad?.reaction == NcReaction.bug, 'malformed X-End-User → ${bad?.code}');
   endUser = badUser;
 
-  final bogus = NeuraCraftClient(httpClient: h, config: NcConfig(baseUrl: config.baseUrl, appToken: 'nc_app_not-a-token'), endUser: () => endUser);
-  final auth = await apiError(() => bogus.openSession());
-  check(auth?.reaction == NcReaction.authInvalid, 'bad app token → ${auth?.code}');
+  // NC_SMOKE_PRODUCTION=1: a live service. Skips the two checks that would cost
+  // real GPU time or cannot work there: the quota run (up to 10 finished jobs)
+  // and the bad-token check (a proxy that injects the real token rewrites it).
+  final production = Platform.environment['NC_SMOKE_PRODUCTION'] == '1';
+  if (production) {
+    stdout.writeln('skip  bad app token, daily quota (NC_SMOKE_PRODUCTION=1)');
+  } else {
+    final bogus = NeuraCraftClient(httpClient: h, config: NcConfig(baseUrl: config.baseUrl, appToken: 'nc_app_not-a-token'), endUser: () => endUser);
+    final auth = await apiError(() => bogus.openSession());
+    check(auth?.reaction == NcReaction.authInvalid, 'bad app token → ${auth?.code}');
 
-  NcApiException? quota;
-  for (var i = 0; i < 10 && quota == null; i++) {
-    quota = await apiError(() async {
-      // Cancelled jobs do not count against the quota, and the plan runs one
-      // job at a time (limit.concurrent_jobs), so let each one finish.
-      final j = await c.submitScene(sketchPng: sketch, mode: SceneMode.map, prompt: 'a bridge', seed: i);
-      return c.watchJob(j.id).last.timeout(const Duration(minutes: 5));
-    });
+    NcApiException? quota;
+    for (var i = 0; i < 10 && quota == null; i++) {
+      quota = await apiError(() async {
+        // Cancelled jobs do not count against the quota, and the plan runs one
+        // job at a time (limit.concurrent_jobs), so let each one finish.
+        final j = await c.submitScene(sketchPng: sketch, mode: SceneMode.map, prompt: 'a bridge', seed: i);
+        return c.watchJob(j.id).last.timeout(const Duration(minutes: 5));
+      });
+    }
+    check(quota?.reaction == NcReaction.dailyQuota && quota?.resetsAt != null, 'daily quota → ${quota?.code}, resets ${quota?.resetsAt}');
   }
-  check(quota?.reaction == NcReaction.dailyQuota && quota?.resetsAt != null, 'daily quota → ${quota?.code}, resets ${quota?.resetsAt}');
 
   await c.closeSession(s.id);
   final closed = await apiError(() => c.heartbeat(s.id));
