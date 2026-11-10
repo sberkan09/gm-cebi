@@ -35,19 +35,31 @@ Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
    ekle" ya da canavar sayfasındaki "İnisiyatife ekle" ile ekle. Zar
    simgesiyle canavarların inisiyatifini at, **Sonraki** ile sırayı ilerlet,
    can çubuğuna dokunup hasar/iyileştirme gir, kartın üstüne dokunup durum ekle.
-   Uygulamayı kapatıp açınca karşılaşma yerinde durmalı.
+   Uygulamayı kapatıp açınca karşılaşma yerinde durmalı. Listeden canavar
+   eklenince üstte zorluk çipi çıkar (ör. "Orta · 1.050 / 1.500 TP"); dokununca
+   bütçeler, canavarların TP'si ve grup açılır. Oyuncu seviyesini ekleme
+   penceresinde, kart menüsündeki "Seviye"de ya da zorluk sayfasında değiştir;
+   oyuncu yoksa grup büyüklüğü ve seviyesi orada ayarlanır.
 5. **Harita** — İnisiyatif ekranında sağ üstteki harita simgesine dokun. Parmağınla çiz
    (renkler: mürekkep, su, bitki, tehlike), dokununca nokta bırakır; "Sil" ile sil; geri al
    düğmesi son işlemi (çizim, silme, temizleme) geri alır. Alttaki şeritten katılımcıya dokununca jetonu haritaya
    gelir; jetonu sürükleyerek taşı; jetona dokunup "Haritadan kaldır" ile kaldır. "Sonraki" sırayı haritadan ilerletir.
-   Tablette de dene: harita ekrana göre büyür.
+   Tablette de dene: harita ekrana göre büyür. İki parmakla kaydır ve yakınlaştır (yakınken köşedeki düğme haritayı
+   sığdırır). Kalemle (S Pen, Apple Pencil) dokununca **kalem modu** kendiliğinden açılır: yalnızca kalem çizer,
+   avuç içi ve parmak çizmez (tek parmak haritayı kaydırır, jetonlar parmakla taşınır); kalemin silgi ucu ya da yan
+   tuşu o çizgi için siler; kalem ekranın üstünde gezinirken fırça/silgi imleci görünür. Kalem modunu haritadaki
+   kalem düğmesinden ya da Ayarlar'dan kapat.
 6. **Notlar** — Oturum notu al; yazdıkların kendiliğinden kaydedilir.
-7. **Genel** — Tek elle kullanım, yazı büyüklüğü, koyu/açık tema (Ayarlar).
+7. **NPC üretici** — Notlar ekranında sağ üstteki maske simgesine dokun, **NPC üret**'e bas.
+   Bir alana dokununca yalnızca o alan değişir; kilit simgesiyle alanı sabitle, sonra
+   **Yeniden üret**. Filtrelerden soy, cinsiyet ve tavrı seç. **Nota kaydet** ve
+   **İnisiyatife ekle**'yi dene. İsimler ve tablolar masada doğal okunuyor mu, söyle.
+8. **Genel** — Tek elle kullanım, yazı büyüklüğü, koyu/açık tema (Ayarlar).
 
 ## Bilinen eksikler (bildirmene gerek yok)
 
 - Çevirilerin tamamı makine destekli; insan incelemesi sürüyor. Terim önerilerin bu yüzden çok değerli.
-- Satın alma yok; NPC üretici sonraki sürümde.
+- Satın alma yok.
 
 ## Geri bildirim
 

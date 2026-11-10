@@ -1213,6 +1213,15 @@ class $CombatantsTable extends Combatants
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _levelMeta = const VerificationMeta('level');
+  @override
+  late final GeneratedColumn<int> level = GeneratedColumn<int>(
+    'level',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1230,6 +1239,7 @@ class $CombatantsTable extends Combatants
     createdAt,
     posX,
     posY,
+    level,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1336,6 +1346,12 @@ class $CombatantsTable extends Combatants
         posY.isAcceptableOrUnknown(data['pos_y']!, _posYMeta),
       );
     }
+    if (data.containsKey('level')) {
+      context.handle(
+        _levelMeta,
+        level.isAcceptableOrUnknown(data['level']!, _levelMeta),
+      );
+    }
     return context;
   }
 
@@ -1405,6 +1421,10 @@ class $CombatantsTable extends Combatants
         DriftSqlType.double,
         data['${effectivePrefix}pos_y'],
       ),
+      level: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}level'],
+      ),
     );
   }
 
@@ -1439,6 +1459,10 @@ class Combatant extends DataClass implements Insertable<Combatant> {
   /// null while the token is not on the map. (schema 2)
   final double? posX;
   final double? posY;
+
+  /// A player character's level (1–20) for encounter difficulty; null uses
+  /// the party level setting. (schema 4)
+  final int? level;
   const Combatant({
     required this.id,
     required this.encounterId,
@@ -1455,6 +1479,7 @@ class Combatant extends DataClass implements Insertable<Combatant> {
     required this.createdAt,
     this.posX,
     this.posY,
+    this.level,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1488,6 +1513,9 @@ class Combatant extends DataClass implements Insertable<Combatant> {
     if (!nullToAbsent || posY != null) {
       map['pos_y'] = Variable<double>(posY);
     }
+    if (!nullToAbsent || level != null) {
+      map['level'] = Variable<int>(level);
+    }
     return map;
   }
 
@@ -1516,6 +1544,9 @@ class Combatant extends DataClass implements Insertable<Combatant> {
       createdAt: Value(createdAt),
       posX: posX == null && nullToAbsent ? const Value.absent() : Value(posX),
       posY: posY == null && nullToAbsent ? const Value.absent() : Value(posY),
+      level: level == null && nullToAbsent
+          ? const Value.absent()
+          : Value(level),
     );
   }
 
@@ -1540,6 +1571,7 @@ class Combatant extends DataClass implements Insertable<Combatant> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       posX: serializer.fromJson<double?>(json['posX']),
       posY: serializer.fromJson<double?>(json['posY']),
+      level: serializer.fromJson<int?>(json['level']),
     );
   }
   @override
@@ -1561,6 +1593,7 @@ class Combatant extends DataClass implements Insertable<Combatant> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'posX': serializer.toJson<double?>(posX),
       'posY': serializer.toJson<double?>(posY),
+      'level': serializer.toJson<int?>(level),
     };
   }
 
@@ -1580,6 +1613,7 @@ class Combatant extends DataClass implements Insertable<Combatant> {
     DateTime? createdAt,
     Value<double?> posX = const Value.absent(),
     Value<double?> posY = const Value.absent(),
+    Value<int?> level = const Value.absent(),
   }) => Combatant(
     id: id ?? this.id,
     encounterId: encounterId ?? this.encounterId,
@@ -1596,6 +1630,7 @@ class Combatant extends DataClass implements Insertable<Combatant> {
     createdAt: createdAt ?? this.createdAt,
     posX: posX.present ? posX.value : this.posX,
     posY: posY.present ? posY.value : this.posY,
+    level: level.present ? level.value : this.level,
   );
   Combatant copyWithCompanion(CombatantsCompanion data) {
     return Combatant(
@@ -1620,6 +1655,7 @@ class Combatant extends DataClass implements Insertable<Combatant> {
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       posX: data.posX.present ? data.posX.value : this.posX,
       posY: data.posY.present ? data.posY.value : this.posY,
+      level: data.level.present ? data.level.value : this.level,
     );
   }
 
@@ -1640,7 +1676,8 @@ class Combatant extends DataClass implements Insertable<Combatant> {
           ..write('sortOrder: $sortOrder, ')
           ..write('createdAt: $createdAt, ')
           ..write('posX: $posX, ')
-          ..write('posY: $posY')
+          ..write('posY: $posY, ')
+          ..write('level: $level')
           ..write(')'))
         .toString();
   }
@@ -1662,6 +1699,7 @@ class Combatant extends DataClass implements Insertable<Combatant> {
     createdAt,
     posX,
     posY,
+    level,
   );
   @override
   bool operator ==(Object other) =>
@@ -1681,7 +1719,8 @@ class Combatant extends DataClass implements Insertable<Combatant> {
           other.sortOrder == this.sortOrder &&
           other.createdAt == this.createdAt &&
           other.posX == this.posX &&
-          other.posY == this.posY);
+          other.posY == this.posY &&
+          other.level == this.level);
 }
 
 class CombatantsCompanion extends UpdateCompanion<Combatant> {
@@ -1700,6 +1739,7 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
   final Value<DateTime> createdAt;
   final Value<double?> posX;
   final Value<double?> posY;
+  final Value<int?> level;
   const CombatantsCompanion({
     this.id = const Value.absent(),
     this.encounterId = const Value.absent(),
@@ -1716,6 +1756,7 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
     this.createdAt = const Value.absent(),
     this.posX = const Value.absent(),
     this.posY = const Value.absent(),
+    this.level = const Value.absent(),
   });
   CombatantsCompanion.insert({
     this.id = const Value.absent(),
@@ -1733,6 +1774,7 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
     required DateTime createdAt,
     this.posX = const Value.absent(),
     this.posY = const Value.absent(),
+    this.level = const Value.absent(),
   }) : encounterId = Value(encounterId),
        name = Value(name),
        createdAt = Value(createdAt);
@@ -1752,6 +1794,7 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
     Expression<DateTime>? createdAt,
     Expression<double>? posX,
     Expression<double>? posY,
+    Expression<int>? level,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1769,6 +1812,7 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
       if (createdAt != null) 'created_at': createdAt,
       if (posX != null) 'pos_x': posX,
       if (posY != null) 'pos_y': posY,
+      if (level != null) 'level': level,
     });
   }
 
@@ -1788,6 +1832,7 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
     Value<DateTime>? createdAt,
     Value<double?>? posX,
     Value<double?>? posY,
+    Value<int?>? level,
   }) {
     return CombatantsCompanion(
       id: id ?? this.id,
@@ -1805,6 +1850,7 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
       createdAt: createdAt ?? this.createdAt,
       posX: posX ?? this.posX,
       posY: posY ?? this.posY,
+      level: level ?? this.level,
     );
   }
 
@@ -1856,6 +1902,9 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
     if (posY.present) {
       map['pos_y'] = Variable<double>(posY.value);
     }
+    if (level.present) {
+      map['level'] = Variable<int>(level.value);
+    }
     return map;
   }
 
@@ -1876,7 +1925,8 @@ class CombatantsCompanion extends UpdateCompanion<Combatant> {
           ..write('sortOrder: $sortOrder, ')
           ..write('createdAt: $createdAt, ')
           ..write('posX: $posX, ')
-          ..write('posY: $posY')
+          ..write('posY: $posY, ')
+          ..write('level: $level')
           ..write(')'))
         .toString();
   }
@@ -3733,6 +3783,7 @@ typedef $$CombatantsTableCreateCompanionBuilder = CombatantsCompanion Function({
   required DateTime createdAt,
   Value<double?> posX,
   Value<double?> posY,
+  Value<int?> level,
 });
 typedef $$CombatantsTableUpdateCompanionBuilder = CombatantsCompanion Function({
   Value<int> id,
@@ -3750,6 +3801,7 @@ typedef $$CombatantsTableUpdateCompanionBuilder = CombatantsCompanion Function({
   Value<DateTime> createdAt,
   Value<double?> posX,
   Value<double?> posY,
+  Value<int?> level,
 });
 
 final class $$CombatantsTableReferences
@@ -3850,6 +3902,11 @@ class $$CombatantsTableFilterComposer
 
   ColumnFilters<double> get posY => $composableBuilder(
     column: $table.posY,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get level => $composableBuilder(
+    column: $table.level,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3956,6 +4013,11 @@ class $$CombatantsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$EncountersTableOrderingComposer get encounterId {
     final $$EncountersTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4035,6 +4097,9 @@ class $$CombatantsTableAnnotationComposer
   GeneratedColumn<double> get posY =>
       $composableBuilder(column: $table.posY, builder: (column) => column);
 
+  GeneratedColumn<int> get level =>
+      $composableBuilder(column: $table.level, builder: (column) => column);
+
   $$EncountersTableAnnotationComposer get encounterId {
     final $$EncountersTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -4102,6 +4167,7 @@ class $$CombatantsTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<double?> posX = const Value.absent(),
                 Value<double?> posY = const Value.absent(),
+                Value<int?> level = const Value.absent(),
               }) => CombatantsCompanion(
                 id: id,
                 encounterId: encounterId,
@@ -4118,6 +4184,7 @@ class $$CombatantsTableTableManager
                 createdAt: createdAt,
                 posX: posX,
                 posY: posY,
+                level: level,
               ),
           createCompanionCallback:
               ({
@@ -4136,6 +4203,7 @@ class $$CombatantsTableTableManager
                 required DateTime createdAt,
                 Value<double?> posX = const Value.absent(),
                 Value<double?> posY = const Value.absent(),
+                Value<int?> level = const Value.absent(),
               }) => CombatantsCompanion.insert(
                 id: id,
                 encounterId: encounterId,
@@ -4152,6 +4220,7 @@ class $$CombatantsTableTableManager
                 createdAt: createdAt,
                 posX: posX,
                 posY: posY,
+                level: level,
               ),
           withReferenceMapper: (p0) => p0
               .map(

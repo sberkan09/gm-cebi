@@ -1,13 +1,10 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/dice.dart';
 import '../../providers.dart';
 
-/// Random source for the dice screen; tests override it with a seeded one.
-final diceRandomProvider = Provider<Random>((ref) => Random.secure());
+export '../../providers.dart' show diceRandomProvider;
 
 /// Dice roller: type any expression (2d20kh1+5) or build one with the big buttons.
 class DiceScreen extends ConsumerStatefulWidget {

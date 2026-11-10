@@ -77,6 +77,19 @@ void main() {
     expect((await state()).current!.name, 'B');
   });
 
+  test('player levels: set, clear, carried into a new encounter', () async {
+    final ayla = await db.addCombatant(name: 'Ayla', isPlayer: true, level: 3);
+    final bora = await db.addCombatant(name: 'Bora', isPlayer: true);
+    await db.addCombatant(name: 'Goblin', monsterId: 'goblin-warrior');
+    var s = await state();
+    expect({for (final c in s.combatants) c.name: c.level}, {'Ayla': 3, 'Bora': null, 'Goblin': null});
+    await db.setLevel(bora, 7);
+    await db.setLevel(ayla, null);
+    await db.newEncounter(keepPlayers: true);
+    s = await state();
+    expect({for (final c in s.combatants) c.name: c.level}, {'Ayla': null, 'Bora': 7});
+  });
+
   test('HP is clamped and conditions toggle', () async {
     final id = await db.addCombatant(name: 'Goblin', hp: 7);
     await db.changeHp(id, 10);
