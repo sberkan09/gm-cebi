@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/stat_input.dart';
 import '../../data/reference.dart';
 import '../../db/database.dart';
 import '../../features/encounter_difficulty.dart';
@@ -10,7 +11,6 @@ import '../../providers.dart';
 import '../widgets/encounter_difficulty.dart';
 import '../widgets/locked.dart';
 import 'detail_screen.dart';
-import 'dice_screen.dart';
 import 'map_screen.dart';
 
 /// Initiative tracker (GM pack). Big next/previous buttons at the bottom for
@@ -285,10 +285,7 @@ Future<bool?> _confirmNewEncounter(BuildContext context) => showDialog<bool>(
     );
 
 /// Accepts an optional leading minus only ("5-3" is rejected, not silently dropped).
-int? _int(String s) {
-  final t = s.trim().replaceAll('−', '-');
-  return RegExp(r'^-?\d+$').hasMatch(t) ? int.parse(t) : null;
-}
+int? _int(String s) => parseStat(s);
 
 Future<void> _showAddSheet(BuildContext context, WidgetRef ref) async {
   final choice = await showModalBottomSheet<String>(
@@ -326,6 +323,15 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
   final ac = TextEditingController();
   final level = TextEditingController();
   var isPlayer = true;
+  var tried = false; // errors show after the first "Ekle"
+  String? nameError() => name.text.trim().isEmpty ? 'Ad gerekli' : null;
+  String? hpError() => statError(hp.text, min: 1);
+  String? acError() => statError(ac.text, min: 1);
+  bool valid() =>
+      nameError() == null && statError(init.text) == null && statError(bonus.text) == null && hpError() == null && acError() == null;
+  ValueChanged<String> changed(StateSetter setState) => (_) {
+        if (tried) setState(() {});
+      };
   final ok = await showDialog<bool>(
     context: context,
     builder: (context) => StatefulBuilder(
@@ -338,7 +344,8 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
               controller: name,
               autofocus: true,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Ad'),
+              onChanged: changed(setState),
+              decoration: InputDecoration(labelText: 'Ad', errorText: tried ? nameError() : null),
             ),
             const SizedBox(height: 8),
             SwitchListTile(
@@ -348,15 +355,25 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
               onChanged: (v) => setState(() => isPlayer = v),
             ),
             Row(children: [
-              Expanded(child: _numField(init, 'İnisiyatif', key: const Key('combatant-init'))),
+              Expanded(
+                child: _numField(init, 'İnisiyatif',
+                    key: const Key('combatant-init'), onChanged: changed(setState), errorText: tried ? statError(init.text) : null),
+              ),
               const SizedBox(width: 8),
-              Expanded(child: _numField(bonus, 'İnis. bonusu')),
+              Expanded(
+                child: _numField(bonus, 'İnis. bonusu', onChanged: changed(setState), errorText: tried ? statError(bonus.text) : null),
+              ),
             ]),
             const SizedBox(height: 8),
             Row(children: [
-              Expanded(child: _numField(hp, 'Can Puanı', key: const Key('combatant-hp'))),
+              Expanded(
+                child: _numField(hp, 'Can Puanı',
+                    key: const Key('combatant-hp'), onChanged: changed(setState), errorText: tried ? hpError() : null),
+              ),
               const SizedBox(width: 8),
-              Expanded(child: _numField(ac, 'ZS')),
+              Expanded(
+                child: _numField(ac, 'ZS', key: const Key('combatant-ac'), onChanged: changed(setState), errorText: tried ? acError() : null),
+              ),
             ]),
             if (isPlayer) ...[
               const SizedBox(height: 8),
@@ -368,20 +385,27 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
           FilledButton(
             key: const Key('combatant-save'),
-            onPressed: isPlayer && _levelError(level.text) != null ? null : () => Navigator.pop(context, true),
+            onPressed: isPlayer && _levelError(level.text) != null
+                ? null
+                : () {
+                    if (valid()) {
+                      Navigator.pop(context, true);
+                    } else {
+                      setState(() => tried = true);
+                    }
+                  },
             child: const Text('Ekle'),
           ),
         ],
       ),
     ),
   );
-  if (ok == true && name.text.trim().isNotEmpty) {
-    final hpValue = _int(hp.text);
+  if (ok == true) {
     await ref.read(databaseProvider).addCombatant(
           name: name.text.trim(),
           initiative: _int(init.text),
           initBonus: _int(bonus.text) ?? 0,
-          hp: hpValue == null || hpValue < 1 ? null : hpValue,
+          hp: _int(hp.text),
           ac: _int(ac.text),
           isPlayer: isPlayer,
           level: isPlayer ? _level(level.text) : null,
@@ -409,12 +433,15 @@ Widget _levelField(TextEditingController c,
       decoration: InputDecoration(labelText: 'Seviye (isteğe bağlı)', helperText: helper, errorText: _levelError(c.text)),
     );
 
-Widget _numField(TextEditingController c, String label, {Key? key}) => TextField(
+Widget _numField(TextEditingController c, String label, {Key? key, ValueChanged<String>? onChanged, String? errorText}) =>
+    TextField(
       key: key,
       controller: c,
+      onChanged: onChanged,
+      maxLength: statFieldMaxLength,
       keyboardType: const TextInputType.numberWithOptions(signed: true),
       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[-−0-9]'))],
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(labelText: label, counterText: '', errorText: errorText, errorMaxLines: 2),
     );
 
 Future<void> _addMonster(BuildContext context, WidgetRef ref) async {

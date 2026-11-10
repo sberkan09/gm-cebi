@@ -1,4 +1,5 @@
 import 'dart:isolate';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -199,6 +200,13 @@ final encounterDifficultyProvider = Provider<EncounterSummary?>((ref) {
 final mapStrokesProvider = StreamProvider<List<MapStroke>>((ref) => ref.watch(databaseProvider).watchStrokes());
 
 // ---------------------------------------------------------------- dice
+
+/// Random source for the dice; tests override it with a seeded one.
+final diceRandomProvider = Provider<Random>((ref) => Random.secure());
+
+/// Random source for the NPC generator: the dice source, so tests that seed
+/// the dice also make NPC generation deterministic.
+final npcRandomProvider = Provider<Random>((ref) => ref.watch(diceRandomProvider));
 
 class DiceHistory extends Notifier<List<RollResult>> {
   static const maxEntries = 30;

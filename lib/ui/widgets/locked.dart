@@ -29,7 +29,7 @@ class GmPackLocked extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                for (final f in const ['İnisiyatif takibi', 'Oturum notları', 'NPC üretici (yakında)'])
+                for (final f in const ['İnisiyatif takibi', 'Oturum notları', 'NPC üretici'])
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(children: [
