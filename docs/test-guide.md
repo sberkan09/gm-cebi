@@ -26,8 +26,8 @@ Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
    "saving throw", "cüce", "hançer", "goblin". Sonuç anında gelmeli (listenin
    üstünde süre yazar, 100 ms'nin altında olmalı). Boş kutuda kategorilere göz at.
 2. **Kayıt sayfası** — Sağ üstteki **TR / EN** düğmesiyle dil tek dokunuşla
-   değişmeli. Henüz çevrilmemiş kayıtlarda (tüm canavarlar, sınıflar, ekipman)
-   İngilizce metin ve bir uyarı görünür; bu beklenen durum.
+   değişmeli. Artık tüm büyüler, canavarlar, sınıflar ve ekipman Türkçe; canavar
+   kartlarında ve sınıf özelliklerinde tuhaf ya da tutarsız terim görürsen not al.
 3. **Zar** — `2d20kh1+5` (avantajlı +5), `4d6dl1` (en düşüğü at), `8d6`,
    `(1d8+3)*2` yaz ya da düğmelerle kur, **AT**'a bas. Avantaj/Dezavantaj
    düğmelerini ve geçmişe dokunup tekrar atmayı dene.
@@ -35,12 +35,20 @@ Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
    ekle" ya da canavar sayfasındaki "İnisiyatife ekle" ile ekle. Zar
    simgesiyle canavarların inisiyatifini at, **Sonraki** ile sırayı ilerlet,
    can çubuğuna dokunup hasar/iyileştirme gir, kartın üstüne dokunup durum ekle.
-   Uygulamayı kapatıp açınca karşılaşma yerinde durmalı.
+   Uygulamayı kapatıp açınca karşılaşma yerinde durmalı. Listeden canavar
+   eklenince üstte zorluk çipi çıkar (ör. "Orta · 1.050 / 1.500 TP"); dokununca
+   bütçeler, canavarların TP'si ve grup açılır. Oyuncu seviyesini ekleme
+   penceresinde, kart menüsündeki "Seviye"de ya da zorluk sayfasında değiştir;
+   oyuncu yoksa grup büyüklüğü ve seviyesi orada ayarlanır.
 5. **Harita** — İnisiyatif ekranında sağ üstteki harita simgesine dokun. Parmağınla çiz
    (renkler: mürekkep, su, bitki, tehlike), dokununca nokta bırakır; "Sil" ile sil; geri al
    düğmesi son işlemi (çizim, silme, temizleme) geri alır. Alttaki şeritten katılımcıya dokununca jetonu haritaya
    gelir; jetonu sürükleyerek taşı; jetona dokunup "Haritadan kaldır" ile kaldır. "Sonraki" sırayı haritadan ilerletir.
-   Tablette de dene: harita ekrana göre büyür.
+   Tablette de dene: harita ekrana göre büyür. İki parmakla kaydır ve yakınlaştır (yakınken köşedeki düğme haritayı
+   sığdırır). Kalemle (S Pen, Apple Pencil) dokununca **kalem modu** kendiliğinden açılır: yalnızca kalem çizer,
+   avuç içi ve parmak çizmez (tek parmak haritayı kaydırır, jetonlar parmakla taşınır); kalemin silgi ucu ya da yan
+   tuşu o çizgi için siler; kalem ekranın üstünde gezinirken fırça/silgi imleci görünür. Kalem modunu haritadaki
+   kalem düğmesinden ya da Ayarlar'dan kapat.
 6. **Notlar** — Oturum notu al; yazdıkların kendiliğinden kaydedilir.
 7. **NPC üretici** — Notlar ekranında sağ üstteki maske simgesine dokun, **NPC üret**'e bas.
    Bir alana dokununca yalnızca o alan değişir; kilit simgesiyle alanı sabitle, sonra
@@ -50,7 +58,7 @@ Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
 
 ## Bilinen eksikler (bildirmene gerek yok)
 
-- Çeviri şimdilik durumlar, kurallar sözlüğü ve 50 büyüde. Canavarların, sınıfların, ekipmanın ve geri kalan büyülerin tamamı İngilizce.
+- Çevirilerin tamamı makine destekli; insan incelemesi sürüyor. Terim önerilerin bu yüzden çok değerli.
 - Satın alma yok.
 - Sihirli eşyalar ve bazı kural bölümleri henüz uygulamada değil.
 

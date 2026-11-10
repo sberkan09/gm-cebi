@@ -6,7 +6,8 @@ Kurallar:
   Yalnızca "5e uyumlu" / "5E compatible" denir (SRD 5.2.1 lisansı).
 - Wizards'a SRD atıf cümlesi dışında atıf yapılmaz. "Wizards ile bağımız yoktur" gibi
   cümleler de buna dahil.
-- Çeviri kapsamı abartılmaz: şu an yalnızca durumlar, kurallar sözlüğü ve 50 büyü Türkçe.
+- Çeviri kapsamı abartılmaz: SRD 5.2.1 içeriğinin tamamı Türkçe, ama çeviriler makine destekli ve
+  insan incelemesi sürüyor. "Kusursuz" ya da "resmî çeviri" gibi ifadeler kullanılmaz.
 - Karakter sayılarına boşluklar dahil. Metni değiştirirsen yeniden say.
 
 ## Google Play
@@ -44,7 +45,7 @@ GM PAKETİ
 • Bu sürümde GM Paketi açık gelir.
 
 ÇEVİRİ DURUMU
-Bu ilk sürümde 15 durum, kurallar sözlüğündeki 140 girdi ve 50 büyü Türkçe. Canavarlar, sınıflar, ekipman ve diğer büyüler şimdilik İngilizce gösterilir ve Türkçe adlarıyla da aranabilir. Çeviriler güncellemelerle genişleyecek.
+SRD 5.2.1'in tamamı Türkçe: 339 büyü, 330 canavar, 12 sınıf ve alt sınıfları, kökenler, hünerler, ekipman, durumlar ve kurallar sözlüğü. Çeviriler makine destekli yapıldı ve gözden geçirilmeye devam ediyor; tuhaf bulduğun terimleri bildirirsen düzeltiriz. Her sayfada TR/EN düğmesiyle İngilizce aslına bakabilirsin.
 
 GİZLİLİK
 Uygulama internete bağlanmaz; reklam, analitik ya da hesap yoktur. Notların ve karşılaşmaların yalnızca telefonunda saklanır.

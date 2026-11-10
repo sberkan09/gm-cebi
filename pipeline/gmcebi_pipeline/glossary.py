@@ -48,6 +48,14 @@ _COPULA = _alt("""ken yken dır dir dur dür tır tir tur tür sın sin sun sün
                   lısın lisin lusun lüsün lıdır lidir ludur lüdür""")
 _TAIL = (rf"(?:['’])?{_PLURAL}?{_POSS}?{_CASE}?(?:ki)?(?:{_COND}{_PERSON}?)?{_COPULA}?{_COPULA}?"
          r"(?!\w)")
+# Short roots (İn, Din) read as common words with the equative/instrumental endings
+# ("ince", "dinle"). For one-word terms of three letters or fewer those endings are not
+# accepted. Homonyms built from ordinary endings ("küpe", "orkide") cannot be told apart
+# by form and stay a known QC blind spot.
+_CASE_SHORT = _alt("""yı yi yu yü nı ni nu nü ı i u ü a e ya ye na ne da de ta te nda nde
+                      dan den tan ten ndan nden nın nin nun nün ın in un ün""")
+_TAIL_SHORT = (rf"(?:['’])?{_PLURAL}?{_POSS}?{_CASE_SHORT}?(?:ki)?(?:{_COND}{_PERSON}?)?{_COPULA}?{_COPULA}?"
+               r"(?!\w)")
 
 
 @dataclass
@@ -86,8 +94,9 @@ class Term:
             else:
                 alts.append(re.escape(stem))
         parts = [re.escape(w) for w in words[:-1]] + ["(?:" + "|".join(alts) + ")"]
+        tail = _TAIL_SHORT if len(words) == 1 and len(last) <= 3 else _TAIL
         # Inflection (and an apostrophe after abbreviations/numbers) may follow the last word.
-        return re.compile(r"(?<!\w)" + r"\s+".join(parts) + _TAIL, re.UNICODE)
+        return re.compile(r"(?<!\w)" + r"\s+".join(parts) + tail, re.UNICODE)
 
     def found_in_tr(self, tr_text: str) -> bool:
         return bool(self.tr_re.search(tr_lower(tr_text)))
@@ -159,6 +168,8 @@ class Glossary:
             self._chosen = {tr_lower(x.tr) for x in self.terms}
         out = []
         for alt in t.alternatives:
+            if alt.startswith("?"):
+                continue  # considered but ordinary word ("?Tür", "?Buz"): documented, not rejected
             a = tr_lower(alt)
             if a in self._chosen or re.fullmatch(r"[A-Z]{1,4}", alt) or alt == t.en \
                     or re.search(rf"(?<!\w){re.escape(a)}(?!\w)", tr_lower(t.tr)):

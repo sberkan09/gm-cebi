@@ -15,8 +15,23 @@ from .models import Record
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "source"
 
+# Known extraction artefacts in the PDF text (a superscript fraction read as digits).
+TEXT_FIXUPS = {"holds up to 11/2 pints": "holds up to 1½ pints"}
+
+
+def _fixup(rec: Record) -> Record:
+    raw = json.dumps(rec.model_dump(mode="json", exclude_none=True), ensure_ascii=False)
+    fixed = raw
+    for bad, good in TEXT_FIXUPS.items():
+        fixed = fixed.replace(bad, good)
+    return rec if fixed == raw else type(rec).model_validate(json.loads(fixed))
+
 
 def build(pdf: Path) -> dict[str, list[Record]]:
+    return {name: [_fixup(r) for r in recs] for name, recs in _parse(pdf).items()}
+
+
+def _parse(pdf: Path) -> dict[str, list[Record]]:
     lines = load_lines(pdf)
     rules, conditions = parse.parse_glossary(lines)
     classes, subclasses = parse.parse_classes(lines)

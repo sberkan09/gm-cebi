@@ -63,6 +63,18 @@ class SettingsScreen extends ConsumerWidget {
             style: t.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
           ),
         ),
+        if (ent.allows(Feature.initiative)) ...[
+          section('Savaş haritası'),
+          SwitchListTile(
+            key: const Key('pen-mode-switch'),
+            secondary: const Icon(Icons.draw_outlined),
+            title: const Text('Kalem modu'),
+            subtitle: const Text('Yalnızca kalem çizer, avuç içi çizmez. Parmakla haritayı kaydır ve yakınlaştır, jetonları taşı. '
+                'Kalem haritaya ilk dokunduğunda kendiliğinden açılır.'),
+            value: s.penMode,
+            onChanged: notifier.setPenMode,
+          ),
+        ],
         section('GM Paketi'),
         ListTile(
           leading: Icon(ent.gmPack ? Icons.lock_open : Icons.lock_outline, color: scheme.primary),

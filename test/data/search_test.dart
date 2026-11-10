@@ -62,9 +62,11 @@ void main() {
   });
 
   test('Turkish suffix fallback', () {
-    final hits = index.search('körlük');
+    final hits = index.search('kördür');
     expect(hits.first.record.key, 'conditions/blinded');
     expect(hits.first.approximate, isTrue);
+    // An exact word in a translated name wins over the fallback.
+    expect(index.search('körlük').first.record.key, 'spells/blindness-deafness');
   });
 
   test('terms: glossary entries without a record', () {

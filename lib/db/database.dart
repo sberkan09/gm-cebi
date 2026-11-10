@@ -65,6 +65,10 @@ class Combatants extends Table {
   /// null while the token is not on the map. (schema 2)
   RealColumn get posX => real().nullable()();
   RealColumn get posY => real().nullable()();
+
+  /// A player character's level (1–20) for encounter difficulty; null uses
+  /// the party level setting. (schema 4)
+  IntColumn get level => integer().nullable()();
 }
 
 /// One pen stroke of an encounter's battle map (schema 2).
@@ -172,7 +176,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: 'gm_cebi'));
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -186,6 +190,7 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(mapStrokes); // CREATE TABLE IF NOT EXISTS
           }
           if (from < 3) await m.createTable(mapScenes); // CREATE TABLE IF NOT EXISTS
+          if (from < 4 && !await _hasColumn('combatants', 'level')) await m.addColumn(combatants, combatants.level);
         }),
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
@@ -269,6 +274,7 @@ class AppDatabase extends _$AppDatabase {
     int? ac,
     bool isPlayer = false,
     String? monsterId,
+    int? level,
   }) async {
     final e = await activeEncounter();
     final current = await _currentCombatantId(e);
@@ -282,11 +288,16 @@ class AppDatabase extends _$AppDatabase {
       ac: Value(ac),
       isPlayer: Value(isPlayer),
       monsterId: Value(monsterId),
+      level: Value(level),
       createdAt: DateTime.now(),
     ));
     await _keepTurnOn(e, current);
     return id;
   }
+
+  /// Sets (or, with null, clears) a player's level.
+  Future<void> setLevel(int id, int? level) =>
+      (update(combatants)..where((c) => c.id.equals(id))).write(CombatantsCompanion(level: Value(level)));
 
   /// Sets (or clears) one combatant's initiative; only that column is written.
   Future<void> setInitiative(int id, int? initiative) async {

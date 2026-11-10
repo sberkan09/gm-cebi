@@ -88,7 +88,7 @@ def cmd_queue(args) -> None:
                 if e and e.tr and e.status != "rejected":
                     continue
                 item = pending.setdefault(seg.key, {"key": seg.key, "en": seg.en, "refs": [], "terms": [],
-                                                    "ds": ds if seg.ns else ""})
+                                                    "ds": seg.ns if seg.ns in ("spells", "lang") else (ds if seg.ns else "")})
                 if len(item["refs"]) < 3:
                     item["refs"].append(f"{ds}/{seg.ref}")
     for item in pending.values():
@@ -97,9 +97,13 @@ def cmd_queue(args) -> None:
                 if (t.startswith("*") and f"{t}*" in item["en"]) or (not t.startswith("*") and f"“{t}" in item["en"])]
         item["titles"] = {t: titles[t] for t in refs}
     # Segments that are exactly a glossary term are filled from the glossary.
-    prefer = {"spells": "büyü adı", "conditions": "durum"}
+    prefer = {"spells": "büyü adı", "conditions": "durum", "monsters": "canavar adı"}
+    # Record-name categories only fill segments of their own dataset ("Shield" spell ≠ armor).
+    own = {"büyü adı": "spells", "canavar adı": "monsters"}
     auto = []
     for k, it in list(pending.items()):
+        if it["ds"] == "lang":
+            continue  # language names are not glossary terms ("Giant" ≠ Dev)
         bullet = it["en"].startswith("- ")
         word = it["en"][2:] if bullet else it["en"]
         cands = [t for t in glossary.terms if t.en in (word, f"{word} [Action]")]
@@ -107,7 +111,7 @@ def cmd_queue(args) -> None:
             continue
         cands.sort(key=lambda t: t.category != prefer.get(it["ds"], t.category))
         cands = [t for t in cands if t.category not in ("bölüm",)] or cands
-        if it["ds"] != "spells" and cands[0].category == "büyü adı":
+        if own.get(cands[0].category, it["ds"]) != it["ds"]:
             continue
         pending.pop(k)
         auto.append(k)

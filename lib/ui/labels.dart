@@ -69,6 +69,42 @@ class ContentLabels {
           'legendary_actions': 'Legendary Actions',
         };
 
+  /// Stat-block detail rows and equipment table columns are stored under their
+  /// English SRD names; this gives the Turkish label (unknown keys stay as they are).
+  String fieldLabel(String key) => _t ? (_fieldTr[key] ?? key) : key;
+
+  static const _fieldTr = {
+    // Monster details
+    'Skills': 'Beceriler',
+    'Senses': 'Duyular',
+    'Languages': 'Diller',
+    'Immunities': 'Bağışıklıklar',
+    'Resistances': 'Dirençler',
+    'Vulnerabilities': 'Zafiyetler',
+    'Gear': 'Teçhizat',
+    // Equipment
+    'Cost': 'Fiyat',
+    'Weight': 'Ağırlık',
+    'Damage': 'Hasar',
+    'Properties': 'Özellikler',
+    'Mastery': 'Ustalık',
+    'Ability': 'Yetenek',
+    'Utilize': 'Kullanma',
+    'Craft': 'Üretim',
+    'Armor Class (AC)': 'Zırh Sınıfı (ZS)',
+    'Strength': 'Güç',
+    'Stealth': 'Gizlilik',
+    'Carrying Capacity': 'Taşıma Kapasitesi',
+    'Speed': 'Hız',
+    'Crew': 'Mürettebat',
+    'Passengers': 'Yolcu',
+    'Cargo (Tons)': 'Yük (Ton)',
+    'AC': 'ZS',
+    'HP': 'CP',
+    'Damage Threshold': 'Hasar Eşiği',
+    'Variants': 'Çeşitler',
+  };
+
   // Classes, origins, feats
   String get features => _t ? 'Sınıf Özellikleri' : 'Class Features';
   String get subclassFeatures => _t ? 'Alt Sınıf Özellikleri' : 'Subclass Features';

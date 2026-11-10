@@ -46,15 +46,15 @@ void main() {
   appTest('monster page adds to the initiative tracker', gmPack: true, (tester, db) async {
     await tester.enterText(find.byKey(const Key('search-field')), 'goblin warrior');
     await settle(tester);
-    await tester.tap(find.text('Goblin Warrior').first);
+    await tester.tap(find.text('Goblin Savaşçısı').first);
     await settle(tester);
     await tester.scrollUntilVisible(find.byKey(const Key('add-to-initiative')), 400, scrollable: scrollableIn(const Key('detail-list')));
     await tester.tap(find.byKey(const Key('add-to-initiative')));
     await settle(tester);
-    expect(find.text('Goblin Warrior inisiyatife eklendi'), findsOneWidget);
+    expect(find.text('Goblin Savaşçısı inisiyatife eklendi'), findsOneWidget);
     await goBack(tester);
     await openTab(tester, 'İnisiyatif');
-    expect(find.text('Goblin Warrior'), findsOneWidget);
+    expect(find.text('Goblin Savaşçısı'), findsOneWidget);
   });
 
   appTest('notes: create, autosave, list, delete', gmPack: true, (tester, db) async {

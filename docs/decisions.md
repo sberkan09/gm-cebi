@@ -89,6 +89,13 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-11-09 — Resim indirmede 302 elle takip edilir: uygulama token'ı ve kurulum kimliği yalnızca NeuraCraft'a gider, depolama sağlayıcısına gitmez.
 - 2026-11-09 — "Verilerimi sil" yerel verileri siler ve yeni kurulum kimliği üretir; sunucu tarafı silme `partner:manage` gerektirdiği ve GM Cebi'nin sunucusu olmadığı için "en geç 7 gün" açıklaması gösterilir.
 
+## Karşılaşma zorluğu (2026-11-09)
+
+- 2026-11-09 — Zorluk SRD 5.2.1 "Combat Encounters" (s. 202) kuralıyla: karakter başına TP bütçesi (seviye × Düşük/Orta/Yüksek) karakterlerin toplamı; karşılaşma TP'si her canavarın normal TP'sinin toplamı (in lair değeri değil), çarpan yok. Karışık seviyeli grupta her karakter kendi satırından sayılır.
+- 2026-11-09 — Bantlar: bütçe o zorlukta harcanabilecek en çok TP olduğu için Düşük bütçesine kadar "Düşük", Orta bütçesine kadar "Orta", Yüksek bütçesine kadar "Yüksek". SRD'de olmayan iki dış bant tablo dışı olduğunu belli eden adlarla: Yüksek bütçesini aşan "Yüksek üstü", Düşük bütçesinin yarısından az olan "Düşük altı" (yarı eşiği uygulamanın kendi kuralı, SRD'den değil). Çipte karşılaşma TP'si bandın üst bütçesine bölünmüş gösterilir.
+- 2026-11-09 — Grup = karşılaşmadaki oyuncu karakterleri. Seviye `combatants.level`'da (boş olabilir; şema 4, geçiş testli); "Yeni karşılaşma" seviyeyi taşır. Seviyesi girilmemiş oyuncu ve oyuncusuz karşılaşma "Grup seviyesi" ayarını (varsayılan 1), oyuncusuz karşılaşma "Grup büyüklüğü" ayarını (varsayılan 4) kullanır; ikisi `settings` tablosunda. Ada göre ayarda saklamak kırılgan olduğu için sütun seçildi.
+- 2026-11-09 — Canavar TP'si kayıttaki İngilizce `xp` metninden okunur (dilden bağımsız; adlara bakılmaz), eksikse TD'den. Elle eklenen ve canavar kaydı olmayan katılımcılar "TP bilinmiyor" olarak gösterilir, toplama katılmaz.
+
 ## NPC üretici (2026-11-09)
 
 - 2026-11-09 — NPC tabloları (`lib/features/npc/npc_tables.dart`) tamamen özgün içeriktir: hiçbir yayımlanmış kitabın isim ya da özellik tablosu kopyalanmaz veya çevrilmez; ürün kimliği adları, dünya/mekân adları, tanrılar ve adı geçen karakterler kullanılmaz. Oyun içeriğinden yalnızca SRD 5.2.1 soy adları (sözlükteki Türkçeleriyle) ve Etkileme eyleminin tavırları (Dostça/Kayıtsız/Düşmanca) alınır. Yasaklı adlar ve en az liste boyları testle denetlenir.
@@ -98,6 +105,11 @@ olarak işaretlenir ve ürün sahibine sorulur.
 
 ## Onay bekleyenler
 
+- 2026-11-09 — Kalan içeriğin tamamı makine destekli çevrildi; mağaza metinleri ve Ayarlar notu bunu açıkça söyler, "kusursuz/resmî çeviri" denmez. İnsan incelemesi sonraki adım.
+- 2026-11-09 — Kayıt adları (büyü, canavar, ekipman) sözlükte `öneri` olarak tutulur ve zorunlu değildir; metin içi adlar çevirmenlere ad listesiyle verilir. Dizi kuralları: Lesser/Greater = Küçük/Üstün, Conjure = Çağır, Summon = Celp Et, Devil = Şeytan, demon çevrilmez (Fiend = İblis dolu).
+- 2026-11-09 — Stat bloğu üslubu: *Başarısızlık:* / *Başarı:* / *Tetikleyici:* / *Karşılık:* ("Tepki" Reaction'ın reddedilen alternatifi); "(Günde 3)", "**İstediği Zaman:**", "(Yenilenme 5–6)", "(İninde 4)". Hasar: sıfat türler yalın (Delici hasar), isim türler -ı ile (Ateş hasarı).
+- 2026-11-09 — Bağlama bağlı segmentler ayrı ad alanında: sınıf büyü listesi hücreleri büyü adı, canavar dil satırı `lang`. Dil adları: Ortak Dil, Ejderce, Elfçe, Devce, Abis Dili, Cehennem Dili, Göksel Dil, Derin Dil, İlkel Dil, Sylvan Dili…
+- 2026-11-09 — AI düzeltme turu (canavarlar, sınıflar, alt sınıflar; 74 segment). Çıkan kurallar `pipeline/prompts/translate_tr.md` sonuna eklendi (tur/sıra, ve/veya kapsamı, eylem adlarının başlıkla aynı olması, Restoration = Yenilenme, Evasion = Sıyrılma). İnsan incelemesi için öncelik ve açık kararlar: `docs/translation-review.md`.
 - **ONAY BEKLİYOR** — Atıf metni: SRD'nin zorunlu kıldığı İngilizce cümle README'ye, `manifest.json`'a ve Hakkında ekranına birebir kondu (onay gerektirmez, lisans şartı). Ek olarak Türkçe bir "değiştirilmiş eser" notu öneriliyor (CC-BY değişikliklerin belirtilmesini istiyor): "Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, değiştirilmiş bir çalışmadır. …" Test sürümünde Hakkında ekranında **öneri metni olarak** duruyor (`lib/app_info.dart`, `translationNotice`); mağaza sürümünden önce onaylanmalı ya da değiştirilmeli. SRD, Wizards'a bu atıf dışında başka bir atıf yapılmamasını istediği için "Wizards ile bağımız yoktur" gibi ek cümleler kullanılmıyor.
 - **ONAY BEKLİYOR** — Uygulama adı: "GM Cebi" çalışma adı olarak kullanılıyor (`lib/app_info.dart`, Android etiketi, iOS `CFBundleDisplayName`).
 - **ONAY BEKLİYOR** — Paket adı: `io.github.sberkan09.gmcebi` (Android ve iOS aynı; `sberkan09.github.io` alanının tersi). Yer tutucu `com.example.*` Play'de reddedildiği için önerildi. İlk mağaza yüklemesinden sonra değiştirilemez; başka bir kimlik istenirse değiştirilecek yerler `docs/release.md`'de.
