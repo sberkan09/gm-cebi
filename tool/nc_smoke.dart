@@ -1,19 +1,27 @@
 // Runs GM Cebi's NeuraCraft client against a real NeuraCraft Cloud API
 // (development: `docker compose` in neuracraft-cloud, or the API + a worker by hand).
 //
-//   NC_API_URL=http://127.0.0.1:8080 NC_APP_TOKEN=nc_app_… dart run tool/nc_smoke.dart sketch.png [out.png]
+//   NC_API_URL=http://127.0.0.1:8080 NC_CLIENT_ID=nc_client_… NC_EMAIL=you@example.com \
+//     dart run tool/nc_smoke.dart sketch.png [out.png]
 //
-// Checks the whole flow the app uses: preset version, session open/heartbeat/
-// close, a job from a sketch and a Turkish narrative over server-sent events,
-// the download (redirect followed by hand), a report, cancel, and the error
-// codes the app reacts to. Exits non-zero on the first failure.
+// Signs in like the app (a code goes to NC_EMAIL; type it in), or with
+// NC_REFRESH_TOKEN=nc_rt_… instead of the email. Then checks the whole flow
+// the app uses: GET /v1/me, preset version, session open/heartbeat/close, a job
+// from a sketch and a Turkish narrative over server-sent events, the download
+// (redirect followed by hand), a report, cancel, a refresh (the refresh token
+// rotates), and the error codes the app reacts to. Exits non-zero on the
+// first failure.
+//
+// NC_SMOKE_DELETE_ACCOUNT=1 ends with DELETE /v1/me (the account and all its
+// data). Otherwise the last refresh token is printed for the next run.
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:gm_cebi/data/neuracraft/auth.dart';
 import 'package:gm_cebi/data/neuracraft/client.dart';
 import 'package:gm_cebi/data/neuracraft/config.dart';
 import 'package:gm_cebi/data/neuracraft/errors.dart';
-import 'package:gm_cebi/data/neuracraft/install_id.dart';
 import 'package:gm_cebi/data/neuracraft/models.dart';
 import 'package:http/http.dart' as http;
 
@@ -32,16 +40,51 @@ Future<NcApiException?> apiError(Future<Object?> Function() f) async {
 }
 
 Future<void> main(List<String> args) async {
-  final config = NcConfig(baseUrl: Platform.environment['NC_API_URL'] ?? '', appToken: Platform.environment['NC_APP_TOKEN'] ?? '');
-  if (!config.isConfigured || args.isEmpty) {
-    stderr.writeln('usage: NC_API_URL=… NC_APP_TOKEN=… dart run tool/nc_smoke.dart sketch.png [out.png]');
+  final env = Platform.environment;
+  final config = NcConfig(baseUrl: env['NC_API_URL'] ?? '', clientId: env['NC_CLIENT_ID'] ?? gmCebiClientId);
+  final email = env['NC_EMAIL'] ?? '';
+  final refreshToken = env['NC_REFRESH_TOKEN'] ?? '';
+  if (!config.isConfigured || args.isEmpty || (email.isEmpty && refreshToken.isEmpty)) {
+    stderr.writeln('usage: NC_API_URL=… [NC_CLIENT_ID=…] (NC_EMAIL=… | NC_REFRESH_TOKEN=…) dart run tool/nc_smoke.dart sketch.png [out.png]');
     exit(2);
   }
   final sketch = Uint8List.fromList(File(args[0]).readAsBytesSync());
-  var endUser = newInstallId();
   final http.Client h = http.Client();
-  final c = NeuraCraftClient(httpClient: h, config: config, endUser: () => endUser);
+  final api = NcAuthApi(httpClient: h, config: config);
+  final store = MemoryTokenStore();
+  final auth = NcTokenManager(api: api, store: store);
+  final c = NeuraCraftClient(httpClient: h, config: config, auth: auth);
 
+  // ------------------------------------------------------------ sign-in
+  final bad = await apiError(() => api.startEmail('not an email'));
+  check(bad?.reaction == NcReaction.invalidEmail || bad?.reaction == NcReaction.signInUnavailable, 'malformed email → ${bad?.code}');
+  if (refreshToken.isNotEmpty) {
+    await store.write(NcTokens(accessToken: '', refreshToken: refreshToken, accessExpiresAt: DateTime(2000), endUserId: ''));
+    await auth.load();
+    await auth.accessToken(); // expired: refreshes
+    check(auth.state.signedIn, 'signed in with NC_REFRESH_TOKEN');
+  } else {
+    final sent = await api.startEmail(email);
+    check(sent.resendAfter > 0, 'code sent (valid ${sent.expiresIn} s, resend after ${sent.resendAfter} s)');
+    final wrong = await apiError(() => api.verifyEmail(email, '000000'));
+    if (wrong != null) stdout.writeln('     a wrong code → ${wrong.code} ${wrong.params}');
+    stdout.write('code from the email: ');
+    final code = stdin.readLineSync(encoding: utf8)?.trim() ?? '';
+    await auth.verifyEmail(email, code);
+    check(auth.state.signedIn, 'signed in as ${auth.state.endUserId}');
+  }
+  final me = await c.getMe();
+  final signedInAs = store.tokens?.endUserId ?? '';
+  check(me.endUserId.isNotEmpty && (signedInAs.isEmpty || me.endUserId == signedInAs),
+      'GET /v1/me (${me.endUserId}, today ${me.used}/${me.daily}, resets ${me.resetsAt})');
+
+  // The access token is sent as is; a broken one is a bug the service names.
+  final bogus = NcTokenManager(
+      api: api, store: MemoryTokenStore(NcTokens(accessToken: 'not-a-token', refreshToken: 'x', accessExpiresAt: DateTime(2100), endUserId: '')));
+  final malformed = await apiError(() => NeuraCraftClient(httpClient: h, config: config, auth: bogus).openSession());
+  check(malformed?.code == 'auth.required' && malformed?.reaction == NcReaction.authInvalid, 'malformed token → ${malformed?.code}');
+
+  // ------------------------------------------------------------ the flow
   check(await c.supportsSketchToScene(), 'sketch_to_scene v$sketchToSceneVersion is offered');
 
   final s = await c.openSession();
@@ -76,8 +119,6 @@ Future<void> main(List<String> args) async {
 
   await c.report(out.assetId, ReportReason.other, note: 'duman testi');
   check(true, 'report accepted');
-  // The guide says a reported picture is hidden for everyone; the app hides
-  // its own copy in any case. Note what the server does today.
   final hidden = await apiError(() => c.downloadAsset(out.assetId));
   stdout.writeln('     after the report the server ${hidden == null ? 'still serves the picture to its owner' : 'answers ${hidden.code}'}');
 
@@ -91,23 +132,18 @@ Future<void> main(List<String> args) async {
   final missing = await apiError(() => c.getJob('00000000-0000-4000-8000-000000000000'));
   check(missing?.reaction == NcReaction.notFound, 'unknown job → not_found');
 
-  final badUser = endUser;
-  endUser = 'bad id with spaces';
-  final bad = await apiError(() => c.openSession());
-  check(bad?.code == 'partner.end_user_required' && bad?.reaction == NcReaction.bug, 'malformed X-End-User → ${bad?.code}');
-  endUser = badUser;
+  // Refresh: the refresh token rotates.
+  final before = store.tokens!;
+  await auth.refreshAfterExpired(before.accessToken);
+  final after = store.tokens!;
+  check(after.refreshToken != before.refreshToken && after.accessToken != before.accessToken, 'refresh rotated both tokens');
 
-  // NC_SMOKE_PRODUCTION=1: a live service. Skips the two checks that would cost
-  // real GPU time or cannot work there: the quota run (up to 10 finished jobs)
-  // and the bad-token check (a proxy that injects the real token rewrites it).
-  final production = Platform.environment['NC_SMOKE_PRODUCTION'] == '1';
+  // NC_SMOKE_PRODUCTION=1: a live service. Skips the quota run (up to 10
+  // finished jobs of real GPU time).
+  final production = env['NC_SMOKE_PRODUCTION'] == '1';
   if (production) {
-    stdout.writeln('skip  bad app token, daily quota (NC_SMOKE_PRODUCTION=1)');
+    stdout.writeln('skip  daily quota (NC_SMOKE_PRODUCTION=1)');
   } else {
-    final bogus = NeuraCraftClient(httpClient: h, config: NcConfig(baseUrl: config.baseUrl, appToken: 'nc_app_not-a-token'), endUser: () => endUser);
-    final auth = await apiError(() => bogus.openSession());
-    check(auth?.reaction == NcReaction.authInvalid, 'bad app token → ${auth?.code}');
-
     NcApiException? quota;
     for (var i = 0; i < 10 && quota == null; i++) {
       quota = await apiError(() async {
@@ -123,6 +159,21 @@ Future<void> main(List<String> args) async {
   await c.closeSession(s.id);
   final closed = await apiError(() => c.heartbeat(s.id));
   check(closed?.reaction == NcReaction.sessionClosed, 'heartbeat after close → ${closed?.code}');
+
+  if (env['NC_SMOKE_DELETE_ACCOUNT'] == '1') {
+    final kept = store.tokens!;
+    await c.deleteMe();
+    check(!auth.state.signedIn && store.tokens == null, 'DELETE /v1/me: account deleted, tokens dropped');
+    final gone = await apiError(() => api.refresh(kept.refreshToken));
+    check(gone?.reaction == NcReaction.signInRequired, 'refresh after the deletion → ${gone?.code}');
+  } else {
+    // Last, as it may end the sign-in: the refresh token used before is dead.
+    final reused = await apiError(() => api.refresh(before.refreshToken));
+    check(reused?.code == 'auth.refresh_invalid', 'the old refresh token again → ${reused?.code}');
+    final still = await apiError(() => c.getMe());
+    stdout.writeln('     after the reuse, GET /v1/me ${still == null ? 'still works' : '→ ${still.code} (the sign-in ended)'}');
+    if (still == null) stdout.writeln('     next run: NC_REFRESH_TOKEN=${store.tokens?.refreshToken}');
+  }
 
   h.close();
   stdout.writeln('all checks passed');

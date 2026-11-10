@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cloud backup and device-to-device transfer from Android 12
+     (android:dataExtractionRules). Same rule as backup_rules.xml: the
+     encrypted online-scene sign-in (flutter_secure_storage, SharedPreferences)
+     stays out, as its Keystore key does not move with it. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="."/>
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="."/>
+    </device-transfer>
+</data-extraction-rules>

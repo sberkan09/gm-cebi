@@ -6,14 +6,17 @@ import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gm_cebi/data/neuracraft/auth.dart';
 import 'package:gm_cebi/data/neuracraft/config.dart';
 import 'package:gm_cebi/db/database.dart';
+import 'package:gm_cebi/features/online_scene/account.dart';
 import 'package:gm_cebi/features/online_scene/online_settings.dart';
 import 'package:gm_cebi/features/online_scene/scene_controller.dart';
 import 'package:gm_cebi/providers.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import '../features/online_session_test.dart' show signedInTokens;
 import 'harness.dart';
 
 /// A 1×1 PNG: what the fake service returns as the picture.
@@ -22,7 +25,14 @@ final tinyPng = base64Decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADU
 class FakeService {
   final calls = <String>[];
   final bodies = <Map<String, dynamic>>[];
+  final authBodies = <String, Map<String, dynamic>>{};
   http.StreamedResponse Function()? nextSubmit;
+
+  /// The answer to `POST /v1/auth/email/start` (default: 202, code sent).
+  http.StreamedResponse Function()? startAnswer;
+
+  /// `DELETE /v1/me` fails as if offline.
+  bool deleteOffline = false;
 
   http.StreamedResponse _json(Object body, [int status = 200]) =>
       http.StreamedResponse(Stream.value(utf8.encode(jsonEncode(body))), status, headers: {'content-type': 'application/json'});
@@ -30,6 +40,26 @@ class FakeService {
   Future<http.StreamedResponse> handle(http.BaseRequest r) async {
     final p = r.url.path;
     calls.add('${r.method} $p');
+    if (p.startsWith('/v1/auth/')) {
+      expect(r.headers.containsKey('Authorization'), isFalse, reason: 'sign-in calls carry no token');
+      authBodies[p] = jsonDecode((r as http.Request).body) as Map<String, dynamic>;
+      return switch (p) {
+        '/v1/auth/email/start' => startAnswer?.call() ?? _json({'expiresIn': 600, 'resendAfter': 60}, 202),
+        '/v1/auth/email/verify' => authBodies[p]!['code'] == '123456'
+            ? _json({'accessToken': 'nc_eu_a1', 'tokenType': 'Bearer', 'expiresIn': 3600, 'refreshToken': 'nc_rt_r1', 'endUser': {'id': 'eu_1'}})
+            : _json({'error': {'code': 'auth.code_invalid', 'params': {'attemptsLeft': 4}}}, 400),
+        '/v1/auth/revoke' => http.StreamedResponse(const Stream.empty(), 204),
+        _ => _json({'error': {'code': 'not_found'}}, 404),
+      };
+    }
+    if (r.url.host == 'nc.test') expect(r.headers['Authorization'], 'Bearer nc_eu_a1');
+    if (p == '/v1/me') {
+      if (r.method == 'DELETE') {
+        if (deleteOffline) throw http.ClientException('offline');
+        return http.StreamedResponse(const Stream.empty(), 204);
+      }
+      return _json({'endUser': {'id': 'eu_1', 'createdAt': '2026-11-10T08:00:00.000Z'}, 'quota': {'daily': 20, 'used': 3, 'resetsAt': '2026-11-10T21:00:00.000Z'}});
+    }
     if (p == '/v1/sessions') {
       return _json({'session': {'id': 's1', 'heartbeatSeconds': 120}, 'capacity': {'state': 'warming', 'etaSeconds': 35}}, 201);
     }
@@ -53,9 +83,10 @@ class FakeService {
   }
 }
 
-List<Override> online(FakeService service) => [
-      ncConfigProvider.overrideWithValue(const NcConfig(baseUrl: 'http://nc.test', appToken: 'nc_app_test')),
+List<Override> online(FakeService service, {MemoryTokenStore? store}) => [
+      ncConfigProvider.overrideWithValue(const NcConfig(baseUrl: 'http://nc.test', clientId: 'nc_client_test')),
       ncHttpClientProvider.overrideWithValue(MockClient.streaming((r, _) => service.handle(r))),
+      ncTokenStoreProvider.overrideWithValue(store ?? MemoryTokenStore(signedInTokens())),
       sceneRandomProvider.overrideWithValue(Random(1)),
       // Picture.toImage never completes in the fake-async widget test zone;
       // the real export is tested in test/core/map_sketch_test.dart.
@@ -170,30 +201,146 @@ void main() {
     expect(await pumped(tester, db.select(db.mapStrokes).get()), hasLength(2));
   });
 
-  final del = FakeService();
-  appTest('Settings: delete my data clears pictures and the install id; the switch hides the feature', gmPack: true, overrides: online(del), (tester, db) async {
-    db.addScene(assetId: 'asset-1', png: tinyPng, mode: 'map', narrative: 'köprü', seed: 1);
-    db.writeSetting('ncInstallId', 'old-install-id');
-    db.writeSetting('ncConsent', 'true');
+  final signIn = FakeService();
+  final signInStore = MemoryTokenStore();
+  appTest('first use: consent, sign in with an emailed code, then the mode sheet', gmPack: true, overrides: online(signIn, store: signInStore),
+      (tester, db) async {
+    await openMapWithSketch(tester, db);
+    await tester.tap(find.byKey(const Key('scene-open')));
     await settle(tester);
+    await tester.tap(find.byKey(const Key('consent-accept')));
+    await settle(tester);
+    expect(signIn.calls, isEmpty, reason: 'consent alone sends nothing: not signed in yet');
+    expect(find.byKey(const Key('signin-email')), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('signin-email')), 'gm-at-example');
+    await tester.tap(find.byKey(const Key('signin-send')));
+    await settle(tester);
+    expect(find.text('Bu e-posta adresi geçerli görünmüyor.'), findsOneWidget);
+    expect(signIn.calls, isEmpty);
+
+    await tester.enterText(find.byKey(const Key('signin-email')), ' gm@example.com ');
+    await tester.tap(find.byKey(const Key('signin-send')));
+    await settle(tester);
+    expect(signIn.authBodies['/v1/auth/email/start'], {'client_id': 'nc_client_test', 'email': 'gm@example.com', 'locale': 'tr'});
+    expect(find.textContaining('gm@example.com adresine gönderdik'), findsOneWidget);
+    expect(find.text('Yeniden gönder (60 sn)'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.text('Yeniden gönder (57 sn)'), findsOneWidget, reason: 'the resend countdown runs');
+
+    await tester.enterText(find.byKey(const Key('signin-code')), '111111');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('signin-verify')));
+    await settle(tester);
+    expect(find.text('Kod yanlış; 4 deneme hakkın kaldı.'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('signin-code')), '123456');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('signin-verify')));
+    await settle(tester);
+    expect(signInStore.tokens?.refreshToken, 'nc_rt_r1', reason: 'kept in the (secure) store');
+    expect(signInStore.tokens?.email, 'gm@example.com');
+    expect(find.byKey(const Key('scene-narrative')), findsOneWidget, reason: 'on to the mode sheet');
+    expect(signIn.calls, contains('POST /v1/sessions'), reason: 'signed in: the session opens and the GPU warms');
+  });
+
+  final unavailable = FakeService()
+    ..startAnswer = () => http.StreamedResponse(Stream.value(utf8.encode(jsonEncode({'error': {'code': 'auth.sign_in_unavailable'}}))), 503,
+        headers: {'content-type': 'application/json'});
+  appTest('sign-in unavailable (503): said inline, nothing else happens', gmPack: true, overrides: online(unavailable, store: MemoryTokenStore()),
+      (tester, db) async {
+    db.writeSetting('ncConsent', 'true');
+    await openMapWithSketch(tester, db);
+    await tester.tap(find.byKey(const Key('scene-open')));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('signin-email')), 'gm@example.com');
+    await tester.tap(find.byKey(const Key('signin-send')));
+    await settle(tester);
+    expect(find.byKey(const Key('signin-error')), findsOneWidget);
+    expect(find.textContaining('Giriş şu an yapılamıyor'), findsOneWidget);
+    expect(find.byKey(const Key('signin-email')), findsOneWidget, reason: 'still on the email step');
+    expect(unavailable.calls, ['POST /v1/auth/email/start']);
+  });
+
+  Future<void> openOnlineSettings(WidgetTester tester, Key key) async {
     await tester.tap(find.byTooltip('Ayarlar ve Hakkında'));
     await settle(tester);
-    await tester.scrollUntilVisible(find.byKey(const Key('online-delete')), 300, scrollable: scrollableIn(const Key('settings-list')));
-    expect(find.text('Onay verildi'), findsOneWidget);
-    await tester.ensureVisible(find.byKey(const Key('online-delete')));
+    await tester.scrollUntilVisible(find.byKey(key), 300, scrollable: scrollableIn(const Key('settings-list')));
+    await tester.ensureVisible(find.byKey(key));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('online-delete')));
+  }
+
+  final out = FakeService();
+  final outStore = MemoryTokenStore(signedInTokens());
+  appTest("Settings: the account with today's quota; sign out revokes and forgets the tokens", gmPack: true, overrides: online(out, store: outStore),
+      (tester, db) async {
+    await openOnlineSettings(tester, const Key('online-sign-out'));
+    expect(find.text('gm@example.com\nBugün: 3/20 harita'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('online-sign-out')));
     await settle(tester);
-    expect(find.text('Veriler silinsin mi?'), findsOneWidget);
-    expect(find.textContaining('en geç 7 gün içinde'), findsOneWidget, reason: 'the server side is explained');
-    await tester.tap(find.byKey(const Key('online-delete-confirm')));
+    expect(out.calls, contains('POST /v1/auth/revoke'));
+    expect(out.authBodies['/v1/auth/revoke'], {'client_id': 'nc_client_test', 'refreshToken': 'nc_rt_r1'});
+    expect(outStore.tokens, isNull);
+    expect(find.text('Çıkış yapıldı.'), findsOneWidget);
+    expect(find.byKey(const Key('online-sign-in')), findsOneWidget);
+    expect(find.byKey(const Key('online-delete-local')), findsOneWidget);
+  });
+
+  final gone = FakeService();
+  final goneStore = MemoryTokenStore(signedInTokens());
+  appTest('Settings: delete my account deletes it on the server, here, and signs out', gmPack: true, overrides: online(gone, store: goneStore),
+      (tester, db) async {
+    db.addScene(assetId: 'asset-1', png: tinyPng, mode: 'map', narrative: 'köprü', seed: 1);
+    db.writeSetting('ncConsent', 'true');
     await settle(tester);
-    expect(find.text('Uygulamadaki çevrimiçi veriler silindi.'), findsOneWidget);
+    await openOnlineSettings(tester, const Key('online-delete-account'));
+    await tester.tap(find.byKey(const Key('online-delete-account')));
+    await settle(tester);
+    expect(find.text('Hesabın silinsin mi?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('online-delete-account-confirm')));
+    await settle(tester);
+    expect(gone.calls, contains('DELETE /v1/me'));
+    expect(find.text('Hesabın ve tüm verilerin silindi.'), findsOneWidget);
+    expect(goneStore.tokens, isNull);
     expect(await pumped(tester, db.select(db.mapScenes).get()), isEmpty);
-    final settings = await pumped(tester, db.readSettings());
-    expect(settings['ncInstallId'], isNot('old-install-id'));
-    expect(settings['ncInstallId'], matches(RegExp(r'^[0-9a-f-]{36}$')));
-    expect(settings['ncConsent'], 'false');
+    expect((await pumped(tester, db.readSettings()))['ncConsent'], 'false', reason: 'consent is asked again');
+    expect(find.byKey(const Key('online-sign-in')), findsOneWidget);
+  });
+
+  final offline = FakeService()..deleteOffline = true;
+  final offlineStore = MemoryTokenStore(signedInTokens());
+  appTest('Settings: offline, the account is not deleted and stays signed in', gmPack: true, overrides: online(offline, store: offlineStore),
+      (tester, db) async {
+    db.addScene(assetId: 'asset-1', png: tinyPng, mode: 'map', narrative: 'köprü', seed: 1);
+    await settle(tester);
+    await openOnlineSettings(tester, const Key('online-delete-account'));
+    await tester.tap(find.byKey(const Key('online-delete-account')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('online-delete-account-confirm')));
+    await settle(tester);
+    expect(find.textContaining('hesabın silinmedi'), findsOneWidget);
+    expect(offlineStore.tokens, isNotNull);
+    expect(await pumped(tester, db.select(db.mapScenes).get()), hasLength(1));
+    expect(find.byKey(const Key('online-sign-out')), findsOneWidget);
+  });
+
+  final del = FakeService();
+  appTest('Settings, signed out: delete the pictures kept here; the switch hides the feature', gmPack: true,
+      overrides: online(del, store: MemoryTokenStore()), (tester, db) async {
+    db.addScene(assetId: 'asset-1', png: tinyPng, mode: 'map', narrative: 'köprü', seed: 1);
+    db.writeSetting('ncConsent', 'true');
+    await settle(tester);
+    await openOnlineSettings(tester, const Key('online-delete-local'));
+    expect(find.text('Onay verildi'), findsOneWidget);
+    expect(find.text('Giriş yapılmadı. Dokun ve e-postanla giriş yap.'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('online-delete-local')));
+    await settle(tester);
+    expect(find.text('Resimler silinsin mi?'), findsOneWidget);
+    expect(find.textContaining('Hesabımı sil'), findsOneWidget, reason: 'the server side is explained');
+    await tester.tap(find.byKey(const Key('online-delete-local-confirm')));
+    await settle(tester);
+    expect(find.text('Uygulamadaki çevrimiçi resimler silindi.'), findsOneWidget);
+    expect(await pumped(tester, db.select(db.mapScenes).get()), isEmpty);
 
     await tester.ensureVisible(find.byKey(const Key('online-enabled')));
     await settle(tester);

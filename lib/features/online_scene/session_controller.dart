@@ -8,7 +8,10 @@
 /// - Heartbeats run every `heartbeatSeconds` while the app is in the
 ///   foreground, and stop in the background.
 /// - `410 session.closed` → a new session, silently.
-/// - Nothing is opened before the user's consent ([onlineFeatureActiveProvider]).
+/// - Nothing is opened before the user's consent and sign-in
+///   ([onlineFeatureActiveProvider]).
+/// - The server ended the sign-in → idle (the UI asks to sign in again);
+///   blocked user or a build the service no longer accepts → disabled.
 library;
 
 import 'dart:async';
@@ -22,7 +25,8 @@ import '../../data/neuracraft/models.dart';
 import 'online_settings.dart';
 
 enum SessionPhase {
-  /// No session and none wanted (map closed, feature off or no consent).
+  /// No session and none wanted (map closed, feature off, no consent or not
+  /// signed in).
   idle,
   opening,
   open,
@@ -30,7 +34,8 @@ enum SessionPhase {
   /// Opening failed; retried after [OnlineSessionController.retryDelay].
   failed,
 
-  /// The app token was rejected: off until an app update.
+  /// Off: this build is no longer accepted (`error` [NcReaction.authInvalid],
+  /// until an app update) or this user was blocked ([NcReaction.blocked]).
   disabled,
 }
 
@@ -89,9 +94,11 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
       scheduleMicrotask(() {
         if (!ref.mounted) return;
         if (!ref.read(onlineFeatureActiveProvider)) {
-          _closeNow();
-        } else if (_users > 0) {
-          _ensureOpen();
+          unawaited(_closeNow());
+        } else {
+          // Signed in again (another account) after a block.
+          if (state.phase == SessionPhase.disabled && state.error == NcReaction.blocked) state = const OnlineSessionState();
+          if (_users > 0) _ensureOpen();
         }
       });
     });
@@ -129,7 +136,7 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
     _heartbeat?.cancel();
     _retryTimer?.cancel();
     _closeTimer?.cancel();
-    _closeTimer = Timer(closeGrace, _closeNow);
+    _closeTimer = Timer(closeGrace, () => unawaited(_closeNow()));
   }
 
   /// From the app lifecycle: heartbeats only in the foreground.
@@ -165,15 +172,35 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
     if (_foreground) await ensureOpen();
   }
 
-  /// The service rejected the app token.
+  /// The service no longer accepts this build: off until an app update.
   void authRejected() {
     _cancelTimers();
     state = OnlineSessionState(phase: SessionPhase.disabled, error: NcReaction.authInvalid, capacity: state.capacity);
     ref.read(onlineSettingsProvider.notifier).markAuthInvalid();
   }
 
-  /// Ends the session now (game over, feature turned off, data deleted).
-  Future<void> closeNow() async => _closeNow();
+  /// A request failed with an account reaction: update needed, blocked, or
+  /// signed out by the server. Returns whether [r] was one of them.
+  bool accountRejected(NcReaction r) {
+    switch (r) {
+      case NcReaction.authInvalid:
+        authRejected();
+      case NcReaction.blocked:
+        _cancelTimers();
+        state = OnlineSessionState(phase: SessionPhase.disabled, error: NcReaction.blocked, capacity: state.capacity);
+      case NcReaction.signInRequired:
+        // The sign-in is gone, so is the session: idle until signed in again.
+        _cancelTimers();
+        state = const OnlineSessionState();
+      default:
+        return false;
+    }
+    return true;
+  }
+
+  /// Ends the session now (game over, feature turned off, signing out). Waits
+  /// for the close request, so it goes out while the token still works.
+  Future<void> closeNow() => _closeNow();
 
   Future<void> _ensureOpen() {
     if (state.sessionId != null || state.phase == SessionPhase.disabled) return Future.value();
@@ -197,10 +224,7 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
       state = OnlineSessionState(phase: SessionPhase.open, sessionId: s.id, capacity: s.capacity);
       _startHeartbeat();
     } on NcException catch (e) {
-      if (e.reaction == NcReaction.authInvalid) {
-        authRejected();
-        return;
-      }
+      if (accountRejected(e.reaction)) return;
       state = state.copyWith(phase: SessionPhase.failed, error: e.reaction, clearSession: true);
       if (_users > 0 && _foreground) {
         _retryTimer = Timer(retryDelay, () {
@@ -228,8 +252,8 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
       switch (e.reaction) {
         case NcReaction.sessionClosed || NcReaction.notFound:
           await sessionClosed();
-        case NcReaction.authInvalid:
-          authRejected();
+        case NcReaction.authInvalid || NcReaction.blocked || NcReaction.signInRequired:
+          accountRejected(e.reaction);
         default:
           // Network blip: keep the session; the next beat tries again.
           state = state.copyWith(error: e.reaction);
@@ -237,13 +261,13 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
     }
   }
 
-  void _closeNow() {
+  Future<void> _closeNow() async {
     _cancelTimers();
     final id = state.sessionId;
     if (state.phase != SessionPhase.disabled && (state.phase != SessionPhase.idle || id != null || state.error != null)) {
       state = const OnlineSessionState();
     }
-    if (id != null) unawaited(_client?.closeSession(id).catchError((_) {}));
+    if (id != null) await _client?.closeSession(id).catchError((_) {});
   }
 
   void _cancelTimers() {

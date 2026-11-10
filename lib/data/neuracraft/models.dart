@@ -174,3 +174,29 @@ extension ReportReasonX on ReportReason {
         ReportReason.other => 'other',
       };
 }
+
+/// `GET /v1/me`: the signed-in end user and today's quota.
+class NcMe {
+  const NcMe({required this.endUserId, this.createdAt, this.daily, this.used, this.resetsAt});
+
+  factory NcMe.fromJson(Map<String, dynamic> m) {
+    final user = m['endUser'] is Map<String, dynamic> ? m['endUser'] as Map<String, dynamic> : const <String, dynamic>{};
+    final quota = m['quota'] is Map<String, dynamic> ? m['quota'] as Map<String, dynamic> : const <String, dynamic>{};
+    return NcMe(
+      endUserId: user['id'] as String? ?? '',
+      createdAt: DateTime.tryParse(user['createdAt'] as String? ?? ''),
+      daily: (quota['daily'] as num?)?.round(),
+      used: (quota['used'] as num?)?.round(),
+      resetsAt: DateTime.tryParse(quota['resetsAt'] as String? ?? '')?.toLocal(),
+    );
+  }
+
+  final String endUserId;
+  final DateTime? createdAt;
+
+  /// Maps per day for this user, and how many were made today (null when the
+  /// service gave none).
+  final int? daily;
+  final int? used;
+  final DateTime? resetsAt;
+}

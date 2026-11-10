@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gm_cebi/data/neuracraft/client.dart';
+import 'package:gm_cebi/data/neuracraft/auth.dart';
 import 'package:gm_cebi/data/neuracraft/config.dart';
 import 'package:gm_cebi/data/neuracraft/errors.dart';
 import 'package:gm_cebi/data/neuracraft/models.dart';
+import 'package:gm_cebi/features/online_scene/account.dart';
+import 'package:gm_cebi/features/online_scene/messages.dart';
 import 'package:gm_cebi/features/online_scene/online_settings.dart';
 import 'package:gm_cebi/features/online_scene/session_controller.dart';
 import 'package:http/http.dart' as http;
@@ -27,6 +29,14 @@ class FakeOnlineSettings extends OnlineSettingsNotifier {
   Future<void> setEnabled(bool v) async => state = AsyncData(state.value!.copyWith(enabled: v));
 }
 
+/// A signed-in end user's tokens (valid for an hour of real time).
+NcTokens signedInTokens() => NcTokens(
+    accessToken: 'nc_eu_a1',
+    refreshToken: 'nc_rt_r1',
+    accessExpiresAt: DateTime.now().add(const Duration(hours: 1)),
+    endUserId: 'eu_1',
+    email: 'gm@example.com');
+
 /// A scripted NeuraCraft server: records every call, answers from [handler].
 class FakeServer {
   final calls = <String>[];
@@ -45,6 +55,11 @@ class FakeServer {
       return _session(r.url.pathSegments[2], {'state': 'ready'});
     }
     if (r.method == 'DELETE') return http.Response(jsonEncode({'closed': true}), 200);
+    if (r.url.path == '/v1/auth/email/verify') {
+      return http.Response(
+          jsonEncode({'accessToken': 'nc_eu_a1', 'tokenType': 'Bearer', 'expiresIn': 3600, 'refreshToken': 'nc_rt_r1', 'endUser': {'id': 'eu_1'}}), 200,
+          headers: {'content-type': 'application/json'});
+    }
     return http.Response('{}', 404);
   }
 
@@ -66,17 +81,16 @@ class FakeServer {
 void main() {
   late FakeServer server;
 
-  ProviderContainer make({bool consented = true, bool enabled = true}) {
+  late MemoryTokenStore store;
+
+  ProviderContainer make({bool consented = true, bool enabled = true, bool signedIn = true}) {
     server = FakeServer();
+    store = MemoryTokenStore(signedIn ? signedInTokens() : null);
     final c = ProviderContainer(overrides: [
-      ncConfigProvider.overrideWithValue(const NcConfig(baseUrl: 'http://nc.test', appToken: 'nc_app_t')),
-      onlineSettingsProvider.overrideWith(
-          () => FakeOnlineSettings(OnlineSettings(enabled: enabled, consented: consented, installId: 'install-1'))),
-      ncClientProvider.overrideWith((ref) => NeuraCraftClient(
-            httpClient: MockClient((r) async => server.handle(r)),
-            config: ref.watch(ncConfigProvider),
-            endUser: () => 'install-1',
-          )),
+      ncConfigProvider.overrideWithValue(const NcConfig(baseUrl: 'http://nc.test', clientId: 'nc_client_t')),
+      onlineSettingsProvider.overrideWith(() => FakeOnlineSettings(OnlineSettings(enabled: enabled, consented: consented))),
+      ncHttpClientProvider.overrideWithValue(MockClient((r) async => server.handle(r))),
+      ncTokenStoreProvider.overrideWithValue(store),
     ]);
     c.listen(onlineSessionProvider, (_, _) {}); // keep it alive like the UI does
     return c;
@@ -87,6 +101,7 @@ void main() {
 
   void settle(ProviderContainer c, FakeAsync a) {
     c.read(onlineSettingsProvider); // start loading
+    c.read(ncAccountProvider); // and the stored sign-in
     a.flushMicrotasks();
     a.elapse(Duration.zero);
   }
@@ -226,18 +241,76 @@ void main() {
     });
   });
 
-  test('401 turns the feature off until an update', () {
+  test('nothing is opened before sign-in; signing in opens the session', () {
+    fakeAsync((a) {
+      final c = make(signedIn: false);
+      settle(c, a);
+      ctl(c).acquire();
+      tick(a);
+      expect(server.calls, isEmpty);
+      expect(c.read(onlineFeatureActiveProvider), isFalse);
+
+      c.read(ncAccountProvider.notifier).verifyEmail('gm@example.com', '123456');
+      tick(a);
+      expect(c.read(ncAccountProvider).signedIn, isTrue);
+      expect(server.calls, ['POST /v1/auth/email/verify', 'POST /v1/sessions']);
+      expect(st(c).phase, SessionPhase.open);
+      c.dispose();
+    });
+  });
+
+  test('the server ends the sign-in: idle (not disabled), signed out, asked to sign in again', () {
     fakeAsync((a) {
       final c = make();
       settle(c, a);
+      ctl(c).acquire();
+      a.flushMicrotasks();
+      expect(st(c).phase, SessionPhase.open);
       server.override = (r) => FakeServer.error(401, 'auth.token_revoked');
+      a.elapse(const Duration(seconds: 120)); // the heartbeat is refused
+      tick(a);
+      expect(st(c).phase, SessionPhase.idle);
+      expect(st(c).sessionId, isNull);
+      expect(c.read(ncAccountProvider).expired, isTrue);
+      expect(store.tokens, isNull);
+      expect(c.read(onlineFeatureVisibleProvider), isTrue, reason: 'still offered: signing in again brings it back');
+      expect(c.read(onlineFeatureActiveProvider), isFalse);
+      final calls = server.calls.length;
+      a.elapse(const Duration(minutes: 5));
+      expect(server.calls.length, calls, reason: 'no retries without a sign-in');
+      c.dispose();
+    });
+  });
+
+  test('a blocked user: disabled with its own label', () {
+    fakeAsync((a) {
+      final c = make();
+      settle(c, a);
+      server.override = (r) => FakeServer.error(403, 'auth.end_user_blocked');
+      ctl(c).acquire();
+      tick(a);
+      expect(st(c).phase, SessionPhase.disabled);
+      expect(st(c).error, NcReaction.blocked);
+      expect(capacityLabel(st(c)), 'Kapalı');
+      expect(c.read(ncAccountProvider).status, NcAuthStatus.blocked);
+      expect(c.read(onlineSettingsProvider).value!.authInvalid, isFalse, reason: 'an update would not help');
+      c.dispose();
+    });
+  });
+
+  test('a build the service no longer accepts turns the feature off until an update', () {
+    fakeAsync((a) {
+      final c = make();
+      settle(c, a);
+      server.override = (r) => FakeServer.error(401, 'auth.end_user_token_required');
       ctl(c).acquire();
       a.flushMicrotasks();
       expect(st(c).phase, SessionPhase.disabled);
       expect(c.read(onlineSettingsProvider).value!.authInvalid, isTrue);
       expect(c.read(onlineFeatureVisibleProvider), isFalse);
       a.elapse(const Duration(minutes: 5));
-      expect(server.count('POST /v1/sessions'), 1, reason: 'no retries with a dead token');
+      expect(server.count('POST /v1/sessions'), 1, reason: 'no retries with an outdated build');
+      expect(capacityLabel(st(c)), 'Güncelleme gerekiyor');
       c.dispose();
     });
   });
@@ -259,12 +332,13 @@ void main() {
   test('without a NeuraCraft configuration nothing is visible or sent', () {
     fakeAsync((a) {
       final c = ProviderContainer(overrides: [
-        ncConfigProvider.overrideWithValue(const NcConfig(baseUrl: '', appToken: '')),
-        onlineSettingsProvider.overrideWith(() => FakeOnlineSettings(const OnlineSettings(consented: true, installId: 'i'))),
+        ncConfigProvider.overrideWithValue(const NcConfig(baseUrl: '', clientId: '')),
+        onlineSettingsProvider.overrideWith(() => FakeOnlineSettings(const OnlineSettings(consented: true))),
       ]);
       c.read(onlineSettingsProvider);
       a.flushMicrotasks();
       expect(c.read(ncClientProvider), isNull);
+      expect(c.read(ncTokenManagerProvider), isNull, reason: 'the keystore is never touched');
       expect(c.read(onlineFeatureVisibleProvider), isFalse);
       c.read(onlineSessionProvider.notifier).acquire();
       a.flushMicrotasks();

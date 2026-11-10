@@ -82,12 +82,21 @@ olarak işaretlenir ve ürün sahibine sorulur.
 
 ## Çevrimiçi sahne (NeuraCraft Cloud, 2026-11-09)
 
-- 2026-11-09 — Özellik isteğe bağlı ve derleme zamanında: yalnızca `NC_API_URL` + `NC_APP_TOKEN` verilen derlemelerde görünür; verilmezse arayüzde iz yok ve Android manifestinde İnternet izni yok (`src/online/AndroidManifest.xml` yalnızca bu derlemelerde birleşir). Ayrıntı: `docs/online-scene.md`.
+- 2026-11-09 — Özellik isteğe bağlı ve derleme zamanında: yalnızca `NC_API_URL` verilen derlemelerde görünür (istemci kimliği 2026-11-10'dan beri kodda, aşağıda); verilmezse arayüzde iz yok ve Android manifestinde İnternet izni yok (`src/online/AndroidManifest.xml` yalnızca bu derlemelerde birleşir). Ayrıntı: `docs/online-scene.md`.
 - 2026-11-09 — Onay verilmeden hiçbir istek gitmez (oturum bile açılmaz). Onay metni alt işleyiciyi (Anthropic, ABD) ve saklama sürelerini söyler.
 - 2026-11-09 — Oturum harita açılınca açılır (GPU soğuksa ~75 sn, yedek veri merkezinde ~120 sn ısınır), heartbeat yalnızca ön planda; haritadan çıkınca 5 dk sonra kapanır (hemen geri dönen GM ısınmış GPU'yu kaybetmesin). `410`'da sessizce yenilenir; `401`'de özellik "güncelleme gerekiyor" ile kapanır.
 - 2026-11-09 — Sonuç PNG'si drift'te karşılaşmaya bağlı saklanır (`map_scenes`, şema 3; sunucu 7 gün sonra siler). Bildirilen resim yerelde hemen gizlenir.
 - 2026-11-09 — Resim indirmede 302 elle takip edilir: uygulama token'ı ve kurulum kimliği yalnızca NeuraCraft'a gider, depolama sağlayıcısına gitmez.
 - 2026-11-09 — "Verilerimi sil" yerel verileri siler ve yeni kurulum kimliği üretir; sunucu tarafı silme `partner:manage` gerektirdiği ve GM Cebi'nin sunucusu olmadığı için "en geç 7 gün" açıklaması gösterilir.
+
+## Çevrimiçi sahne: kullanıcı girişi (2026-11-10)
+
+- 2026-11-10 — Uygulama token'ı (`nc_app_…`) ve `X-End-User` kurulum kimliği kaldırıldı; yerine e-postaya gelen 6 haneli kodla kullanıcı girişi geldi (neuracraft-cloud #48). Gerekçe: APK'deki token çıkarılabiliyordu, kurulum kimliği de istemcinin kendi beyanıydı. Her istek artık kullanıcının kısa ömürlü erişim token'ını (`nc_eu_…`, 1 saat) taşır. Ayrıntı: `docs/online-scene.md`, "Giriş".
+- 2026-11-10 — İstemci kimliği (`nc_client_…`) herkese açıktır ve tek başına yetki vermez; GM Cebi'ninki (`nc_client_hZnpzu714IuIGtH2S5C26q8S`) kodda gömülüdür, `--dart-define=NC_CLIENT_ID` yalnızca başka bir sunucu için geçersiz kılar. Özellik `NC_API_URL` verilen derlemelerde görünür. `v*-test*` etiketleri ancak bu derlemeyle yeniden güvenli (APK'de token yok).
+- 2026-11-10 — Token'lar `flutter_secure_storage` ile Keychain (`first_unlock_this_device`) / Android Keystore'da. Android yedeğinden ve cihaz aktarımından `sharedpref` alanı çıkarıldı (Keystore anahtarı taşınmadığı için geri yüklenen kayıt çözülemezdi); okunamayan kayıt "çıkış yapılmış" sayılır ve silinir. Kullanıcının yazdığı e-posta yalnızca Ayarlar'da göstermek için aynı kayıtta, cihazda kalır.
+- 2026-11-10 — Yenileme tek uçuşlu: yenileme token'ı her kullanımda değişir ve iki kez kullanılırsa giriş biter. Aynı anda `401 auth.token_expired` alan istekler tek bir `POST /v1/auth/token`'ı bekler; istek bir kez tekrarlanır. Süresi dolmak üzere olan erişim token'ı istekten önce yenilenir. Ağ hatasında giriş korunur.
+- 2026-11-10 — Giriş yalnızca özellik ilk kullanıldığında istenir ("Sahneyi canlandır" → onay → giriş → mod). Sunucu girişi bitirirse (`auth.refresh_invalid`, `auth.token_revoked`) oturum "kapalı" değil boşta kalır ve haritada "Oturumun sona erdi, tekrar giriş yap" çıkar; engellenen kullanıcı (`auth.end_user_blocked`) için özellik o çalıştırma boyunca kapalı. "Güncelleme gerekiyor" (`authInvalid`) artık yalnızca `auth.client_invalid`, `auth.end_user_token_required`, `auth.scope_missing`, `auth.required` için.
+- 2026-11-10 — "Verilerimi sil" yerine "Hesabımı sil": `DELETE /v1/me` hesabı ve sunucudaki her şeyi hemen siler (mağazaların istediği uygulama içi hesap silme); ardından yerel resimler ve onay silinir. Çevrimdışıysa hesap kalır ve hata gösterilir. Giriş yapılmamışken yalnızca yerel "Uygulamadaki çevrimiçi resimleri sil" var. Bu, 2026-11-09'daki "en geç 7 gün" kararının yerini alır.
 
 ## Karşılaşma zorluğu (2026-11-09)
 

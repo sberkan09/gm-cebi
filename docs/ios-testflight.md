@@ -41,6 +41,10 @@ yüzden TestFlight derlemesi de mağaza bayraklarıyla yapılır:
    birincil dil Türkçe, bundle id yukarıdaki, SKU (ör. `gmcebi-ios`).
 4. **Uygulama Gizliliği (App Privacy):** "Veri toplamıyoruz" (*Data Not Collected*).
    Gizlilik politikası URL'si (`docs/store/privacy-policy-*.md` yayımlandıktan sonra).
+   Çevrimiçi sahne açık bir derleme (`NC_API_URL` verilmiş) gönderilirse bu cevap değişir:
+   Contact Info → *Email Address* (App Functionality, kullanıcıya bağlı, izleme yok) ve User Content
+   (çizim ve tarif, App Functionality). Hesap uygulama içinden silinebilir (Ayarlar → "Hesabımı
+   sil"). Ayrıntı: `docs/online-scene.md`, "Gizlilik ve mağaza beyanları".
 5. **Yaş derecelendirmesi anketi:** şiddet yalnızca metin olarak, fantastik oyun
    kuralları içinde. En temkinli seçim "Seyrek/Hafif Fantastik Şiddet". Diğer her şey
    "Yok". Sınırsız web erişimi, kumar, kullanıcı içeriği paylaşımı yok.

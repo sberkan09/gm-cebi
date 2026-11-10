@@ -1,6 +1,11 @@
 /// HTTP client for NeuraCraft Cloud's sketch-to-scene API
 /// (neuracraft-cloud docs/partners/gm-cebi.md). The UI never calls HTTP
 /// directly; it goes through this class.
+///
+/// Every request carries the signed-in end user's access token
+/// (`Authorization: Bearer nc_eu_…`, from [NcTokenManager]). On
+/// `401 auth.token_expired` the token is refreshed and the request repeated
+/// once.
 library;
 
 import 'dart:async';
@@ -9,6 +14,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import 'auth.dart';
 import 'config.dart';
 import 'errors.dart';
 import 'models.dart';
@@ -28,7 +34,7 @@ class NeuraCraftClient {
   NeuraCraftClient({
     required http.Client httpClient,
     required this.config,
-    required this.endUser,
+    required this.auth,
     this.timeout = const Duration(seconds: 20),
     this.pollInterval = const Duration(seconds: 1),
     this.eventIdleTimeout = const Duration(seconds: 45),
@@ -38,9 +44,8 @@ class NeuraCraftClient {
   final http.Client _http;
   final NcConfig config;
 
-  /// The install id (`X-End-User`), read on every request so a reset takes
-  /// effect at once.
-  final String Function() endUser;
+  /// The sign-in: access token, refresh, and signing out on the server's word.
+  final NcTokenManager auth;
 
   /// Per request (a job's whole wait is bounded by the caller).
   final Duration timeout;
@@ -56,10 +61,17 @@ class NeuraCraftClient {
   /// [pollInterval]) before the wait gives up.
   final int pollRetries;
 
-  Map<String, String> get _auth => {
-        'Authorization': 'Bearer ${config.appToken}',
-        'X-End-User': endUser(),
-      };
+  // ------------------------------------------------------------ account
+
+  /// The signed-in user and today's quota.
+  Future<NcMe> getMe() async => NcMe.fromJson(await _json('GET', '/v1/me'));
+
+  /// Deletes the end user, everything stored for them and all their tokens
+  /// (in-app account deletion), then forgets the sign-in here.
+  Future<void> deleteMe() async {
+    await _json('DELETE', '/v1/me');
+    await auth.accountDeleted();
+  }
 
   // ------------------------------------------------------------ sessions
 
@@ -161,17 +173,11 @@ class NeuraCraftClient {
   }
 
   Stream<NcJobEvent> _events(String jobId) async* {
-    final req = http.Request('GET', config.uri('/v1/jobs/${Uri.encodeComponent(jobId)}/events'))
-      ..headers.addAll({..._auth, 'Accept': 'text/event-stream'});
-    final http.StreamedResponse res;
-    try {
-      res = await _http.send(req).timeout(timeout);
-    } on Object catch (e) {
-      throw NcNetworkException('events: $e');
-    }
+    final res = await _sendAuthed(() => http.Request('GET', config.uri('/v1/jobs/${Uri.encodeComponent(jobId)}/events'))
+      ..headers['Accept'] = 'text/event-stream');
     if (res.statusCode != 200) {
       final body = await res.stream.bytesToString().catchError((_) => '');
-      throw _apiError(res.statusCode, body);
+      throw ncErrorFrom(res.statusCode, body);
     }
     if (!(res.headers['content-type'] ?? '').contains('text/event-stream')) {
       throw const NcNetworkException('events: not an event stream');
@@ -225,13 +231,11 @@ class NeuraCraftClient {
   // ------------------------------------------------------------ assets
 
   /// Downloads a result. The service answers with a redirect to a signed
-  /// storage URL; it is followed here by hand so the app token and install
-  /// id are only ever sent to NeuraCraft, never to the storage provider.
+  /// storage URL; it is followed here by hand so the access token is only
+  /// ever sent to NeuraCraft, never to the storage provider.
   Future<Uint8List> downloadAsset(String assetId) async {
-    final first = http.Request('GET', config.uri('/v1/assets/${Uri.encodeComponent(assetId)}/content'))
-      ..headers.addAll(_auth)
-      ..followRedirects = false;
-    var res = await _sendStreamed(first);
+    var res = await _sendAuthed(() => http.Request('GET', config.uri('/v1/assets/${Uri.encodeComponent(assetId)}/content'))
+      ..followRedirects = false);
     if (res.isRedirect || const {301, 302, 303, 307, 308}.contains(res.statusCode)) {
       await res.stream.drain<void>();
       final location = res.headers['location'];
@@ -240,7 +244,7 @@ class NeuraCraftClient {
       res = await _sendStreamed(http.Request('GET', target));
     }
     final bytes = await res.stream.toBytes().timeout(timeout, onTimeout: () => throw const NcNetworkException('content: timeout'));
-    if (res.statusCode != 200) throw _apiError(res.statusCode, utf8.decode(bytes, allowMalformed: true));
+    if (res.statusCode != 200) throw ncErrorFrom(res.statusCode, utf8.decode(bytes, allowMalformed: true));
     return bytes;
   }
 
@@ -276,20 +280,53 @@ class NeuraCraftClient {
     }
   }
 
-  Future<Map<String, dynamic>> _json(String method, String path, {Object? body}) async {
-    final req = http.Request(method, config.uri(path))..headers.addAll({..._auth, 'Accept': 'application/json'});
-    if (body != null) {
-      req.headers['Content-Type'] = 'application/json';
-      req.body = jsonEncode(body);
+  /// Sends a request built by [build] with the access token. On
+  /// `401 auth.token_expired` the token is refreshed (one refresh shared by
+  /// all callers) and the request sent once more; on `auth.token_revoked` or
+  /// `auth.end_user_blocked` the sign-in ends. Other answers, errors included,
+  /// are returned as they are.
+  Future<http.StreamedResponse> _sendAuthed(http.BaseRequest Function() build) async {
+    var retried = false;
+    while (true) {
+      final token = await auth.accessToken();
+      final req = build()..headers['Authorization'] = 'Bearer $token';
+      final res = await _sendStreamed(req);
+      if (res.statusCode != 401 && res.statusCode != 403) return res;
+      final String text;
+      try {
+        text = await res.stream.bytesToString().timeout(timeout);
+      } on Object catch (e) {
+        throw NcNetworkException('${req.method} ${req.url.path}: $e');
+      }
+      final e = ncErrorFrom(res.statusCode, text);
+      if (e is NcApiException) {
+        if (e.code == 'auth.token_expired' && !retried) {
+          retried = true;
+          await auth.refreshAfterExpired(token);
+          continue;
+        }
+        await auth.rejected(e, accessToken: token);
+      }
+      throw e;
     }
-    final res = await _sendStreamed(req);
+  }
+
+  Future<Map<String, dynamic>> _json(String method, String path, {Object? body}) async {
+    final res = await _sendAuthed(() {
+      final req = http.Request(method, config.uri(path))..headers['Accept'] = 'application/json';
+      if (body != null) {
+        req.headers['Content-Type'] = 'application/json';
+        req.body = jsonEncode(body);
+      }
+      return req;
+    });
     final String text;
     try {
       text = await res.stream.bytesToString().timeout(timeout);
     } on Object catch (e) {
       throw NcNetworkException('$method $path: $e');
     }
-    if (res.statusCode < 200 || res.statusCode >= 300) throw _apiError(res.statusCode, text);
+    if (res.statusCode < 200 || res.statusCode >= 300) throw ncErrorFrom(res.statusCode, text);
     if (text.isEmpty) return const {};
     try {
       final decoded = jsonDecode(text);
@@ -297,22 +334,5 @@ class NeuraCraftClient {
     } on FormatException {
       throw NcNetworkException('$method $path: not JSON');
     }
-  }
-
-  /// `{"error": {"code", "params"}}` → [NcApiException]; anything else
-  /// (a proxy page, an empty 502) → [NcNetworkException] for 5xx.
-  static NcException _apiError(int status, String body) {
-    try {
-      final m = jsonDecode(body);
-      final err = m is Map<String, dynamic> ? m['error'] : null;
-      if (err is Map<String, dynamic> && err['code'] is String) {
-        final params = err['params'];
-        return NcApiException(status, err['code'] as String, params is Map<String, dynamic> ? params : const {});
-      }
-    } on FormatException {
-      // not JSON
-    }
-    if (status >= 500) return NcNetworkException('HTTP $status');
-    return NcApiException(status, 'http_$status');
   }
 }

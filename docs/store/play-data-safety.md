@@ -25,6 +25,32 @@ Gerekçe (Play tanımlarına göre):
 - Google Play'in kendi topladığı kurulum/çökme istatistikleri (Android vitals)
   uygulamanın beyanına girmez.
 
+## Çevrimiçi sahne açık derleme (`NC_API_URL` verilmiş)
+
+Yukarıdaki "Hayır" yalnızca çevrimdışı mağaza derlemesi içindir. Çevrimiçi sahne açık bir derleme
+Play'e giderse form şöyle doldurulur (`docs/online-scene.md`, "Gizlilik ve mağaza beyanları";
+kaynak: neuracraft-cloud `docs/PRIVACY.md`):
+
+| Soru | Cevap |
+|---|---|
+| Veri topluyor ya da paylaşıyor mu? | **Evet** |
+| Aktarımda şifreli mi? | **Evet** (https) |
+| Kullanıcı verisinin silinmesini isteyebilir mi? | **Evet**: uygulama içinde Ayarlar → Çevrimiçi sahne → "Hesabımı sil" (`DELETE /v1/me`, sunucudaki her şey hemen silinir). Play'in istediği hesap silme web adresi: gizlilik politikasındaki "Hesabını silme" bölümü. |
+| Hesap oluşturma | Var, isteğe bağlı: yalnızca çevrimiçi sahne için e-posta + tek kullanımlık kod. Uygulamanın geri kalanı hesapsız çalışır. |
+
+| Veri türü | Toplanıyor | Paylaşılıyor | Zorunlu mu | Amaç |
+|---|---|---|---|---|
+| Kişisel bilgiler → **E-posta adresi** | Evet (giriş kodu için; NeuraCraft adresi değil HMAC özetini saklar, kodu Brevo/AB gönderir) | Hayır (hizmet sağlayıcı / işleyici) | İsteğe bağlı | Uygulama işlevi, hesap yönetimi |
+| Fotoğraflar ve videolar → **Diğer resimler** (arazi çizimi) | Evet (24 saat; sonuç resmi 7 gün) | Hayır | İsteğe bağlı | Uygulama işlevi |
+| Uygulama etkinliği → **Diğer kullanıcı içeriği** (sahne tarifi) | Evet (iş bittikten 24 saat sonrasına kadar; kimliksiz olarak çeviri için Anthropic/ABD'ye gidebilir) | Hayır | İsteğe bağlı | Uygulama işlevi |
+
+- Reklam ya da pazarlama için kullanım ve paylaşım **yok**; analitik **yok**.
+- Hizmet sağlayıcıya (işleyici) aktarım Play'in tanımına göre "paylaşım" sayılmaz.
+- Cihaz kimliği ya da kurulum kimliği **toplanmaz** (eski `X-End-User` kaldırıldı). Sunucu rastgele
+  bir kullanıcı numarası (`eu_…`) üretir.
+- "Uygulama erişimi" bölümü: inceleme için çevrimiçi sahneye giriş gerekir; test hesabı yerine
+  inceleme ekibinin kendi e-postasıyla kod alabileceği yazılmalı (ya da özellik kapalı derleme).
+
 ## Uygulama içeriği — diğer bölümler
 
 | Bölüm | Cevap |
@@ -45,10 +71,13 @@ Gerekçe (Play tanımlarına göre):
 ## Kanıt (kod taraması, 1.0.0)
 
 - Çalışma zamanı bağımlılıkları (`pubspec.yaml`): `flutter_riverpod`, `drift`,
-  `drift_flutter`, `sqlite3`, `path_provider`. Ağ, analitik, reklam ya da çökme raporlama
-  paketi yok (`firebase`, `sentry`, `http`, `dio`, `url_launcher` vb. yok).
-- `lib/` içinde `HttpClient`, `Socket`, `WebSocket`, `Uri` isteği ya da platform kanalı
-  yok. Koddaki tek URL'ler SRD atıf metnindeki düz metin adresler; tıklanabilir değil.
+  `drift_flutter`, `sqlite3`, `path_provider`; ayrıca yalnızca çevrimiçi sahnenin kullandığı
+  `http` ve `flutter_secure_storage`. Analitik, reklam ya da çökme raporlama paketi yok
+  (`firebase`, `sentry`, `dio`, `url_launcher` vb. yok).
+- Ağ isteği yapan tek kod çevrimiçi sahnedir (`lib/data/neuracraft/`). `NC_API_URL`
+  verilmeyen mağaza derlemesinde hiç çalışmaz: arayüzde görünmez, güvenli depo
+  okunmaz, manifestte İnternet izni yoktur. Koddaki diğer URL'ler SRD atıf metnindeki düz
+  metin adresler; tıklanabilir değil.
 - Android `src/main/AndroidManifest.xml` hiçbir `uses-permission` içermiyor.
   `INTERNET` yalnızca `src/debug` ve `src/profile` manifestlerinde var. Bunlar Flutter
   geliştirme araçları içindir, release derlemesine girmez.

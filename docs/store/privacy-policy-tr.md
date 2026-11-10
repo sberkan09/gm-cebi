@@ -36,6 +36,37 @@ iCloud/bilgisayar yedeklemesi açıksa, işletim sistemi bu verileri diğer uygu
 verileriyle birlikte yedekleyebilir. Bu yedekleme Google ya da Apple tarafından senin
 hesabında yapılır. Geliştirici bu yedeklere erişemez.
 
+## Çevrimiçi sahne (isteğe bağlı)
+
+<!-- Yalnızca çevrimiçi sahne açık derlemeler için yayımlanır (docs/online-scene.md). Bu bölüm
+yayımlanırsa giriş paragrafındaki "veri toplamaz" cümlesi ve "Toplanan veriler" bölümü buna göre
+değiştirilmeli. -->
+
+Savaş haritasında "Sahneyi canlandır" özelliğini kullanırsan, çizdiğin arazi resme dönüştürülmek
+üzere NeuraCraft Cloud sunucusuna gönderilir. Bu özellik isteğe bağlıdır; kullanmazsan hiçbir şey
+gönderilmez ve uygulama çevrimdışı çalışmaya devam eder.
+
+- **Giriş:** özellik yalnızca e-posta adresinle giriş yapınca çalışır (yalnızca bu özellik için).
+  Adresin yalnızca 6 haneli giriş kodunu göndermek için kullanılır; kodu Brevo (AB) gönderir.
+  NeuraCraft adresin kendisini saklamaz; yalnızca bir özetini (HMAC), sana verilen rastgele bir
+  kullanıcı numarasını ve kayıt / son kullanım zamanlarını saklar. Ad ya da mağaza hesabı istenmez.
+  Uygulama adresini yalnızca Ayarlar'da göstermek için cihazında tutar; giriş anahtarları cihazın
+  güvenli deposunda (Keychain, Android Keystore) saklanır.
+- **Gönderilenler ve saklama süreleri:** çizim 24 saat, üretilen resim 7 gün, yazdığın tarif iş
+  bittikten 24 saat sonrasına kadar saklanır. Jetonlar ve karşılaşma bilgileri gönderilmez.
+- **Nerede:** işler Avrupa Birliği'ndeki sunucularda çalışır. Türkiye dışına (AB'ye) aktarım
+  yapılmış olur.
+- **Alt işleyiciler:** tarifin İngilizceye çevrilmesi için metin, hiçbir kimlik bilgisi olmadan
+  Anthropic'e (ABD) gönderilebilir. Kod e-postalarını Brevo (AB) gönderir.
+- **Reklam, analitik, izleme:** yok. Veriler satılmaz, reklam için paylaşılmaz.
+
+### Hesabını silme
+
+Ayarlar → Çevrimiçi sahne → **"Hesabımı sil"**. Hesabın ve sunucudaki tüm verilerin (çizimler,
+resimler, tarifler, giriş anahtarları) hemen silinir; uygulamadaki çevrimiçi resimler de silinir.
+"Çıkış yap" yalnızca bu cihazdaki girişi kapatır. Uygulamaya erişemiyorsan silme isteğini
+<E-POSTA> adresine gönderebilirsin.
+
 ## Üçüncü taraflar
 
 Uygulamada veri gönderen üçüncü taraf kütüphane ya da hizmet (SDK) yoktur. Uygulamayı
@@ -59,7 +90,8 @@ Sorular için: <E-POSTA>
 ---
 
 *Bu politika GM Cebi'nin kaynak kodu taranarak yazıldı: çalışma zamanı bağımlılıkları
-yalnızca `flutter_riverpod`, `drift`, `drift_flutter`, `sqlite3` ve `path_provider`;
-hiçbiri ağ bağlantısı kurmaz. Mağaza derlemesi kontrol betiği
+`flutter_riverpod`, `drift`, `drift_flutter`, `sqlite3` ve `path_provider`; bunlar ağ bağlantısı
+kurmaz. `http` ve `flutter_secure_storage` yalnızca isteğe bağlı çevrimiçi sahne içindir ve bu
+özelliğin kapalı olduğu derlemede hiç çalışmaz. Mağaza derlemesi kontrol betiği
 (`tool/check_store_build.sh`) Android derlemesinde İnternet izni olmadığını her sürümde
 denetler.*

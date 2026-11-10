@@ -1,18 +1,22 @@
 /// UI of the optional online scene feature on the battle map: the session
 /// scope, the status bar, the "bring the scene to life" sheet with first-use
-/// consent, and the report sheet.
+/// consent and sign-in, and the report sheet.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/neuracraft/auth.dart';
 import '../../data/neuracraft/client.dart';
+import '../../data/neuracraft/errors.dart';
 import '../../data/neuracraft/models.dart';
+import '../../features/online_scene/account.dart';
 import '../../features/online_scene/messages.dart';
 import '../../features/online_scene/online_settings.dart';
 import '../../features/online_scene/scene_controller.dart';
 import '../../features/online_scene/session_controller.dart';
 import '../../providers.dart';
+import 'sign_in_sheet.dart';
 
 /// Holds the NeuraCraft session open while [child] (the battle map) is on
 /// screen, with heartbeats only while the app is in the foreground.
@@ -84,6 +88,7 @@ class SceneStatusBar extends ConsumerWidget {
     final job = ref.watch(sceneControllerProvider);
     final session = ref.watch(onlineSessionProvider);
     final scene = ref.watch(activeSceneProvider).value;
+    final account = ref.watch(ncAccountProvider);
     final t = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
     final ctl = ref.read(sceneControllerProvider.notifier);
@@ -124,6 +129,18 @@ class SceneStatusBar extends ConsumerWidget {
           Expanded(child: Text(message, key: const Key('scene-error'), style: t.bodyMedium)),
           if (retryable) TextButton(key: const Key('scene-retry'), onPressed: ctl.retry, child: const Text('Yeniden dene')),
           IconButton(key: const Key('scene-dismiss'), tooltip: 'Kapat', icon: const Icon(Icons.close), onPressed: ctl.dismissError),
+        ]);
+      case SceneIdle() when account.expired || account.status == NcAuthStatus.blocked:
+        // The server ended the sign-in (or blocked this user): say so on the map.
+        final blocked = account.status == NcAuthStatus.blocked;
+        return bar([
+          Icon(blocked ? Icons.block : Icons.cloud_off_outlined, size: 18, color: scheme.onSurfaceVariant),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(messageForReaction(blocked ? NcReaction.blocked : NcReaction.signInRequired),
+                key: const Key('account-status'), style: t.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+          ),
+          if (!blocked) TextButton(key: const Key('sign-in-again'), onPressed: () => showSignInSheet(context), child: const Text('Giriş yap')),
         ]);
       case SceneIdle():
         if (scene == null && session.phase == SessionPhase.idle) return const SizedBox.shrink();
@@ -166,8 +183,8 @@ class SceneStatusBar extends ConsumerWidget {
   }
 }
 
-/// "Sahneyi canlandır": asks for consent the first time, then the mode and
-/// the description.
+/// "Sahneyi canlandır": asks for consent the first time, then for sign-in
+/// when signed out, then the mode and the description.
 Future<void> showSceneSheet(BuildContext context, WidgetRef ref) async {
   final settings = ref.read(onlineSettingsProvider).value;
   if (settings == null) return;
@@ -187,6 +204,16 @@ Future<void> showSceneSheet(BuildContext context, WidgetRef ref) async {
     await ref.read(onlineSettingsProvider.notifier).setConsented(true);
   }
   if (!context.mounted) return;
+  await ref.read(ncAccountProvider.notifier).load();
+  if (!context.mounted) return;
+  final account = ref.read(ncAccountProvider);
+  if (account.status == NcAuthStatus.blocked) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(messageForReaction(NcReaction.blocked))));
+    return;
+  }
+  if (!account.signedIn) {
+    if (!await showSignInSheet(context) || !context.mounted) return;
+  }
   final last = ref.read(activeSceneProvider).value;
   final result = await showModalBottomSheet<({SceneMode mode, String narrative})>(
     context: context,
