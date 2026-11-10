@@ -74,11 +74,13 @@ ustalıkları. Asset'ler 2,9 MB (bütçe 10 MB).
 ## Çevrimiçi sahne (isteğe bağlı, NeuraCraft Cloud)
 
 Dal: `claude/online-scene` (savaş haritası dalının üstünde). Haritadaki arazi çizimi sunucuda resme
-dönüşür, resim alt katman olur, jetonlar üstte kalır. Yalnızca `NC_API_URL` + `NC_APP_TOKEN` ile
+dönüşür, resim alt katman olur, jetonlar üstte kalır. Yalnızca `NC_API_URL` + `NC_CLIENT_ID` ile
 derlenen sürümlerde görünür; mağaza/test derlemeleri bugünkü gibi tamamen çevrimdışı.
-İstemci, oturum yöneticisi, üretim akışı, Ayarlar (aç/kapa, gizlilik, "Verilerimi sil"), Türkçe hata
-mesajları ve testler hazır; yerel neuracraft-cloud API'sine karşı `tool/nc_smoke.dart` ile uçtan uca
-denendi. Mağazaya açık derleme gitmeden önce gizlilik beyanları güncellenmeli
+İstemci, oturum yöneticisi, üretim akışı, Ayarlar (aç/kapa, gizlilik, hesap), Türkçe hata mesajları ve
+testler hazır; yerel neuracraft-cloud API'sine karşı `tool/nc_smoke.dart` ile uçtan uca denendi.
+2026-11-10: uygulama token'ı yerine e-postaya gelen kodla kullanıcı girişi (neuracraft-cloud #48);
+token'lar güvenli depoda, tek uçuşlu yenileme, uygulama içi "Hesabımı sil". Girişli sürüm canlı
+serviste henüz denenmedi (servis bugün `auth.sign_in_unavailable` dönüyor). Mağazaya açık derleme gitmeden önce gizlilik beyanları güncellenmeli
 (`docs/online-scene.md`, "Gizlilik ve mağaza beyanları").
 
 ## Savaş haritası (GM Paketi, çevrimdışı)

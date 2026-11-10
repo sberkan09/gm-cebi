@@ -7,10 +7,12 @@ import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gm_cebi/data/neuracraft/auth.dart';
 import 'package:gm_cebi/data/neuracraft/client.dart';
 import 'package:gm_cebi/data/neuracraft/config.dart';
 import 'package:gm_cebi/data/neuracraft/models.dart';
 import 'package:gm_cebi/db/database.dart';
+import 'package:gm_cebi/features/online_scene/account.dart';
 import 'package:gm_cebi/features/online_scene/online_settings.dart';
 import 'package:gm_cebi/features/online_scene/scene_controller.dart';
 import 'package:gm_cebi/features/online_scene/session_controller.dart';
@@ -18,7 +20,9 @@ import 'package:gm_cebi/providers.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
-import 'online_session_test.dart' show FakeOnlineSettings;
+import 'online_session_test.dart' show FakeOnlineSettings, signedInTokens;
+
+const config = NcConfig(baseUrl: 'http://nc.test', clientId: 'nc_client_t');
 
 final sketch = Uint8List.fromList([0x89, 0x50, 0x4e, 0x47, 7, 7, 7]);
 final scenePng = Uint8List.fromList(List.generate(64, (i) => i));
@@ -104,6 +108,7 @@ void main() {
   late AppDatabase db;
   late ProviderContainer c;
   late Server server;
+  late MemoryTokenStore store;
 
   setUp(() {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -119,12 +124,14 @@ void main() {
     server = s;
     c = ProviderContainer(overrides: [
       databaseProvider.overrideWithValue(db),
-      ncConfigProvider.overrideWithValue(const NcConfig(baseUrl: 'http://nc.test', appToken: 'nc_app_t')),
-      onlineSettingsProvider.overrideWith(() => FakeOnlineSettings(const OnlineSettings(consented: true, installId: 'install-1'))),
+      ncConfigProvider.overrideWithValue(config),
+      onlineSettingsProvider.overrideWith(() => FakeOnlineSettings(const OnlineSettings(consented: true))),
+      ncTokenStoreProvider.overrideWithValue(store = MemoryTokenStore(signedInTokens())),
+      ncHttpClientProvider.overrideWithValue(MockClient.streaming((r, _) => server.handle(r))),
       ncClientProvider.overrideWith((ref) => NeuraCraftClient(
-            httpClient: MockClient.streaming((r, _) => server.handle(r)),
-            config: ref.watch(ncConfigProvider),
-            endUser: () => 'install-1',
+            httpClient: ref.watch(ncHttpClientProvider),
+            config: config,
+            auth: ref.watch(ncTokenManagerProvider)!,
             pollInterval: const Duration(milliseconds: 1),
           )),
       sketchExporterProvider.overrideWithValue(() async => withSketch ? sketch : null),
@@ -133,6 +140,7 @@ void main() {
     c.listen(sceneControllerProvider, (_, _) {});
     c.listen(onlineSessionProvider, (_, _) {});
     await c.read(onlineSettingsProvider.future);
+    await c.read(ncAccountProvider.notifier).load();
   }
 
   SceneController ctl() => c.read(sceneControllerProvider.notifier);
@@ -238,8 +246,28 @@ void main() {
     expect(f.retryable, isFalse);
   });
 
-  test('401 on submit turns the feature off until an update', () async {
-    await make(Server(submit: [() => err(401, 'auth.token_expired')]));
+  test('the server ends the sign-in on submit: asked to sign in again, the session idle', () async {
+    await make(Server(submit: [() => err(401, 'auth.token_revoked')]));
+    await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
+    final f = st() as SceneFailed;
+    expect(f.message, 'Oturumun sona erdi, tekrar giriş yap.');
+    expect(f.retryable, isFalse);
+    expect(c.read(onlineSessionProvider).phase, SessionPhase.idle);
+    expect(c.read(ncAccountProvider).expired, isTrue);
+    expect(store.tokens, isNull);
+    expect(c.read(onlineFeatureVisibleProvider), isTrue);
+  });
+
+  test('GM Cebi\'s maps for today are used up: no retry button', () async {
+    await make(Server(submit: [() => err(429, 'quota.partner_daily', {'resetsAt': '2026-11-10T21:00:00.000Z'})]));
+    await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
+    final f = st() as SceneFailed;
+    expect(f.message, "GM Cebi'nin bugünkü harita hakkı doldu, yarın tekrar dene.");
+    expect(f.retryable, isFalse);
+  });
+
+  test('an outdated build turns the feature off until an update', () async {
+    await make(Server(submit: [() => err(401, 'auth.end_user_token_required')]));
     await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
     expect((st() as SceneFailed).message, 'Çevrimiçi resim için uygulamanın güncellenmesi gerekiyor.');
     expect(c.read(onlineSessionProvider).phase, SessionPhase.disabled);
@@ -270,17 +298,15 @@ void main() {
     server = Server();
     c = ProviderContainer(overrides: [
       databaseProvider.overrideWithValue(db),
-      ncConfigProvider.overrideWithValue(const NcConfig(baseUrl: 'http://nc.test', appToken: 'nc_app_t')),
-      onlineSettingsProvider.overrideWith(() => FakeOnlineSettings(const OnlineSettings(consented: true, installId: 'install-1'))),
-      ncClientProvider.overrideWith((ref) => NeuraCraftClient(
-            httpClient: MockClient((r) async => throw http.ClientException('offline')),
-            config: ref.watch(ncConfigProvider),
-            endUser: () => 'install-1',
-          )),
+      ncConfigProvider.overrideWithValue(config),
+      onlineSettingsProvider.overrideWith(() => FakeOnlineSettings(const OnlineSettings(consented: true))),
+      ncTokenStoreProvider.overrideWithValue(MemoryTokenStore(signedInTokens())),
+      ncHttpClientProvider.overrideWithValue(MockClient((r) async => throw http.ClientException('offline'))),
       sketchExporterProvider.overrideWithValue(() async => sketch),
     ]);
     c.listen(sceneControllerProvider, (_, _) {});
     await c.read(onlineSettingsProvider.future);
+    await c.read(ncAccountProvider.notifier).load();
     await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
     expect((st() as SceneFailed).message, 'Sunucuya ulaşılamadı. Harita çevrimdışı çalışmaya devam ediyor.');
   });
@@ -308,10 +334,11 @@ void main() {
     expect(await db.watchActiveScene().first, isNull);
 
     final id = await db.addScene(assetId: 'asset-2', png: scenePng, mode: 'map', narrative: '', seed: 1);
+    final offline = MockClient((r) async => throw http.ClientException('offline'));
     final failing = NeuraCraftClient(
-        httpClient: MockClient((r) async => throw http.ClientException('offline')),
-        config: const NcConfig(baseUrl: 'http://nc.test', appToken: 't'),
-        endUser: () => 'i');
+        httpClient: offline,
+        config: config,
+        auth: NcTokenManager(api: NcAuthApi(httpClient: offline, config: config), store: MemoryTokenStore(signedInTokens())));
     final view = MapSceneView(id: id!, assetId: 'asset-2', png: scenePng, mode: 'map', narrative: '');
     expect(await reportScene(db, failing, view, ReportReason.other), 'Resim gizlendi, ama bildirim gönderilemedi.');
     expect(await db.watchActiveScene().first, isNull);

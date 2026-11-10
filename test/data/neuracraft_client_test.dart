@@ -1,26 +1,35 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gm_cebi/data/neuracraft/auth.dart';
 import 'package:gm_cebi/data/neuracraft/client.dart';
 import 'package:gm_cebi/data/neuracraft/config.dart';
 import 'package:gm_cebi/data/neuracraft/errors.dart';
-import 'package:gm_cebi/data/neuracraft/install_id.dart';
 import 'package:gm_cebi/data/neuracraft/models.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
-const config = NcConfig(baseUrl: 'http://nc.test', appToken: 'nc_app_test');
-const installId = '0f8b3c1e-1111-4222-8333-444455556666';
+const config = NcConfig(baseUrl: 'http://nc.test', clientId: 'nc_client_test');
 
-NeuraCraftClient clientWith(http.Client h) => NeuraCraftClient(
+NcTokens testTokens({String access = 'nc_eu_a1', String refresh = 'nc_rt_r1', DateTime? expires}) => NcTokens(
+    accessToken: access,
+    refreshToken: refresh,
+    accessExpiresAt: expires ?? DateTime.now().add(const Duration(hours: 1)),
+    endUserId: 'eu_1',
+    email: 'gm@example.com');
+
+/// A manager signed in with [testTokens], refreshing through [h].
+NcTokenManager signedIn(http.Client h, {NcTokenStore? store}) =>
+    NcTokenManager(api: NcAuthApi(httpClient: h, config: config), store: store ?? MemoryTokenStore(testTokens()));
+
+NeuraCraftClient clientWith(http.Client h, {NcTokenManager? auth, Duration timeout = const Duration(seconds: 2)}) => NeuraCraftClient(
       httpClient: h,
       config: config,
-      endUser: () => installId,
+      auth: auth ?? signedIn(h),
       pollInterval: const Duration(milliseconds: 1),
-      timeout: const Duration(seconds: 2),
+      timeout: timeout,
     );
 
 http.Response jsonResponse(Object body, [int status = 200]) =>
@@ -57,7 +66,7 @@ final png = Uint8List.fromList([0x89, 0x50, 0x4e, 0x47, 1, 2, 3]);
 
 void main() {
   group('requests', () {
-    test('every request carries the app token and the install id', () async {
+    test('every request carries the access token, and no X-End-User', () async {
       final seen = <http.BaseRequest>[];
       final c = clientWith(MockClient((r) async {
         seen.add(r);
@@ -66,8 +75,8 @@ void main() {
       await c.openSession();
       expect(seen.single.method, 'POST');
       expect(seen.single.url.toString(), 'http://nc.test/v1/sessions');
-      expect(seen.single.headers['Authorization'], 'Bearer nc_app_test');
-      expect(seen.single.headers['X-End-User'], installId);
+      expect(seen.single.headers['Authorization'], 'Bearer nc_eu_a1');
+      expect(seen.single.headers.containsKey('X-End-User'), isFalse);
     });
 
     test('sessions: capacity states and heartbeat', () async {
@@ -158,8 +167,14 @@ void main() {
       (400, 'content.text_refused', NcReaction.textRefused),
       (400, 'partner.end_user_required', NcReaction.bug),
       (401, 'auth.required', NcReaction.authInvalid),
-      (401, 'auth.token_revoked', NcReaction.authInvalid),
-      (401, 'auth.token_expired', NcReaction.authInvalid),
+      (400, 'auth.client_invalid', NcReaction.authInvalid),
+      (401, 'auth.end_user_token_required', NcReaction.authInvalid),
+      (403, 'auth.scope_missing', NcReaction.authInvalid),
+      (401, 'auth.token_revoked', NcReaction.signInRequired),
+      (401, 'auth.refresh_invalid', NcReaction.signInRequired),
+      (403, 'auth.end_user_blocked', NcReaction.blocked),
+      (503, 'auth.sign_in_unavailable', NcReaction.signInUnavailable),
+      (429, 'quota.partner_daily', NcReaction.partnerDailyQuota),
       (402, 'allowance.insufficient', NcReaction.allowanceExhausted),
       (402, 'credits.insufficient', NcReaction.serviceOutOfCredits),
       (404, 'not_found', NcReaction.notFound),
@@ -208,12 +223,7 @@ void main() {
       final notJson = clientWith(MockClient((r) async => http.Response('hello', 200)));
       await expectLater(notJson.openSession(), throwsA(isA<NcNetworkException>()));
 
-      final slow = NeuraCraftClient(
-        httpClient: MockClient((r) => Completer<http.Response>().future),
-        config: config,
-        endUser: () => installId,
-        timeout: const Duration(milliseconds: 20),
-      );
+      final slow = clientWith(MockClient((r) => Completer<http.Response>().future), timeout: const Duration(milliseconds: 20));
       await expectLater(slow.openSession(), throwsA(isA<NcNetworkException>()));
     });
   });
@@ -249,7 +259,7 @@ void main() {
       final got = await c.watchJob('job-1').toList();
       expect(seen.url.path, '/v1/jobs/job-1/events');
       expect(seen.headers['Accept'], 'text/event-stream');
-      expect(seen.headers['X-End-User'], installId);
+      expect(seen.headers['Authorization'], 'Bearer nc_eu_a1');
       expect(got.map((e) => e.runtimeType), [NcJobSnapshot, NcJobStateChanged, NcJobProgressed, NcJobSnapshot]);
       expect((got[2] as NcJobProgressed).progress.fraction, isNull);
       final last = (got.last as NcJobSnapshot).job;
@@ -297,16 +307,17 @@ void main() {
   group('flaky networks', () {
     test('a silent event stream (no pings) is taken as dead: polling takes over', () async {
       var polls = 0;
+      final h = MockClient.streaming((r, _) async {
+        if (r.url.path.endsWith('/events')) {
+          return http.StreamedResponse(StreamController<List<int>>().stream, 200, headers: {'content-type': 'text/event-stream'});
+        }
+        polls++;
+        return http.StreamedResponse(Stream.value(utf8.encode(jsonEncode({'job': jobJson('succeeded')}))), 200);
+      });
       final c = NeuraCraftClient(
-        httpClient: MockClient.streaming((r, _) async {
-          if (r.url.path.endsWith('/events')) {
-            return http.StreamedResponse(StreamController<List<int>>().stream, 200, headers: {'content-type': 'text/event-stream'});
-          }
-          polls++;
-          return http.StreamedResponse(Stream.value(utf8.encode(jsonEncode({'job': jobJson('succeeded')}))), 200);
-        }),
+        httpClient: h,
         config: config,
-        endUser: () => installId,
+        auth: signedIn(h),
         pollInterval: const Duration(milliseconds: 1),
         eventIdleTimeout: const Duration(milliseconds: 50),
       );
@@ -317,10 +328,11 @@ void main() {
 
     test('pings keep a slow event stream alive', () async {
       final ctl = StreamController<List<int>>();
+      final h = MockClient.streaming((r, _) async => http.StreamedResponse(ctl.stream, 200, headers: {'content-type': 'text/event-stream'}));
       final c = NeuraCraftClient(
-        httpClient: MockClient.streaming((r, _) async => http.StreamedResponse(ctl.stream, 200, headers: {'content-type': 'text/event-stream'})),
+        httpClient: h,
         config: config,
-        endUser: () => installId,
+        auth: signedIn(h),
         eventIdleTimeout: const Duration(milliseconds: 80),
       );
       final got = c.watchJob('job-1').toList();
@@ -363,7 +375,7 @@ void main() {
       final bytes = await c.downloadAsset('a-1');
       expect(bytes, [1, 2, 3, 4]);
       expect(seen.map((r) => r.url.toString()), ['http://nc.test/v1/assets/a-1/content', 'https://storage.example/blob?sig=abc']);
-      expect(seen[0].headers['Authorization'], 'Bearer nc_app_test');
+      expect(seen[0].headers['Authorization'], 'Bearer nc_eu_a1');
       expect(seen[1].headers.containsKey('Authorization'), isFalse);
       expect(seen[1].headers.containsKey('X-End-User'), isFalse);
     });
@@ -388,22 +400,11 @@ void main() {
     });
   });
 
-  test('install ids are random UUID v4 strings the service accepts', () {
-    final a = newInstallId(Random(1));
-    final b = newInstallId(Random(2));
-    expect(a, isNot(b));
-    expect(a, matches(RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')));
-    expect(installIdPattern.hasMatch(a), isTrue);
-    expect(installIdPattern.hasMatch(''), isFalse);
-    expect(installIdPattern.hasMatch('a' * 65), isFalse);
-    expect(installIdPattern.hasMatch('ali@ev cihazı'), isFalse);
-  });
-
   test('config is off unless both values are given', () {
-    expect(const NcConfig(baseUrl: '', appToken: 'x').isConfigured, isFalse);
-    expect(const NcConfig(baseUrl: 'http://x', appToken: '').isConfigured, isFalse);
+    expect(const NcConfig(baseUrl: '', clientId: 'x').isConfigured, isFalse);
+    expect(const NcConfig(baseUrl: 'http://x', clientId: '').isConfigured, isFalse);
     expect(config.isConfigured, isTrue);
-    expect(const NcConfig(baseUrl: 'http://x:8080/', appToken: 't').uri('/v1/sessions').toString(), 'http://x:8080/v1/sessions');
+    expect(const NcConfig(baseUrl: 'http://x:8080/', clientId: 't').uri('/v1/sessions').toString(), 'http://x:8080/v1/sessions');
     expect(NcConfig.fromEnvironment.isConfigured, isFalse, reason: 'plain test runs have no dart-defines');
   });
 }

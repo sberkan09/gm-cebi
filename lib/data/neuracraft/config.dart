@@ -1,10 +1,11 @@
 /// Build-time configuration of the optional online scene feature
 /// (NeuraCraft Cloud, docs/online-scene.md).
 ///
-///   flutter run --dart-define=NC_API_URL=http://10.0.2.2:8080 --dart-define=NC_APP_TOKEN=nc_app_…
+///   flutter run --dart-define=NC_API_URL=http://10.0.2.2:8080 --dart-define=NC_CLIENT_ID=nc_client_…
 ///
 /// Without both values the feature is compiled out of the UI and the app stays
-/// fully offline. Never commit a real token.
+/// fully offline. The client id is public: it grants nothing on its own, the
+/// end user signs in with an emailed code (lib/data/neuracraft/auth.dart).
 library;
 
 /// Same as Flutter's kReleaseMode, without importing Flutter (this layer is
@@ -12,24 +13,24 @@ library;
 const _releaseMode = bool.fromEnvironment('dart.vm.product');
 
 class NcConfig {
-  const NcConfig({required this.baseUrl, required this.appToken});
+  const NcConfig({required this.baseUrl, required this.clientId});
 
   /// From `--dart-define`.
   static const fromEnvironment = NcConfig(
     baseUrl: String.fromEnvironment('NC_API_URL'),
-    appToken: String.fromEnvironment('NC_APP_TOKEN'),
+    clientId: String.fromEnvironment('NC_CLIENT_ID'),
   );
 
   /// e.g. `http://localhost:8080` (development) or the production https URL.
   final String baseUrl;
 
-  /// An app token (`nc_app_…`): scopes jobs:submit, jobs:read, assets:read.
-  final String appToken;
+  /// GM Cebi's public client id (`nc_client_…`), sent with the sign-in calls.
+  final String clientId;
 
   /// Release builds only talk https; plain http (a developer's machine) is
   /// for debug and profile builds.
   bool get isConfigured =>
-      baseUrl.isNotEmpty && appToken.isNotEmpty && (!_releaseMode || Uri.tryParse(baseUrl)?.scheme == 'https');
+      baseUrl.isNotEmpty && clientId.isNotEmpty && (!_releaseMode || Uri.tryParse(baseUrl)?.scheme == 'https');
 
   Uri uri(String path) {
     final base = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;

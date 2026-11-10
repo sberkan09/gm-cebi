@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Auto Backup up to Android 11 (android:fullBackupContent). The app keeps
+     nothing in SharedPreferences except flutter_secure_storage's encrypted
+     online-scene sign-in, whose Keystore key never leaves the device: a
+     restored copy could not be decrypted. Leave it out; a restored install
+     simply asks for sign-in again (docs/online-scene.md). -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="."/>
+</full-backup-content>

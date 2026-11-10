@@ -58,7 +58,7 @@ class SceneFailed extends SceneJobState {
   const SceneFailed(this.message, {this.retryable = true, this.quiet = false});
   final String message;
 
-  /// "Yeniden dene" makes sense (not for a dead token or a used-up quota).
+  /// "Yeniden dene" makes sense (not when signed out or a quota is used up).
   final bool retryable;
 
   /// The service failed twice for no reason we can name: say little.
@@ -82,10 +82,14 @@ class SceneController extends Notifier<SceneJobState> {
   /// Shortened in tests.
   static Duration retrySoonDelay = const Duration(seconds: 3);
 
-  /// Retrying cannot help: a dead token, a used-up quota, a refused text, a bug.
+  /// Retrying cannot help: signed out, blocked, an outdated build, a used-up
+  /// quota, a refused text, a bug.
   static const _notRetryable = {
     NcReaction.authInvalid,
+    NcReaction.signInRequired,
+    NcReaction.blocked,
     NcReaction.dailyQuota,
+    NcReaction.partnerDailyQuota,
     NcReaction.allowanceExhausted,
     NcReaction.bug,
     NcReaction.textRefused,
@@ -171,7 +175,7 @@ class SceneController extends Notifier<SceneJobState> {
       }
     } on NcException catch (e) {
       if (gen != _generation) return;
-      if (e.reaction == NcReaction.authInvalid) ref.read(onlineSessionProvider.notifier).authRejected();
+      ref.read(onlineSessionProvider.notifier).accountRejected(e.reaction);
       if (e is NcApiException && e.reaction == NcReaction.bug) debugPrint('NeuraCraft rejected the request: ${e.code} ${e.params}');
       state = SceneFailed(messageFor(e), retryable: !_notRetryable.contains(e.reaction));
     } on TimeoutException {

@@ -16,22 +16,43 @@ String messageFor(NcException e) {
     if (e.unchecked) return 'İçerik kontrolü yapılamadı, tekrar dene.';
     return 'Resim üretilemedi.';
   }
-  if (e is NcApiException && e.reaction == NcReaction.dailyQuota) {
-    final at = e.resetsAt;
-    return at == null ? 'Bugünkü harita hakkın doldu, yarın yenilenir.' : 'Bugünkü harita hakkın doldu, ${_hhmm(at)} saatinde yenilenir.';
+  if (e is NcApiException) {
+    switch (e.reaction) {
+      case NcReaction.dailyQuota:
+        final at = e.resetsAt;
+        return at == null ? 'Bugünkü harita hakkın doldu, yarın yenilenir.' : 'Bugünkü harita hakkın doldu, ${_hhmm(at)} saatinde yenilenir.';
+      case NcReaction.signInRequired when e.code == NcApiException.signInRequired:
+        return 'Çevrimiçi sahne için giriş yap.';
+      case NcReaction.codeInvalid when e.attemptsLeft != null:
+        return e.attemptsLeft! > 0 ? 'Kod yanlış; ${e.attemptsLeft} deneme hakkın kaldı.' : 'Kod yanlış. Yeni kod iste.';
+      case NcReaction.codeRateLimited when e.retryAfter != null:
+        return 'Çok fazla kod istendi; ${_wait(e.retryAfter!)} sonra tekrar dene.';
+      default:
+        break;
+    }
   }
   return messageForReaction(e.reaction);
 }
+
+String _wait(int seconds) => seconds < 120 ? '$seconds saniye' : '${(seconds / 60).ceil()} dakika';
 
 String messageForReaction(NcReaction r) => switch (r) {
       NcReaction.bug => 'Bir hata oluştu, resim üretilemedi.',
       NcReaction.textRefused => 'Bu tarif kabul edilmedi, farklı anlatmayı dene.',
       NcReaction.authInvalid => 'Çevrimiçi resim için uygulamanın güncellenmesi gerekiyor.',
+      NcReaction.signInRequired => 'Oturumun sona erdi, tekrar giriş yap.',
+      NcReaction.blocked => 'Çevrimiçi sahne bu hesap için kapatıldı.',
+      NcReaction.signInUnavailable => 'Giriş şu an yapılamıyor; kod e-postası gönderilemiyor. Biraz sonra tekrar dene.',
+      NcReaction.invalidEmail => 'Bu e-posta adresi geçerli görünmüyor.',
+      NcReaction.codeInvalid => 'Kod yanlış.',
+      NcReaction.codeExpired => 'Kodun süresi doldu ya da çok kez yanlış girildi. Yeni kod iste.',
+      NcReaction.codeRateLimited => 'Çok fazla kod istendi; biraz bekleyip tekrar dene.',
       NcReaction.allowanceExhausted => 'Bu kullanıcı için hak kalmadı.',
       NcReaction.serviceOutOfCredits => 'Çevrimiçi resim geçici olarak kullanılamıyor.',
       NcReaction.notFound => 'Resim bulunamadı; 7 günden eski olabilir.',
       NcReaction.sessionClosed => 'Bağlantı yenilendi, tekrar dene.',
       NcReaction.dailyQuota => 'Bugünkü harita hakkın doldu.',
+      NcReaction.partnerDailyQuota => "GM Cebi'nin bugünkü harita hakkı doldu, yarın tekrar dene.",
       NcReaction.busy => 'Şu an çok yoğun, biraz sonra dene.',
       NcReaction.retrySoon => 'Şu an çok yoğun, birkaç saniye sonra tekrar dene.',
       NcReaction.noGpu => 'Çevrimiçi resim şu an kullanılamıyor. Harita çevrimdışı çalışmaya devam ediyor.',
@@ -48,7 +69,7 @@ String capacityLabel(OnlineSessionState s) {
     case SessionPhase.opening:
       return 'Bağlanıyor…';
     case SessionPhase.disabled:
-      return 'Güncelleme gerekiyor';
+      return s.error == NcReaction.blocked ? 'Kapalı' : 'Güncelleme gerekiyor';
     case SessionPhase.failed:
       return s.error == NcReaction.offline ? 'Çevrimdışı' : 'Şu an kullanılamıyor';
     case SessionPhase.open:
@@ -85,10 +106,19 @@ const consentTitle = 'Çevrimiçi sahne';
 /// (docs/partners/gm-cebi.md, "Privacy"; neuracraft-cloud docs/PRIVACY.md).
 const consentText = '''Çizdiğin arazi ve yazdığın tarif, resme dönüştürülmek için NeuraCraft Cloud sunucusuna gönderilir. Jetonlar gönderilmez; onları uygulama resmin üstüne çizer.
 
-• Hesap yok; ad ya da e-posta toplanmaz. Tek kimlik, bu kurulum için üretilen rastgele bir numaradır.
+• Çevrimiçi sahne için (yalnızca bu özellik için) e-posta adresinle giriş yaparsın. Adres yalnızca giriş kodunu göndermek için kullanılır; kodu Brevo (AB) gönderir.
+• NeuraCraft adresin kendisini saklamaz, yalnızca bir özetini (HMAC) ve sana verilen rastgele bir kullanıcı numarasını saklar.
 • Sunucu çizimi 24 saat, resmi 7 gün, tarifi iş bittikten sonra 24 saat saklar.
-• İşler AB'deki sunucularda çalışır. Tarifin İngilizceye çevrilmesi için metin, kimlik bilgisi olmadan Anthropic'e (ABD) gönderilebilir.
-• Bu özelliği Ayarlar'dan istediğin zaman kapatabilirsin.''';
+• İşler AB'deki sunucularda çalışır. Tarifin İngilizceye çevrilmesi için metin, hiçbir kimlik bilgisi olmadan Anthropic'e (ABD) gönderilebilir.
+• Hesabını Ayarlar'dan istediğin zaman silebilirsin; sunucudaki her şey hemen silinir. Özelliği de Ayarlar'dan kapatabilirsin.''';
 
-const deleteDataInfo =
-    'Uygulamadaki çevrimiçi resimler silinir ve yeni bir kurulum kimliği üretilir. Sunucudaki çizimler ve resimler en geç 7 gün içinde kendiliğinden silinir.';
+/// The sign-in sheet's explanation.
+const signInInfo = 'Çevrimiçi sahne için e-posta adresinle giriş yap. Adresine 6 haneli bir kod gelir; adres yalnızca bu kodu göndermek için kullanılır.';
+
+/// "Hesabımı sil" confirmation.
+const deleteAccountInfo =
+    'Hesabın ve sunucudaki tüm çizimlerin, resimlerin ve tariflerin hemen silinir. Uygulamadaki çevrimiçi resimler de silinir. Bu işlem geri alınamaz.';
+
+/// "Uygulamadaki çevrimiçi resimleri sil" (signed out: local only).
+const deleteLocalInfo =
+    'Bu cihazdaki çevrimiçi resimler silinir. Sunucudaki verilerin için giriş yapıp "Hesabımı sil"i kullan.';

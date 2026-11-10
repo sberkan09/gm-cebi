@@ -3,13 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app_info.dart';
 import '../../data/reference.dart';
+import '../../data/neuracraft/auth.dart';
 import '../../data/neuracraft/errors.dart';
 import '../../features/flags.dart';
+import '../../features/online_scene/account.dart';
 import '../../features/online_scene/messages.dart';
 import '../../features/online_scene/online_settings.dart';
 import '../../features/online_scene/scene_controller.dart';
-import '../../features/online_scene/session_controller.dart';
 import '../../providers.dart';
+import '../widgets/sign_in_sheet.dart';
 
 /// Settings, About and License.
 class SettingsScreen extends ConsumerWidget {
@@ -177,33 +179,118 @@ class _OnlineSceneSettings extends ConsumerWidget {
           ),
         ),
       ),
-      ListTile(
-        key: const Key('online-delete'),
-        leading: const Icon(Icons.delete_outline),
-        title: const Text('Verilerimi sil'),
-        subtitle: const Text('Çevrimiçi resimler ve kurulum kimliği'),
-        onTap: () async {
-          final ok = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Veriler silinsin mi?'),
-              content: const Text(deleteDataInfo),
-              actions: [
-                TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
-                FilledButton(key: const Key('online-delete-confirm'), onPressed: () => Navigator.pop(context, true), child: const Text('Sil')),
-              ],
-            ),
-          );
-          if (ok != true) return;
-          await ref.read(sceneControllerProvider.notifier).cancel();
-          await ref.read(onlineSessionProvider.notifier).closeNow();
-          await ref.read(databaseProvider).deleteAllScenes();
-          await ref.read(onlineSettingsProvider.notifier).resetIdentity();
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Uygulamadaki çevrimiçi veriler silindi.')));
-          }
-        },
-      ),
+      const _OnlineAccount(),
     ]);
+  }
+}
+
+/// "Çevrimiçi sahne hesabı": sign-in, today's quota, sign-out and account
+/// deletion (which also deletes everything on the server).
+class _OnlineAccount extends ConsumerWidget {
+  const _OnlineAccount();
+
+  void _snack(BuildContext context, String text) {
+    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  Future<bool> _confirm(BuildContext context, {required String title, required String text, required String action, required Key key}) async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: Text(text),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
+            FilledButton(key: key, onPressed: () => Navigator.pop(context, true), child: Text(action)),
+          ],
+        ),
+      ) ==
+      true;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final a = ref.watch(ncAccountProvider);
+    final scheme = Theme.of(context).colorScheme;
+    const title = Text('Çevrimiçi sahne hesabı');
+    switch (a.status) {
+      case NcAuthStatus.loading:
+        return const SizedBox.shrink();
+      case NcAuthStatus.blocked:
+        return ListTile(
+          key: const Key('online-account'),
+          leading: Icon(Icons.block, color: scheme.error),
+          title: title,
+          subtitle: Text(messageForReaction(NcReaction.blocked)),
+        );
+      case NcAuthStatus.signedOut:
+        return Column(children: [
+          ListTile(
+            key: const Key('online-sign-in'),
+            leading: const Icon(Icons.login),
+            title: title,
+            subtitle: Text(a.expired ? 'Oturumun sona erdi, tekrar giriş yap.' : 'Giriş yapılmadı. Dokun ve e-postanla giriş yap.'),
+            onTap: () => showSignInSheet(context),
+          ),
+          ListTile(
+            key: const Key('online-delete-local'),
+            leading: const Icon(Icons.delete_outline),
+            title: const Text('Uygulamadaki çevrimiçi resimleri sil'),
+            onTap: () async {
+              if (!await _confirm(context,
+                  title: 'Resimler silinsin mi?', text: deleteLocalInfo, action: 'Sil', key: const Key('online-delete-local-confirm'))) {
+                return;
+              }
+              await ref.read(sceneControllerProvider.notifier).cancel();
+              await ref.read(databaseProvider).deleteAllScenes();
+              if (context.mounted) _snack(context, 'Uygulamadaki çevrimiçi resimler silindi.');
+            },
+          ),
+        ]);
+      case NcAuthStatus.signedIn:
+        final me = ref.watch(ncMeProvider).value;
+        final quota = me?.daily != null && me?.used != null ? 'Bugün: ${me!.used}/${me.daily} harita' : null;
+        return Column(children: [
+          ListTile(
+            key: const Key('online-account'),
+            leading: const Icon(Icons.account_circle_outlined),
+            title: title,
+            subtitle: Text([a.email ?? 'Giriş yapıldı', ?quota].join('\n'), key: const Key('online-account-details')),
+            isThreeLine: quota != null,
+          ),
+          ListTile(
+            key: const Key('online-sign-out'),
+            leading: const Icon(Icons.logout),
+            title: const Text('Çıkış yap'),
+            onTap: () async {
+              await signOutOnline(ref);
+              if (context.mounted) _snack(context, 'Çıkış yapıldı.');
+            },
+          ),
+          ListTile(
+            key: const Key('online-delete-account'),
+            leading: Icon(Icons.delete_forever_outlined, color: scheme.error),
+            title: const Text('Hesabımı sil'),
+            subtitle: const Text('Hesabın ve sunucudaki tüm verilerin hemen silinir'),
+            onTap: () async {
+              if (!await _confirm(context,
+                  title: 'Hesabın silinsin mi?', text: deleteAccountInfo, action: 'Hesabımı sil', key: const Key('online-delete-account-confirm'))) {
+                return;
+              }
+              try {
+                await deleteOnlineAccount(ref);
+                if (context.mounted) _snack(context, 'Hesabın ve tüm verilerin silindi.');
+              } on NcException catch (e) {
+                if (context.mounted) {
+                  _snack(
+                      context,
+                      e.reaction == NcReaction.offline
+                          ? 'Sunucuya ulaşılamadı; hesabın silinmedi. Bağlantını kontrol edip tekrar dene.'
+                          : 'Hesap silinemedi: ${messageFor(e)}');
+                }
+              }
+            },
+          ),
+        ]);
+    }
   }
 }
