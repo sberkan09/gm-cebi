@@ -53,9 +53,10 @@ olur ve makine çıktısı onu bir daha ezemez.
 Her segment içe aktarılırken (`qc.py`):
 
 1. **Terim tutarlılığı** — `enforce=yes` olan her sözlük terimi kaynakta geçiyorsa çeviride de geçmeli. Eşleşme kökten sonra yalnızca sıralı Türkçe çekim eklerini kabul eder (çoğul, iyelik, hâl, -ki, şart, ek-fiil); "büyük" "büyü"yü, "dinlenme" "din"i karşılamaz. Gerekirse `tr_pattern` sütunu doğal türetmeye izin verir (Avantajlı, 5 fitlik).
-   - **Reddedilen alternatif** — terimin `alternatives` sütunundaki biçimler (başka bir terimin seçili karşılığı değilse) çeviride geçerse hata.
+   - **Reddedilen alternatif** — terimin `alternatives` sütunundaki biçimler (başka bir terimin seçili karşılığı değilse) çeviride geçerse hata. Başına `?` konan alternatif (`?Buz`, `?Tür`) yalnızca kayıt içindir: gündelik kelime olduğu için serbesttir.
+   - **Kısa kökler** — üç harf ya da daha kısa tek kelimelik terimlerde (İn, Din) eşitlik ve araç ekleri (-ce, -le) kabul edilmez; "ince" İn'i, "dinle" Din'i karşılamaz.
    - **Büyük/küçük harf** — terim kaynakta büyük harfliyse (Advantage) Türkçede de büyük, küçükse (saving throw) küçük; cümle başı hariç.
-2. **Sayı ve zar** — sayıların ve zar ifadelerinin (2d6+3) çok kümesi birebir aynı. Binlik ayırıcılar eşdeğer sayılır (1,000 = 1.000; Türkçede nokta kullanılır).
+2. **Sayı ve zar** — sayıların ve zar ifadelerinin (2d6+3) çok kümesi birebir aynı (sıra serbest: Türkçede öğe dizilişi değişir). Binlik ayırıcılar eşdeğer sayılır (1,000 = 1.000; Türkçede nokta kullanılır), ondalık virgül de (1.5 = 1,5).
 3. **Referanslar** — tırnaklı başlık atıfları (“Rules Glossary”) ve italik büyü adları, hedefi sözlükte ya da çevrilmiş kayıt adlarında varsa o Türkçe başlıkla çevrilmeli. Hedefi henüz bilinmeyen atıflar denetlenmez (sözlüğe "bölüm" satırı eklenince denetime girer). Büyü atıfları (*Shield*) ile kural atıfları (“Shield”) ayrı anahtarlarla tutulur.
 4. **Biçim** — `**` / `*` sayıları ve başlık etiketleri korunmalı.
 5. **Ürün kimliği** — yasaklı adlar geçmemeli; ayrıca İngilizce kelime kalıntısı uyarısı.

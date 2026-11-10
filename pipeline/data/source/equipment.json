@@ -2205,7 +2205,7 @@
   "blocks": [
    {
     "type": "p",
-    "text": "A Glass Bottle holds up to 11/2 pints."
+    "text": "A Glass Bottle holds up to 1½ pints."
    }
   ]
  },
@@ -4029,7 +4029,8 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "600 lb."
+   "Weight": "600 lb.",
+   "Cost": "100 GP"
   },
   "blocks": []
  },
@@ -4047,7 +4048,8 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "200 lb."
+   "Weight": "200 lb.",
+   "Cost": "15 GP"
   },
   "blocks": []
  },
@@ -4065,7 +4067,8 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "100 lb."
+   "Weight": "100 lb.",
+   "Cost": "250 GP"
   },
   "blocks": []
  },
@@ -4083,29 +4086,14 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "10 lb."
+   "Weight": "10 lb.",
+   "Cost": "5 CP"
   },
   "blocks": []
  },
  {
-  "id": "saddle",
-  "name": "Saddle",
-  "source": {
-   "document": "SRD 5.2.1",
-   "page": 100,
-   "heading": [
-    "Equipment",
-    "Tack, Harness, and Drawn Vehicles"
-   ]
-  },
-  "kind": "equipment",
-  "category": "vehicle",
-  "fields": {},
-  "blocks": []
- },
- {
-  "id": "exotic",
-  "name": "Exotic",
+  "id": "saddle-exotic",
+  "name": "Saddle, Exotic",
   "source": {
    "document": "SRD 5.2.1",
    "page": 100,
@@ -4117,13 +4105,14 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "40 lb."
+   "Weight": "40 lb.",
+   "Cost": "60 GP"
   },
   "blocks": []
  },
  {
-  "id": "military",
-  "name": "Military",
+  "id": "saddle-military",
+  "name": "Saddle, Military",
   "source": {
    "document": "SRD 5.2.1",
    "page": 100,
@@ -4135,13 +4124,14 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "30 lb."
+   "Weight": "30 lb.",
+   "Cost": "20 GP"
   },
   "blocks": []
  },
  {
-  "id": "riding",
-  "name": "Riding",
+  "id": "saddle-riding",
+  "name": "Saddle, Riding",
   "source": {
    "document": "SRD 5.2.1",
    "page": 100,
@@ -4153,7 +4143,8 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "25 lb."
+   "Weight": "25 lb.",
+   "Cost": "10 GP"
   },
   "blocks": []
  },
@@ -4171,7 +4162,8 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "300 lb."
+   "Weight": "300 lb.",
+   "Cost": "20 GP"
   },
   "blocks": []
  },
@@ -4189,7 +4181,8 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "—"
+   "Weight": "—",
+   "Cost": "5 SP"
   },
   "blocks": []
  },
@@ -4207,24 +4200,9 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "400 lb."
+   "Weight": "400 lb.",
+   "Cost": "35 GP"
   },
-  "blocks": []
- },
- {
-  "id": "speed",
-  "name": "Speed",
-  "source": {
-   "document": "SRD 5.2.1",
-   "page": 101,
-   "heading": [
-    "Equipment",
-    "Airborne and Waterborne Vehicles"
-   ]
-  },
-  "kind": "equipment",
-  "category": "vehicle",
-  "fields": {},
   "blocks": []
  },
  {
@@ -4241,7 +4219,14 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "8 mph"
+   "Speed": "8 mph",
+   "Crew": "10",
+   "Passengers": "20",
+   "Cargo (Tons)": "1",
+   "AC": "13",
+   "HP": "300",
+   "Damage Threshold": "—",
+   "Cost": "40,000 GP"
   },
   "blocks": []
  },
@@ -4259,7 +4244,14 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "4 mph"
+   "Speed": "4 mph",
+   "Crew": "80",
+   "Passengers": "—",
+   "Cargo (Tons)": "150",
+   "AC": "15",
+   "HP": "500",
+   "Damage Threshold": "20",
+   "Cost": "30,000 GP"
   },
   "blocks": []
  },
@@ -4277,7 +4269,14 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "1 mph"
+   "Speed": "1 mph",
+   "Crew": "1",
+   "Passengers": "6",
+   "Cargo (Tons)": "1/2",
+   "AC": "15",
+   "HP": "100",
+   "Damage Threshold": "10",
+   "Cost": "3,000 GP"
   },
   "blocks": []
  },
@@ -4295,7 +4294,14 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "3 mph"
+   "Speed": "3 mph",
+   "Crew": "40",
+   "Passengers": "150",
+   "Cargo (Tons)": "10",
+   "AC": "15",
+   "HP": "300",
+   "Damage Threshold": "15",
+   "Cost": "10,000 GP"
   },
   "blocks": []
  },
@@ -4313,7 +4319,14 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "1½ mph"
+   "Speed": "1½ mph",
+   "Crew": "1",
+   "Passengers": "3",
+   "Cargo (Tons)": "—",
+   "AC": "11",
+   "HP": "50",
+   "Damage Threshold": "—",
+   "Cost": "50 GP"
   },
   "blocks": []
  },
@@ -4331,7 +4344,14 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "2 mph"
+   "Speed": "2 mph",
+   "Crew": "20",
+   "Passengers": "20",
+   "Cargo (Tons)": "100",
+   "AC": "15",
+   "HP": "300",
+   "Damage Threshold": "15",
+   "Cost": "10,000 GP"
   },
   "blocks": []
  },
@@ -4349,113 +4369,14 @@
   "kind": "equipment",
   "category": "vehicle",
   "fields": {
-   "Cost": "2½ mph"
-  },
-  "blocks": []
- },
- {
-  "id": "comfortable",
-  "name": "Comfortable",
-  "source": {
-   "document": "SRD 5.2.1",
-   "page": 101,
-   "heading": [
-    "Equipment",
-    "Airborne and Waterborne Vehicles"
-   ]
-  },
-  "kind": "equipment",
-  "category": "vehicle",
-  "fields": {
-   "Cost": "2 SP"
-  },
-  "blocks": []
- },
- {
-  "id": "wealthy",
-  "name": "Wealthy",
-  "source": {
-   "document": "SRD 5.2.1",
-   "page": 101,
-   "heading": [
-    "Equipment",
-    "Airborne and Waterborne Vehicles"
-   ]
-  },
-  "kind": "equipment",
-  "category": "vehicle",
-  "fields": {
-   "Cost": "3 SP"
-  },
-  "blocks": []
- },
- {
-  "id": "aristocratic",
-  "name": "Aristocratic",
-  "source": {
-   "document": "SRD 5.2.1",
-   "page": 101,
-   "heading": [
-    "Equipment",
-    "Airborne and Waterborne Vehicles"
-   ]
-  },
-  "kind": "equipment",
-  "category": "vehicle",
-  "fields": {
-   "Cost": "6 SP"
-  },
-  "blocks": []
- },
- {
-  "id": "wine-bottle",
-  "name": "Wine (bottle)",
-  "source": {
-   "document": "SRD 5.2.1",
-   "page": 101,
-   "heading": [
-    "Equipment",
-    "Airborne and Waterborne Vehicles"
-   ]
-  },
-  "kind": "equipment",
-  "category": "vehicle",
-  "fields": {},
-  "blocks": []
- },
- {
-  "id": "common",
-  "name": "Common",
-  "source": {
-   "document": "SRD 5.2.1",
-   "page": 101,
-   "heading": [
-    "Equipment",
-    "Airborne and Waterborne Vehicles"
-   ]
-  },
-  "kind": "equipment",
-  "category": "vehicle",
-  "fields": {
-   "Cost": "2 SP"
-  },
-  "blocks": []
- },
- {
-  "id": "fine",
-  "name": "Fine",
-  "source": {
-   "document": "SRD 5.2.1",
-   "page": 101,
-   "heading": [
-    "Equipment",
-    "Airborne and Waterborne Vehicles"
-   ]
-  },
-  "kind": "equipment",
-  "category": "vehicle",
-  "fields": {
-   "Cost": "10 GP"
+   "Speed": "2½ mph",
+   "Crew": "60",
+   "Passengers": "60",
+   "Cargo (Tons)": "200",
+   "AC": "15",
+   "HP": "500",
+   "Damage Threshold": "20",
+   "Cost": "25,000 GP"
   },
   "blocks": []
  }

@@ -16,7 +16,7 @@ import re
 
 from .glossary import Glossary
 from .license import find_terms
-from .textutil import dice_tokens, number_tokens
+from .textutil import dice_tokens, number_tokens, tr_lower
 
 # English number words → digits are allowed to be rendered either way, so the
 # QC only compares digit tokens.
@@ -54,11 +54,11 @@ def check_references(en: str, tr: str, title_map: dict[str, str]) -> list[str]:
         tgt = title_map.get(ref)
         if tgt is None:
             continue  # target not in the glossary or translated names yet: not checked
-        if tgt.lower() not in tr.lower():
+        if tr_lower(tgt) not in tr_lower(tr):
             issues.append(f"ref: “{ref}” → “{tgt}” bulunamadı")
     for ref in re.findall(r"(?<!\*)\*([^*]+?)\*(?!\*)", en):
         tgt = title_map.get(f"*{ref}")
-        if tgt and tgt.lower() not in tr.lower():
+        if tgt and tr_lower(tgt) not in tr_lower(tr):
             issues.append(f"ref: *{ref}* → *{tgt}* bulunamadı")
     return issues
 

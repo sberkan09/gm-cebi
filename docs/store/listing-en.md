@@ -6,8 +6,8 @@ Rules:
   "5E compatible" (SRD 5.2.1 license).
 - No attribution to Wizards other than the SRD attribution sentence. That also rules out
   disclaimers such as "not affiliated with Wizards".
-- Do not overstate the translation: only conditions, the rules glossary and 50 spells
-  are in Turkish so far.
+- Do not overstate the translation: all SRD 5.2.1 content is in Turkish, but the translation
+  is machine-assisted and human review is ongoing. Never claim "perfect" or "official".
 - Character counts include spaces. Recount after edits.
 
 ## Google Play
@@ -45,7 +45,7 @@ GM PACK
 • The GM pack is unlocked in this version.
 
 TRANSLATION STATUS
-This first version has all 15 conditions, the 140 rules glossary entries and 50 spells in Turkish. Monsters, classes, equipment and the remaining spells are shown in English for now and can also be found by their Turkish names. More translations will follow in updates.
+All of SRD 5.2.1 is in Turkish: 339 spells, 330 monsters, 12 classes and their subclasses, origins, feats, equipment, conditions and the rules glossary. The translation is machine-assisted and still being reviewed; report any odd terms and we will fix them. Every page has a TR/EN switch to check the English original.
 
 PRIVACY
 The app never connects to the internet. No ads, no analytics, no account. Your notes and encounters stay on your phone.

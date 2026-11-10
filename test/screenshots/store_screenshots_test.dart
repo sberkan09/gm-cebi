@@ -59,7 +59,7 @@ void main() {
       await goBack(tester);
       await tester.enterText(find.byKey(const Key('search-field')), 'goblin warrior');
       await settle(tester);
-      await tester.tap(find.text('Goblin Warrior').first);
+      await tester.tap(find.text('Goblin Savaşçısı').first);
       await settle(tester);
       await shot('04-canavar');
     });
@@ -75,8 +75,8 @@ void main() {
 
     appTest('${d.dir}: initiative', gmPack: true, surface: d.size, pixelRatio: d.pixelRatio, (tester, db) async {
       db.addCombatant(name: 'Ayla', initiative: 17, hp: 24, ac: 15, isPlayer: true);
-      db.addCombatant(name: 'Goblin Warrior', initiative: 14, hp: 10, ac: 15, monsterId: 'goblin-warrior');
-      db.addCombatant(name: 'Wolf', initiative: 9, hp: 11, ac: 12, monsterId: 'wolf');
+      db.addCombatant(name: 'Goblin Savaşçısı', initiative: 14, hp: 10, ac: 15, monsterId: 'goblin-warrior');
+      db.addCombatant(name: 'Kurt', initiative: 9, hp: 11, ac: 12, monsterId: 'wolf');
       await settle(tester);
       db.nextTurn();
       await settle(tester);

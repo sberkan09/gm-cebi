@@ -87,7 +87,7 @@ def glossary_review(path: Path = DOCS / "glossary-review.md") -> None:
     ]
     for t in core:
         if t.status == "tartışmalı":
-            lines.append(f"| {t.en} | **{t.tr}** | {', '.join(t.alternatives) or '—'} | {t.note or '—'} | "
+            lines.append(f"| {t.en} | **{t.tr}** | {', '.join(a.lstrip('?') for a in t.alternatives) or '—'} | {t.note or '—'} | "
                          f"{t.evidence or '—'} |")
     by_cat: dict[str, list] = {}
     for t in core:
@@ -101,7 +101,7 @@ def glossary_review(path: Path = DOCS / "glossary-review.md") -> None:
         for t in by_cat[c]:
             n += 1
             lines.append(f"| {n} | {t.en} | **{t.tr}** | {t.status} | {'✔' if t.enforce else ''} | "
-                         f"{', '.join(t.alternatives)} | {t.note} | {t.evidence} |")
+                         f"{', '.join(a.lstrip('?') for a in t.alternatives)} | {t.note} | {t.evidence} |")
         lines.append("")
     lines += ["## Pilot büyü adları ve bölüm adları", "", "| İngilizce | Türkçe | Tür |", "|---|---|---|"]
     for t in g.terms:

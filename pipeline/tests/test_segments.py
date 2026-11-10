@@ -36,3 +36,17 @@ def test_needs_translation():
     assert not needs_translation("2d6 + 3")
     assert not needs_translation("—")
     assert needs_translation("60 feet")
+
+
+def test_context_namespaces():
+    from gmcebi_pipeline.segments import record_segments, segment_key
+    cls = {"id": "bard", "name": "Bard", "blocks": [
+        {"type": "table", "title": "Cantrips", "header": ["Spell", "School"], "rows": [["Light", "Evocation"]]},
+        {"type": "table", "title": "Gear", "header": ["Item", "Cost"], "rows": [["Light", "1 GP"]]}]}
+    keys = {(s.path, s.en): s.key for s in record_segments(cls, "classes")}
+    assert keys[("blocks.0.rows.0.0", "Light")] == segment_key("Light", "spells")  # the spell
+    assert keys[("blocks.1.rows.0.0", "Light")] == segment_key("Light")            # plain text
+    mon = {"id": "ettin", "name": "Ettin", "creature_type": "Giant", "details": {"Languages": "Giant"}}
+    keys = {s.path: s.key for s in record_segments(mon, "monsters")}
+    assert keys["details.Languages"] == segment_key("Giant", "lang")
+    assert keys["creature_type"] == segment_key("Giant")

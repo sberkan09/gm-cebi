@@ -31,3 +31,8 @@ def test_dice_and_numbers():
 def test_thousands_separators_are_equivalent():
     assert number_tokens("1,000 GP") == number_tokens("1.000 altın") == ["1000"]
     assert number_tokens("XP 7,200") == number_tokens("TP 7.200")
+
+
+def test_decimal_comma_is_equivalent():
+    assert number_tokens("a 2.5-foot gap") == number_tokens("2,5 fitlik bir boşluk") == ["2.5"]
+    assert number_tokens("1,000 GP") == ["1000"]  # thousands still win over decimals

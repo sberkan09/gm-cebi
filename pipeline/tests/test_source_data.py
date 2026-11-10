@@ -77,3 +77,13 @@ def test_no_soft_hyphen_leftovers(source):
     # "word- word" from a line-break hyphen that was not joined
     leftovers = re.findall(r"[a-z]{3,}- [a-z]{3,}", blob)
     assert len(leftovers) <= 3, leftovers
+
+
+def test_vehicle_tables(source):
+    eq = {e["id"]: e for e in source["equipment"]}
+    assert eq["galley"]["fields"]["Cost"] == "30,000 GP"
+    assert eq["rowboat"]["fields"]["HP"] == "50" and eq["rowboat"]["fields"]["Cost"] == "50 GP"
+    assert eq["saddle-exotic"]["name"] == "Saddle, Exotic"
+    assert eq["cart"]["fields"] == {"Weight": "200 lb.", "Cost": "15 GP"}
+    # Header cells and rows of the food table that leaked into the ship table are gone.
+    assert not {"speed", "exotic", "comfortable", "common", "saddle"} & set(eq)
