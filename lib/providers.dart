@@ -8,6 +8,7 @@ import 'core/dice.dart';
 import 'data/reference.dart';
 import 'data/search.dart';
 import 'db/database.dart';
+import 'features/encounter_difficulty.dart';
 import 'features/flags.dart';
 
 // ---------------------------------------------------------------- database
@@ -45,7 +46,14 @@ final referenceProvider = FutureProvider<Reference>((ref) => loadReferenceFromAs
 // ---------------------------------------------------------------- settings
 
 class AppSettings {
-  const AppSettings({this.contentLang = Lang.tr, this.themeMode = ThemeMode.dark, this.gmPackOverride, this.penModeChoice});
+  const AppSettings({
+    this.contentLang = Lang.tr,
+    this.themeMode = ThemeMode.dark,
+    this.gmPackOverride,
+    this.partyLevel = 1,
+    this.partySize = 4,
+    this.penModeChoice,
+  });
 
   /// Default language of detail pages (each page has a one-tap toggle).
   final Lang contentLang;
@@ -56,6 +64,13 @@ class AppSettings {
   /// Internal builds only: test switch for the GM pack entitlement.
   final bool? gmPackOverride;
 
+  /// Encounter difficulty: "Grup seviyesi", the level of players without one
+  /// and of the party when the encounter has no players.
+  final int partyLevel;
+
+  /// Encounter difficulty: party size when the encounter has no players.
+  final int partySize;
+
   /// Battle map "Kalem modu": only a stylus draws; fingers pan, zoom and move
   /// tokens (palm rejection). Null until decided: the first stylus touch
   /// turns it on, but never over the user's own choice (toolbar or Settings).
@@ -63,11 +78,21 @@ class AppSettings {
 
   bool get penMode => penModeChoice ?? false;
 
-  AppSettings copyWith({Lang? contentLang, ThemeMode? themeMode, bool? gmPackOverride, bool clearOverride = false, bool? penModeChoice}) =>
+  AppSettings copyWith({
+    Lang? contentLang,
+    ThemeMode? themeMode,
+    bool? gmPackOverride,
+    bool clearOverride = false,
+    int? partyLevel,
+    int? partySize,
+    bool? penModeChoice,
+  }) =>
       AppSettings(
         contentLang: contentLang ?? this.contentLang,
         themeMode: themeMode ?? this.themeMode,
         gmPackOverride: clearOverride ? null : (gmPackOverride ?? this.gmPackOverride),
+        partyLevel: partyLevel ?? this.partyLevel,
+        partySize: partySize ?? this.partySize,
         penModeChoice: penModeChoice ?? this.penModeChoice,
       );
 }
@@ -82,6 +107,8 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
       contentLang: m['contentLang'] == 'en' ? Lang.en : Lang.tr,
       themeMode: switch (m['themeMode']) { 'light' => ThemeMode.light, 'system' => ThemeMode.system, _ => ThemeMode.dark },
       gmPackOverride: switch (m['gmPackOverride']) { 'true' => true, 'false' => false, _ => null },
+      partyLevel: clampLevel(int.tryParse(m['partyLevel'] ?? '') ?? 1),
+      partySize: (int.tryParse(m['partySize'] ?? '') ?? 4).clamp(minPartySize, maxPartySize),
       penModeChoice: switch (m['mapPenMode']) { 'true' => true, 'false' => false, _ => null },
     );
   }
@@ -103,6 +130,18 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
     await _db.writeSetting('gmPackOverride', v?.toString());
   }
 
+  Future<void> setPartyLevel(int level) async {
+    final l = clampLevel(level);
+    state = AsyncData(_current.copyWith(partyLevel: l));
+    await _db.writeSetting('partyLevel', '$l');
+  }
+
+  Future<void> setPartySize(int size) async {
+    final n = size.clamp(minPartySize, maxPartySize);
+    state = AsyncData(_current.copyWith(partySize: n));
+    await _db.writeSetting('partySize', '$n');
+  }
+
   /// The user's choice (map toolbar or Settings).
   Future<void> setPenMode(bool v) async {
     state = AsyncData(_current.copyWith(penModeChoice: v));
@@ -117,6 +156,9 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
     await setPenMode(true);
   }
 }
+
+const minPartySize = 1;
+const maxPartySize = 12;
 
 final settingsProvider = AsyncNotifierProvider<SettingsNotifier, AppSettings>(SettingsNotifier.new);
 
@@ -134,6 +176,24 @@ final notesProvider = StreamProvider<List<Note>>((ref) => ref.watch(databaseProv
 
 final encounterProvider =
     StreamProvider<EncounterState>((ref) => ref.watch(databaseProvider).watchEncounterState());
+
+/// The active encounter's difficulty inputs; null while the encounter or the
+/// reference data is loading.
+final encounterDifficultyProvider = Provider<EncounterSummary?>((ref) {
+  final state = ref.watch(encounterProvider).value;
+  final data = ref.watch(referenceProvider).value?.data;
+  if (state == null || data == null) return null;
+  final s = ref.watch(currentSettingsProvider);
+  return summarizeEncounter(
+    state.combatants,
+    (id) {
+      final r = data.find('monsters', id);
+      return r == null ? null : monsterXp(r.en);
+    },
+    partyLevel: s.partyLevel,
+    partySize: s.partySize,
+  );
+});
 
 /// Pen strokes of the active encounter's battle map.
 final mapStrokesProvider = StreamProvider<List<MapStroke>>((ref) => ref.watch(databaseProvider).watchStrokes());

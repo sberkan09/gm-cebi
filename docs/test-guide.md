@@ -35,7 +35,11 @@ Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
    ekle" ya da canavar sayfasındaki "İnisiyatife ekle" ile ekle. Zar
    simgesiyle canavarların inisiyatifini at, **Sonraki** ile sırayı ilerlet,
    can çubuğuna dokunup hasar/iyileştirme gir, kartın üstüne dokunup durum ekle.
-   Uygulamayı kapatıp açınca karşılaşma yerinde durmalı.
+   Uygulamayı kapatıp açınca karşılaşma yerinde durmalı. Listeden canavar
+   eklenince üstte zorluk çipi çıkar (ör. "Orta · 1.050 / 1.500 TP"); dokununca
+   bütçeler, canavarların TP'si ve grup açılır. Oyuncu seviyesini ekleme
+   penceresinde, kart menüsündeki "Seviye"de ya da zorluk sayfasında değiştir;
+   oyuncu yoksa grup büyüklüğü ve seviyesi orada ayarlanır.
 5. **Harita** — İnisiyatif ekranında sağ üstteki harita simgesine dokun. Parmağınla çiz
    (renkler: mürekkep, su, bitki, tehlike), dokununca nokta bırakır; "Sil" ile sil; geri al
    düğmesi son işlemi (çizim, silme, temizleme) geri alır. Alttaki şeritten katılımcıya dokununca jetonu haritaya

@@ -89,6 +89,13 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-11-09 — Resim indirmede 302 elle takip edilir: uygulama token'ı ve kurulum kimliği yalnızca NeuraCraft'a gider, depolama sağlayıcısına gitmez.
 - 2026-11-09 — "Verilerimi sil" yerel verileri siler ve yeni kurulum kimliği üretir; sunucu tarafı silme `partner:manage` gerektirdiği ve GM Cebi'nin sunucusu olmadığı için "en geç 7 gün" açıklaması gösterilir.
 
+## Karşılaşma zorluğu (2026-11-09)
+
+- 2026-11-09 — Zorluk SRD 5.2.1 "Combat Encounters" (s. 202) kuralıyla: karakter başına TP bütçesi (seviye × Düşük/Orta/Yüksek) karakterlerin toplamı; karşılaşma TP'si her canavarın normal TP'sinin toplamı (in lair değeri değil), çarpan yok. Karışık seviyeli grupta her karakter kendi satırından sayılır.
+- 2026-11-09 — Bantlar: bütçe o zorlukta harcanabilecek en çok TP olduğu için Düşük bütçesine kadar "Düşük", Orta bütçesine kadar "Orta", Yüksek bütçesine kadar "Yüksek". SRD'de olmayan iki dış bant tablo dışı olduğunu belli eden adlarla: Yüksek bütçesini aşan "Yüksek üstü", Düşük bütçesinin yarısından az olan "Düşük altı" (yarı eşiği uygulamanın kendi kuralı, SRD'den değil). Çipte karşılaşma TP'si bandın üst bütçesine bölünmüş gösterilir.
+- 2026-11-09 — Grup = karşılaşmadaki oyuncu karakterleri. Seviye `combatants.level`'da (boş olabilir; şema 4, geçiş testli); "Yeni karşılaşma" seviyeyi taşır. Seviyesi girilmemiş oyuncu ve oyuncusuz karşılaşma "Grup seviyesi" ayarını (varsayılan 1), oyuncusuz karşılaşma "Grup büyüklüğü" ayarını (varsayılan 4) kullanır; ikisi `settings` tablosunda. Ada göre ayarda saklamak kırılgan olduğu için sütun seçildi.
+- 2026-11-09 — Canavar TP'si kayıttaki İngilizce `xp` metninden okunur (dilden bağımsız; adlara bakılmaz), eksikse TD'den. Elle eklenen ve canavar kaydı olmayan katılımcılar "TP bilinmiyor" olarak gösterilir, toplama katılmaz.
+
 ## Onay bekleyenler
 
 - **ONAY BEKLİYOR** — Atıf metni: SRD'nin zorunlu kıldığı İngilizce cümle README'ye, `manifest.json`'a ve Hakkında ekranına birebir kondu (onay gerektirmez, lisans şartı). Ek olarak Türkçe bir "değiştirilmiş eser" notu öneriliyor (CC-BY değişikliklerin belirtilmesini istiyor): "Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, değiştirilmiş bir çalışmadır. …" Test sürümünde Hakkında ekranında **öneri metni olarak** duruyor (`lib/app_info.dart`, `translationNotice`); mağaza sürümünden önce onaylanmalı ya da değiştirilmeli. SRD, Wizards'a bu atıf dışında başka bir atıf yapılmamasını istediği için "Wizards ile bağımız yoktur" gibi ek cümleler kullanılmıyor.
