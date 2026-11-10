@@ -45,7 +45,7 @@ final referenceProvider = FutureProvider<Reference>((ref) => loadReferenceFromAs
 // ---------------------------------------------------------------- settings
 
 class AppSettings {
-  const AppSettings({this.contentLang = Lang.tr, this.themeMode = ThemeMode.dark, this.gmPackOverride});
+  const AppSettings({this.contentLang = Lang.tr, this.themeMode = ThemeMode.dark, this.gmPackOverride, this.penModeChoice});
 
   /// Default language of detail pages (each page has a one-tap toggle).
   final Lang contentLang;
@@ -56,11 +56,19 @@ class AppSettings {
   /// Internal builds only: test switch for the GM pack entitlement.
   final bool? gmPackOverride;
 
-  AppSettings copyWith({Lang? contentLang, ThemeMode? themeMode, bool? gmPackOverride, bool clearOverride = false}) =>
+  /// Battle map "Kalem modu": only a stylus draws; fingers pan, zoom and move
+  /// tokens (palm rejection). Null until decided: the first stylus touch
+  /// turns it on, but never over the user's own choice (toolbar or Settings).
+  final bool? penModeChoice;
+
+  bool get penMode => penModeChoice ?? false;
+
+  AppSettings copyWith({Lang? contentLang, ThemeMode? themeMode, bool? gmPackOverride, bool clearOverride = false, bool? penModeChoice}) =>
       AppSettings(
         contentLang: contentLang ?? this.contentLang,
         themeMode: themeMode ?? this.themeMode,
         gmPackOverride: clearOverride ? null : (gmPackOverride ?? this.gmPackOverride),
+        penModeChoice: penModeChoice ?? this.penModeChoice,
       );
 }
 
@@ -74,6 +82,7 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
       contentLang: m['contentLang'] == 'en' ? Lang.en : Lang.tr,
       themeMode: switch (m['themeMode']) { 'light' => ThemeMode.light, 'system' => ThemeMode.system, _ => ThemeMode.dark },
       gmPackOverride: switch (m['gmPackOverride']) { 'true' => true, 'false' => false, _ => null },
+      penModeChoice: switch (m['mapPenMode']) { 'true' => true, 'false' => false, _ => null },
     );
   }
 
@@ -92,6 +101,20 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
   Future<void> setGmPackOverride(bool? v) async {
     state = AsyncData(_current.copyWith(gmPackOverride: v, clearOverride: v == null));
     await _db.writeSetting('gmPackOverride', v?.toString());
+  }
+
+  /// The user's choice (map toolbar or Settings).
+  Future<void> setPenMode(bool v) async {
+    state = AsyncData(_current.copyWith(penModeChoice: v));
+    await _db.writeSetting('mapPenMode', '$v');
+  }
+
+  /// A stylus touched the map: turn pen mode on, unless it was ever decided
+  /// (or the settings are not loaded yet, so the choice is not known).
+  Future<void> stylusSeen() async {
+    final s = state.value;
+    if (s == null || s.penModeChoice != null) return;
+    await setPenMode(true);
   }
 }
 

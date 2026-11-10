@@ -40,7 +40,11 @@ Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
    (renkler: mürekkep, su, bitki, tehlike), dokununca nokta bırakır; "Sil" ile sil; geri al
    düğmesi son işlemi (çizim, silme, temizleme) geri alır. Alttaki şeritten katılımcıya dokununca jetonu haritaya
    gelir; jetonu sürükleyerek taşı; jetona dokunup "Haritadan kaldır" ile kaldır. "Sonraki" sırayı haritadan ilerletir.
-   Tablette de dene: harita ekrana göre büyür.
+   Tablette de dene: harita ekrana göre büyür. İki parmakla kaydır ve yakınlaştır (yakınken köşedeki düğme haritayı
+   sığdırır). Kalemle (S Pen, Apple Pencil) dokununca **kalem modu** kendiliğinden açılır: yalnızca kalem çizer,
+   avuç içi ve parmak çizmez (tek parmak haritayı kaydırır, jetonlar parmakla taşınır); kalemin silgi ucu ya da yan
+   tuşu o çizgi için siler; kalem ekranın üstünde gezinirken fırça/silgi imleci görünür. Kalem modunu haritadaki
+   kalem düğmesinden ya da Ayarlar'dan kapat.
 6. **Notlar** — Oturum notu al; yazdıkların kendiliğinden kaydedilir.
 7. **Genel** — Tek elle kullanım, yazı büyüklüğü, koyu/açık tema (Ayarlar).
 
