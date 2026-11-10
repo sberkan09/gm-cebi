@@ -34,6 +34,9 @@ class FakeService {
   /// `DELETE /v1/me` fails as if offline.
   bool deleteOffline = false;
 
+  /// The `GET /v1/presets` answer (null: 404, as if the region layer were unknown).
+  Map<String, Object?>? presets;
+
   http.StreamedResponse _json(Object body, [int status = 200]) =>
       http.StreamedResponse(Stream.value(utf8.encode(jsonEncode(body))), status, headers: {'content-type': 'application/json'});
 
@@ -65,6 +68,7 @@ class FakeService {
     }
     if (p.endsWith('/heartbeat')) return _json({'session': {'id': 's1', 'heartbeatSeconds': 120}, 'capacity': {'state': 'ready'}});
     if (r.method == 'DELETE') return _json({'closed': true});
+    if (p == '/v1/presets' && presets != null) return _json(presets!);
     if (p == '/v1/presets/sketch_to_scene/jobs') {
       bodies.add(jsonDecode((r as http.Request).body) as Map<String, dynamic>);
       final n = nextSubmit;
@@ -92,7 +96,11 @@ List<Override> online(FakeService service, {MemoryTokenStore? store}) => [
       // the real export is tested in test/core/map_sketch_test.dart.
       sketchExporterProvider.overrideWith((ref) => () async {
             final strokes = await ref.read(databaseProvider).select(ref.read(databaseProvider).mapStrokes).get();
-            return strokes.isEmpty ? null : tinyPng;
+            return strokes.where((s) => !s.isRegion).isEmpty ? null : tinyPng;
+          }),
+      regionsExporterProvider.overrideWith((ref) => () async {
+            final strokes = await ref.read(databaseProvider).select(ref.read(databaseProvider).mapStrokes).get();
+            return strokes.any((s) => s.isRegion) ? tinyPng : null;
           }),
     ];
 
@@ -148,6 +156,9 @@ void main() {
     await settle(tester);
     expect(service.calls, contains('POST /v1/sessions'), reason: 'consent opens the session: the GPU starts warming');
     expect(find.byKey(const Key('scene-capacity-warning')), findsOneWidget);
+    expect(find.byKey(const Key('scene-ground')), findsNothing, reason: 'the service does not take a region layer yet');
+    expect(find.byKey(const Key('scene-regions-hint')), findsNothing);
+    expect(find.textContaining('nehri, suyu'), findsOneWidget, reason: 'without regions, the description is the only way to say where the water is');
 
     await tester.tap(find.text('Atmosfer'));
     await tester.enterText(find.byKey(const Key('scene-narrative')), 'Nehrin üzerinde ahşap bir köprü');
@@ -174,6 +185,56 @@ void main() {
     expect(service.calls, contains('POST /v1/assets/asset-1/report'));
     expect(find.text('Resim bildirildi ve gizlendi.'), findsOneWidget);
     expect(find.byKey(const Key('scene-toggle')), findsNothing, reason: 'a reported picture is not shown');
+  });
+
+  final regionService = FakeService()
+    ..presets = {
+      'presets': [
+        {
+          'id': 'sketch_to_scene',
+          'version': 1,
+          'params': {
+            'mode': {'type': 'enum', 'options': ['map', 'atmosphere'], 'required': true},
+            'ground': {'type': 'enum', 'options': ['grass', 'stone', 'dirt', 'sand', 'snow'], 'default': 'grass'},
+          },
+          'inputs': [
+            {'name': 'sketch', 'contentTypes': ['image/png']},
+            {'name': 'regions', 'contentTypes': ['image/png']},
+          ],
+        },
+      ],
+    };
+  appTest('a service that takes the region layer: Zemin in map mode; the painted areas and the ground are sent', gmPack: true,
+      overrides: online(regionService), (tester, db) async {
+    db.writeSetting('ncConsent', 'true');
+    db.addStroke(const [Offset01(0.2, 0.2), Offset01(0.8, 0.2)], region: 3, width: 0.09); // stone floor
+    db.addStroke(const [Offset01(0.2, 0.3), Offset01(0.8, 0.3)], region: 4, width: 0.05); // wall
+    await openMapWithSketch(tester, db);
+    await tester.tap(find.byKey(const Key('scene-open')));
+    await settle(tester);
+    expect(find.byKey(const Key('scene-regions-hint')), findsOneWidget);
+    expect(find.text('Nehirleri ve yolları Alan fırçasıyla boyarsan resim çok daha doğru olur.'), findsOneWidget);
+    expect(find.byKey(const Key('scene-ground')), findsOneWidget);
+    for (final label in ['Çimen', 'Taş', 'Toprak', 'Kum', 'Kar']) {
+      expect(find.widgetWithText(ChoiceChip, label), findsOneWidget);
+    }
+    expect(tester.widget<ChoiceChip>(find.byKey(const Key('ground-stone'))).selected, isTrue, reason: 'mostly floor and wall: a dungeon');
+
+    await tester.tap(find.text('Atmosfer'));
+    await settle(tester);
+    expect(find.byKey(const Key('scene-ground')), findsNothing, reason: 'the region layer is for map mode only');
+    await tester.tap(find.descendant(of: find.byKey(const Key('scene-mode')), matching: find.text('Harita')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('ground-snow')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('scene-generate')));
+    await settle(tester);
+
+    final body = regionService.bodies.single;
+    expect(body['params']['mode'], 'map');
+    expect(body['params']['ground'], 'snow');
+    expect((body['inputs'] as Map).keys, ['sketch', 'regions']);
+    expect(body['inputs']['regions']['contentType'], 'image/png');
   });
 
   final quota = FakeService()

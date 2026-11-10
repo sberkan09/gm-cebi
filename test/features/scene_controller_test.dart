@@ -61,6 +61,9 @@ class Server {
   /// When set, the events stream is this controller's (the test drives it).
   StreamController<List<int>>? events;
 
+  /// The `GET /v1/presets` answer (null: 404).
+  Map<String, Object?>? presets;
+
   Future<http.StreamedResponse> handle(http.BaseRequest r) async {
     calls.add('${r.method} ${r.url.path}');
     final p = r.url.path;
@@ -71,6 +74,7 @@ class Server {
         'capacity': {'state': 'ready'},
       }, 201);
     }
+    if (p == '/v1/presets' && presets != null) return jsonStream(presets!);
     if (p == '/v1/presets/sketch_to_scene/jobs') {
       bodies.add(jsonDecode((r as http.Request).body) as Map<String, dynamic>);
       if (holdSubmit != null) await holdSubmit!.future;
@@ -120,7 +124,7 @@ void main() {
     await db.close();
   });
 
-  Future<void> make(Server s, {bool withSketch = true}) async {
+  Future<void> make(Server s, {bool withSketch = true, Uint8List? regions}) async {
     server = s;
     c = ProviderContainer(overrides: [
       databaseProvider.overrideWithValue(db),
@@ -135,6 +139,7 @@ void main() {
             pollInterval: const Duration(milliseconds: 1),
           )),
       sketchExporterProvider.overrideWithValue(() async => withSketch ? sketch : null),
+      regionsExporterProvider.overrideWithValue(() async => regions),
       sceneRandomProvider.overrideWithValue(Random(42)),
     ]);
     c.listen(sceneControllerProvider, (_, _) {});
@@ -393,5 +398,71 @@ void main() {
     await running;
     expect(await db.watchActiveScene().first, isNull, reason: 'the new encounter has no picture');
     expect(await db.select(db.mapScenes).get(), isEmpty, reason: 'the old encounter is gone, so nothing is kept');
+  });
+
+  group('region layer (neuracraft-cloud #42)', () {
+    final regions = Uint8List.fromList([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 5, 5]);
+    Map<String, Object?> advertised({bool ground = true}) => {
+          'presets': [
+            {
+              'id': 'sketch_to_scene',
+              'version': 1,
+              'params': {
+                'mode': {'type': 'enum', 'options': ['map', 'atmosphere']},
+                if (ground) 'ground': {'type': 'enum', 'options': ['grass', 'stone', 'dirt', 'sand', 'snow'], 'default': 'grass'},
+              },
+              'inputs': [
+                {'name': 'sketch'},
+                {'name': 'regions'},
+              ],
+            },
+          ],
+        };
+
+    test('advertised: the painted areas and the ground go with the sketch; asked once', () async {
+      await make(Server()..presets = advertised(), regions: regions);
+      await ctl().generate(mode: SceneMode.map, narrative: 'köprü', ground: 'sand');
+      expect(st(), isA<SceneIdle>());
+      final body = server.bodies.single;
+      expect(body['inputs']['sketch']['inline'], base64Encode(sketch));
+      expect(body['inputs']['regions'], {'inline': base64Encode(regions), 'contentType': 'image/png'});
+      expect(body['params']['ground'], 'sand');
+      expect(server.calls.first, 'POST /v1/sessions');
+
+      await ctl().retry();
+      expect(server.bodies.last['params']['ground'], 'sand', reason: 'a retry keeps the ground');
+      expect(server.count('GET /v1/presets'), 1, reason: 'the answer is cached');
+    });
+
+    test('not advertised (today): the sketch goes alone, exactly as before', () async {
+      await make(Server(), regions: regions);
+      await ctl().generate(mode: SceneMode.map, narrative: 'köprü', ground: 'sand');
+      expect(st(), isA<SceneIdle>());
+      final body = server.bodies.single;
+      expect((body['inputs'] as Map).keys, ['sketch']);
+      expect((body['params'] as Map).containsKey('ground'), isFalse);
+    });
+
+    test('regions advertised without a ground: the layer goes, the ground does not', () async {
+      await make(Server()..presets = advertised(ground: false), regions: regions);
+      await ctl().generate(mode: SceneMode.map, narrative: 'köprü', ground: 'stone');
+      final body = server.bodies.single;
+      expect((body['inputs'] as Map).keys, ['sketch', 'regions']);
+      expect((body['params'] as Map).containsKey('ground'), isFalse);
+    });
+
+    test('atmosphere mode and an unpainted map send no region layer (and do not ask)', () async {
+      await make(Server()..presets = advertised(), regions: regions);
+      await ctl().generate(mode: SceneMode.atmosphere, narrative: 'köprü', ground: 'sand');
+      expect((server.bodies.single['inputs'] as Map).keys, ['sketch']);
+      expect(server.count('GET /v1/presets'), 0);
+    });
+
+    test('nothing painted: no region layer, no presets request', () async {
+      await make(Server()..presets = advertised());
+      await ctl().generate(mode: SceneMode.map, narrative: 'köprü', ground: 'sand');
+      expect((server.bodies.single['inputs'] as Map).keys, ['sketch']);
+      expect(server.count('GET /v1/presets'), 0);
+    });
   });
 }

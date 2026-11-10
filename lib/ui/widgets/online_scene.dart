@@ -10,6 +10,8 @@ import '../../data/neuracraft/auth.dart';
 import '../../data/neuracraft/client.dart';
 import '../../data/neuracraft/errors.dart';
 import '../../data/neuracraft/models.dart';
+import '../../db/database.dart';
+import '../../features/map_sketch.dart';
 import '../../features/online_scene/account.dart';
 import '../../features/online_scene/messages.dart';
 import '../../features/online_scene/online_settings.dart';
@@ -164,7 +166,7 @@ class SceneStatusBar extends ConsumerWidget {
               onSelected: (v) async {
                 switch (v) {
                   case 'retry':
-                    await ctl.generate(mode: SceneMode.values.byName(scene.mode), narrative: scene.narrative);
+                    await ctl.generate(mode: SceneMode.values.byName(scene.mode), narrative: scene.narrative, ground: ctl.lastGround);
                   case 'report':
                     if (context.mounted) await showReportSheet(context, ref, scene);
                   case 'remove':
@@ -215,23 +217,39 @@ Future<void> showSceneSheet(BuildContext context, WidgetRef ref) async {
     if (!await showSignInSheet(context) || !context.mounted) return;
   }
   final last = ref.read(activeSceneProvider).value;
-  final result = await showModalBottomSheet<({SceneMode mode, String narrative})>(
+  final result = await showModalBottomSheet<({SceneMode mode, String narrative, String? ground})>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    builder: (context) => _SceneForm(initialNarrative: last?.narrative ?? '', initialMode: last == null ? SceneMode.map : SceneMode.values.byName(last.mode)),
+    builder: (context) => _SceneForm(
+      initialNarrative: last?.narrative ?? '',
+      initialMode: last == null ? SceneMode.map : SceneMode.values.byName(last.mode),
+      initialGround: ref.read(sceneControllerProvider.notifier).lastGround,
+    ),
   );
   if (result != null) {
     ref.read(sceneVisibleProvider.notifier).set(true);
-    await ref.read(sceneControllerProvider.notifier).generate(mode: result.mode, narrative: result.narrative);
+    await ref.read(sceneControllerProvider.notifier).generate(mode: result.mode, narrative: result.narrative, ground: result.ground);
   }
 }
 
+/// "Zemin": what the picture shows where nothing is painted (`params.ground`).
+const groundLabels = {'grass': 'Çimen', 'stone': 'Taş', 'dirt': 'Toprak', 'sand': 'Kum', 'snow': 'Kar'};
+
+/// Taş when most of the painted strokes are stone floor or wall (a dungeon),
+/// otherwise Çimen (the service's default).
+String defaultGround(List<RegionStroke> regions) {
+  if (regions.isEmpty) return 'grass';
+  final indoor = regions.where((r) => r.kind == RegionKind.stone || r.kind == RegionKind.wall).length;
+  return indoor * 2 > regions.length ? 'stone' : 'grass';
+}
+
 class _SceneForm extends ConsumerStatefulWidget {
-  const _SceneForm({required this.initialNarrative, required this.initialMode});
+  const _SceneForm({required this.initialNarrative, required this.initialMode, this.initialGround});
 
   final String initialNarrative;
   final SceneMode initialMode;
+  final String? initialGround;
 
   @override
   ConsumerState<_SceneForm> createState() => _SceneFormState();
@@ -240,6 +258,9 @@ class _SceneForm extends ConsumerStatefulWidget {
 class _SceneFormState extends ConsumerState<_SceneForm> {
   late final _text = TextEditingController(text: widget.initialNarrative);
   late SceneMode _mode = widget.initialMode;
+
+  /// The GM's pick; until then the last request's, or [defaultGround].
+  late String? _ground = widget.initialGround;
 
   @override
   void dispose() {
@@ -252,7 +273,14 @@ class _SceneFormState extends ConsumerState<_SceneForm> {
     final t = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
     final session = ref.watch(onlineSessionProvider);
-    final hasSketch = (ref.watch(mapStrokesProvider).value ?? const []).isNotEmpty;
+    final rows = ref.watch(mapStrokesProvider).value ?? const [];
+    final hasSketch = rows.any((s) => !s.isRegion);
+    final regions = regionStrokesOf(rows);
+    // The region layer goes only to a service that takes it (neuracraft-cloud #42).
+    final features = ref.watch(sceneFeaturesProvider).value ?? NcSceneFeatures.none;
+    final withRegions = _mode == SceneMode.map && features.regions;
+    final grounds = withRegions ? features.grounds : const <String>[];
+    final ground = grounds.contains(_ground) ? _ground! : (grounds.contains(defaultGround(regions)) ? defaultGround(regions) : null);
     final warning = capacityWarning(session);
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + MediaQuery.viewInsetsOf(context).bottom),
@@ -272,12 +300,35 @@ class _SceneFormState extends ConsumerState<_SceneForm> {
         ),
         const SizedBox(height: 6),
         Text(
-          _mode == SceneMode.map
-              ? 'Çizimin düzeni korunur, yukarıdan bakış. Ağaçları küçük dairelerle çiz; nehri, suyu ve masa, '
-                  'sandalye gibi küçük eşyaları açıklamada da belirt.'
-              : 'Daha serbest ve atmosferik; düzen birebir korunmaz.',
+          switch (_mode) {
+            SceneMode.map when withRegions => 'Çizimin düzeni korunur, yukarıdan bakış. Ağaçları küçük dairelerle çiz; masa, sandalye gibi '
+                'küçük eşyaları açıklamada belirt.',
+            SceneMode.map => 'Çizimin düzeni korunur, yukarıdan bakış. Ağaçları küçük dairelerle çiz; nehri, suyu ve masa, '
+                'sandalye gibi küçük eşyaları açıklamada da belirt.',
+            SceneMode.atmosphere => 'Daha serbest ve atmosferik; düzen birebir korunmaz.',
+          },
           style: t.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
         ),
+        if (withRegions) ...[
+          const SizedBox(height: 6),
+          Text('Nehirleri ve yolları Alan fırçasıyla boyarsan resim çok daha doğru olur.',
+              key: const Key('scene-regions-hint'), style: t.bodySmall?.copyWith(color: scheme.primary)),
+        ],
+        if (ground != null) ...[
+          const SizedBox(height: 10),
+          Text(regions.isEmpty ? 'Zemin (önce bir alan boya)' : 'Zemin: boyanmayan yerler', style: t.labelLarge),
+          const SizedBox(height: 4),
+          Wrap(key: const Key('scene-ground'), spacing: 6, runSpacing: 2, children: [
+            for (final g in grounds)
+              ChoiceChip(
+                key: Key('ground-$g'),
+                label: Text(groundLabels[g] ?? g),
+                selected: g == ground,
+                // Without painted areas there is no region layer to go with it.
+                onSelected: regions.isEmpty ? null : (_) => setState(() => _ground = g),
+              ),
+          ]),
+        ],
         const SizedBox(height: 12),
         TextField(
           key: const Key('scene-narrative'),
@@ -302,7 +353,9 @@ class _SceneFormState extends ConsumerState<_SceneForm> {
         ],
         FilledButton.icon(
           key: const Key('scene-generate'),
-          onPressed: hasSketch ? () => Navigator.pop(context, (mode: _mode, narrative: _text.text)) : null,
+          onPressed: hasSketch
+              ? () => Navigator.pop(context, (mode: _mode, narrative: _text.text, ground: ground != null && regions.isNotEmpty ? ground : null))
+              : null,
           icon: const Icon(Icons.auto_awesome),
           label: const Text('Resmi oluştur'),
         ),

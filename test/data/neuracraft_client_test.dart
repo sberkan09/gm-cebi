@@ -164,6 +164,115 @@ void main() {
       expect(await withPresets([{'id': 'sketch_to_scene', 'version': 2}]), isTrue);
       expect(await withPresets([{'id': 'other', 'version': 1}]), isFalse);
     });
+
+    // The region layer (neuracraft-cloud #42): a second inline PNG and the ground.
+    final regions = Uint8List.fromList([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 9, 9, 9]);
+
+    test('submitScene with the region layer adds inputs.regions and params.ground', () async {
+      late Map<String, dynamic> body;
+      final c = clientWith(MockClient((r) async {
+        body = jsonDecode(r.body) as Map<String, dynamic>;
+        return jsonResponse({'job': jobJson('queued')}, 201);
+      }));
+      await c.submitScene(sketchPng: png, mode: SceneMode.map, narrative: 'köprü', seed: 7, regionsPng: regions, ground: 'stone');
+      expect(body['params'], {'mode': 'map', 'narrative': 'köprü', 'seed': 7, 'ground': 'stone'});
+      expect(body['inputs'], {
+        'sketch': {'inline': base64Encode(png), 'contentType': 'image/png'},
+        'regions': {'inline': base64Encode(regions), 'contentType': 'image/png'},
+      });
+
+      // Regions without a ground: the service's default (grass) fills the rest.
+      await c.submitScene(sketchPng: png, mode: SceneMode.map, narrative: 'köprü', regionsPng: regions);
+      expect((body['params'] as Map).containsKey('ground'), isFalse);
+      expect((body['inputs'] as Map).keys, ['sketch', 'regions']);
+    });
+
+    test('submitScene checks the region layer and the ground before sending', () async {
+      var sent = 0;
+      final c = clientWith(MockClient((r) async {
+        sent++;
+        return jsonResponse({});
+      }));
+      Future<void> bad(Future<void> Function() f) => expectLater(f(), throwsArgumentError);
+      final big = Uint8List(maxRegionsBytes + 1)..setAll(0, regions);
+      await bad(() => c.submitScene(sketchPng: png, mode: SceneMode.map, narrative: 'köprü', regionsPng: big));
+      await bad(() => c.submitScene(sketchPng: png, mode: SceneMode.map, narrative: 'köprü', regionsPng: Uint8List.fromList([1, 2, 3])));
+      await bad(() => c.submitScene(sketchPng: png, mode: SceneMode.map, narrative: 'köprü', regionsPng: regions, ground: 'lava'));
+      await bad(() => c.submitScene(sketchPng: png, mode: SceneMode.map, narrative: 'köprü', ground: 'stone'));
+      expect(sent, 0);
+      expect(sceneGrounds, ['grass', 'stone', 'dirt', 'sand', 'snow']);
+    });
+
+    group('sceneFeatures', () {
+      Map<String, Object?> preset({int version = 1, List<Object?>? inputs, Map<String, Object?>? params}) => {
+            'id': 'sketch_to_scene',
+            'version': version,
+            'oldestVersion': 1,
+            'description': 'A picture of a scene from a terrain sketch',
+            'latency': 'interactive',
+            'params': params ??
+                {
+                  'mode': {'type': 'enum', 'options': ['map', 'atmosphere'], 'required': true, 'doc': 'map: keeps the layout'},
+                },
+            'inputs': inputs ??
+                [
+                  {'name': 'sketch', 'doc': 'Terrain sketch', 'contentTypes': ['image/png'], 'maxBytes': 524288, 'maxSide': 1024},
+                ],
+          };
+      final regionsInput = {'name': 'regions', 'doc': 'Painted areas', 'contentTypes': ['image/png'], 'maxBytes': 524288, 'maxSide': 1024};
+      final groundParam = {'type': 'enum', 'options': ['grass', 'stone', 'dirt', 'sand', 'snow', 'lava'], 'default': 'grass', 'doc': 'Unpainted area'};
+
+      Future<NcSceneFeatures> features(Object body) => clientWith(MockClient((r) async => jsonResponse(body))).sceneFeatures();
+
+      test("today's service (sketch only): not supported", () async {
+        final f = await features({'presets': [preset()]});
+        expect(f.regions, isFalse);
+        expect(f.grounds, isEmpty);
+      });
+
+      test('a preset listing the regions input and the ground parameter: supported', () async {
+        final f = await features({
+          'presets': [
+            preset(inputs: [...preset()['inputs']! as List, regionsInput], params: {'ground': groundParam}),
+          ],
+        });
+        expect(f.regions, isTrue);
+        expect(f.grounds, ['grass', 'stone', 'dirt', 'sand', 'snow'], reason: 'only the grounds this app knows');
+      });
+
+      test('regions without a ground parameter: the layer goes, no ground', () async {
+        final f = await features({'presets': [preset(inputs: [regionsInput])]});
+        expect(f.regions, isTrue);
+        expect(f.grounds, isEmpty);
+      });
+
+      test('unknown shapes and older versions are "not supported"', () async {
+        expect((await features({'presets': 'yes'})).regions, isFalse);
+        expect((await features({'presets': [preset(inputs: [regionsInput], version: 0)]})).regions, isFalse);
+        expect((await features({'presets': [{'id': 'sketch_to_scene', 'version': 1, 'inputs': {'regions': true}}]})).regions, isFalse);
+        expect((await features({'presets': [{'id': 'sketch_to_scene', 'version': '1', 'inputs': [regionsInput]}]})).regions, isFalse);
+        expect((await features({})).regions, isFalse);
+        // A ground parameter without options: every ground this app knows.
+        final f = await features({'presets': [preset(inputs: [regionsInput], params: {'ground': {'type': 'string'}})]});
+        expect(f.grounds, sceneGrounds);
+      });
+
+      test('asked once per client; a failed request is not cached', () async {
+        var calls = 0;
+        var fail = true;
+        final c = clientWith(MockClient((r) async {
+          expect(r.url.path, '/v1/presets');
+          calls++;
+          if (fail) return errorResponse(503, 'unavailable');
+          return jsonResponse({'presets': [preset(inputs: [regionsInput])]});
+        }));
+        expect((await c.sceneFeatures()).regions, isFalse);
+        fail = false;
+        expect((await c.sceneFeatures()).regions, isTrue, reason: 'asked again after the failure');
+        expect((await c.sceneFeatures()).regions, isTrue);
+        expect(calls, 2, reason: 'the answer is kept');
+      });
+    });
   });
 
   group('errors', () {

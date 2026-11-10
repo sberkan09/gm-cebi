@@ -164,6 +164,7 @@ geçti. Girişli sürüm henüz gerçek sunucuya karşı çalıştırılmadı: c
 | | `lib/ui/widgets/sign_in_sheet.dart` | Giriş sayfası (e-posta → kod) |
 | | `lib/ui/screens/map_screen.dart`, `settings_screen.dart` | Bağlantı noktaları |
 | Veritabanı | `map_scenes` (şema 3) | Sonuç PNG'si karşılaşmaya bağlı saklanır (sunucu 7 gün sonra siler). Bildirilen resim `hidden`. |
+| | `map_strokes.region`, `.width` (şema 5) | Alan fırçası darbeleri (aşağıda, "Alan katmanı"); kalem çizgilerinde ikisi de boş. |
 
 ### Oturum
 
@@ -187,7 +188,8 @@ geçti. Girişli sürüm henüz gerçek sunucuya karşı çalıştırılmadı: c
 ### İş
 
 - Gönderilen PNG, `renderTerrainPng` ile **jetonsuz katmandan** üretilir: siyah mürekkep, beyaz
-  zemin, 512×512.
+  zemin, 512×512. Alan fırçasıyla boyanan yerler bu çizime **girmez**; ayrı katman olarak gider
+  (aşağıda).
 - Varsayılan mod `map`. Tarif boşsa genel bir İngilizce prompt gider (servis `narrative` ya da
   `prompt` istiyor). İstemci her işte bildiği şablon sürümünü (`version: 1`) gönderir.
 - **Bekleme:** SSE ile. Akış açılamazsa, erken koparsa ya da 45 sn boyunca hiç satır gelmezse
@@ -205,6 +207,54 @@ geçti. Girişli sürüm henüz gerçek sunucuya karşı çalıştırılmadı: c
 - **Görünüm:** resim alt katman; ızgara ve jetonlar üstte. Resim üstündeyken çizime başlanırsa
   görünüm kendiliğinden çizime döner. "Resim" düğmesiyle ikisi arasında geçilir.
 
+### Alan katmanı (neuracraft-cloud #42)
+
+Scribble ControlNet yalnızca çizgileri görür; iki nehir çizgisinin hangi tarafının su olduğunu
+bilemez (`online-scene/2026-11-10-map-mode.md`). NeuraCraft'ın önerisi ve GM Cebi'nin onayıyla
+(neuracraft-cloud #42) harita moduna **isteğe bağlı bir alan katmanı** eklendi: GM kaba alanları
+sabit renkli fırçalarla boyar, uygulama bunu ikinci bir PNG olarak gönderir, sunucu img2img için
+kullanır (denemede güç ~0,6'da nehir düzgün mavi bir şerit oluyor).
+
+- **Haritada:** araç çubuğunda "Çiz" ile "Sil"in yanında **"Alan"**. Altı tür ve üç fırça kalınlığı
+  (İnce / Orta / Kalın = kenarın %2,5 / %5 / %9'u; varsayılan Kalın). Boyalar ekranda yarı saydam
+  (%45, katman olarak: üst üste binen darbe koyulaşmaz), ızgaranın, çizgilerin ve jetonların
+  altında; çevrimiçi resim gösterilirken çizim gibi gizlenir. "Sil", son seçilen aracın katmanını
+  siler (Alan'dan sonra alanları, Çiz'den sonra çizgileri); bir alana boyalı genişliğinin herhangi bir
+  yerinden dokunmak yeter. Kalemin silgi ucu da aynı kurala uyar. Geri al ikisini de kapsar; "Çizimi
+  temizle" ikisini de siler. Kalem modu kuralları (avuç içi reddi) aynen geçerli.
+- **Veri:** ayrı tablo yerine `map_strokes`'a iki boş olabilen sütun (şema 5, geçiş testli):
+  `region` (tür numarası) ve `width` (kenarın kesri). Eski satırlar boş kalır, yani kalem çizgisi.
+  Tek tablo sayesinde geri al, silgi geri yükleme, temizleme ve karşılaşmayla birlikte silinme
+  değişmeden iki katmanda da çalışır.
+- **Sözleşme:**
+  - `inputs.regions`: `inputs.sketch` ile aynı biçimde ikinci satır içi PNG
+    (`{"inline": base64, "contentType": "image/png"}`), çizimle aynı boyut (512×512), boyanmayan
+    yer **saydam**, en çok 512 KB. Uygulama küçültmez; sınır aşılırsa "Boyanan alanlar
+    gönderilemeyecek kadar büyük" der (düz renkli 512×512 birkaç KB tutuyor).
+  - Renkler (tam, opak): Su `#2060A0`, Yol `#8C6E48`, Orman `#285C28`, Taş zemin `#808080`,
+    Duvar `#404040`, Kum `#D2B478`. Kenarlar yumuşatılmış çizilir; sunucu kenar piksellerini en
+    yakın palet rengine yuvarlıyor, %50'den az opaklığı boyanmamış sayıyor. Tür sırası veritabanında
+    numara olarak saklandığı için değişmez (`RegionKind`).
+  - `params.ground`: `grass` (varsayılan), `stone`, `dirt`, `sand`, `snow`: boyanmayan yer neyle
+    dolsun. Sayfada "Zemin": Çimen, Taş, Toprak, Kum, Kar. Boyanan darbelerin çoğu taş zemin ya da
+    duvarsa varsayılan Taş, yoksa Çimen. Zemin yalnızca alan katmanıyla birlikte gider; hiç alan
+    boyanmamışsa seçim kapalıdır.
+  - `regions` yoksa harita modu eskisi gibi; atmosfer modunda katman hiç gönderilmez.
+- **Destek tespiti:** sunucu bilmediği girdi ve parametreyi `preset.params_invalid` ile reddediyor
+  ve #42 sunucuda henüz canlı değil. Bu yüzden uygulama katmanı yalnızca servis duyurunca gönderir:
+  `NeuraCraftClient.sceneFeatures()` `GET /v1/presets` yanıtında `sketch_to_scene` şablonuna bakar.
+  Yanıtın biçimi (neuracraft-cloud `apps/api/src/presets.ts`, `presetJson`):
+  `{"presets": [{"id", "version", "oldestVersion", "description", "latency", "params": {ad: {type,
+  options?, default?, required?, doc}}, "inputs": [{name, doc, contentTypes, maxBytes, maxSide}]}]}`.
+  `inputs` içinde `name: "regions"` varsa katman desteklenir; `params.ground` varsa zemin de gider
+  (`options` verilmişse yalnızca uygulamanın bildiği ve listede olan değerler). Sürüm uygulamanınkinden
+  eskiyse ya da biçim beklenmedikse "desteklenmiyor". Cevap istemci nesnesi yaşadıkça (giriş ve
+  yapılandırma değişmedikçe) saklanır; ağ hatası saklanmaz, sonraki istekte yeniden sorulur.
+  Desteklenmiyorsa çizim **tek başına, bugünkü gibi** gider ve sayfada Zemin seçimi çıkmaz.
+- **Sayfa:** desteklenince harita modunda Zemin seçimi ve "Nehirleri ve yolları Alan fırçasıyla
+  boyarsan resim çok daha doğru olur." ipucu; açıklama ipucu artık nehri ve suyu açıklamaya yazmayı
+  istemez. Desteklenmiyorsa eski ipucu kalır.
+
 ## Gizlilik ve mağaza beyanları
 
 Bu özellik **açık bir derleme** mağazaya gittiği gün aşağıdakiler değişmeli. Bugünkü mağaza
@@ -214,7 +264,8 @@ hazırlığı (PR #4) çevrimdışı derleme içindir. Hazır metinler: `docs/st
 
 Kaynak: neuracraft-cloud `docs/PRIVACY.md` ve `docs/partners/gm-cebi.md` ("Privacy").
 
-- **Ne gider:** çizim ve tarif; giriş için e-posta adresi.
+- **Ne gider:** çizim (servis destekliyorsa boyanan alanlar da, ayrı bir resim olarak) ve tarif;
+  giriş için e-posta adresi.
 - **E-posta:** yalnızca giriş kodunu göndermek için kullanılır; kodu Brevo (AB) gönderir (adres, kod
   ve "GM Cebi"). NeuraCraft adresi saklamaz, yalnızca HMAC özetini, rastgele kullanıcı numarasını
   (`eu_…`) ve kayıt / son görülme zamanlarını saklar. Ad ve mağaza hesabı yok. Uygulama adresi yalnızca
@@ -266,5 +317,6 @@ Kaynak: neuracraft-cloud `docs/PRIVACY.md` ve `docs/partners/gm-cebi.md` ("Priva
   alana taşıyor); içini taramak, doldurmak ya da açıklamada belirtmek değiştirmedi. Ayrıntı ve
   resimler: [`online-scene/2026-11-10-map-mode.md`](online-scene/2026-11-10-map-mode.md).
   Uygulama harita modunda kısa bir çizim ipucu gösteriyor (ağaçlar daire; nehir, su ve küçük
-  eşyalar açıklamada).
+  eşyalar açıklamada). Çözüm alan katmanı (yukarıda); sunucu tarafı canlı olunca uygulama kendiliğinden
+  göndermeye başlar.
 - **Cihaz:** gerçek telefon ya da tablette denenmedi.

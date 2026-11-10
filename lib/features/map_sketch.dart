@@ -1,6 +1,7 @@
-/// Battle-map drawing: palette, painter, stroke helpers and the terrain-only
-/// export that a future "bring the scene to life" request would send
-/// (docs/spikes/sketch-to-scene/README.md: tokens must not reach the model).
+/// Battle-map drawing: palette, painter, stroke helpers and the exports the
+/// online scene sends: the terrain lines alone (docs/spikes/sketch-to-scene/
+/// README.md: tokens must not reach the model) and the painted regions as a
+/// separate layer (docs/online-scene.md, "Alan katmanı").
 library;
 
 import 'dart:math' as math;
@@ -9,6 +10,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import '../data/neuracraft/client.dart' show maxRegionsBytes;
 import '../db/database.dart';
 
 const mapPaletteNames = ['Mürekkep', 'Su', 'Bitki', 'Tehlike'];
@@ -71,6 +73,45 @@ class SketchStroke {
   final int color;
 }
 
+/// What the area brush ("Alan") paints. The index is stored with each stroke
+/// (`map_strokes.region`), so the order must never change; the colours are the
+/// region contract with NeuraCraft Cloud (neuracraft-cloud #42) and are sent
+/// exactly, opaque, whatever the app's theme.
+enum RegionKind {
+  water('Su', Color(0xFF2060A0)),
+  road('Yol', Color(0xFF8C6E48)),
+  forest('Orman', Color(0xFF285C28)),
+  stone('Taş zemin', Color(0xFF808080)),
+  wall('Duvar', Color(0xFF404040)),
+  sand('Kum', Color(0xFFD2B478));
+
+  const RegionKind(this.label, this.color);
+
+  /// Turkish name on the toolbar.
+  final String label;
+
+  /// The exact colour of the region layer.
+  final Color color;
+
+  static RegionKind of(int index) => values[index.clamp(0, values.length - 1)];
+}
+
+/// Area brush widths (fraction of the map's side): İnce, Orta, Kalın.
+const regionWidths = [0.025, 0.05, 0.09];
+const regionWidthNames = ['İnce', 'Orta', 'Kalın'];
+
+/// A stroke of the area brush: round caps and joins, [width] in map units.
+class RegionStroke {
+  const RegionStroke(this.points, this.kind, this.width);
+  final List<Offset01> points;
+  final RegionKind kind;
+  final double width;
+}
+
+/// On screen the regions are see-through, so the grid and the lines over them
+/// stay readable.
+const regionScreenOpacity = 0.45;
+
 class MapToken {
   const MapToken({
     required this.position,
@@ -101,11 +142,26 @@ double tokenRadius(double side) => math.max(14, side / 30);
 double eraserRadius(double side) => math.max(16, side / 28);
 
 class MapPainter extends CustomPainter {
-  MapPainter({required this.strokes, required this.tokens, required this.grid, required this.theme, this.labelStyle, this.background});
+  MapPainter({
+    required this.strokes,
+    required this.tokens,
+    required this.grid,
+    required this.theme,
+    this.regions = const [],
+    this.regionOpacity = regionScreenOpacity,
+    this.labelStyle,
+    this.background,
+  });
 
   /// The online picture made from the sketch: the bottom layer, under the
   /// grid, the strokes and the tokens.
   final ui.Image? background;
+
+  /// Painted areas: over the picture, under the grid, the lines and the tokens.
+  final List<RegionStroke> regions;
+
+  /// 1 in the region export; see-through on screen.
+  final double regionOpacity;
 
   final List<SketchStroke> strokes;
   final List<MapToken> tokens;
@@ -129,6 +185,7 @@ class MapPainter extends CustomPainter {
         Paint()..filterQuality = FilterQuality.medium,
       );
     }
+    paintRegions(canvas, regions, side, opacity: regionOpacity);
     if (grid) {
       final g = Paint()
         ..color = theme.grid
@@ -213,6 +270,36 @@ class MapPainter extends CustomPainter {
   bool shouldRepaint(MapPainter old) => true;
 }
 
+/// Paints [regions] in their exact colours. Below 1, [opacity] applies to the
+/// layer as a whole, so overlapping strokes of one kind do not get darker.
+void paintRegions(Canvas canvas, List<RegionStroke> regions, double side, {double opacity = 1}) {
+  if (regions.isEmpty || opacity <= 0) return;
+  final layered = opacity < 1;
+  if (layered) canvas.saveLayer(Offset.zero & Size.square(side), Paint()..color = Color.fromRGBO(0, 0, 0, opacity));
+  for (final r in regions) {
+    final w = r.width * side;
+    final paint = Paint()
+      ..color = r.kind.color
+      ..strokeWidth = w
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke;
+    if (r.points.isEmpty) continue;
+    final first = MapPainter._px(r.points.first, side);
+    if (r.points.length == 1) {
+      canvas.drawCircle(first, w / 2, paint..style = PaintingStyle.fill);
+      continue;
+    }
+    final path = Path()..moveTo(first.dx, first.dy);
+    for (final p in r.points.skip(1)) {
+      final o = MapPainter._px(p, side);
+      path.lineTo(o.dx, o.dy);
+    }
+    canvas.drawPath(path, paint);
+  }
+  if (layered) canvas.restore();
+}
+
 /// Drops points closer than [minStep] (map units) to the previous kept point;
 /// the first and last points always stay.
 List<Offset01> simplify(List<Offset01> points, {double minStep = 0.004}) {
@@ -226,16 +313,19 @@ List<Offset01> simplify(List<Offset01> points, {double minStep = 0.004}) {
   return out;
 }
 
-/// Ids of the strokes passing within [radius] (map units) of [at].
-List<int> strokesNear(Iterable<(int, List<Offset01>)> strokes, Offset01 at, double radius) {
+/// Ids of the strokes passing within [radius] (map units) of [at]. [pad]
+/// widens the reach per stroke id (half an area stroke's width: touching its
+/// painted edge is enough).
+List<int> strokesNear(Iterable<(int, List<Offset01>)> strokes, Offset01 at, double radius, {double Function(int id)? pad}) {
   final hits = <int>[];
   for (final (id, pts) in strokes) {
+    final reach = radius + (pad?.call(id) ?? 0);
     if (pts.length == 1) {
-      if (_dist(pts.first, at) <= radius) hits.add(id);
+      if (_dist(pts.first, at) <= reach) hits.add(id);
       continue;
     }
     for (var i = 0; i + 1 < pts.length; i++) {
-      if (_segDist(at, pts[i], pts[i + 1]) <= radius) {
+      if (_segDist(at, pts[i], pts[i + 1]) <= reach) {
         hits.add(id);
         break;
       }
@@ -246,13 +336,14 @@ List<int> strokesNear(Iterable<(int, List<Offset01>)> strokes, Offset01 at, doub
 
 /// Ids of the strokes within [radius] of the eraser's path [from] → [to]
 /// (sampled every half radius, so fast swipes do not skip lines).
-List<int> strokesNearPath(Iterable<(int, List<Offset01>)> strokes, Offset01 from, Offset01 to, double radius) {
+List<int> strokesNearPath(Iterable<(int, List<Offset01>)> strokes, Offset01 from, Offset01 to, double radius,
+    {double Function(int id)? pad}) {
   final list = strokes.toList();
   final steps = math.max(1, (_dist(from, to) / (radius / 2)).ceil());
   final hits = <int>{};
   for (var i = 0; i <= steps; i++) {
     final t = i / steps;
-    hits.addAll(strokesNear(list, Offset01(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t), radius));
+    hits.addAll(strokesNear(list, Offset01(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t), radius, pad: pad));
   }
   return [...hits];
 }
@@ -267,14 +358,45 @@ double _segDist(Offset01 p, Offset01 a, Offset01 b) {
   return _dist(p, Offset01(a.x + t * dx, a.y + t * dy));
 }
 
-/// The terrain alone (no tokens, no grid) as a black-on-white PNG: the input
-/// a sketch-to-scene service gets. Tokens stay in the app and are drawn on top
-/// of whatever image comes back.
-Future<Uint8List> renderTerrainPng(List<SketchStroke> strokes, {int size = 512}) async {
+/// The pen lines of a map's stroke rows (the sketch), oldest first.
+List<SketchStroke> lineStrokesOf(Iterable<MapStroke> rows) => [for (final s in rows) if (!s.isRegion) SketchStroke(s.offsets, s.color)];
+
+/// The area-brush strokes of a map's stroke rows (the region layer), oldest first.
+List<RegionStroke> regionStrokesOf(Iterable<MapStroke> rows) =>
+    [for (final s in rows) if (s.isRegion) RegionStroke(s.offsets, RegionKind.of(s.region!), s.width ?? regionWidths.last)];
+
+/// The terrain alone (no tokens, no grid, no painted areas) as a
+/// black-on-white PNG: the input a sketch-to-scene service gets. Tokens stay
+/// in the app and are drawn on top of whatever image comes back.
+Future<Uint8List> renderTerrainPng(List<SketchStroke> strokes, {int size = 512}) =>
+    _renderPng(size, (canvas) => MapPainter(strokes: strokes, tokens: const [], grid: false, theme: MapTheme.export)
+        .paint(canvas, Size.square(size.toDouble())));
+
+/// The region layer: each area stroke in its exact opaque colour on a
+/// transparent background (transparent = unpainted), the same size as the
+/// sketch. Null when nothing is painted. Throws [RegionsTooLarge] if the PNG is
+/// over [maxRegionsBytes] (it is never downscaled: it must match the sketch;
+/// flat colours at 512 × 512 compress to a few kilobytes).
+Future<Uint8List?> renderRegionsPng(List<RegionStroke> regions, {int size = 512}) async {
+  if (regions.isEmpty) return null;
+  final png = await _renderPng(size, (canvas) => paintRegions(canvas, regions, size.toDouble()));
+  if (png.length > maxRegionsBytes) {
+    throw RegionsTooLarge(png.length);
+  }
+  return png;
+}
+
+/// The region layer came out over [maxRegionsBytes].
+class RegionsTooLarge implements Exception {
+  const RegionsTooLarge(this.bytes);
+  final int bytes;
+  @override
+  String toString() => 'RegionsTooLarge: $bytes bytes, over the $maxRegionsBytes limit';
+}
+
+Future<Uint8List> _renderPng(int size, void Function(Canvas canvas) draw) async {
   final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder);
-  MapPainter(strokes: strokes, tokens: const [], grid: false, theme: MapTheme.export)
-      .paint(canvas, Size.square(size.toDouble()));
+  draw(Canvas(recorder));
   final picture = recorder.endRecording();
   final image = await picture.toImage(size, size);
   picture.dispose();
