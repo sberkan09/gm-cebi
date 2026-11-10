@@ -11770,38 +11770,46 @@
     "type": "table",
     "header": [
      "1d10",
-     "Species",
-     "1d10",
      "Species"
     ],
     "rows": [
      [
       "1",
-      "Roll again.",
+      "Roll again."
+     ],
+     [
+      "2",
+      "Dragonborn"
+     ],
+     [
+      "3",
+      "Dwarf"
+     ],
+     [
+      "4",
+      "Elf"
+     ],
+     [
+      "5",
+      "Gnome"
+     ],
+     [
       "6",
       "Goliath"
      ],
      [
-      "2",
-      "Dragonborn",
       "7",
       "Halfling"
      ],
      [
-      "3",
-      "Dwarf",
       "8",
       "Human"
      ],
      [
-      "4",
-      "Elf",
       "9",
       "Orc"
      ],
      [
-      "5",
-      "Gnome",
       "10",
       "Tiefling"
      ]
@@ -12271,7 +12279,16 @@
      [
       "Extensive (know the target well)",
       "−5"
-     ],
+     ]
+    ]
+   },
+   {
+    "type": "table",
+    "header": [
+     "You Have the Target’s …",
+     "Save Modifier"
+    ],
+    "rows": [
      [
       "Picture or other likeness",
       "−2"

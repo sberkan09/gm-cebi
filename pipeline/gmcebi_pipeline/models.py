@@ -168,6 +168,21 @@ class EquipmentItem(Record):
     blocks: list[Block] = Field(default_factory=list)
 
 
+class MagicItem(Record):
+    kind: Literal["magic_item"] = "magic_item"
+    category: str = Field(description="Armor | Potion | Ring | Rod | Scroll | Staff | Wand | Weapon | Wondrous Item")
+    rarity: str = Field(description="Common … Artifact; may list several ('Uncommon (+1), Rare (+2)')")
+    attunement: str | None = Field(default=None, description="'Requires Attunement' plus any restriction")
+    type_line: str = Field(description="The italic line under the name, verbatim")
+    blocks: list[Block] = Field(default_factory=list)
+
+
+class RuleSection(Record):
+    kind: Literal["rule_section"] = "rule_section"
+    chapter: str = Field(description="Playing the Game | Character Creation | Gameplay Toolbox | Magic Items")
+    blocks: list[Block] = Field(default_factory=list, description="Sub-sections as '### ' / '#### ' heading paragraphs")
+
+
 class WeaponMastery(Record):
     kind: Literal["weapon_mastery"] = "weapon_mastery"
     text: str
@@ -191,4 +206,6 @@ DATASETS: dict[str, type[Record]] = {
     "equipment": EquipmentItem,
     "weapon_mastery": WeaponMastery,
     "weapon_properties": WeaponProperty,
+    "magic_items": MagicItem,
+    "rules": RuleSection,
 }

@@ -2,6 +2,26 @@
 
 Son güncelleme: 2026-11-09 (SRD içeriğinin tamamı Türkçe)
 
+## Büyülü eşyalar ve kural bölümleri (dal `claude/magic-items`)
+
+- **258 büyülü eşya** (tür, nadirlik, uyumlanma, italik tür satırı, metin, tablolar ve gömülü stat
+  blokları: Dev Sinek, Ölüm Avatarı) ve **34 kural bölümü**: Oyunun Oynanışı, Karakter Oluşturma,
+  Oyun Araç Kutusu (yolculuk, lanetler ve salgınlar, çevre, korku, zehirler, tuzaklar, savaş
+  karşılaşmaları) ve büyülü eşya kuralları; bölüm girişleri (`playing-intro` kenar kutularıyla,
+  `magic-items-intro`, "A'dan Z'ye Büyülü Eşyalar") ayrı bölüm olarak. Uygulamada "Büyülü Eşyalar"
+  ve "Kural Bölümleri" olarak aranır ve gezilir.
+- Tablo kurucu (`structure.py`): farklı başlıklı tablo önceki tabloyu bitirir (Eylemler tablosu
+  Beceriler'e karışmıyor); başlık satırındaki farklı punto/kalınlıktaki hücreler başlık sayılır;
+  sağa/ortaya hizalı sütunlar tek sütun; birleşik hücreler span konumundan bölünür; yan yana basılmış
+  iki kopya tablo (Nadirlik | Değer | Nadirlik | Değer) alt alta dizilir. Testler her tablonun
+  dikdörtgen olduğunu ve başlık hücrelerinin dolu olduğunu denetler.
+- SRD metninin kendisinde geçen birkaç ürün adı ("D&D", "Tiamat", "yuan-ti") derlemede nötr ifadeyle
+  değiştiriliyor (`TEXT_FIXUPS`, `build_source.py`).
+- Çeviri: 257 eşya adı ve 214 bölüm başlığı sözlüğe, 3.735 segment toplu çeviri, tutarlılık geçişi ve
+  AI düzeltme turu (61 segment). Bağlama bağlı yeni ad alanları: nadirlik alanı ("Common" = Yaygın),
+  silah ustalığı hücreleri ("Slow" = Yavaşlatma), dil tabloları ("Giant" = Devce).
+- Bellek: 14.034 segment, QC bulgusu 0. Asset'ler 3,9 MB.
+
 ## Tam çeviri (dal `claude/full-translation`)
 
 SRD 5.2.1'deki 1.080 kaydın tamamı Türkçe: 339 büyü, 330 canavar, 12 sınıf + 12 alt sınıf,
@@ -142,7 +162,7 @@ olmadığı için atlanıyor.
 - **Soy alt seçenekleri** (Forest Gnome, Rock Gnome; Goliath atalık seçenekleri) ayrı `traits` girdisi olarak duruyor; Faz 1'de üst özelliğin altına gruplanabilir. Vampire zaafları ve Sphinx kükremeleri gibi canavar alt maddeleri tek özellik metninde.
 - **Spell Scroll** ekipmanda üç kayıt (Cantrip, Level 1 ve açıklamalı ana kayıt); Faz 1'de tek kayıtta birleştirilebilir.
 - **Ayrıştırılmayan sayfalar** (101–106 büyü yapma kuralları vb.) yüzünden bazı kural atıfları uygulamada karşılıksız kalacak.
-- **Magic Items**, **Gameplay Toolbox** ve **Playing the Game** bölümleri ayrıştırılmadı (Faz 0 listesinde yoktu).
+- Büyü yapma kuralları (s. 104–106), yaşam giderleri, yemek ve konaklama tablosu, ücretli hizmetler henüz ayrıştırılmadı.
 - Çeviri bu oturumda API anahtarı olmadığı için oturum içi Claude ile yapıldı; aynı talimat API arka ucuyla da çalışır (`translate api`).
 
 ## Onay bekleyenler (ürün sahibi)

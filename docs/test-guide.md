@@ -26,7 +26,7 @@ Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
    "saving throw", "cüce", "hançer", "goblin". Sonuç anında gelmeli (listenin
    üstünde süre yazar, 100 ms'nin altında olmalı). Boş kutuda kategorilere göz at.
 2. **Kayıt sayfası** — Sağ üstteki **TR / EN** düğmesiyle dil tek dokunuşla
-   değişmeli. Artık tüm büyüler, canavarlar, sınıflar ve ekipman Türkçe; canavar
+   değişmeli. Artık tüm büyüler, canavarlar, büyülü eşyalar, sınıflar, ekipman ve kural bölümleri Türkçe; canavar
    kartlarında ve sınıf özelliklerinde tuhaf ya da tutarsız terim görürsen not al.
 3. **Zar** — `2d20kh1+5` (avantajlı +5), `4d6dl1` (en düşüğü at), `8d6`,
    `(1d8+3)*2` yaz ya da düğmelerle kur, **AT**'a bas. Avantaj/Dezavantaj
@@ -60,7 +60,6 @@ Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
 
 - Çevirilerin tamamı makine destekli; insan incelemesi sürüyor. Terim önerilerin bu yüzden çok değerli.
 - Satın alma yok.
-- Sihirli eşyalar ve bazı kural bölümleri henüz uygulamada değil.
 
 ## Geri bildirim
 

@@ -23,6 +23,10 @@ Türkçe, 10 kural (mekanik), 2 anlam. Bulunan hata türleri ve örnekler:
 
 Kurallar `pipeline/prompts/translate_tr.md` ve karar kaydında (`docs/decisions.md`).
 
+Büyülü eşyalar ve kural bölümlerinde ikinci bir AI düzeltme turu yapıldı (61 segment): "within 30
+feet" ifadesinin "30 fit mesafede" (tam 30 fit) diye çevrilmesi, öznesi kaybolan cümleler ("senin
+nerede olduğunu"), "bir yüzyıl içinde" (yüz yıl sonra) ve başlıkla metin arasındaki terim farkları.
+
 ## İnsan incelemesi: öncelik sırası
 
 1. **Canavar kartlarının eylem metinleri** (`monsters`, "Eylemler" ve "Efsanevi Eylemler"). Masada en
@@ -32,7 +36,10 @@ Kurallar `pipeline/prompts/translate_tr.md` ve karar kaydında (`docs/decisions.
 2. **Sınıf özellikleri** (12 sınıf + 12 alt sınıf): özellik adlarının tablo ve metinde aynı olması;
    "Uzun Dinlenmeyi bitirdiğinde harcanmış kullanımları geri kazanırsın" gibi kaynak kuralları.
 3. **Büyüler**: menzil, süre ve "Daha Yüksek Seviyeli Büyü Slotu Kullanma" bölümleri.
-4. **Ekipman ve kurallar sözlüğü**: kısa, daha az risk.
+4. **Büyülü eşyalar**: yük (charge) kuralları, uyumlanma kısıtları ve "bir sonraki şafak" süreleri.
+5. **Kural bölümleri** (Oyunun Oynanışı, Oyun Araç Kutusu): tablolar ve ara kutularla bölünmüş
+   cümleler (kaynakta da bölünmüş).
+6. **Ekipman ve kurallar sözlüğü**: kısa, daha az risk.
 
 İnceleme yolu: `python -m gmcebi_pipeline.translate review` → `translations/review_queue.csv`
 (`decision`: ok / fix / reject), sonra `apply-review`. Onaylanan segment `reviewed` olur ve makine
@@ -53,6 +60,10 @@ Kurallar `pipeline/prompts/translate_tr.md` ve karar kaydında (`docs/decisions.
 - **Kesme işareti**: eylem ve özellik adları ad gibi ek alıyor ("Isırık'ı", "İlahi Müdahale'yi");
   küçük harfli yabancı yaratık adları kayıtlar arasında karışık ("aboleth'in" / "balorun").
   Tek kural seçilirse toplu düzeltilebilir.
+
+- **Hizalama kısaltmaları** (LG, NG, CE…) İngilizce bırakıldı; Türkçe bir kısaltma takımı istenirse
+  karar gerekiyor (Kuralcı ve Kaotik ikisi de K ile başlıyor).
+- **Düzlem adlarında kesme işareti** karışık: "Astral Düzlem'de" (çoğunluk) / "Astral Düzlemde".
 
 ## Kaynakta kalan bozukluklar
 

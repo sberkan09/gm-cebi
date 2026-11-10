@@ -46,6 +46,11 @@ def test_context_namespaces():
     keys = {(s.path, s.en): s.key for s in record_segments(cls, "classes")}
     assert keys[("blocks.0.rows.0.0", "Light")] == segment_key("Light", "spells")  # the spell
     assert keys[("blocks.1.rows.0.0", "Light")] == segment_key("Light")            # plain text
+    beads = {"id": "necklace-of-prayer-beads", "name": "Necklace of Prayer Beads", "blocks": [
+        {"type": "table", "header": ["1d20", "Bead", "Spell"], "rows": [["1–6", "Bead of Blessing", "Bless"]]}]}
+    keys = {s.path: s.key for s in record_segments(beads, "magic_items")}
+    assert keys["blocks.0.rows.0.2"] == segment_key("Bless", "spells")  # a "Spell" column anywhere
+    assert keys["blocks.0.rows.0.1"] == segment_key("Bead of Blessing")
     mon = {"id": "ettin", "name": "Ettin", "creature_type": "Giant", "details": {"Languages": "Giant"}}
     keys = {s.path: s.key for s in record_segments(mon, "monsters")}
     assert keys["details.Languages"] == segment_key("Giant", "lang")

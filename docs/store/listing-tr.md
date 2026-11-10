@@ -45,7 +45,7 @@ GM PAKETİ
 • Bu sürümde GM Paketi açık gelir.
 
 ÇEVİRİ DURUMU
-SRD 5.2.1'in tamamı Türkçe: 339 büyü, 330 canavar, 12 sınıf ve alt sınıfları, kökenler, hünerler, ekipman, durumlar ve kurallar sözlüğü. Çeviriler makine destekli yapıldı ve gözden geçirilmeye devam ediyor; tuhaf bulduğun terimleri bildirirsen düzeltiriz. Her sayfada TR/EN düğmesiyle İngilizce aslına bakabilirsin.
+SRD 5.2.1'in tamamı Türkçe: 339 büyü, 330 canavar, 258 büyülü eşya, 12 sınıf ve alt sınıfları, kökenler, hünerler, ekipman, durumlar, kurallar sözlüğü ve oyun kuralları (zehirler, tuzaklar, karşılaşma zorluğu…). Çeviriler makine destekli yapıldı ve gözden geçirilmeye devam ediyor; tuhaf bulduğun terimleri bildirirsen düzeltiriz. Her sayfada TR/EN düğmesiyle İngilizce aslına bakabilirsin.
 
 GİZLİLİK
 Uygulama internete bağlanmaz; reklam, analitik ya da hesap yoktur. Notların ve karşılaşmaların yalnızca telefonunda saklanır.

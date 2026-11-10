@@ -45,7 +45,7 @@ GM PACK
 • The GM pack is unlocked in this version.
 
 TRANSLATION STATUS
-All of SRD 5.2.1 is in Turkish: 339 spells, 330 monsters, 12 classes and their subclasses, origins, feats, equipment, conditions and the rules glossary. The translation is machine-assisted and still being reviewed; report any odd terms and we will fix them. Every page has a TR/EN switch to check the English original.
+All of SRD 5.2.1 is in Turkish: 339 spells, 330 monsters, 258 magic items, 12 classes and their subclasses, origins, feats, equipment, conditions, the rules glossary and the gameplay rules (poisons, traps, encounter difficulty…). The translation is machine-assisted and still being reviewed; report any odd terms and we will fix them. Every page has a TR/EN switch to check the English original.
 
 PRIVACY
 The app never connects to the internet. No ads, no analytics, no account. Your notes and encounters stay on your phone.
