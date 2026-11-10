@@ -2,7 +2,7 @@
 
 > Üretildi: `python -m gmcebi_pipeline.report` — elle düzenleme; değişiklikleri `pipeline/glossary.csv`'ye yap.
 
-Çekirdek terim: **1161** — topluluk: 116, öneri: 1002, tartışmalı: 43. Ayrıca 339 pilot büyü adı ve 239 bölüm adı (en altta).
+Çekirdek terim: **1168** — topluluk: 116, öneri: 1009, tartışmalı: 43. Ayrıca 339 pilot büyü adı ve 315 bölüm adı (en altta).
 
 ## Nasıl incelenir
 
@@ -233,7 +233,7 @@
 | 145 | Restrained | **Kısıtlanmış** | öneri | ✔ | Bağlanmış |  |  |
 | 146 | Stunned | **Sersemlemiş** | öneri | ✔ |  |  | K |
 | 147 | Unconscious | **Bilinçsiz** | topluluk | ✔ | Baygın |  | B |
-| 148 | Condition | **Durum** | topluluk | ✔ |  | "weather conditions" (hava koşulları) hariç. |  |
+| 148 | Condition | **Durum** | topluluk | ✔ |  | "weather conditions" / "unhealthy conditions" (koşullar) hariç. |  |
 
 ### Eylem
 
@@ -724,679 +724,686 @@
 | 526 | Rowboat | **Sandal** | öneri |  |  |  |  |
 | 527 | Sailing Ship | **Yelkenli** | öneri |  |  |  |  |
 | 528 | Warship | **Savaş Gemisi** | öneri |  |  |  |  |
+| 529 | Wretched | **Sefil** | öneri |  |  | Yaşam tarzı düzeyi (Yaşam Tarzı Giderleri, Yiyecek tablosu). |  |
+| 530 | Squalid | **Perişan** | öneri |  |  | Yaşam tarzı düzeyi (Yaşam Tarzı Giderleri, Yiyecek tablosu). |  |
+| 531 | Poor | **Yoksul** | öneri |  |  | Yaşam tarzı düzeyi (Yaşam Tarzı Giderleri, Yiyecek tablosu). |  |
+| 532 | Modest | **Mütevazı** | öneri |  |  | Yaşam tarzı düzeyi (Yaşam Tarzı Giderleri, Yiyecek tablosu). |  |
+| 533 | Comfortable | **Rahat** | öneri |  |  | Yaşam tarzı düzeyi (Yaşam Tarzı Giderleri, Yiyecek tablosu). |  |
+| 534 | Wealthy | **Varlıklı** | öneri |  |  | Yaşam tarzı düzeyi (Yaşam Tarzı Giderleri, Yiyecek tablosu). |  |
+| 535 | Aristocratic | **Aristokrat** | öneri |  |  | Yaşam tarzı düzeyi (Yaşam Tarzı Giderleri, Yiyecek tablosu). |  |
 
 ### Eşya
 
 | # | İngilizce | Türkçe | Durum | Zorunlu | Alternatifler | Not | Kanıt |
 |---|---|---|---|---|---|---|---|
-| 529 | Attunement | **Uyumlanma** | öneri | ✔ |  |  |  |
-| 530 | Magic Item | **Büyülü Eşya** | öneri | ✔ |  |  |  |
-| 531 | Requires Attunement | **Uyumlanma Gerektirir** | öneri | ✔ |  |  |  |
+| 536 | Attunement | **Uyumlanma** | öneri | ✔ |  |  |  |
+| 537 | Magic Item | **Büyülü Eşya** | öneri | ✔ |  |  |  |
+| 538 | Requires Attunement | **Uyumlanma Gerektirir** | öneri | ✔ |  |  |  |
 
 ### Para
 
 | # | İngilizce | Türkçe | Durum | Zorunlu | Alternatifler | Not | Kanıt |
 |---|---|---|---|---|---|---|---|
-| 532 | Copper Piece | **bakır** | tartışmalı | ✔ | BP | Kısaltma yerine kelime: '5 CP' → '5 bakır'. İngilizce kısaltmalar (GP=gold) Türkçe okumada yanıltıcı. |  |
-| 533 | Silver Piece | **gümüş** | tartışmalı | ✔ |  | '1 SP' → '1 gümüş'. |  |
-| 534 | Electrum Piece | **elektrum** | tartışmalı | ✔ |  | '1 EP' → '1 elektrum'. |  |
-| 535 | Gold Piece | **altın** | tartışmalı | ✔ | AP, GP | '50 GP' → '50 altın'. |  |
-| 536 | Platinum Piece | **platin** | tartışmalı | ✔ |  | '10 PP' → '10 platin'. |  |
+| 539 | Copper Piece | **bakır** | tartışmalı | ✔ | BP | Kısaltma yerine kelime: '5 CP' → '5 bakır'. İngilizce kısaltmalar (GP=gold) Türkçe okumada yanıltıcı. |  |
+| 540 | Silver Piece | **gümüş** | tartışmalı | ✔ |  | '1 SP' → '1 gümüş'. |  |
+| 541 | Electrum Piece | **elektrum** | tartışmalı | ✔ |  | '1 EP' → '1 elektrum'. |  |
+| 542 | Gold Piece | **altın** | tartışmalı | ✔ | AP, GP | '50 GP' → '50 altın'. |  |
+| 543 | Platinum Piece | **platin** | tartışmalı | ✔ |  | '10 PP' → '10 platin'. |  |
 
 ### Birim
 
 | # | İngilizce | Türkçe | Durum | Zorunlu | Alternatifler | Not | Kanıt |
 |---|---|---|---|---|---|---|---|
-| 537 | feet | **fit** | tartışmalı | ✔ | ft | Sayılar değişmez (QC). 30 feet → 30 fit. Metrik gösterim ileride uygulama ayarı olabilir. "5 fitlik" kabul edilir; "ayak" (vücut) normal kelime olarak serbest. |  |
-| 538 | mile | **mil** | öneri | ✔ |  |  |  |
-| 539 | pound (lb.) | **lb** | öneri |  | libre | Ağırlık birimi kısaltması korunur. |  |
+| 544 | feet | **fit** | tartışmalı | ✔ | ft | Sayılar değişmez (QC). 30 feet → 30 fit. Metrik gösterim ileride uygulama ayarı olabilir. "5 fitlik" kabul edilir; "ayak" (vücut) normal kelime olarak serbest. |  |
+| 545 | mile | **mil** | öneri | ✔ |  |  |  |
+| 546 | pound (lb.) | **lb** | öneri |  | libre | Ağırlık birimi kısaltması korunur. |  |
 
 ### Canavar adı
 
 | # | İngilizce | Türkçe | Durum | Zorunlu | Alternatifler | Not | Kanıt |
 |---|---|---|---|---|---|---|---|
-| 540 | Aboleth | **Aboleth** | öneri |  |  |  |  |
-| 541 | Air Elemental | **Hava Elementali** | öneri |  |  |  |  |
-| 542 | Animated Armor | **Canlanmış Zırh** | öneri |  |  |  |  |
-| 543 | Animated Flying Sword | **Canlanmış Uçan Kılıç** | öneri |  |  |  |  |
-| 544 | Animated Rug of Smothering | **Canlanmış Boğucu Halı** | öneri |  |  |  |  |
-| 545 | Ankheg | **Ankheg** | öneri |  |  |  |  |
-| 546 | Assassin | **Suikastçı** | öneri |  |  |  |  |
-| 547 | Awakened Shrub | **Uyanmış Çalı** | öneri |  |  |  |  |
-| 548 | Awakened Tree | **Uyanmış Ağaç** | öneri |  |  |  |  |
-| 549 | Axe Beak | **Balta Gagalı** | öneri |  |  |  |  |
-| 550 | Azer Sentinel | **Azer Nöbetçisi** | öneri |  |  |  |  |
-| 551 | Balor | **Balor** | öneri |  |  | Demon (iblis türü) adı korunmuştur. |  |
-| 552 | Bandit | **Haydut** | öneri |  |  |  |  |
-| 553 | Bandit Captain | **Haydut Reisi** | öneri |  |  | Captain bağlama göre: Reis (haydut), Kaptan (korsan), Komutan (muhafız, hobgoblin). |  |
-| 554 | Barbed Devil | **Dikenli Şeytan** | öneri |  |  | Devil = Şeytan. |  |
-| 555 | Basilisk | **Basilisk** | öneri |  |  |  |  |
-| 556 | Bearded Devil | **Sakallı Şeytan** | öneri |  |  |  |  |
-| 557 | Behir | **Behir** | öneri |  |  |  |  |
-| 558 | Berserker | **Gözü Dönmüş** | öneri |  |  | Path of the Berserker = Gözü Dönmüş Yolu ile uyumlu. |  |
-| 559 | Black Dragon Wyrmling | **Yavru Kara Ejderha** | öneri |  |  | Kalıp: [Yaş] [Renk] Ejderha; Wyrmling = Yavru. |  |
-| 560 | Young Black Dragon | **Genç Kara Ejderha** | öneri |  |  |  |  |
-| 561 | Adult Black Dragon | **Yetişkin Kara Ejderha** | öneri |  |  |  |  |
-| 562 | Ancient Black Dragon | **Kadim Kara Ejderha** | öneri |  |  |  |  |
-| 563 | Black Pudding | **Kara Puding** | öneri |  |  |  |  |
-| 564 | Blink Dog | **Işınlanan Köpek** | öneri |  |  |  |  |
-| 565 | Blue Dragon Wyrmling | **Yavru Mavi Ejderha** | öneri |  |  |  |  |
-| 566 | Young Blue Dragon | **Genç Mavi Ejderha** | öneri |  |  |  |  |
-| 567 | Adult Blue Dragon | **Yetişkin Mavi Ejderha** | öneri |  |  |  |  |
-| 568 | Ancient Blue Dragon | **Kadim Mavi Ejderha** | öneri |  |  |  |  |
-| 569 | Bone Devil | **Kemik Şeytanı** | öneri |  |  |  |  |
-| 570 | Brass Dragon Wyrmling | **Yavru Pirinç Ejderha** | öneri |  |  |  |  |
-| 571 | Young Brass Dragon | **Genç Pirinç Ejderha** | öneri |  |  |  |  |
-| 572 | Adult Brass Dragon | **Yetişkin Pirinç Ejderha** | öneri |  |  |  |  |
-| 573 | Ancient Brass Dragon | **Kadim Pirinç Ejderha** | öneri |  |  |  |  |
-| 574 | Bronze Dragon Wyrmling | **Yavru Bronz Ejderha** | öneri |  |  |  |  |
-| 575 | Young Bronze Dragon | **Genç Bronz Ejderha** | öneri |  |  |  |  |
-| 576 | Adult Bronze Dragon | **Yetişkin Bronz Ejderha** | öneri |  |  |  |  |
-| 577 | Ancient Bronze Dragon | **Kadim Bronz Ejderha** | öneri |  |  |  |  |
-| 578 | Bugbear Stalker | **Bugbear Pusucusu** | öneri |  |  |  |  |
-| 579 | Bugbear Warrior | **Bugbear Savaşçısı** | öneri |  |  | Warrior = "X Savaşçısı" kalıbı. |  |
-| 580 | Bulette | **Bulette** | öneri |  |  |  |  |
-| 581 | Centaur Trooper | **Sentor Askeri** | öneri |  |  |  |  |
-| 582 | Chain Devil | **Zincir Şeytanı** | öneri |  |  |  |  |
-| 583 | Chimera | **Kimera** | öneri |  |  |  |  |
-| 584 | Chuul | **Chuul** | öneri |  |  |  |  |
-| 585 | Clay Golem | **Kil Golemi** | öneri |  |  |  |  |
-| 586 | Cloaker | **Pelerinimsi** | öneri |  |  |  |  |
-| 587 | Cloud Giant | **Bulut Devi** | öneri |  |  |  |  |
-| 588 | Cockatrice | **Kokatris** | öneri |  |  |  |  |
-| 589 | Commoner | **Halktan Biri** | öneri |  |  |  |  |
-| 590 | Copper Dragon Wyrmling | **Yavru Bakır Ejderha** | öneri |  |  |  |  |
-| 591 | Young Copper Dragon | **Genç Bakır Ejderha** | öneri |  |  |  |  |
-| 592 | Adult Copper Dragon | **Yetişkin Bakır Ejderha** | öneri |  |  |  |  |
-| 593 | Ancient Copper Dragon | **Kadim Bakır Ejderha** | öneri |  |  |  |  |
-| 594 | Couatl | **Couatl** | öneri |  |  |  |  |
-| 595 | Swarm of Crawling Claws | **Sürünen Pençe Sürüsü** | öneri |  |  |  |  |
-| 596 | Cultist | **Tarikatçı** | öneri |  |  |  |  |
-| 597 | Cultist Fanatic | **Fanatik Tarikatçı** | öneri |  |  |  |  |
-| 598 | Darkmantle | **Kara Örtü** | öneri |  |  |  |  |
-| 599 | Death Dog | **Ölüm Köpeği** | öneri |  |  |  |  |
-| 600 | Deva | **Deva** | öneri |  |  |  |  |
-| 601 | Djinni | **Cin** | öneri |  |  |  |  |
-| 602 | Doppelganger | **Doppelganger** | öneri |  |  |  |  |
-| 603 | Dragon Turtle | **Ejderha Kaplumbağası** | öneri |  |  |  |  |
-| 604 | Dretch | **Dretch** | öneri |  |  |  |  |
-| 605 | Drider | **Drider** | öneri |  |  |  |  |
-| 606 | Druid | **Druid** | öneri |  |  | Sınıf adıyla aynı; NPC bir druid olduğu için bilinçli. |  |
-| 607 | Dryad | **Driyad** | öneri |  |  |  |  |
-| 608 | Earth Elemental | **Toprak Elementali** | öneri |  |  |  |  |
-| 609 | Efreeti | **İfrit** | öneri |  |  |  |  |
-| 610 | Erinyes | **Erinyes** | öneri |  |  |  |  |
-| 611 | Ettercap | **Ettercap** | öneri |  |  |  |  |
-| 612 | Ettin | **Ettin** | öneri |  |  |  |  |
-| 613 | Fire Elemental | **Ateş Elementali** | öneri |  |  |  |  |
-| 614 | Fire Giant | **Ateş Devi** | öneri |  |  |  |  |
-| 615 | Flesh Golem | **Et Golemi** | öneri |  |  |  |  |
-| 616 | Frost Giant | **Ayaz Devi** | öneri |  |  | Ray of Frost = Ayaz Işını ile uyumlu. |  |
-| 617 | Shrieker Fungus | **Çığlıkçı Mantar** | öneri |  |  |  |  |
-| 618 | Violet Fungus | **Eflatun Mantar** | öneri |  |  | Purple Worm (Mor Solucan) ile karışmasın diye Eflatun. |  |
-| 619 | Gargoyle | **Gargoyl** | öneri |  |  |  |  |
-| 620 | Gelatinous Cube | **Jelatinimsi Küp** | öneri |  |  |  |  |
-| 621 | Ghast | **Kokuşmuş Gulyabani** | öneri |  |  | Ghoul = Gulyabani serisi. |  |
-| 622 | Ghost | **Hayalet** | öneri |  |  |  |  |
-| 623 | Ghoul | **Gulyabani** | öneri |  |  |  |  |
-| 624 | Gibbering Mouther | **Geveleyen Ağız** | öneri |  |  |  |  |
-| 625 | Glabrezu | **Glabrezu** | öneri |  |  |  |  |
-| 626 | Gladiator | **Gladyatör** | öneri |  |  |  |  |
-| 627 | Gnoll Warrior | **Gnoll Savaşçısı** | öneri |  |  |  |  |
-| 628 | Goblin Minion | **Goblin Uşağı** | öneri |  |  |  |  |
-| 629 | Goblin Warrior | **Goblin Savaşçısı** | öneri |  |  |  |  |
-| 630 | Goblin Boss | **Goblin Elebaşı** | öneri |  |  | Boss = Elebaşı. |  |
-| 631 | Gold Dragon Wyrmling | **Yavru Altın Ejderha** | öneri |  |  |  |  |
-| 632 | Young Gold Dragon | **Genç Altın Ejderha** | öneri |  |  |  |  |
-| 633 | Adult Gold Dragon | **Yetişkin Altın Ejderha** | öneri |  |  |  |  |
-| 634 | Ancient Gold Dragon | **Kadim Altın Ejderha** | öneri |  |  |  |  |
-| 635 | Gorgon | **Gorgon** | öneri |  |  |  |  |
-| 636 | Gray Ooze | **Gri Balçık** | öneri |  |  |  |  |
-| 637 | Green Dragon Wyrmling | **Yavru Yeşil Ejderha** | öneri |  |  |  |  |
-| 638 | Young Green Dragon | **Genç Yeşil Ejderha** | öneri |  |  |  |  |
-| 639 | Adult Green Dragon | **Yetişkin Yeşil Ejderha** | öneri |  |  |  |  |
-| 640 | Ancient Green Dragon | **Kadim Yeşil Ejderha** | öneri |  |  |  |  |
-| 641 | Green Hag | **Yeşil Cadı** | öneri |  |  | Hag = Cadı. |  |
-| 642 | Grick | **Grik** | öneri |  |  |  |  |
-| 643 | Griffon | **Grifon** | öneri |  |  |  |  |
-| 644 | Grimlock | **Grimlock** | öneri |  |  |  |  |
-| 645 | Guardian Naga | **Muhafız Naga** | öneri |  |  |  |  |
-| 646 | Guard | **Muhafız** | öneri |  |  |  |  |
-| 647 | Guard Captain | **Muhafız Komutanı** | öneri |  |  |  |  |
-| 648 | Half-Dragon | **Yarı Ejderha** | öneri |  |  |  |  |
-| 649 | Harpy | **Harpi** | öneri |  |  |  |  |
-| 650 | Hell Hound | **Cehennem Tazısı** | öneri |  |  |  |  |
-| 651 | Hezrou | **Hezrou** | öneri |  |  |  |  |
-| 652 | Hill Giant | **Tepe Devi** | öneri |  |  |  |  |
-| 653 | Hippogriff | **Hipogrif** | öneri |  |  |  |  |
-| 654 | Hobgoblin Warrior | **Hobgoblin Savaşçısı** | öneri |  |  |  |  |
-| 655 | Hobgoblin Captain | **Hobgoblin Komutanı** | öneri |  |  |  |  |
-| 656 | Homunculus | **Homunkulus** | öneri |  |  |  |  |
-| 657 | Horned Devil | **Boynuzlu Şeytan** | öneri |  |  |  |  |
-| 658 | Hydra | **Hidra** | öneri |  |  |  |  |
-| 659 | Ice Devil | **Buz Şeytanı** | öneri |  |  |  |  |
-| 660 | Imp | **Şeytancık** | öneri |  |  |  |  |
-| 661 | Incubus | **İnkübus** | öneri |  |  |  |  |
-| 662 | Invisible Stalker | **Görünmez Takipçi** | öneri |  |  |  |  |
-| 663 | Iron Golem | **Demir Golemi** | öneri |  |  |  |  |
-| 664 | Knight | **Şövalye** | öneri |  |  |  |  |
-| 665 | Kobold Warrior | **Kobold Savaşçısı** | öneri |  |  |  |  |
-| 666 | Kraken | **Kraken** | öneri |  |  |  |  |
-| 667 | Lamia | **Lamia** | öneri |  |  |  |  |
-| 668 | Lemure | **Lemure** | öneri |  |  | Lemür (hayvan) ile karışmasın diye özgün yazım. |  |
-| 669 | Lich | **Lich** | öneri |  |  |  |  |
-| 670 | Mage | **Efsuncu** | öneri |  |  | Wizard = Büyücü, Sorcerer = Sihirbaz dolu olduğu için. |  |
-| 671 | Archmage | **Ulu Efsuncu** | öneri |  |  |  |  |
-| 672 | Magmin | **Magmin** | öneri |  |  |  |  |
-| 673 | Manticore | **Mantikor** | öneri |  |  |  |  |
-| 674 | Marilith | **Marilith** | öneri |  |  |  |  |
-| 675 | Medusa | **Medusa** | öneri |  |  |  |  |
-| 676 | Dust Mephit | **Toz Mefiti** | öneri |  |  |  |  |
-| 677 | Ice Mephit | **Buz Mefiti** | öneri |  |  |  |  |
-| 678 | Magma Mephit | **Magma Mefiti** | öneri |  |  |  |  |
-| 679 | Steam Mephit | **Buhar Mefiti** | öneri |  |  |  |  |
-| 680 | Merfolk Skirmisher | **Deniz Halkı Akıncısı** | öneri |  |  |  |  |
-| 681 | Merrow | **Merrow** | öneri |  |  |  |  |
-| 682 | Mimic | **Taklitçi** | öneri |  |  |  |  |
-| 683 | Minotaur of Baphomet | **Baphomet Minotoru** | öneri |  |  |  |  |
-| 684 | Mummy | **Mumya** | öneri |  |  |  |  |
-| 685 | Mummy Lord | **Mumya Efendisi** | öneri |  |  |  |  |
-| 686 | Nalfeshnee | **Nalfeshnee** | öneri |  |  |  |  |
-| 687 | Night Hag | **Gece Cadısı** | öneri |  |  |  |  |
-| 688 | Nightmare | **Kâbus** | öneri |  |  | Ateş saçan cehennem atı. |  |
-| 689 | Noble | **Soylu** | öneri |  |  |  |  |
-| 690 | Ochre Jelly | **Okra Jölesi** | öneri |  |  |  |  |
-| 691 | Ogre | **Ogre** | öneri |  |  | Giant = Dev ile karışmasın diye. |  |
-| 692 | Oni | **Oni** | öneri |  |  |  |  |
-| 693 | Otyugh | **Otyugh** | öneri |  |  |  |  |
-| 694 | Owlbear | **Baykuşayı** | öneri |  |  |  |  |
-| 695 | Pegasus | **Pegasus** | öneri |  |  |  |  |
-| 696 | Phase Spider | **Faz Örümceği** | öneri |  |  |  |  |
-| 697 | Pirate | **Korsan** | öneri |  |  |  |  |
-| 698 | Pirate Captain | **Korsan Kaptanı** | öneri |  |  |  |  |
-| 699 | Pit Fiend | **Çukur İblisi** | öneri |  |  | Fiend = İblis; kendisi bir şeytan (devil). |  |
-| 700 | Planetar | **Planetar** | öneri |  |  |  |  |
-| 701 | Priest Acolyte | **Tapınak Çömezi** | öneri |  |  | Acolyte (geçmiş) = Mürit, Cleric = Rahip dolu olduğu için. |  |
-| 702 | Priest | **Din Adamı** | öneri |  |  | Cleric = Rahip ile çakışmasın diye. |  |
-| 703 | Pseudodragon | **Sözde Ejderha** | öneri |  |  |  |  |
-| 704 | Purple Worm | **Mor Solucan** | öneri |  |  |  |  |
-| 705 | Quasit | **Quasit** | öneri |  |  |  |  |
-| 706 | Rakshasa | **Rakşasa** | öneri |  |  |  |  |
-| 707 | Red Dragon Wyrmling | **Yavru Kırmızı Ejderha** | öneri |  |  |  |  |
-| 708 | Young Red Dragon | **Genç Kırmızı Ejderha** | öneri |  |  |  |  |
-| 709 | Adult Red Dragon | **Yetişkin Kırmızı Ejderha** | öneri |  |  |  |  |
-| 710 | Ancient Red Dragon | **Kadim Kırmızı Ejderha** | öneri |  |  |  |  |
-| 711 | Remorhaz | **Remorhaz** | öneri |  |  |  |  |
-| 712 | Roc | **Rok** | öneri |  |  |  |  |
-| 713 | Roper | **Kementçi** | öneri |  |  |  |  |
-| 714 | Rust Monster | **Pas Canavarı** | öneri |  |  |  |  |
-| 715 | Sahuagin Warrior | **Sahuagin Savaşçısı** | öneri |  |  |  |  |
-| 716 | Salamander | **Semender** | öneri |  |  |  |  |
-| 717 | Satyr | **Satir** | öneri |  |  |  |  |
-| 718 | Scout | **İzci** | öneri |  |  |  |  |
-| 719 | Sea Hag | **Deniz Cadısı** | öneri |  |  |  |  |
-| 720 | Shadow | **Gölge** | öneri |  |  |  |  |
-| 721 | Shambling Mound | **Yürüyen Höyük** | öneri |  |  |  |  |
-| 722 | Shield Guardian | **Kalkan Muhafızı** | öneri |  |  |  |  |
-| 723 | Silver Dragon Wyrmling | **Yavru Gümüş Ejderha** | öneri |  |  |  |  |
-| 724 | Young Silver Dragon | **Genç Gümüş Ejderha** | öneri |  |  |  |  |
-| 725 | Adult Silver Dragon | **Yetişkin Gümüş Ejderha** | öneri |  |  |  |  |
-| 726 | Ancient Silver Dragon | **Kadim Gümüş Ejderha** | öneri |  |  |  |  |
-| 727 | Skeleton | **İskelet** | öneri |  |  |  |  |
-| 728 | Warhorse Skeleton | **Savaş Atı İskeleti** | öneri |  |  |  |  |
-| 729 | Minotaur Skeleton | **Minotor İskeleti** | öneri |  |  |  |  |
-| 730 | Solar | **Solar** | öneri |  |  |  |  |
-| 731 | Specter | **Tayf** | öneri |  |  | Ghost = Hayalet, Specter = Tayf, Wraith = Karaltı, Shadow = Gölge. |  |
-| 732 | Sphinx of Wonder | **Mucize Sfenksi** | öneri |  |  |  |  |
-| 733 | Sphinx of Lore | **İrfan Sfenksi** | öneri |  |  | College of Lore = İrfan Okulu ile uyumlu. |  |
-| 734 | Sphinx of Valor | **Yiğitlik Sfenksi** | öneri |  |  |  |  |
-| 735 | Spirit Naga | **Ruh Naga** | öneri |  |  |  |  |
-| 736 | Sprite | **Kanatlı Peri** | öneri |  |  |  |  |
-| 737 | Spy | **Casus** | öneri |  |  |  |  |
-| 738 | Stirge | **Stirge** | öneri |  |  |  |  |
-| 739 | Stone Giant | **Taş Devi** | öneri |  |  |  |  |
-| 740 | Stone Golem | **Taş Golemi** | öneri |  |  |  |  |
-| 741 | Storm Giant | **Fırtına Devi** | öneri |  |  |  |  |
-| 742 | Succubus | **Sukübus** | öneri |  |  |  |  |
-| 743 | Tarrasque | **Tarrasque** | öneri |  |  |  |  |
-| 744 | Tough | **Kabadayı** | öneri |  |  |  |  |
-| 745 | Tough Boss | **Kabadayı Elebaşı** | öneri |  |  |  |  |
-| 746 | Treant | **Ağaçadam** | öneri |  |  |  |  |
-| 747 | Troll | **Trol** | öneri |  |  |  |  |
-| 748 | Troll Limb | **Trol Uzvu** | öneri |  |  |  |  |
-| 749 | Unicorn | **Tek Boynuzlu At** | öneri |  |  |  |  |
-| 750 | Vampire Familiar | **Vampir Hizmetkârı** | öneri |  |  |  |  |
-| 751 | Vampire Spawn | **Vampir Yavrusu** | öneri |  |  |  |  |
-| 752 | Vampire | **Vampir** | öneri |  |  |  |  |
-| 753 | Vrock | **Vrock** | öneri |  |  |  |  |
-| 754 | Warrior Infantry | **Piyade Savaşçı** | öneri |  |  |  |  |
-| 755 | Warrior Veteran | **Kıdemli Savaşçı** | öneri |  |  |  |  |
-| 756 | Water Elemental | **Su Elementali** | öneri |  |  |  |  |
-| 757 | Werebear | **Ayı Adam** | öneri |  |  |  |  |
-| 758 | Wereboar | **Yaban Domuzu Adam** | öneri |  |  |  |  |
-| 759 | Wererat | **Sıçan Adam** | öneri |  |  |  |  |
-| 760 | Weretiger | **Kaplan Adam** | öneri |  |  |  |  |
-| 761 | Werewolf | **Kurt Adam** | öneri |  |  |  |  |
-| 762 | White Dragon Wyrmling | **Yavru Beyaz Ejderha** | öneri |  |  |  |  |
-| 763 | Young White Dragon | **Genç Beyaz Ejderha** | öneri |  |  |  |  |
-| 764 | Adult White Dragon | **Yetişkin Beyaz Ejderha** | öneri |  |  |  |  |
-| 765 | Ancient White Dragon | **Kadim Beyaz Ejderha** | öneri |  |  |  |  |
-| 766 | Wight | **Wight** | öneri |  |  | Alternatif: Höyük Hortlağı (Undead = Hortlak ile karışmasın diye kullanılmadı). |  |
-| 767 | Will-o’-Wisp | **Bataklık Feneri** | öneri |  |  | Halk adı "cinfeneri"; Djinni = Cin ile karışmasın diye. |  |
-| 768 | Winter Wolf | **Kış Kurdu** | öneri |  |  |  |  |
-| 769 | Worg | **Worg** | öneri |  |  |  |  |
-| 770 | Wraith | **Karaltı** | öneri |  |  |  |  |
-| 771 | Wyvern | **Wyvern** | öneri |  |  |  |  |
-| 772 | Xorn | **Xorn** | öneri |  |  |  |  |
-| 773 | Zombie | **Zombi** | öneri |  |  |  |  |
-| 774 | Ogre Zombie | **Ogre Zombisi** | öneri |  |  |  |  |
-| 775 | Allosaurus | **Allosaurus** | öneri |  |  |  |  |
-| 776 | Ankylosaurus | **Ankylosaurus** | öneri |  |  |  |  |
-| 777 | Ape | **Maymun** | öneri |  |  |  |  |
-| 778 | Archelon | **Archelon** | öneri |  |  |  |  |
-| 779 | Baboon | **Babun** | öneri |  |  |  |  |
-| 780 | Badger | **Porsuk** | öneri |  |  |  |  |
-| 781 | Bat | **Yarasa** | öneri |  |  |  |  |
-| 782 | Black Bear | **Kara Ayı** | öneri |  |  |  |  |
-| 783 | Blood Hawk | **Kan Şahini** | öneri |  |  |  |  |
-| 784 | Boar | **Yaban Domuzu** | öneri |  |  |  |  |
-| 785 | Brown Bear | **Boz Ayı** | öneri |  |  |  |  |
-| 786 | Camel | **Deve** | öneri |  |  |  |  |
-| 787 | Cat | **Kedi** | öneri |  |  |  |  |
-| 788 | Constrictor Snake | **Boğucu Yılan** | öneri |  |  |  |  |
-| 789 | Crab | **Yengeç** | öneri |  |  |  |  |
-| 790 | Crocodile | **Timsah** | öneri |  |  |  |  |
-| 791 | Deer | **Geyik** | öneri |  |  |  |  |
-| 792 | Dire Wolf | **Ulu Kurt** | öneri |  |  |  |  |
-| 793 | Draft Horse | **Koşum Atı** | öneri |  |  |  |  |
-| 794 | Eagle | **Kartal** | öneri |  |  |  |  |
-| 795 | Elephant | **Fil** | öneri |  |  |  |  |
-| 796 | Elk | **Kızıl Geyik** | öneri |  |  |  |  |
-| 797 | Flying Snake | **Uçan Yılan** | öneri |  |  |  |  |
-| 798 | Frog | **Kurbağa** | öneri |  |  |  |  |
-| 799 | Giant Ape | **Dev Maymun** | öneri |  |  |  |  |
-| 800 | Giant Badger | **Dev Porsuk** | öneri |  |  |  |  |
-| 801 | Giant Bat | **Dev Yarasa** | öneri |  |  |  |  |
-| 802 | Giant Boar | **Dev Yaban Domuzu** | öneri |  |  |  |  |
-| 803 | Giant Centipede | **Dev Kırkayak** | öneri |  |  |  |  |
-| 804 | Giant Constrictor Snake | **Dev Boğucu Yılan** | öneri |  |  |  |  |
-| 805 | Giant Crab | **Dev Yengeç** | öneri |  |  |  |  |
-| 806 | Giant Crocodile | **Dev Timsah** | öneri |  |  |  |  |
-| 807 | Giant Eagle | **Dev Kartal** | öneri |  |  |  |  |
-| 808 | Giant Elk | **Dev Kızıl Geyik** | öneri |  |  |  |  |
-| 809 | Giant Fire Beetle | **Dev Ateş Böceği** | öneri |  |  |  |  |
-| 810 | Giant Frog | **Dev Kurbağa** | öneri |  |  |  |  |
-| 811 | Giant Goat | **Dev Keçi** | öneri |  |  |  |  |
-| 812 | Giant Hyena | **Dev Sırtlan** | öneri |  |  |  |  |
-| 813 | Giant Lizard | **Dev Kertenkele** | öneri |  |  |  |  |
-| 814 | Giant Octopus | **Dev Ahtapot** | öneri |  |  |  |  |
-| 815 | Giant Owl | **Dev Baykuş** | öneri |  |  |  |  |
-| 816 | Giant Rat | **Dev Sıçan** | öneri |  |  |  |  |
-| 817 | Giant Scorpion | **Dev Akrep** | öneri |  |  |  |  |
-| 818 | Giant Seahorse | **Dev Denizatı** | öneri |  |  |  |  |
-| 819 | Giant Shark | **Dev Köpekbalığı** | öneri |  |  |  |  |
-| 820 | Giant Spider | **Dev Örümcek** | öneri |  |  |  |  |
-| 821 | Giant Toad | **Dev Karakurbağası** | öneri |  |  |  |  |
-| 822 | Giant Venomous Snake | **Dev Zehirli Yılan** | öneri |  |  |  |  |
-| 823 | Giant Vulture | **Dev Akbaba** | öneri |  |  |  |  |
-| 824 | Giant Wasp | **Dev Eşekarısı** | öneri |  |  |  |  |
-| 825 | Giant Weasel | **Dev Gelincik** | öneri |  |  |  |  |
-| 826 | Giant Wolf Spider | **Dev Kurt Örümceği** | öneri |  |  |  |  |
-| 827 | Goat | **Keçi** | öneri |  |  |  |  |
-| 828 | Hawk | **Şahin** | öneri |  |  |  |  |
-| 829 | Hippopotamus | **Su Aygırı** | öneri |  |  |  |  |
-| 830 | Hunter Shark | **Avcı Köpekbalığı** | öneri |  |  |  |  |
-| 831 | Hyena | **Sırtlan** | öneri |  |  |  |  |
-| 832 | Jackal | **Çakal** | öneri |  |  |  |  |
-| 833 | Killer Whale | **Katil Balina** | öneri |  |  |  |  |
-| 834 | Lion | **Aslan** | öneri |  |  |  |  |
-| 835 | Lizard | **Kertenkele** | öneri |  |  |  |  |
-| 836 | Mammoth | **Mamut** | öneri |  |  |  |  |
-| 837 | Mastiff | **Mastif** | öneri |  |  |  |  |
-| 838 | Mule | **Katır** | öneri |  |  |  |  |
-| 839 | Octopus | **Ahtapot** | öneri |  |  |  |  |
-| 840 | Owl | **Baykuş** | öneri |  |  |  |  |
-| 841 | Panther | **Panter** | öneri |  |  |  |  |
-| 842 | Piranha | **Pirana** | öneri |  |  |  |  |
-| 843 | Plesiosaurus | **Plesiosaurus** | öneri |  |  |  |  |
-| 844 | Polar Bear | **Kutup Ayısı** | öneri |  |  |  |  |
-| 845 | Pony | **Midilli** | öneri |  |  |  |  |
-| 846 | Pteranodon | **Pteranodon** | öneri |  |  |  |  |
-| 847 | Rat | **Sıçan** | öneri |  |  |  |  |
-| 848 | Raven | **Kuzgun** | öneri |  |  |  |  |
-| 849 | Reef Shark | **Resif Köpekbalığı** | öneri |  |  |  |  |
-| 850 | Rhinoceros | **Gergedan** | öneri |  |  |  |  |
-| 851 | Riding Horse | **Binek Atı** | öneri |  |  |  |  |
-| 852 | Saber-Toothed Tiger | **Kılıç Dişli Kaplan** | öneri |  |  |  |  |
-| 853 | Scorpion | **Akrep** | öneri |  |  |  |  |
-| 854 | Seahorse | **Denizatı** | öneri |  |  |  |  |
-| 855 | Spider | **Örümcek** | öneri |  |  |  |  |
-| 856 | Swarm of Bats | **Yarasa Sürüsü** | öneri |  |  |  |  |
-| 857 | Swarm of Insects | **Böcek Sürüsü** | öneri |  |  |  |  |
-| 858 | Swarm of Piranhas | **Pirana Sürüsü** | öneri |  |  |  |  |
-| 859 | Swarm of Rats | **Sıçan Sürüsü** | öneri |  |  |  |  |
-| 860 | Swarm of Ravens | **Kuzgun Sürüsü** | öneri |  |  |  |  |
-| 861 | Swarm of Venomous Snakes | **Zehirli Yılan Sürüsü** | öneri |  |  |  |  |
-| 862 | Tiger | **Kaplan** | öneri |  |  |  |  |
-| 863 | Triceratops | **Triceratops** | öneri |  |  |  |  |
-| 864 | Tyrannosaurus Rex | **Tyrannosaurus Rex** | öneri |  |  |  |  |
-| 865 | Venomous Snake | **Zehirli Yılan** | öneri |  |  |  |  |
-| 866 | Vulture | **Akbaba** | öneri |  |  |  |  |
-| 867 | Warhorse | **Savaş Atı** | öneri |  |  |  |  |
-| 868 | Weasel | **Gelincik** | öneri |  |  |  |  |
-| 869 | Wolf | **Kurt** | öneri |  |  |  |  |
+| 547 | Aboleth | **Aboleth** | öneri |  |  |  |  |
+| 548 | Air Elemental | **Hava Elementali** | öneri |  |  |  |  |
+| 549 | Animated Armor | **Canlanmış Zırh** | öneri |  |  |  |  |
+| 550 | Animated Flying Sword | **Canlanmış Uçan Kılıç** | öneri |  |  |  |  |
+| 551 | Animated Rug of Smothering | **Canlanmış Boğucu Halı** | öneri |  |  |  |  |
+| 552 | Ankheg | **Ankheg** | öneri |  |  |  |  |
+| 553 | Assassin | **Suikastçı** | öneri |  |  |  |  |
+| 554 | Awakened Shrub | **Uyanmış Çalı** | öneri |  |  |  |  |
+| 555 | Awakened Tree | **Uyanmış Ağaç** | öneri |  |  |  |  |
+| 556 | Axe Beak | **Balta Gagalı** | öneri |  |  |  |  |
+| 557 | Azer Sentinel | **Azer Nöbetçisi** | öneri |  |  |  |  |
+| 558 | Balor | **Balor** | öneri |  |  | Demon (iblis türü) adı korunmuştur. |  |
+| 559 | Bandit | **Haydut** | öneri |  |  |  |  |
+| 560 | Bandit Captain | **Haydut Reisi** | öneri |  |  | Captain bağlama göre: Reis (haydut), Kaptan (korsan), Komutan (muhafız, hobgoblin). |  |
+| 561 | Barbed Devil | **Dikenli Şeytan** | öneri |  |  | Devil = Şeytan. |  |
+| 562 | Basilisk | **Basilisk** | öneri |  |  |  |  |
+| 563 | Bearded Devil | **Sakallı Şeytan** | öneri |  |  |  |  |
+| 564 | Behir | **Behir** | öneri |  |  |  |  |
+| 565 | Berserker | **Gözü Dönmüş** | öneri |  |  | Path of the Berserker = Gözü Dönmüş Yolu ile uyumlu. |  |
+| 566 | Black Dragon Wyrmling | **Yavru Kara Ejderha** | öneri |  |  | Kalıp: [Yaş] [Renk] Ejderha; Wyrmling = Yavru. |  |
+| 567 | Young Black Dragon | **Genç Kara Ejderha** | öneri |  |  |  |  |
+| 568 | Adult Black Dragon | **Yetişkin Kara Ejderha** | öneri |  |  |  |  |
+| 569 | Ancient Black Dragon | **Kadim Kara Ejderha** | öneri |  |  |  |  |
+| 570 | Black Pudding | **Kara Puding** | öneri |  |  |  |  |
+| 571 | Blink Dog | **Işınlanan Köpek** | öneri |  |  |  |  |
+| 572 | Blue Dragon Wyrmling | **Yavru Mavi Ejderha** | öneri |  |  |  |  |
+| 573 | Young Blue Dragon | **Genç Mavi Ejderha** | öneri |  |  |  |  |
+| 574 | Adult Blue Dragon | **Yetişkin Mavi Ejderha** | öneri |  |  |  |  |
+| 575 | Ancient Blue Dragon | **Kadim Mavi Ejderha** | öneri |  |  |  |  |
+| 576 | Bone Devil | **Kemik Şeytanı** | öneri |  |  |  |  |
+| 577 | Brass Dragon Wyrmling | **Yavru Pirinç Ejderha** | öneri |  |  |  |  |
+| 578 | Young Brass Dragon | **Genç Pirinç Ejderha** | öneri |  |  |  |  |
+| 579 | Adult Brass Dragon | **Yetişkin Pirinç Ejderha** | öneri |  |  |  |  |
+| 580 | Ancient Brass Dragon | **Kadim Pirinç Ejderha** | öneri |  |  |  |  |
+| 581 | Bronze Dragon Wyrmling | **Yavru Bronz Ejderha** | öneri |  |  |  |  |
+| 582 | Young Bronze Dragon | **Genç Bronz Ejderha** | öneri |  |  |  |  |
+| 583 | Adult Bronze Dragon | **Yetişkin Bronz Ejderha** | öneri |  |  |  |  |
+| 584 | Ancient Bronze Dragon | **Kadim Bronz Ejderha** | öneri |  |  |  |  |
+| 585 | Bugbear Stalker | **Bugbear Pusucusu** | öneri |  |  |  |  |
+| 586 | Bugbear Warrior | **Bugbear Savaşçısı** | öneri |  |  | Warrior = "X Savaşçısı" kalıbı. |  |
+| 587 | Bulette | **Bulette** | öneri |  |  |  |  |
+| 588 | Centaur Trooper | **Sentor Askeri** | öneri |  |  |  |  |
+| 589 | Chain Devil | **Zincir Şeytanı** | öneri |  |  |  |  |
+| 590 | Chimera | **Kimera** | öneri |  |  |  |  |
+| 591 | Chuul | **Chuul** | öneri |  |  |  |  |
+| 592 | Clay Golem | **Kil Golemi** | öneri |  |  |  |  |
+| 593 | Cloaker | **Pelerinimsi** | öneri |  |  |  |  |
+| 594 | Cloud Giant | **Bulut Devi** | öneri |  |  |  |  |
+| 595 | Cockatrice | **Kokatris** | öneri |  |  |  |  |
+| 596 | Commoner | **Halktan Biri** | öneri |  |  |  |  |
+| 597 | Copper Dragon Wyrmling | **Yavru Bakır Ejderha** | öneri |  |  |  |  |
+| 598 | Young Copper Dragon | **Genç Bakır Ejderha** | öneri |  |  |  |  |
+| 599 | Adult Copper Dragon | **Yetişkin Bakır Ejderha** | öneri |  |  |  |  |
+| 600 | Ancient Copper Dragon | **Kadim Bakır Ejderha** | öneri |  |  |  |  |
+| 601 | Couatl | **Couatl** | öneri |  |  |  |  |
+| 602 | Swarm of Crawling Claws | **Sürünen Pençe Sürüsü** | öneri |  |  |  |  |
+| 603 | Cultist | **Tarikatçı** | öneri |  |  |  |  |
+| 604 | Cultist Fanatic | **Fanatik Tarikatçı** | öneri |  |  |  |  |
+| 605 | Darkmantle | **Kara Örtü** | öneri |  |  |  |  |
+| 606 | Death Dog | **Ölüm Köpeği** | öneri |  |  |  |  |
+| 607 | Deva | **Deva** | öneri |  |  |  |  |
+| 608 | Djinni | **Cin** | öneri |  |  |  |  |
+| 609 | Doppelganger | **Doppelganger** | öneri |  |  |  |  |
+| 610 | Dragon Turtle | **Ejderha Kaplumbağası** | öneri |  |  |  |  |
+| 611 | Dretch | **Dretch** | öneri |  |  |  |  |
+| 612 | Drider | **Drider** | öneri |  |  |  |  |
+| 613 | Druid | **Druid** | öneri |  |  | Sınıf adıyla aynı; NPC bir druid olduğu için bilinçli. |  |
+| 614 | Dryad | **Driyad** | öneri |  |  |  |  |
+| 615 | Earth Elemental | **Toprak Elementali** | öneri |  |  |  |  |
+| 616 | Efreeti | **İfrit** | öneri |  |  |  |  |
+| 617 | Erinyes | **Erinyes** | öneri |  |  |  |  |
+| 618 | Ettercap | **Ettercap** | öneri |  |  |  |  |
+| 619 | Ettin | **Ettin** | öneri |  |  |  |  |
+| 620 | Fire Elemental | **Ateş Elementali** | öneri |  |  |  |  |
+| 621 | Fire Giant | **Ateş Devi** | öneri |  |  |  |  |
+| 622 | Flesh Golem | **Et Golemi** | öneri |  |  |  |  |
+| 623 | Frost Giant | **Ayaz Devi** | öneri |  |  | Ray of Frost = Ayaz Işını ile uyumlu. |  |
+| 624 | Shrieker Fungus | **Çığlıkçı Mantar** | öneri |  |  |  |  |
+| 625 | Violet Fungus | **Eflatun Mantar** | öneri |  |  | Purple Worm (Mor Solucan) ile karışmasın diye Eflatun. |  |
+| 626 | Gargoyle | **Gargoyl** | öneri |  |  |  |  |
+| 627 | Gelatinous Cube | **Jelatinimsi Küp** | öneri |  |  |  |  |
+| 628 | Ghast | **Kokuşmuş Gulyabani** | öneri |  |  | Ghoul = Gulyabani serisi. |  |
+| 629 | Ghost | **Hayalet** | öneri |  |  |  |  |
+| 630 | Ghoul | **Gulyabani** | öneri |  |  |  |  |
+| 631 | Gibbering Mouther | **Geveleyen Ağız** | öneri |  |  |  |  |
+| 632 | Glabrezu | **Glabrezu** | öneri |  |  |  |  |
+| 633 | Gladiator | **Gladyatör** | öneri |  |  |  |  |
+| 634 | Gnoll Warrior | **Gnoll Savaşçısı** | öneri |  |  |  |  |
+| 635 | Goblin Minion | **Goblin Uşağı** | öneri |  |  |  |  |
+| 636 | Goblin Warrior | **Goblin Savaşçısı** | öneri |  |  |  |  |
+| 637 | Goblin Boss | **Goblin Elebaşı** | öneri |  |  | Boss = Elebaşı. |  |
+| 638 | Gold Dragon Wyrmling | **Yavru Altın Ejderha** | öneri |  |  |  |  |
+| 639 | Young Gold Dragon | **Genç Altın Ejderha** | öneri |  |  |  |  |
+| 640 | Adult Gold Dragon | **Yetişkin Altın Ejderha** | öneri |  |  |  |  |
+| 641 | Ancient Gold Dragon | **Kadim Altın Ejderha** | öneri |  |  |  |  |
+| 642 | Gorgon | **Gorgon** | öneri |  |  |  |  |
+| 643 | Gray Ooze | **Gri Balçık** | öneri |  |  |  |  |
+| 644 | Green Dragon Wyrmling | **Yavru Yeşil Ejderha** | öneri |  |  |  |  |
+| 645 | Young Green Dragon | **Genç Yeşil Ejderha** | öneri |  |  |  |  |
+| 646 | Adult Green Dragon | **Yetişkin Yeşil Ejderha** | öneri |  |  |  |  |
+| 647 | Ancient Green Dragon | **Kadim Yeşil Ejderha** | öneri |  |  |  |  |
+| 648 | Green Hag | **Yeşil Cadı** | öneri |  |  | Hag = Cadı. |  |
+| 649 | Grick | **Grik** | öneri |  |  |  |  |
+| 650 | Griffon | **Grifon** | öneri |  |  |  |  |
+| 651 | Grimlock | **Grimlock** | öneri |  |  |  |  |
+| 652 | Guardian Naga | **Muhafız Naga** | öneri |  |  |  |  |
+| 653 | Guard | **Muhafız** | öneri |  |  |  |  |
+| 654 | Guard Captain | **Muhafız Komutanı** | öneri |  |  |  |  |
+| 655 | Half-Dragon | **Yarı Ejderha** | öneri |  |  |  |  |
+| 656 | Harpy | **Harpi** | öneri |  |  |  |  |
+| 657 | Hell Hound | **Cehennem Tazısı** | öneri |  |  |  |  |
+| 658 | Hezrou | **Hezrou** | öneri |  |  |  |  |
+| 659 | Hill Giant | **Tepe Devi** | öneri |  |  |  |  |
+| 660 | Hippogriff | **Hipogrif** | öneri |  |  |  |  |
+| 661 | Hobgoblin Warrior | **Hobgoblin Savaşçısı** | öneri |  |  |  |  |
+| 662 | Hobgoblin Captain | **Hobgoblin Komutanı** | öneri |  |  |  |  |
+| 663 | Homunculus | **Homunkulus** | öneri |  |  |  |  |
+| 664 | Horned Devil | **Boynuzlu Şeytan** | öneri |  |  |  |  |
+| 665 | Hydra | **Hidra** | öneri |  |  |  |  |
+| 666 | Ice Devil | **Buz Şeytanı** | öneri |  |  |  |  |
+| 667 | Imp | **Şeytancık** | öneri |  |  |  |  |
+| 668 | Incubus | **İnkübus** | öneri |  |  |  |  |
+| 669 | Invisible Stalker | **Görünmez Takipçi** | öneri |  |  |  |  |
+| 670 | Iron Golem | **Demir Golemi** | öneri |  |  |  |  |
+| 671 | Knight | **Şövalye** | öneri |  |  |  |  |
+| 672 | Kobold Warrior | **Kobold Savaşçısı** | öneri |  |  |  |  |
+| 673 | Kraken | **Kraken** | öneri |  |  |  |  |
+| 674 | Lamia | **Lamia** | öneri |  |  |  |  |
+| 675 | Lemure | **Lemure** | öneri |  |  | Lemür (hayvan) ile karışmasın diye özgün yazım. |  |
+| 676 | Lich | **Lich** | öneri |  |  |  |  |
+| 677 | Mage | **Efsuncu** | öneri |  |  | Wizard = Büyücü, Sorcerer = Sihirbaz dolu olduğu için. |  |
+| 678 | Archmage | **Ulu Efsuncu** | öneri |  |  |  |  |
+| 679 | Magmin | **Magmin** | öneri |  |  |  |  |
+| 680 | Manticore | **Mantikor** | öneri |  |  |  |  |
+| 681 | Marilith | **Marilith** | öneri |  |  |  |  |
+| 682 | Medusa | **Medusa** | öneri |  |  |  |  |
+| 683 | Dust Mephit | **Toz Mefiti** | öneri |  |  |  |  |
+| 684 | Ice Mephit | **Buz Mefiti** | öneri |  |  |  |  |
+| 685 | Magma Mephit | **Magma Mefiti** | öneri |  |  |  |  |
+| 686 | Steam Mephit | **Buhar Mefiti** | öneri |  |  |  |  |
+| 687 | Merfolk Skirmisher | **Deniz Halkı Akıncısı** | öneri |  |  |  |  |
+| 688 | Merrow | **Merrow** | öneri |  |  |  |  |
+| 689 | Mimic | **Taklitçi** | öneri |  |  |  |  |
+| 690 | Minotaur of Baphomet | **Baphomet Minotoru** | öneri |  |  |  |  |
+| 691 | Mummy | **Mumya** | öneri |  |  |  |  |
+| 692 | Mummy Lord | **Mumya Efendisi** | öneri |  |  |  |  |
+| 693 | Nalfeshnee | **Nalfeshnee** | öneri |  |  |  |  |
+| 694 | Night Hag | **Gece Cadısı** | öneri |  |  |  |  |
+| 695 | Nightmare | **Kâbus** | öneri |  |  | Ateş saçan cehennem atı. |  |
+| 696 | Noble | **Soylu** | öneri |  |  |  |  |
+| 697 | Ochre Jelly | **Okra Jölesi** | öneri |  |  |  |  |
+| 698 | Ogre | **Ogre** | öneri |  |  | Giant = Dev ile karışmasın diye. |  |
+| 699 | Oni | **Oni** | öneri |  |  |  |  |
+| 700 | Otyugh | **Otyugh** | öneri |  |  |  |  |
+| 701 | Owlbear | **Baykuşayı** | öneri |  |  |  |  |
+| 702 | Pegasus | **Pegasus** | öneri |  |  |  |  |
+| 703 | Phase Spider | **Faz Örümceği** | öneri |  |  |  |  |
+| 704 | Pirate | **Korsan** | öneri |  |  |  |  |
+| 705 | Pirate Captain | **Korsan Kaptanı** | öneri |  |  |  |  |
+| 706 | Pit Fiend | **Çukur İblisi** | öneri |  |  | Fiend = İblis; kendisi bir şeytan (devil). |  |
+| 707 | Planetar | **Planetar** | öneri |  |  |  |  |
+| 708 | Priest Acolyte | **Tapınak Çömezi** | öneri |  |  | Acolyte (geçmiş) = Mürit, Cleric = Rahip dolu olduğu için. |  |
+| 709 | Priest | **Din Adamı** | öneri |  |  | Cleric = Rahip ile çakışmasın diye. |  |
+| 710 | Pseudodragon | **Sözde Ejderha** | öneri |  |  |  |  |
+| 711 | Purple Worm | **Mor Solucan** | öneri |  |  |  |  |
+| 712 | Quasit | **Quasit** | öneri |  |  |  |  |
+| 713 | Rakshasa | **Rakşasa** | öneri |  |  |  |  |
+| 714 | Red Dragon Wyrmling | **Yavru Kırmızı Ejderha** | öneri |  |  |  |  |
+| 715 | Young Red Dragon | **Genç Kırmızı Ejderha** | öneri |  |  |  |  |
+| 716 | Adult Red Dragon | **Yetişkin Kırmızı Ejderha** | öneri |  |  |  |  |
+| 717 | Ancient Red Dragon | **Kadim Kırmızı Ejderha** | öneri |  |  |  |  |
+| 718 | Remorhaz | **Remorhaz** | öneri |  |  |  |  |
+| 719 | Roc | **Rok** | öneri |  |  |  |  |
+| 720 | Roper | **Kementçi** | öneri |  |  |  |  |
+| 721 | Rust Monster | **Pas Canavarı** | öneri |  |  |  |  |
+| 722 | Sahuagin Warrior | **Sahuagin Savaşçısı** | öneri |  |  |  |  |
+| 723 | Salamander | **Semender** | öneri |  |  |  |  |
+| 724 | Satyr | **Satir** | öneri |  |  |  |  |
+| 725 | Scout | **İzci** | öneri |  |  |  |  |
+| 726 | Sea Hag | **Deniz Cadısı** | öneri |  |  |  |  |
+| 727 | Shadow | **Gölge** | öneri |  |  |  |  |
+| 728 | Shambling Mound | **Yürüyen Höyük** | öneri |  |  |  |  |
+| 729 | Shield Guardian | **Kalkan Muhafızı** | öneri |  |  |  |  |
+| 730 | Silver Dragon Wyrmling | **Yavru Gümüş Ejderha** | öneri |  |  |  |  |
+| 731 | Young Silver Dragon | **Genç Gümüş Ejderha** | öneri |  |  |  |  |
+| 732 | Adult Silver Dragon | **Yetişkin Gümüş Ejderha** | öneri |  |  |  |  |
+| 733 | Ancient Silver Dragon | **Kadim Gümüş Ejderha** | öneri |  |  |  |  |
+| 734 | Skeleton | **İskelet** | öneri |  |  |  |  |
+| 735 | Warhorse Skeleton | **Savaş Atı İskeleti** | öneri |  |  |  |  |
+| 736 | Minotaur Skeleton | **Minotor İskeleti** | öneri |  |  |  |  |
+| 737 | Solar | **Solar** | öneri |  |  |  |  |
+| 738 | Specter | **Tayf** | öneri |  |  | Ghost = Hayalet, Specter = Tayf, Wraith = Karaltı, Shadow = Gölge. |  |
+| 739 | Sphinx of Wonder | **Mucize Sfenksi** | öneri |  |  |  |  |
+| 740 | Sphinx of Lore | **İrfan Sfenksi** | öneri |  |  | College of Lore = İrfan Okulu ile uyumlu. |  |
+| 741 | Sphinx of Valor | **Yiğitlik Sfenksi** | öneri |  |  |  |  |
+| 742 | Spirit Naga | **Ruh Naga** | öneri |  |  |  |  |
+| 743 | Sprite | **Kanatlı Peri** | öneri |  |  |  |  |
+| 744 | Spy | **Casus** | öneri |  |  |  |  |
+| 745 | Stirge | **Stirge** | öneri |  |  |  |  |
+| 746 | Stone Giant | **Taş Devi** | öneri |  |  |  |  |
+| 747 | Stone Golem | **Taş Golemi** | öneri |  |  |  |  |
+| 748 | Storm Giant | **Fırtına Devi** | öneri |  |  |  |  |
+| 749 | Succubus | **Sukübus** | öneri |  |  |  |  |
+| 750 | Tarrasque | **Tarrasque** | öneri |  |  |  |  |
+| 751 | Tough | **Kabadayı** | öneri |  |  |  |  |
+| 752 | Tough Boss | **Kabadayı Elebaşı** | öneri |  |  |  |  |
+| 753 | Treant | **Ağaçadam** | öneri |  |  |  |  |
+| 754 | Troll | **Trol** | öneri |  |  |  |  |
+| 755 | Troll Limb | **Trol Uzvu** | öneri |  |  |  |  |
+| 756 | Unicorn | **Tek Boynuzlu At** | öneri |  |  |  |  |
+| 757 | Vampire Familiar | **Vampir Hizmetkârı** | öneri |  |  |  |  |
+| 758 | Vampire Spawn | **Vampir Yavrusu** | öneri |  |  |  |  |
+| 759 | Vampire | **Vampir** | öneri |  |  |  |  |
+| 760 | Vrock | **Vrock** | öneri |  |  |  |  |
+| 761 | Warrior Infantry | **Piyade Savaşçı** | öneri |  |  |  |  |
+| 762 | Warrior Veteran | **Kıdemli Savaşçı** | öneri |  |  |  |  |
+| 763 | Water Elemental | **Su Elementali** | öneri |  |  |  |  |
+| 764 | Werebear | **Ayı Adam** | öneri |  |  |  |  |
+| 765 | Wereboar | **Yaban Domuzu Adam** | öneri |  |  |  |  |
+| 766 | Wererat | **Sıçan Adam** | öneri |  |  |  |  |
+| 767 | Weretiger | **Kaplan Adam** | öneri |  |  |  |  |
+| 768 | Werewolf | **Kurt Adam** | öneri |  |  |  |  |
+| 769 | White Dragon Wyrmling | **Yavru Beyaz Ejderha** | öneri |  |  |  |  |
+| 770 | Young White Dragon | **Genç Beyaz Ejderha** | öneri |  |  |  |  |
+| 771 | Adult White Dragon | **Yetişkin Beyaz Ejderha** | öneri |  |  |  |  |
+| 772 | Ancient White Dragon | **Kadim Beyaz Ejderha** | öneri |  |  |  |  |
+| 773 | Wight | **Wight** | öneri |  |  | Alternatif: Höyük Hortlağı (Undead = Hortlak ile karışmasın diye kullanılmadı). |  |
+| 774 | Will-o’-Wisp | **Bataklık Feneri** | öneri |  |  | Halk adı "cinfeneri"; Djinni = Cin ile karışmasın diye. |  |
+| 775 | Winter Wolf | **Kış Kurdu** | öneri |  |  |  |  |
+| 776 | Worg | **Worg** | öneri |  |  |  |  |
+| 777 | Wraith | **Karaltı** | öneri |  |  |  |  |
+| 778 | Wyvern | **Wyvern** | öneri |  |  |  |  |
+| 779 | Xorn | **Xorn** | öneri |  |  |  |  |
+| 780 | Zombie | **Zombi** | öneri |  |  |  |  |
+| 781 | Ogre Zombie | **Ogre Zombisi** | öneri |  |  |  |  |
+| 782 | Allosaurus | **Allosaurus** | öneri |  |  |  |  |
+| 783 | Ankylosaurus | **Ankylosaurus** | öneri |  |  |  |  |
+| 784 | Ape | **Maymun** | öneri |  |  |  |  |
+| 785 | Archelon | **Archelon** | öneri |  |  |  |  |
+| 786 | Baboon | **Babun** | öneri |  |  |  |  |
+| 787 | Badger | **Porsuk** | öneri |  |  |  |  |
+| 788 | Bat | **Yarasa** | öneri |  |  |  |  |
+| 789 | Black Bear | **Kara Ayı** | öneri |  |  |  |  |
+| 790 | Blood Hawk | **Kan Şahini** | öneri |  |  |  |  |
+| 791 | Boar | **Yaban Domuzu** | öneri |  |  |  |  |
+| 792 | Brown Bear | **Boz Ayı** | öneri |  |  |  |  |
+| 793 | Camel | **Deve** | öneri |  |  |  |  |
+| 794 | Cat | **Kedi** | öneri |  |  |  |  |
+| 795 | Constrictor Snake | **Boğucu Yılan** | öneri |  |  |  |  |
+| 796 | Crab | **Yengeç** | öneri |  |  |  |  |
+| 797 | Crocodile | **Timsah** | öneri |  |  |  |  |
+| 798 | Deer | **Geyik** | öneri |  |  |  |  |
+| 799 | Dire Wolf | **Ulu Kurt** | öneri |  |  |  |  |
+| 800 | Draft Horse | **Koşum Atı** | öneri |  |  |  |  |
+| 801 | Eagle | **Kartal** | öneri |  |  |  |  |
+| 802 | Elephant | **Fil** | öneri |  |  |  |  |
+| 803 | Elk | **Kızıl Geyik** | öneri |  |  |  |  |
+| 804 | Flying Snake | **Uçan Yılan** | öneri |  |  |  |  |
+| 805 | Frog | **Kurbağa** | öneri |  |  |  |  |
+| 806 | Giant Ape | **Dev Maymun** | öneri |  |  |  |  |
+| 807 | Giant Badger | **Dev Porsuk** | öneri |  |  |  |  |
+| 808 | Giant Bat | **Dev Yarasa** | öneri |  |  |  |  |
+| 809 | Giant Boar | **Dev Yaban Domuzu** | öneri |  |  |  |  |
+| 810 | Giant Centipede | **Dev Kırkayak** | öneri |  |  |  |  |
+| 811 | Giant Constrictor Snake | **Dev Boğucu Yılan** | öneri |  |  |  |  |
+| 812 | Giant Crab | **Dev Yengeç** | öneri |  |  |  |  |
+| 813 | Giant Crocodile | **Dev Timsah** | öneri |  |  |  |  |
+| 814 | Giant Eagle | **Dev Kartal** | öneri |  |  |  |  |
+| 815 | Giant Elk | **Dev Kızıl Geyik** | öneri |  |  |  |  |
+| 816 | Giant Fire Beetle | **Dev Ateş Böceği** | öneri |  |  |  |  |
+| 817 | Giant Frog | **Dev Kurbağa** | öneri |  |  |  |  |
+| 818 | Giant Goat | **Dev Keçi** | öneri |  |  |  |  |
+| 819 | Giant Hyena | **Dev Sırtlan** | öneri |  |  |  |  |
+| 820 | Giant Lizard | **Dev Kertenkele** | öneri |  |  |  |  |
+| 821 | Giant Octopus | **Dev Ahtapot** | öneri |  |  |  |  |
+| 822 | Giant Owl | **Dev Baykuş** | öneri |  |  |  |  |
+| 823 | Giant Rat | **Dev Sıçan** | öneri |  |  |  |  |
+| 824 | Giant Scorpion | **Dev Akrep** | öneri |  |  |  |  |
+| 825 | Giant Seahorse | **Dev Denizatı** | öneri |  |  |  |  |
+| 826 | Giant Shark | **Dev Köpekbalığı** | öneri |  |  |  |  |
+| 827 | Giant Spider | **Dev Örümcek** | öneri |  |  |  |  |
+| 828 | Giant Toad | **Dev Karakurbağası** | öneri |  |  |  |  |
+| 829 | Giant Venomous Snake | **Dev Zehirli Yılan** | öneri |  |  |  |  |
+| 830 | Giant Vulture | **Dev Akbaba** | öneri |  |  |  |  |
+| 831 | Giant Wasp | **Dev Eşekarısı** | öneri |  |  |  |  |
+| 832 | Giant Weasel | **Dev Gelincik** | öneri |  |  |  |  |
+| 833 | Giant Wolf Spider | **Dev Kurt Örümceği** | öneri |  |  |  |  |
+| 834 | Goat | **Keçi** | öneri |  |  |  |  |
+| 835 | Hawk | **Şahin** | öneri |  |  |  |  |
+| 836 | Hippopotamus | **Su Aygırı** | öneri |  |  |  |  |
+| 837 | Hunter Shark | **Avcı Köpekbalığı** | öneri |  |  |  |  |
+| 838 | Hyena | **Sırtlan** | öneri |  |  |  |  |
+| 839 | Jackal | **Çakal** | öneri |  |  |  |  |
+| 840 | Killer Whale | **Katil Balina** | öneri |  |  |  |  |
+| 841 | Lion | **Aslan** | öneri |  |  |  |  |
+| 842 | Lizard | **Kertenkele** | öneri |  |  |  |  |
+| 843 | Mammoth | **Mamut** | öneri |  |  |  |  |
+| 844 | Mastiff | **Mastif** | öneri |  |  |  |  |
+| 845 | Mule | **Katır** | öneri |  |  |  |  |
+| 846 | Octopus | **Ahtapot** | öneri |  |  |  |  |
+| 847 | Owl | **Baykuş** | öneri |  |  |  |  |
+| 848 | Panther | **Panter** | öneri |  |  |  |  |
+| 849 | Piranha | **Pirana** | öneri |  |  |  |  |
+| 850 | Plesiosaurus | **Plesiosaurus** | öneri |  |  |  |  |
+| 851 | Polar Bear | **Kutup Ayısı** | öneri |  |  |  |  |
+| 852 | Pony | **Midilli** | öneri |  |  |  |  |
+| 853 | Pteranodon | **Pteranodon** | öneri |  |  |  |  |
+| 854 | Rat | **Sıçan** | öneri |  |  |  |  |
+| 855 | Raven | **Kuzgun** | öneri |  |  |  |  |
+| 856 | Reef Shark | **Resif Köpekbalığı** | öneri |  |  |  |  |
+| 857 | Rhinoceros | **Gergedan** | öneri |  |  |  |  |
+| 858 | Riding Horse | **Binek Atı** | öneri |  |  |  |  |
+| 859 | Saber-Toothed Tiger | **Kılıç Dişli Kaplan** | öneri |  |  |  |  |
+| 860 | Scorpion | **Akrep** | öneri |  |  |  |  |
+| 861 | Seahorse | **Denizatı** | öneri |  |  |  |  |
+| 862 | Spider | **Örümcek** | öneri |  |  |  |  |
+| 863 | Swarm of Bats | **Yarasa Sürüsü** | öneri |  |  |  |  |
+| 864 | Swarm of Insects | **Böcek Sürüsü** | öneri |  |  |  |  |
+| 865 | Swarm of Piranhas | **Pirana Sürüsü** | öneri |  |  |  |  |
+| 866 | Swarm of Rats | **Sıçan Sürüsü** | öneri |  |  |  |  |
+| 867 | Swarm of Ravens | **Kuzgun Sürüsü** | öneri |  |  |  |  |
+| 868 | Swarm of Venomous Snakes | **Zehirli Yılan Sürüsü** | öneri |  |  |  |  |
+| 869 | Tiger | **Kaplan** | öneri |  |  |  |  |
+| 870 | Triceratops | **Triceratops** | öneri |  |  |  |  |
+| 871 | Tyrannosaurus Rex | **Tyrannosaurus Rex** | öneri |  |  |  |  |
+| 872 | Venomous Snake | **Zehirli Yılan** | öneri |  |  |  |  |
+| 873 | Vulture | **Akbaba** | öneri |  |  |  |  |
+| 874 | Warhorse | **Savaş Atı** | öneri |  |  |  |  |
+| 875 | Weasel | **Gelincik** | öneri |  |  |  |  |
+| 876 | Wolf | **Kurt** | öneri |  |  |  |  |
 
 ### Dil
 
 | # | İngilizce | Türkçe | Durum | Zorunlu | Alternatifler | Not | Kanıt |
 |---|---|---|---|---|---|---|---|
-| 870 | Common | **Ortak Dil** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 871 | Common Sign Language | **Ortak İşaret Dili** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 872 | Draconic | **Ejderce** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 873 | Dwarvish | **Cücece** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 874 | Elvish | **Elfçe** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 875 | Giant | **Devce** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 876 | Gnomish | **Gnomca** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 877 | Goblin | **Goblince** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 878 | Halfling | **Buçuklukça** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 879 | Orc | **Orkça** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 880 | Abyssal | **Abis Dili** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 881 | Celestial | **Göksel Dil** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 882 | Deep Speech | **Derin Dil** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 883 | Infernal | **Cehennem Dili** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 884 | Primordial | **İlkel Dil** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 885 | Sylvan | **Sylvan Dili** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 886 | Undercommon | **Yeraltı Ortak Dili** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 887 | Druidic | **Druidce** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
-| 888 | Thieves’ Cant | **Hırsız Argosu** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 877 | Common | **Ortak Dil** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 878 | Common Sign Language | **Ortak İşaret Dili** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 879 | Draconic | **Ejderce** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 880 | Dwarvish | **Cücece** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 881 | Elvish | **Elfçe** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 882 | Giant | **Devce** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 883 | Gnomish | **Gnomca** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 884 | Goblin | **Goblince** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 885 | Halfling | **Buçuklukça** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 886 | Orc | **Orkça** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 887 | Abyssal | **Abis Dili** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 888 | Celestial | **Göksel Dil** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 889 | Deep Speech | **Derin Dil** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 890 | Infernal | **Cehennem Dili** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 891 | Primordial | **İlkel Dil** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 892 | Sylvan | **Sylvan Dili** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 893 | Undercommon | **Yeraltı Ortak Dili** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 894 | Druidic | **Druidce** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
+| 895 | Thieves’ Cant | **Hırsız Argosu** | öneri |  |  | Dil adı; canavar kartlarındaki Diller satırı ve metin içi. |  |
 
 ### Sihirli eşya türü
 
 | # | İngilizce | Türkçe | Durum | Zorunlu | Alternatifler | Not | Kanıt |
 |---|---|---|---|---|---|---|---|
-| 889 | Armor | **Zırh** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
-| 890 | Potion | **İksir** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
-| 891 | Ring | **Yüzük** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
-| 892 | Rod | **Çubuk** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
-| 893 | Scroll | **Parşömen** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
-| 894 | Staff | **Asa** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
-| 895 | Wand | **Değnek** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
-| 896 | Weapon | **Silah** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
-| 897 | Wondrous Item | **Harikulade Eşya** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
+| 896 | Armor | **Zırh** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
+| 897 | Potion | **İksir** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
+| 898 | Ring | **Yüzük** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
+| 899 | Rod | **Çubuk** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
+| 900 | Scroll | **Parşömen** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
+| 901 | Staff | **Asa** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
+| 902 | Wand | **Değnek** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
+| 903 | Weapon | **Silah** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
+| 904 | Wondrous Item | **Harikulade Eşya** | öneri |  |  | Sihirli eşya türü (eşya kartındaki italik satır). |  |
 
 ### Nadirlik
 
 | # | İngilizce | Türkçe | Durum | Zorunlu | Alternatifler | Not | Kanıt |
 |---|---|---|---|---|---|---|---|
-| 898 | Common | **Yaygın** | öneri |  |  | "Common" dil adıyla (Ortak Dil) çakıştığı için zorunlu değil. |  |
-| 899 | Uncommon | **Az Bulunur** | öneri | ✔ |  |  |  |
-| 900 | Rare | **Nadir** | öneri | ✔ |  |  |  |
-| 901 | Very Rare | **Çok Nadir** | öneri | ✔ |  |  |  |
-| 902 | Legendary | **Efsanevi** | öneri |  |  |  |  |
-| 903 | Artifact | **Artefakt** | öneri | ✔ |  |  |  |
-| 904 | Rarity Varies | **Nadirliği Değişir** | öneri | ✔ |  |  |  |
+| 905 | Common | **Yaygın** | öneri |  |  | "Common" dil adıyla (Ortak Dil) çakıştığı için zorunlu değil. |  |
+| 906 | Uncommon | **Az Bulunur** | öneri | ✔ |  |  |  |
+| 907 | Rare | **Nadir** | öneri | ✔ |  |  |  |
+| 908 | Very Rare | **Çok Nadir** | öneri | ✔ |  |  |  |
+| 909 | Legendary | **Efsanevi** | öneri |  |  |  |  |
+| 910 | Artifact | **Artefakt** | öneri | ✔ |  |  |  |
+| 911 | Rarity Varies | **Nadirliği Değişir** | öneri | ✔ |  |  |  |
 
 ### Sihirli eşya adı
 
 | # | İngilizce | Türkçe | Durum | Zorunlu | Alternatifler | Not | Kanıt |
 |---|---|---|---|---|---|---|---|
-| 905 | Adamantine Armor | **Adamantin Zırh** | öneri |  |  |  |  |
-| 906 | Ammunition, +1, +2, or +3 | **Mühimmat, +1, +2 veya +3** | öneri |  |  |  |  |
-| 907 | Ammunition of Slaying | **Öldürücü Mühimmat** | öneri |  |  |  |  |
-| 908 | Amulet of Health | **Sağlık Muskası** | öneri |  |  | Amulet = Muska, Periapt = Nazarlık, Talisman = Tılsım |  |
-| 909 | Amulet of Proof against Detection and Location | **Algılanma ve Bulunmaya Karşı Muska** | öneri |  |  |  |  |
-| 910 | Amulet of the Planes | **Düzlemler Muskası** | öneri |  |  |  |  |
-| 911 | Animated Shield | **Canlanmış Kalkan** | öneri |  |  |  |  |
-| 912 | Apparatus of the Crab | **Yengeç Aygıtı** | öneri |  |  |  |  |
-| 913 | Armor, +1, +2, or +3 | **Zırh, +1, +2 veya +3** | öneri |  |  |  |  |
-| 914 | Armor of Invulnerability | **Dokunulmazlık Zırhı** | öneri |  |  |  |  |
-| 915 | Armor of Resistance | **Direnç Zırhı** | öneri |  |  |  |  |
-| 916 | Armor of Vulnerability | **Zafiyet Zırhı** | öneri |  |  |  |  |
-| 917 | Arrow-Catching Shield | **Ok Yakalayan Kalkan** | öneri |  |  |  |  |
-| 918 | Bag of Beans | **Fasulye Torbası** | öneri |  |  |  |  |
-| 919 | Bag of Devouring | **Yutucu Torba** | öneri |  |  |  |  |
-| 920 | Bag of Holding | **Dipsiz Torba** | öneri |  |  | Dipsiz Torba: deyimsel, doğal ad (sınırsız değil, 500 lb) |  |
-| 921 | Bag of Tricks | **Marifetler Torbası** | öneri |  |  |  |  |
-| 922 | Bead of Force | **Kuvvet Boncuğu** | öneri |  |  |  |  |
-| 923 | Bead of Nourishment | **Besin Boncuğu** | öneri |  |  |  |  |
-| 924 | Belt of Dwarvenkind | **Cüce Kemeri** | öneri |  |  |  |  |
-| 925 | Belt of Giant Strength | **Dev Gücü Kemeri** | öneri |  |  |  |  |
-| 926 | Berserker Axe | **Gözü Dönmüş Baltası** | öneri |  |  |  |  |
-| 927 | Boots of Elvenkind | **Elf Çizmeleri** | öneri |  |  |  |  |
-| 928 | Boots of Levitation | **Havalanma Çizmeleri** | öneri |  |  |  |  |
-| 929 | Boots of Speed | **Hız Çizmeleri** | öneri |  |  |  |  |
-| 930 | Boots of Striding and Springing | **Uzun Adım ve Sıçrama Çizmeleri** | öneri |  |  |  |  |
-| 931 | Boots of the Winterlands | **Kış Diyarı Çizmeleri** | öneri |  |  |  |  |
-| 932 | Bowl of Commanding Water Elementals | **Su Elementallerine Hükmetme Kâsesi** | öneri |  |  |  |  |
-| 933 | Bracers of Archery | **Okçuluk Bilezikleri** | öneri |  |  |  |  |
-| 934 | Bracers of Defense | **Savunma Bilezikleri** | öneri |  |  |  |  |
-| 935 | Brazier of Commanding Fire Elementals | **Ateş Elementallerine Hükmetme Mangalı** | öneri |  |  |  |  |
-| 936 | Brooch of Shielding | **Kalkan Broşu** | öneri |  |  |  |  |
-| 937 | Broom of Flying | **Uçan Süpürge** | öneri |  |  |  |  |
-| 938 | Candle of Invocation | **Yakarış Mumu** | öneri |  |  |  |  |
-| 939 | Cape of the Mountebank | **Şarlatan Pelerini** | öneri |  |  |  |  |
-| 940 | Carpet of Flying | **Uçan Halı** | öneri |  |  |  |  |
-| 941 | Censer of Controlling Air Elementals | **Hava Elementallerini Yönetme Buhurdanı** | öneri |  |  |  |  |
-| 942 | Chime of Opening | **Açma Çanı** | öneri |  |  |  |  |
-| 943 | Circlet of Blasting | **Patlama Tacı** | öneri |  |  |  |  |
-| 944 | Cloak of Arachnida | **Örümcek Pelerini** | öneri |  |  |  |  |
-| 945 | Cloak of Displacement | **Yer Değiştirme Pelerini** | öneri |  |  |  |  |
-| 946 | Cloak of Elvenkind | **Elf Pelerini** | öneri |  |  |  |  |
-| 947 | Cloak of Invisibility | **Görünmezlik Pelerini** | öneri |  |  |  |  |
-| 948 | Cloak of Protection | **Koruma Pelerini** | öneri |  |  |  |  |
-| 949 | Cloak of the Bat | **Yarasa Pelerini** | öneri |  |  |  |  |
-| 950 | Cloak of the Manta Ray | **Vatoz Pelerini** | öneri |  |  |  |  |
-| 951 | Crystal Ball | **Kristal Küre** | öneri |  |  |  |  |
-| 952 | Crystal Ball of Mind Reading | **Zihin Okuma Kristal Küresi** | öneri |  |  |  |  |
-| 953 | Crystal Ball of Telepathy | **Telepati Kristal Küresi** | öneri |  |  |  |  |
-| 954 | Crystal Ball of True Seeing | **Gerçeği Görme Kristal Küresi** | öneri |  |  |  |  |
-| 955 | Cube of Force | **Kuvvet Küpü** | öneri |  |  |  |  |
-| 956 | Cubic Gate | **Kübik Geçit** | öneri |  |  |  |  |
-| 957 | Dagger of Venom | **Zehir Hançeri** | öneri |  |  |  |  |
-| 958 | Dancing Sword | **Dans Eden Kılıç** | öneri |  |  |  |  |
-| 959 | Decanter of Endless Water | **Bitmeyen Su Sürahisi** | öneri |  |  |  |  |
-| 960 | Deck of Illusions | **İllüzyon Destesi** | öneri |  |  |  |  |
-| 961 | Defender | **Koruyucu** | öneri |  |  |  |  |
-| 962 | Demon Armor | **Demon Zırhı** | öneri |  |  | Biçem kılavuzu: demon = demon (İblis = Fiend) |  |
-| 963 | Dimensional Shackles | **Boyutsal Prangalar** | öneri |  |  |  |  |
-| 964 | Dragon Orb | **Ejderha Küresi** | öneri |  |  |  |  |
-| 965 | Dragon Scale Mail | **Ejderha Pullu Zırh** | öneri |  |  |  |  |
-| 966 | Dragon Slayer | **Ejderha Avcısı** | öneri |  |  |  |  |
-| 967 | Dust of Disappearance | **Kaybolma Tozu** | öneri |  |  |  |  |
-| 968 | Dust of Dryness | **Kuruluk Tozu** | öneri |  |  |  |  |
-| 969 | Dust of Sneezing and Choking | **Hapşırma ve Boğulma Tozu** | öneri |  |  |  |  |
-| 970 | Dwarven Plate | **Cüce Plaka Zırhı** | öneri |  |  |  |  |
-| 971 | Dwarven Thrower | **Cüce Fırlatıcısı** | öneri |  |  |  |  |
-| 972 | Efficient Quiver | **Verimli Sadak** | öneri |  |  |  |  |
-| 973 | Efreeti Bottle | **İfrit Şişesi** | öneri |  |  |  |  |
-| 974 | Elemental Gem | **Elemental Mücevheri** | öneri |  |  |  |  |
-| 975 | Elixir of Health | **Sağlık Eliksiri** | öneri |  |  |  |  |
-| 976 | Elven Chain | **Elf Zincir Zırhı** | öneri |  |  |  |  |
-| 977 | Energy Bow | **Enerji Yayı** | öneri |  |  |  |  |
-| 978 | Eversmoking Bottle | **Bitmeyen Duman Şişesi** | öneri |  |  |  |  |
-| 979 | Eyes of Charming | **Büyüleme Gözleri** | öneri |  |  |  |  |
-| 980 | Eyes of Minute Seeing | **Ayrıntı Görme Gözleri** | öneri |  |  |  |  |
-| 981 | Eyes of the Eagle | **Kartal Gözleri** | öneri |  |  |  |  |
-| 982 | Feather Token | **Tüy Nişanesi** | öneri |  |  |  |  |
-| 983 | Figurine of Wondrous Power | **Harikulade Güç Heykelciği** | öneri |  |  |  |  |
-| 984 | Flame Tongue | **Alev Dili** | öneri |  |  |  |  |
-| 985 | Folding Boat | **Katlanır Tekne** | öneri |  |  |  |  |
-| 986 | Frost Brand | **Ayaz Kılıcı** | öneri |  |  |  |  |
-| 987 | Gauntlets of Ogre Power | **Ogre Gücü Eldivenleri** | öneri |  |  |  |  |
-| 988 | Gem of Brightness | **Parlaklık Mücevheri** | öneri |  |  |  |  |
-| 989 | Gem of Seeing | **Görme Mücevheri** | öneri |  |  |  |  |
-| 990 | Giant Slayer | **Dev Avcısı** | öneri |  |  |  |  |
-| 991 | Glamoured Studded Leather | **Kılık Değiştiren Perçinli Deri Zırh** | öneri |  |  |  |  |
-| 992 | Gloves of Missile Snaring | **Mermi Yakalama Eldivenleri** | öneri |  |  |  |  |
-| 993 | Gloves of Swimming and Climbing | **Yüzme ve Tırmanma Eldivenleri** | öneri |  |  |  |  |
-| 994 | Gloves of Thievery | **Hırsızlık Eldivenleri** | öneri |  |  |  |  |
-| 995 | Goggles of Night | **Gece Gözlüğü** | öneri |  |  |  |  |
-| 996 | Hammer of Thunderbolts | **Şimşek Çekici** | öneri |  |  |  |  |
-| 997 | Handy Haversack | **Kullanışlı Heybe** | öneri |  |  |  |  |
-| 998 | Hat of Disguise | **Kılık Değiştirme Şapkası** | öneri |  |  |  |  |
-| 999 | Hat of Many Spells | **Sayısız Büyü Şapkası** | öneri |  |  |  |  |
-| 1000 | Headband of Intellect | **Zeka Alın Bandı** | öneri |  |  |  |  |
-| 1001 | Helm of Brilliance | **Parıltı Miğferi** | öneri |  |  |  |  |
-| 1002 | Helm of Comprehending Languages | **Dilleri Anlama Miğferi** | öneri |  |  |  |  |
-| 1003 | Helm of Telepathy | **Telepati Miğferi** | öneri |  |  |  |  |
-| 1004 | Helm of Teleportation | **Işınlanma Miğferi** | öneri |  |  |  |  |
-| 1005 | Holy Avenger | **Kutsal İntikamcı** | öneri |  |  |  |  |
-| 1006 | Horn of Blasting | **Patlama Borusu** | öneri |  |  |  |  |
-| 1007 | Horn of Valhalla | **Valhalla Borusu** | öneri |  |  |  |  |
-| 1008 | Horseshoes of a Zephyr | **Meltem Nalları** | öneri |  |  |  |  |
-| 1009 | Horseshoes of Speed | **Hız Nalları** | öneri |  |  |  |  |
-| 1010 | Immovable Rod | **Kımıldamaz Çubuk** | öneri |  |  |  |  |
-| 1011 | Instant Fortress | **Anında Kale** | öneri |  |  |  |  |
-| 1012 | Ioun Stone | **Ioun Taşı** | öneri |  |  |  |  |
-| 1013 | Iron Bands | **Demir Bağlar** | öneri |  |  |  |  |
-| 1014 | Iron Flask | **Demir Şişe** | öneri |  |  |  |  |
-| 1015 | Javelin of Lightning | **Yıldırım Ciridi** | öneri |  |  |  |  |
-| 1016 | Lantern of Revealing | **İfşa Feneri** | öneri |  |  |  |  |
-| 1017 | Luck Blade | **Şans Kılıcı** | öneri |  |  |  |  |
-| 1018 | Mace of Disruption | **Yıkım Topuzu** | öneri |  |  |  |  |
-| 1019 | Mace of Smiting | **Darbe Topuzu** | öneri |  |  |  |  |
-| 1020 | Mace of Terror | **Dehşet Topuzu** | öneri |  |  |  |  |
-| 1021 | Mantle of Spell Resistance | **Büyü Direnci Örtüsü** | öneri |  |  |  |  |
-| 1022 | Manual of Bodily Health | **Beden Sağlığı Kılavuzu** | öneri |  |  |  |  |
-| 1023 | Manual of Gainful Exercise | **Verimli Egzersiz Kılavuzu** | öneri |  |  |  |  |
-| 1024 | Manual of Golems | **Golem Kılavuzu** | öneri |  |  |  |  |
-| 1025 | Manual of Quickness of Action | **Eylem Çabukluğu Kılavuzu** | öneri |  |  |  |  |
-| 1026 | Marvelous Pigments | **Mucizevi Boyalar** | öneri |  |  |  |  |
-| 1027 | Medallion of Thoughts | **Düşünce Madalyonu** | öneri |  |  |  |  |
-| 1028 | Mirror of Life Trapping | **Yaşam Kapanı Aynası** | öneri |  |  |  |  |
-| 1029 | Mithral Armor | **Mithral Zırh** | öneri |  |  |  |  |
-| 1030 | Mysterious Deck | **Gizemli Deste** | öneri |  |  | SRD'deki yeni ad (Deck of Many Things yerine); düz çeviri |  |
-| 1031 | Necklace of Adaptation | **Uyum Kolyesi** | öneri |  |  |  |  |
-| 1032 | Necklace of Fireballs | **Ateş Topu Kolyesi** | öneri |  |  |  |  |
-| 1033 | Necklace of Prayer Beads | **Dua Boncuğu Kolyesi** | öneri |  |  |  |  |
-| 1034 | Nine Lives Stealer | **Dokuz Can Hırsızı** | öneri |  |  |  |  |
-| 1035 | Oathbow | **Yemin Yayı** | öneri |  |  |  |  |
-| 1036 | Oil of Etherealness | **Eterikleşme Yağı** | öneri |  |  |  |  |
-| 1037 | Oil of Sharpness | **Keskinlik Yağı** | öneri |  |  |  |  |
-| 1038 | Oil of Slipperiness | **Kayganlık Yağı** | öneri |  |  |  |  |
-| 1039 | Pearl of Power | **Kudret İncisi** | öneri |  |  |  |  |
-| 1040 | Periapt of Health | **Sağlık Nazarlığı** | öneri |  |  |  |  |
-| 1041 | Periapt of Proof against Poison | **Zehre Karşı Nazarlık** | öneri |  |  |  |  |
-| 1042 | Periapt of Wound Closure | **Yara Kapama Nazarlığı** | öneri |  |  |  |  |
-| 1043 | Philter of Love | **Aşk İksiri** | öneri |  |  | Philter: yerleşik 'Aşk İksiri' kalıbı |  |
-| 1044 | Pipes of Haunting | **Ürperti Kavalı** | öneri |  |  |  |  |
-| 1045 | Pipes of the Sewers | **Lağım Kavalı** | öneri |  |  |  |  |
-| 1046 | Plate Armor of Etherealness | **Eterikleşme Plaka Zırhı** | öneri |  |  |  |  |
-| 1047 | Portable Hole | **Taşınabilir Delik** | öneri |  |  |  |  |
-| 1048 | Potion of Animal Friendship | **Hayvan Dostluğu İksiri** | öneri |  |  |  |  |
-| 1049 | Potion of Clairvoyance | **Durugörü İksiri** | öneri |  |  |  |  |
-| 1050 | Potion of Climbing | **Tırmanma İksiri** | öneri |  |  |  |  |
-| 1051 | Potion of Diminution | **Küçülme İksiri** | öneri |  |  |  |  |
-| 1052 | Potion of Flying | **Uçma İksiri** | öneri |  |  |  |  |
-| 1053 | Potion of Gaseous Form | **Gaz Biçimi İksiri** | öneri |  |  |  |  |
-| 1054 | Potion of Giant Strength | **Dev Gücü İksiri** | öneri |  |  |  |  |
-| 1055 | Potion of Growth | **Büyüme İksiri** | öneri |  |  |  |  |
-| 1056 | Potions of Healing | **Şifa İksirleri** | öneri |  |  | Şifa İksiri (sözlük) çoğulu; giriş birden çok tür kapsar |  |
-| 1057 | Potion of Heroism | **Kahramanlık İksiri** | öneri |  |  |  |  |
-| 1058 | Potion of Invisibility | **Görünmezlik İksiri** | öneri |  |  |  |  |
-| 1059 | Potion of Invulnerability | **Dokunulmazlık İksiri** | öneri |  |  |  |  |
-| 1060 | Potion of Longevity | **Uzun Ömür İksiri** | öneri |  |  |  |  |
-| 1061 | Potion of Mind Reading | **Zihin Okuma İksiri** | öneri |  |  |  |  |
-| 1062 | Potion of Poison | **Zehir İksiri** | öneri |  |  |  |  |
-| 1063 | Potion of Resistance | **Direnç İksiri** | öneri |  |  |  |  |
-| 1064 | Potion of Speed | **Hız İksiri** | öneri |  |  |  |  |
-| 1065 | Potion of Vitality | **Dirilik İksiri** | öneri |  |  |  |  |
-| 1066 | Potion of Water Breathing | **Suda Nefes Alma İksiri** | öneri |  |  |  |  |
-| 1067 | Quarterstaff of the Acrobat | **Akrobat Asası** | öneri |  |  |  |  |
-| 1068 | Ring of Animal Influence | **Hayvan Etkileme Yüzüğü** | öneri |  |  |  |  |
-| 1069 | Ring of Djinni Summoning | **Cin Çağırma Yüzüğü** | öneri |  |  |  |  |
-| 1070 | Ring of Elemental Command | **Elementallere Hükmetme Yüzüğü** | öneri |  |  |  |  |
-| 1071 | Ring of Evasion | **Sıyrılma Yüzüğü** | öneri |  |  |  |  |
-| 1072 | Ring of Feather Falling | **Tüy Düşüşü Yüzüğü** | öneri |  |  |  |  |
-| 1073 | Ring of Free Action | **Serbest Hareket Yüzüğü** | öneri |  |  |  |  |
-| 1074 | Ring of Invisibility | **Görünmezlik Yüzüğü** | öneri |  |  |  |  |
-| 1075 | Ring of Jumping | **Zıplama Yüzüğü** | öneri |  |  |  |  |
-| 1076 | Ring of Mind Shielding | **Zihin Kalkanı Yüzüğü** | öneri |  |  |  |  |
-| 1077 | Ring of Protection | **Koruma Yüzüğü** | öneri |  |  |  |  |
-| 1078 | Ring of Regeneration | **Rejenerasyon Yüzüğü** | öneri |  |  |  |  |
-| 1079 | Ring of Resistance | **Direnç Yüzüğü** | öneri |  |  |  |  |
-| 1080 | Ring of Shooting Stars | **Kayan Yıldız Yüzüğü** | öneri |  |  |  |  |
-| 1081 | Ring of Spell Storing | **Büyü Saklama Yüzüğü** | öneri |  |  |  |  |
-| 1082 | Ring of Spell Turning | **Büyü Yansıtma Yüzüğü** | öneri |  |  |  |  |
-| 1083 | Ring of Swimming | **Yüzme Yüzüğü** | öneri |  |  |  |  |
-| 1084 | Ring of Telekinesis | **Telekinezi Yüzüğü** | öneri |  |  |  |  |
-| 1085 | Ring of the Ram | **Koç Yüzüğü** | öneri |  |  |  |  |
-| 1086 | Ring of Three Wishes | **Üç Dilek Yüzüğü** | öneri |  |  |  |  |
-| 1087 | Ring of Warmth | **Sıcaklık Yüzüğü** | öneri |  |  |  |  |
-| 1088 | Ring of Water Walking | **Su Üstünde Yürüme Yüzüğü** | öneri |  |  |  |  |
-| 1089 | Ring of X-ray Vision | **X Işını Görüşü Yüzüğü** | öneri |  |  |  |  |
-| 1090 | Robe of Eyes | **Gözler Cüppesi** | öneri |  |  |  |  |
-| 1091 | Robe of Scintillating Colors | **Işıldayan Renkler Cüppesi** | öneri |  |  |  |  |
-| 1092 | Robe of Stars | **Yıldızlar Cüppesi** | öneri |  |  |  |  |
-| 1093 | Robe of the Archmagi | **Ulu Efsuncular Cüppesi** | öneri |  |  | Archmage = Ulu Efsuncu (sözlük) |  |
-| 1094 | Robe of Useful Items | **Faydalı Eşyalar Cüppesi** | öneri |  |  |  |  |
-| 1095 | Rod of Absorption | **Emilim Çubuğu** | öneri |  |  |  |  |
-| 1096 | Rod of Alertness | **Uyanıklık Çubuğu** | öneri |  |  |  |  |
-| 1097 | Rod of Lordly Might | **Hükümdar Kudreti Çubuğu** | öneri |  |  |  |  |
-| 1098 | Rod of Resurrection | **Diriliş Çubuğu** | öneri |  |  |  |  |
-| 1099 | Rod of Rulership | **Hükümranlık Çubuğu** | öneri |  |  |  |  |
-| 1100 | Rod of Security | **Güvenlik Çubuğu** | öneri |  |  |  |  |
-| 1101 | Rope of Climbing | **Tırmanma Halatı** | öneri |  |  |  |  |
-| 1102 | Rope of Entanglement | **Dolaştırma Halatı** | öneri |  |  |  |  |
-| 1103 | Scarab of Protection | **Koruma Skarabesi** | öneri |  |  |  |  |
-| 1104 | Scimitar of Speed | **Hız Palası** | öneri |  |  |  |  |
-| 1105 | Sending Stones | **Haber Taşları** | öneri |  |  |  |  |
-| 1106 | Sentinel Shield | **Nöbetçi Kalkanı** | öneri |  |  |  |  |
-| 1107 | Shield, +1, +2, or +3 | **Kalkan, +1, +2 veya +3** | öneri |  |  |  |  |
-| 1108 | Shield of Missile Attraction | **Mermi Çeken Kalkan** | öneri |  |  |  |  |
-| 1109 | Shield of the Cavalier | **Süvari Kalkanı** | öneri |  |  |  |  |
-| 1110 | Slippers of Spider Climbing | **Örümcek Tırmanışı Terlikleri** | öneri |  |  |  |  |
-| 1111 | Sovereign Glue | **Mutlak Yapıştırıcı** | öneri |  |  |  |  |
-| 1112 | Spellguard Shield | **Büyüsavar Kalkan** | öneri |  |  |  |  |
-| 1113 | Sphere of Annihilation | **Yok Oluş Küresi** | öneri |  |  |  |  |
-| 1114 | Staff of Charming | **Büyüleme Asası** | öneri |  |  |  |  |
-| 1115 | Staff of Fire | **Ateş Asası** | öneri |  |  |  |  |
-| 1116 | Staff of Frost | **Ayaz Asası** | öneri |  |  |  |  |
-| 1117 | Staff of Healing | **Şifa Asası** | öneri |  |  |  |  |
-| 1118 | Staff of Power | **Kudret Asası** | öneri |  |  |  |  |
-| 1119 | Staff of Striking | **Vuruş Asası** | öneri |  |  |  |  |
-| 1120 | Staff of Swarming Insects | **Böcek Sürüsü Asası** | öneri |  |  |  |  |
-| 1121 | Staff of the Magi | **Efsuncular Asası** | öneri |  |  | Mage = Efsuncu (sözlük) |  |
-| 1122 | Staff of the Python | **Piton Asası** | öneri |  |  |  |  |
-| 1123 | Staff of the Woodlands | **Ormanlar Asası** | öneri |  |  |  |  |
-| 1124 | Staff of Thunder and Lightning | **Gök Gürültüsü ve Yıldırım Asası** | öneri |  |  |  |  |
-| 1125 | Staff of Withering | **Soldurma Asası** | öneri |  |  |  |  |
-| 1126 | Stone of Controlling Earth Elementals | **Toprak Elementallerini Yönetme Taşı** | öneri |  |  |  |  |
-| 1127 | Stone of Good Luck (Luckstone) | **İyi Talih Taşı (Şans Taşı)** | öneri |  |  |  |  |
-| 1128 | Sun Blade | **Güneş Kılıcı** | öneri |  |  |  |  |
-| 1129 | Sword of Life Stealing | **Can Çalan Kılıç** | öneri |  |  |  |  |
-| 1130 | Sword of Sharpness | **Keskinlik Kılıcı** | öneri |  |  |  |  |
-| 1131 | Sword of Wounding | **Yaralama Kılıcı** | öneri |  |  |  |  |
-| 1132 | Talisman of Pure Good | **Saf İyilik Tılsımı** | öneri |  |  |  |  |
-| 1133 | Talisman of the Sphere | **Küre Tılsımı** | öneri |  |  |  |  |
-| 1134 | Talisman of Ultimate Evil | **Mutlak Kötülük Tılsımı** | öneri |  |  |  |  |
-| 1135 | Thunderous Greatclub | **Gürleyen Büyük Sopa** | öneri |  |  |  |  |
-| 1136 | Tome of Clear Thought | **Berrak Düşünce Kitabı** | öneri |  |  |  |  |
-| 1137 | Tome of Leadership and Influence | **Liderlik ve Nüfuz Kitabı** | öneri |  |  |  |  |
-| 1138 | Tome of Understanding | **Anlayış Kitabı** | öneri |  |  |  |  |
-| 1139 | Trident of Fish Command | **Balıklara Hükmeden Üç Dişli Mızrak** | öneri |  |  |  |  |
-| 1140 | Universal Solvent | **Evrensel Çözücü** | öneri |  |  |  |  |
-| 1141 | Vicious Weapon | **Acımasız Silah** | öneri |  |  |  |  |
-| 1142 | Vorpal Sword | **Vorpal Kılıç** | öneri |  |  |  |  |
-| 1143 | Wand of Binding | **Bağlama Değneği** | öneri |  |  |  |  |
-| 1144 | Wand of Enemy Detection | **Düşman Algılama Değneği** | öneri |  |  |  |  |
-| 1145 | Wand of Fear | **Korku Değneği** | öneri |  |  |  |  |
-| 1146 | Wand of Fireballs | **Ateş Topu Değneği** | öneri |  |  |  |  |
-| 1147 | Wand of Lightning Bolts | **Yıldırım Oku Değneği** | öneri |  |  |  |  |
-| 1148 | Wand of Magic Detection | **Büyü Algılama Değneği** | öneri |  |  |  |  |
-| 1149 | Wand of Magic Missiles | **Büyülü Füze Değneği** | öneri |  |  |  |  |
-| 1150 | Wand of Paralysis | **Felç Değneği** | öneri |  |  |  |  |
-| 1151 | Wand of Polymorph | **Biçim Değiştirme Değneği** | öneri |  |  |  |  |
-| 1152 | Wand of Secrets | **Sırlar Değneği** | öneri |  |  |  |  |
-| 1153 | Wand of the War Mage, +1, +2, or +3 | **Savaş Büyücüsü Değneği, +1, +2 veya +3** | öneri |  |  |  |  |
-| 1154 | Wand of Web | **Ağ Değneği** | öneri |  |  |  |  |
-| 1155 | Wand of Wonder | **Mucize Değneği** | öneri |  |  |  |  |
-| 1156 | Weapon, +1, +2, or +3 | **Silah, +1, +2 veya +3** | öneri |  |  |  |  |
-| 1157 | Weapon of Warning | **Uyarı Silahı** | öneri |  |  |  |  |
-| 1158 | Well of Many Worlds | **Sayısız Dünya Kuyusu** | öneri |  |  |  |  |
-| 1159 | Wind Fan | **Rüzgâr Yelpazesi** | öneri |  |  |  |  |
-| 1160 | Winged Boots | **Kanatlı Çizmeler** | öneri |  |  |  |  |
-| 1161 | Wings of Flying | **Uçma Kanatları** | öneri |  |  |  |  |
+| 912 | Adamantine Armor | **Adamantin Zırh** | öneri |  |  |  |  |
+| 913 | Ammunition, +1, +2, or +3 | **Mühimmat, +1, +2 veya +3** | öneri |  |  |  |  |
+| 914 | Ammunition of Slaying | **Öldürücü Mühimmat** | öneri |  |  |  |  |
+| 915 | Amulet of Health | **Sağlık Muskası** | öneri |  |  | Amulet = Muska, Periapt = Nazarlık, Talisman = Tılsım |  |
+| 916 | Amulet of Proof against Detection and Location | **Algılanma ve Bulunmaya Karşı Muska** | öneri |  |  |  |  |
+| 917 | Amulet of the Planes | **Düzlemler Muskası** | öneri |  |  |  |  |
+| 918 | Animated Shield | **Canlanmış Kalkan** | öneri |  |  |  |  |
+| 919 | Apparatus of the Crab | **Yengeç Aygıtı** | öneri |  |  |  |  |
+| 920 | Armor, +1, +2, or +3 | **Zırh, +1, +2 veya +3** | öneri |  |  |  |  |
+| 921 | Armor of Invulnerability | **Dokunulmazlık Zırhı** | öneri |  |  |  |  |
+| 922 | Armor of Resistance | **Direnç Zırhı** | öneri |  |  |  |  |
+| 923 | Armor of Vulnerability | **Zafiyet Zırhı** | öneri |  |  |  |  |
+| 924 | Arrow-Catching Shield | **Ok Yakalayan Kalkan** | öneri |  |  |  |  |
+| 925 | Bag of Beans | **Fasulye Torbası** | öneri |  |  |  |  |
+| 926 | Bag of Devouring | **Yutucu Torba** | öneri |  |  |  |  |
+| 927 | Bag of Holding | **Dipsiz Torba** | öneri |  |  | Dipsiz Torba: deyimsel, doğal ad (sınırsız değil, 500 lb) |  |
+| 928 | Bag of Tricks | **Marifetler Torbası** | öneri |  |  |  |  |
+| 929 | Bead of Force | **Kuvvet Boncuğu** | öneri |  |  |  |  |
+| 930 | Bead of Nourishment | **Besin Boncuğu** | öneri |  |  |  |  |
+| 931 | Belt of Dwarvenkind | **Cüce Kemeri** | öneri |  |  |  |  |
+| 932 | Belt of Giant Strength | **Dev Gücü Kemeri** | öneri |  |  |  |  |
+| 933 | Berserker Axe | **Gözü Dönmüş Baltası** | öneri |  |  |  |  |
+| 934 | Boots of Elvenkind | **Elf Çizmeleri** | öneri |  |  |  |  |
+| 935 | Boots of Levitation | **Havalanma Çizmeleri** | öneri |  |  |  |  |
+| 936 | Boots of Speed | **Hız Çizmeleri** | öneri |  |  |  |  |
+| 937 | Boots of Striding and Springing | **Uzun Adım ve Sıçrama Çizmeleri** | öneri |  |  |  |  |
+| 938 | Boots of the Winterlands | **Kış Diyarı Çizmeleri** | öneri |  |  |  |  |
+| 939 | Bowl of Commanding Water Elementals | **Su Elementallerine Hükmetme Kâsesi** | öneri |  |  |  |  |
+| 940 | Bracers of Archery | **Okçuluk Bilezikleri** | öneri |  |  |  |  |
+| 941 | Bracers of Defense | **Savunma Bilezikleri** | öneri |  |  |  |  |
+| 942 | Brazier of Commanding Fire Elementals | **Ateş Elementallerine Hükmetme Mangalı** | öneri |  |  |  |  |
+| 943 | Brooch of Shielding | **Kalkan Broşu** | öneri |  |  |  |  |
+| 944 | Broom of Flying | **Uçan Süpürge** | öneri |  |  |  |  |
+| 945 | Candle of Invocation | **Yakarış Mumu** | öneri |  |  |  |  |
+| 946 | Cape of the Mountebank | **Şarlatan Pelerini** | öneri |  |  |  |  |
+| 947 | Carpet of Flying | **Uçan Halı** | öneri |  |  |  |  |
+| 948 | Censer of Controlling Air Elementals | **Hava Elementallerini Yönetme Buhurdanı** | öneri |  |  |  |  |
+| 949 | Chime of Opening | **Açma Çanı** | öneri |  |  |  |  |
+| 950 | Circlet of Blasting | **Patlama Tacı** | öneri |  |  |  |  |
+| 951 | Cloak of Arachnida | **Örümcek Pelerini** | öneri |  |  |  |  |
+| 952 | Cloak of Displacement | **Yer Değiştirme Pelerini** | öneri |  |  |  |  |
+| 953 | Cloak of Elvenkind | **Elf Pelerini** | öneri |  |  |  |  |
+| 954 | Cloak of Invisibility | **Görünmezlik Pelerini** | öneri |  |  |  |  |
+| 955 | Cloak of Protection | **Koruma Pelerini** | öneri |  |  |  |  |
+| 956 | Cloak of the Bat | **Yarasa Pelerini** | öneri |  |  |  |  |
+| 957 | Cloak of the Manta Ray | **Vatoz Pelerini** | öneri |  |  |  |  |
+| 958 | Crystal Ball | **Kristal Küre** | öneri |  |  |  |  |
+| 959 | Crystal Ball of Mind Reading | **Zihin Okuma Kristal Küresi** | öneri |  |  |  |  |
+| 960 | Crystal Ball of Telepathy | **Telepati Kristal Küresi** | öneri |  |  |  |  |
+| 961 | Crystal Ball of True Seeing | **Gerçeği Görme Kristal Küresi** | öneri |  |  |  |  |
+| 962 | Cube of Force | **Kuvvet Küpü** | öneri |  |  |  |  |
+| 963 | Cubic Gate | **Kübik Geçit** | öneri |  |  |  |  |
+| 964 | Dagger of Venom | **Zehir Hançeri** | öneri |  |  |  |  |
+| 965 | Dancing Sword | **Dans Eden Kılıç** | öneri |  |  |  |  |
+| 966 | Decanter of Endless Water | **Bitmeyen Su Sürahisi** | öneri |  |  |  |  |
+| 967 | Deck of Illusions | **İllüzyon Destesi** | öneri |  |  |  |  |
+| 968 | Defender | **Koruyucu** | öneri |  |  |  |  |
+| 969 | Demon Armor | **Demon Zırhı** | öneri |  |  | Biçem kılavuzu: demon = demon (İblis = Fiend) |  |
+| 970 | Dimensional Shackles | **Boyutsal Prangalar** | öneri |  |  |  |  |
+| 971 | Dragon Orb | **Ejderha Küresi** | öneri |  |  |  |  |
+| 972 | Dragon Scale Mail | **Ejderha Pullu Zırh** | öneri |  |  |  |  |
+| 973 | Dragon Slayer | **Ejderha Avcısı** | öneri |  |  |  |  |
+| 974 | Dust of Disappearance | **Kaybolma Tozu** | öneri |  |  |  |  |
+| 975 | Dust of Dryness | **Kuruluk Tozu** | öneri |  |  |  |  |
+| 976 | Dust of Sneezing and Choking | **Hapşırma ve Boğulma Tozu** | öneri |  |  |  |  |
+| 977 | Dwarven Plate | **Cüce Plaka Zırhı** | öneri |  |  |  |  |
+| 978 | Dwarven Thrower | **Cüce Fırlatıcısı** | öneri |  |  |  |  |
+| 979 | Efficient Quiver | **Verimli Sadak** | öneri |  |  |  |  |
+| 980 | Efreeti Bottle | **İfrit Şişesi** | öneri |  |  |  |  |
+| 981 | Elemental Gem | **Elemental Mücevheri** | öneri |  |  |  |  |
+| 982 | Elixir of Health | **Sağlık Eliksiri** | öneri |  |  |  |  |
+| 983 | Elven Chain | **Elf Zincir Zırhı** | öneri |  |  |  |  |
+| 984 | Energy Bow | **Enerji Yayı** | öneri |  |  |  |  |
+| 985 | Eversmoking Bottle | **Bitmeyen Duman Şişesi** | öneri |  |  |  |  |
+| 986 | Eyes of Charming | **Büyüleme Gözleri** | öneri |  |  |  |  |
+| 987 | Eyes of Minute Seeing | **Ayrıntı Görme Gözleri** | öneri |  |  |  |  |
+| 988 | Eyes of the Eagle | **Kartal Gözleri** | öneri |  |  |  |  |
+| 989 | Feather Token | **Tüy Nişanesi** | öneri |  |  |  |  |
+| 990 | Figurine of Wondrous Power | **Harikulade Güç Heykelciği** | öneri |  |  |  |  |
+| 991 | Flame Tongue | **Alev Dili** | öneri |  |  |  |  |
+| 992 | Folding Boat | **Katlanır Tekne** | öneri |  |  |  |  |
+| 993 | Frost Brand | **Ayaz Kılıcı** | öneri |  |  |  |  |
+| 994 | Gauntlets of Ogre Power | **Ogre Gücü Eldivenleri** | öneri |  |  |  |  |
+| 995 | Gem of Brightness | **Parlaklık Mücevheri** | öneri |  |  |  |  |
+| 996 | Gem of Seeing | **Görme Mücevheri** | öneri |  |  |  |  |
+| 997 | Giant Slayer | **Dev Avcısı** | öneri |  |  |  |  |
+| 998 | Glamoured Studded Leather | **Kılık Değiştiren Perçinli Deri Zırh** | öneri |  |  |  |  |
+| 999 | Gloves of Missile Snaring | **Mermi Yakalama Eldivenleri** | öneri |  |  |  |  |
+| 1000 | Gloves of Swimming and Climbing | **Yüzme ve Tırmanma Eldivenleri** | öneri |  |  |  |  |
+| 1001 | Gloves of Thievery | **Hırsızlık Eldivenleri** | öneri |  |  |  |  |
+| 1002 | Goggles of Night | **Gece Gözlüğü** | öneri |  |  |  |  |
+| 1003 | Hammer of Thunderbolts | **Şimşek Çekici** | öneri |  |  |  |  |
+| 1004 | Handy Haversack | **Kullanışlı Heybe** | öneri |  |  |  |  |
+| 1005 | Hat of Disguise | **Kılık Değiştirme Şapkası** | öneri |  |  |  |  |
+| 1006 | Hat of Many Spells | **Sayısız Büyü Şapkası** | öneri |  |  |  |  |
+| 1007 | Headband of Intellect | **Zeka Alın Bandı** | öneri |  |  |  |  |
+| 1008 | Helm of Brilliance | **Parıltı Miğferi** | öneri |  |  |  |  |
+| 1009 | Helm of Comprehending Languages | **Dilleri Anlama Miğferi** | öneri |  |  |  |  |
+| 1010 | Helm of Telepathy | **Telepati Miğferi** | öneri |  |  |  |  |
+| 1011 | Helm of Teleportation | **Işınlanma Miğferi** | öneri |  |  |  |  |
+| 1012 | Holy Avenger | **Kutsal İntikamcı** | öneri |  |  |  |  |
+| 1013 | Horn of Blasting | **Patlama Borusu** | öneri |  |  |  |  |
+| 1014 | Horn of Valhalla | **Valhalla Borusu** | öneri |  |  |  |  |
+| 1015 | Horseshoes of a Zephyr | **Meltem Nalları** | öneri |  |  |  |  |
+| 1016 | Horseshoes of Speed | **Hız Nalları** | öneri |  |  |  |  |
+| 1017 | Immovable Rod | **Kımıldamaz Çubuk** | öneri |  |  |  |  |
+| 1018 | Instant Fortress | **Anında Kale** | öneri |  |  |  |  |
+| 1019 | Ioun Stone | **Ioun Taşı** | öneri |  |  |  |  |
+| 1020 | Iron Bands | **Demir Bağlar** | öneri |  |  |  |  |
+| 1021 | Iron Flask | **Demir Şişe** | öneri |  |  |  |  |
+| 1022 | Javelin of Lightning | **Yıldırım Ciridi** | öneri |  |  |  |  |
+| 1023 | Lantern of Revealing | **İfşa Feneri** | öneri |  |  |  |  |
+| 1024 | Luck Blade | **Şans Kılıcı** | öneri |  |  |  |  |
+| 1025 | Mace of Disruption | **Yıkım Topuzu** | öneri |  |  |  |  |
+| 1026 | Mace of Smiting | **Darbe Topuzu** | öneri |  |  |  |  |
+| 1027 | Mace of Terror | **Dehşet Topuzu** | öneri |  |  |  |  |
+| 1028 | Mantle of Spell Resistance | **Büyü Direnci Örtüsü** | öneri |  |  |  |  |
+| 1029 | Manual of Bodily Health | **Beden Sağlığı Kılavuzu** | öneri |  |  |  |  |
+| 1030 | Manual of Gainful Exercise | **Verimli Egzersiz Kılavuzu** | öneri |  |  |  |  |
+| 1031 | Manual of Golems | **Golem Kılavuzu** | öneri |  |  |  |  |
+| 1032 | Manual of Quickness of Action | **Eylem Çabukluğu Kılavuzu** | öneri |  |  |  |  |
+| 1033 | Marvelous Pigments | **Mucizevi Boyalar** | öneri |  |  |  |  |
+| 1034 | Medallion of Thoughts | **Düşünce Madalyonu** | öneri |  |  |  |  |
+| 1035 | Mirror of Life Trapping | **Yaşam Kapanı Aynası** | öneri |  |  |  |  |
+| 1036 | Mithral Armor | **Mithral Zırh** | öneri |  |  |  |  |
+| 1037 | Mysterious Deck | **Gizemli Deste** | öneri |  |  | SRD'deki yeni ad (Deck of Many Things yerine); düz çeviri |  |
+| 1038 | Necklace of Adaptation | **Uyum Kolyesi** | öneri |  |  |  |  |
+| 1039 | Necklace of Fireballs | **Ateş Topu Kolyesi** | öneri |  |  |  |  |
+| 1040 | Necklace of Prayer Beads | **Dua Boncuğu Kolyesi** | öneri |  |  |  |  |
+| 1041 | Nine Lives Stealer | **Dokuz Can Hırsızı** | öneri |  |  |  |  |
+| 1042 | Oathbow | **Yemin Yayı** | öneri |  |  |  |  |
+| 1043 | Oil of Etherealness | **Eterikleşme Yağı** | öneri |  |  |  |  |
+| 1044 | Oil of Sharpness | **Keskinlik Yağı** | öneri |  |  |  |  |
+| 1045 | Oil of Slipperiness | **Kayganlık Yağı** | öneri |  |  |  |  |
+| 1046 | Pearl of Power | **Kudret İncisi** | öneri |  |  |  |  |
+| 1047 | Periapt of Health | **Sağlık Nazarlığı** | öneri |  |  |  |  |
+| 1048 | Periapt of Proof against Poison | **Zehre Karşı Nazarlık** | öneri |  |  |  |  |
+| 1049 | Periapt of Wound Closure | **Yara Kapama Nazarlığı** | öneri |  |  |  |  |
+| 1050 | Philter of Love | **Aşk İksiri** | öneri |  |  | Philter: yerleşik 'Aşk İksiri' kalıbı |  |
+| 1051 | Pipes of Haunting | **Ürperti Kavalı** | öneri |  |  |  |  |
+| 1052 | Pipes of the Sewers | **Lağım Kavalı** | öneri |  |  |  |  |
+| 1053 | Plate Armor of Etherealness | **Eterikleşme Plaka Zırhı** | öneri |  |  |  |  |
+| 1054 | Portable Hole | **Taşınabilir Delik** | öneri |  |  |  |  |
+| 1055 | Potion of Animal Friendship | **Hayvan Dostluğu İksiri** | öneri |  |  |  |  |
+| 1056 | Potion of Clairvoyance | **Durugörü İksiri** | öneri |  |  |  |  |
+| 1057 | Potion of Climbing | **Tırmanma İksiri** | öneri |  |  |  |  |
+| 1058 | Potion of Diminution | **Küçülme İksiri** | öneri |  |  |  |  |
+| 1059 | Potion of Flying | **Uçma İksiri** | öneri |  |  |  |  |
+| 1060 | Potion of Gaseous Form | **Gaz Biçimi İksiri** | öneri |  |  |  |  |
+| 1061 | Potion of Giant Strength | **Dev Gücü İksiri** | öneri |  |  |  |  |
+| 1062 | Potion of Growth | **Büyüme İksiri** | öneri |  |  |  |  |
+| 1063 | Potions of Healing | **Şifa İksirleri** | öneri |  |  | Şifa İksiri (sözlük) çoğulu; giriş birden çok tür kapsar |  |
+| 1064 | Potion of Heroism | **Kahramanlık İksiri** | öneri |  |  |  |  |
+| 1065 | Potion of Invisibility | **Görünmezlik İksiri** | öneri |  |  |  |  |
+| 1066 | Potion of Invulnerability | **Dokunulmazlık İksiri** | öneri |  |  |  |  |
+| 1067 | Potion of Longevity | **Uzun Ömür İksiri** | öneri |  |  |  |  |
+| 1068 | Potion of Mind Reading | **Zihin Okuma İksiri** | öneri |  |  |  |  |
+| 1069 | Potion of Poison | **Zehir İksiri** | öneri |  |  |  |  |
+| 1070 | Potion of Resistance | **Direnç İksiri** | öneri |  |  |  |  |
+| 1071 | Potion of Speed | **Hız İksiri** | öneri |  |  |  |  |
+| 1072 | Potion of Vitality | **Dirilik İksiri** | öneri |  |  |  |  |
+| 1073 | Potion of Water Breathing | **Suda Nefes Alma İksiri** | öneri |  |  |  |  |
+| 1074 | Quarterstaff of the Acrobat | **Akrobat Asası** | öneri |  |  |  |  |
+| 1075 | Ring of Animal Influence | **Hayvan Etkileme Yüzüğü** | öneri |  |  |  |  |
+| 1076 | Ring of Djinni Summoning | **Cin Çağırma Yüzüğü** | öneri |  |  |  |  |
+| 1077 | Ring of Elemental Command | **Elementallere Hükmetme Yüzüğü** | öneri |  |  |  |  |
+| 1078 | Ring of Evasion | **Sıyrılma Yüzüğü** | öneri |  |  |  |  |
+| 1079 | Ring of Feather Falling | **Tüy Düşüşü Yüzüğü** | öneri |  |  |  |  |
+| 1080 | Ring of Free Action | **Serbest Hareket Yüzüğü** | öneri |  |  |  |  |
+| 1081 | Ring of Invisibility | **Görünmezlik Yüzüğü** | öneri |  |  |  |  |
+| 1082 | Ring of Jumping | **Zıplama Yüzüğü** | öneri |  |  |  |  |
+| 1083 | Ring of Mind Shielding | **Zihin Kalkanı Yüzüğü** | öneri |  |  |  |  |
+| 1084 | Ring of Protection | **Koruma Yüzüğü** | öneri |  |  |  |  |
+| 1085 | Ring of Regeneration | **Rejenerasyon Yüzüğü** | öneri |  |  |  |  |
+| 1086 | Ring of Resistance | **Direnç Yüzüğü** | öneri |  |  |  |  |
+| 1087 | Ring of Shooting Stars | **Kayan Yıldız Yüzüğü** | öneri |  |  |  |  |
+| 1088 | Ring of Spell Storing | **Büyü Saklama Yüzüğü** | öneri |  |  |  |  |
+| 1089 | Ring of Spell Turning | **Büyü Yansıtma Yüzüğü** | öneri |  |  |  |  |
+| 1090 | Ring of Swimming | **Yüzme Yüzüğü** | öneri |  |  |  |  |
+| 1091 | Ring of Telekinesis | **Telekinezi Yüzüğü** | öneri |  |  |  |  |
+| 1092 | Ring of the Ram | **Koç Yüzüğü** | öneri |  |  |  |  |
+| 1093 | Ring of Three Wishes | **Üç Dilek Yüzüğü** | öneri |  |  |  |  |
+| 1094 | Ring of Warmth | **Sıcaklık Yüzüğü** | öneri |  |  |  |  |
+| 1095 | Ring of Water Walking | **Su Üstünde Yürüme Yüzüğü** | öneri |  |  |  |  |
+| 1096 | Ring of X-ray Vision | **X Işını Görüşü Yüzüğü** | öneri |  |  |  |  |
+| 1097 | Robe of Eyes | **Gözler Cüppesi** | öneri |  |  |  |  |
+| 1098 | Robe of Scintillating Colors | **Işıldayan Renkler Cüppesi** | öneri |  |  |  |  |
+| 1099 | Robe of Stars | **Yıldızlar Cüppesi** | öneri |  |  |  |  |
+| 1100 | Robe of the Archmagi | **Ulu Efsuncular Cüppesi** | öneri |  |  | Archmage = Ulu Efsuncu (sözlük) |  |
+| 1101 | Robe of Useful Items | **Faydalı Eşyalar Cüppesi** | öneri |  |  |  |  |
+| 1102 | Rod of Absorption | **Emilim Çubuğu** | öneri |  |  |  |  |
+| 1103 | Rod of Alertness | **Uyanıklık Çubuğu** | öneri |  |  |  |  |
+| 1104 | Rod of Lordly Might | **Hükümdar Kudreti Çubuğu** | öneri |  |  |  |  |
+| 1105 | Rod of Resurrection | **Diriliş Çubuğu** | öneri |  |  |  |  |
+| 1106 | Rod of Rulership | **Hükümranlık Çubuğu** | öneri |  |  |  |  |
+| 1107 | Rod of Security | **Güvenlik Çubuğu** | öneri |  |  |  |  |
+| 1108 | Rope of Climbing | **Tırmanma Halatı** | öneri |  |  |  |  |
+| 1109 | Rope of Entanglement | **Dolaştırma Halatı** | öneri |  |  |  |  |
+| 1110 | Scarab of Protection | **Koruma Skarabesi** | öneri |  |  |  |  |
+| 1111 | Scimitar of Speed | **Hız Palası** | öneri |  |  |  |  |
+| 1112 | Sending Stones | **Haber Taşları** | öneri |  |  |  |  |
+| 1113 | Sentinel Shield | **Nöbetçi Kalkanı** | öneri |  |  |  |  |
+| 1114 | Shield, +1, +2, or +3 | **Kalkan, +1, +2 veya +3** | öneri |  |  |  |  |
+| 1115 | Shield of Missile Attraction | **Mermi Çeken Kalkan** | öneri |  |  |  |  |
+| 1116 | Shield of the Cavalier | **Süvari Kalkanı** | öneri |  |  |  |  |
+| 1117 | Slippers of Spider Climbing | **Örümcek Tırmanışı Terlikleri** | öneri |  |  |  |  |
+| 1118 | Sovereign Glue | **Mutlak Yapıştırıcı** | öneri |  |  |  |  |
+| 1119 | Spellguard Shield | **Büyüsavar Kalkan** | öneri |  |  |  |  |
+| 1120 | Sphere of Annihilation | **Yok Oluş Küresi** | öneri |  |  |  |  |
+| 1121 | Staff of Charming | **Büyüleme Asası** | öneri |  |  |  |  |
+| 1122 | Staff of Fire | **Ateş Asası** | öneri |  |  |  |  |
+| 1123 | Staff of Frost | **Ayaz Asası** | öneri |  |  |  |  |
+| 1124 | Staff of Healing | **Şifa Asası** | öneri |  |  |  |  |
+| 1125 | Staff of Power | **Kudret Asası** | öneri |  |  |  |  |
+| 1126 | Staff of Striking | **Vuruş Asası** | öneri |  |  |  |  |
+| 1127 | Staff of Swarming Insects | **Böcek Sürüsü Asası** | öneri |  |  |  |  |
+| 1128 | Staff of the Magi | **Efsuncular Asası** | öneri |  |  | Mage = Efsuncu (sözlük) |  |
+| 1129 | Staff of the Python | **Piton Asası** | öneri |  |  |  |  |
+| 1130 | Staff of the Woodlands | **Ormanlar Asası** | öneri |  |  |  |  |
+| 1131 | Staff of Thunder and Lightning | **Gök Gürültüsü ve Yıldırım Asası** | öneri |  |  |  |  |
+| 1132 | Staff of Withering | **Soldurma Asası** | öneri |  |  |  |  |
+| 1133 | Stone of Controlling Earth Elementals | **Toprak Elementallerini Yönetme Taşı** | öneri |  |  |  |  |
+| 1134 | Stone of Good Luck (Luckstone) | **İyi Talih Taşı (Şans Taşı)** | öneri |  |  |  |  |
+| 1135 | Sun Blade | **Güneş Kılıcı** | öneri |  |  |  |  |
+| 1136 | Sword of Life Stealing | **Can Çalan Kılıç** | öneri |  |  |  |  |
+| 1137 | Sword of Sharpness | **Keskinlik Kılıcı** | öneri |  |  |  |  |
+| 1138 | Sword of Wounding | **Yaralama Kılıcı** | öneri |  |  |  |  |
+| 1139 | Talisman of Pure Good | **Saf İyilik Tılsımı** | öneri |  |  |  |  |
+| 1140 | Talisman of the Sphere | **Küre Tılsımı** | öneri |  |  |  |  |
+| 1141 | Talisman of Ultimate Evil | **Mutlak Kötülük Tılsımı** | öneri |  |  |  |  |
+| 1142 | Thunderous Greatclub | **Gürleyen Büyük Sopa** | öneri |  |  |  |  |
+| 1143 | Tome of Clear Thought | **Berrak Düşünce Kitabı** | öneri |  |  |  |  |
+| 1144 | Tome of Leadership and Influence | **Liderlik ve Nüfuz Kitabı** | öneri |  |  |  |  |
+| 1145 | Tome of Understanding | **Anlayış Kitabı** | öneri |  |  |  |  |
+| 1146 | Trident of Fish Command | **Balıklara Hükmeden Üç Dişli Mızrak** | öneri |  |  |  |  |
+| 1147 | Universal Solvent | **Evrensel Çözücü** | öneri |  |  |  |  |
+| 1148 | Vicious Weapon | **Acımasız Silah** | öneri |  |  |  |  |
+| 1149 | Vorpal Sword | **Vorpal Kılıç** | öneri |  |  |  |  |
+| 1150 | Wand of Binding | **Bağlama Değneği** | öneri |  |  |  |  |
+| 1151 | Wand of Enemy Detection | **Düşman Algılama Değneği** | öneri |  |  |  |  |
+| 1152 | Wand of Fear | **Korku Değneği** | öneri |  |  |  |  |
+| 1153 | Wand of Fireballs | **Ateş Topu Değneği** | öneri |  |  |  |  |
+| 1154 | Wand of Lightning Bolts | **Yıldırım Oku Değneği** | öneri |  |  |  |  |
+| 1155 | Wand of Magic Detection | **Büyü Algılama Değneği** | öneri |  |  |  |  |
+| 1156 | Wand of Magic Missiles | **Büyülü Füze Değneği** | öneri |  |  |  |  |
+| 1157 | Wand of Paralysis | **Felç Değneği** | öneri |  |  |  |  |
+| 1158 | Wand of Polymorph | **Biçim Değiştirme Değneği** | öneri |  |  |  |  |
+| 1159 | Wand of Secrets | **Sırlar Değneği** | öneri |  |  |  |  |
+| 1160 | Wand of the War Mage, +1, +2, or +3 | **Savaş Büyücüsü Değneği, +1, +2 veya +3** | öneri |  |  |  |  |
+| 1161 | Wand of Web | **Ağ Değneği** | öneri |  |  |  |  |
+| 1162 | Wand of Wonder | **Mucize Değneği** | öneri |  |  |  |  |
+| 1163 | Weapon, +1, +2, or +3 | **Silah, +1, +2 veya +3** | öneri |  |  |  |  |
+| 1164 | Weapon of Warning | **Uyarı Silahı** | öneri |  |  |  |  |
+| 1165 | Well of Many Worlds | **Sayısız Dünya Kuyusu** | öneri |  |  |  |  |
+| 1166 | Wind Fan | **Rüzgâr Yelpazesi** | öneri |  |  |  |  |
+| 1167 | Winged Boots | **Kanatlı Çizmeler** | öneri |  |  |  |  |
+| 1168 | Wings of Flying | **Uçma Kanatları** | öneri |  |  |  |  |
 
 ## Pilot büyü adları ve bölüm adları
 
@@ -1980,6 +1987,82 @@
 | Senses | Duyular | bölüm |
 | Special Purpose | Özel Amaç | bölüm |
 | Conflict | Çatışma | bölüm |
+| Marching Order | Yürüyüş Düzeni | bölüm |
+| Playing on a Grid | Izgara Üzerinde Oynama | bölüm |
+| Unseen Attackers and Targets | Görülmeyen Saldırganlar ve Hedefler | bölüm |
+| Resting | Dinlenme | bölüm |
+| Knocking Out a Creature | Bir Yaratığı Bayıltma | bölüm |
+| Unaligned Creatures | Yönelimsiz Yaratıklar | bölüm |
+| Bonus Feats at Level 20 | 20. Seviyede Bonus Hünerler | bölüm |
+| Breaking Your Oath | Yemini Bozma | bölüm |
+| Expanding and Replacing a Spellbook | Büyü Kitabını Genişletme ve Yenileme | bölüm |
+| Magic Item Rules | Büyülü Eşya Kuralları | bölüm |
+| Selling Equipment | Ekipman Satma | bölüm |
+| Coins | Sikkeler | bölüm |
+| Coin Values | Sikke Değerleri | bölüm |
+| Weapon Proficiency | Silah Yetkinliği | bölüm |
+| Properties | Özellikler | bölüm |
+| Improvised Weapons | Doğaçlama Silahlar | bölüm |
+| Mastery Properties | Ustalık Özellikleri | bölüm |
+| Light, Medium, or Heavy Armor | Hafif, Orta veya Ağır Zırh | bölüm |
+| One at a Time | Bir Seferde Bir Tane | bölüm |
+| Tool Proficiency | Alet Yetkinliği | bölüm |
+| Other Tools | Diğer Aletler | bölüm |
+| Adventuring Gear | Macera Ekipmanı | bölüm |
+| Mounts and Vehicles | Binekler ve Taşıtlar | bölüm |
+| Mounts and Cargo | Binekler ve Yük | bölüm |
+| Barding | Binek Zırhı | bölüm |
+| Saddles | Eyerler | bölüm |
+| Large Vehicles | Büyük Taşıtlar | bölüm |
+| Crew | Mürettebat | bölüm |
+| Passengers | Yolcular | bölüm |
+| Ship Repair | Gemi Onarımı | bölüm |
+| Lifestyle Expenses | Yaşam Tarzı Giderleri | bölüm |
+| Wretched (Free) | Sefil (Ücretsiz) | bölüm |
+| Squalid (1 SP per Day) | Perişan (Günde 1 gümüş) | bölüm |
+| Poor (2 SP per Day) | Yoksul (Günde 2 gümüş) | bölüm |
+| Modest (1 GP per Day) | Mütevazı (Günde 1 altın) | bölüm |
+| Comfortable (2 GP per Day) | Rahat (Günde 2 altın) | bölüm |
+| Wealthy (4 GP per Day) | Varlıklı (Günde 4 altın) | bölüm |
+| Aristocratic (10 GP per Day) | Aristokrat (Günde 10 altın) | bölüm |
+| Food, Drink, and Lodging | Yiyecek, İçecek ve Konaklama | bölüm |
+| Hirelings | Kiralık Yardımcılar | bölüm |
+| Spellcasting Services | Büyü Yapma Hizmetleri | bölüm |
+| Identifying a Magic Item | Büyülü Eşyayı Tanımlama | bölüm |
+| Attune during a Short Rest | Kısa Dinlenme Sırasında Uyumlanma | bölüm |
+| No More Than Three Items | En Fazla Üç Eşya | bölüm |
+| Ending Attunement | Uyumlanmayı Sonlandırma | bölüm |
+| Wearing and Wielding Items | Eşyaları Giyme ve Kuşanma | bölüm |
+| Multiple Items of the Same Kind | Aynı Türden Birden Fazla Eşya | bölüm |
+| Paired Items | Çift Eşyalar | bölüm |
+| Crafting Nonmagical Items | Büyülü Olmayan Eşya Yapımı | bölüm |
+| Raw Materials | Ham Maddeler | bölüm |
+| Time | Süre | bölüm |
+| Brewing Potions of Healing | Şifa İksiri Demleme | bölüm |
+| Scribing Spell Scrolls | Büyü Parşömeni Yazma | bölüm |
+| Spell Scroll Costs | Büyü Parşömeni Maliyetleri | bölüm |
+| Prerequisites for the Scribe | Yazıcı İçin Ön Koşullar | bölüm |
+| Cantrips | Cantrip'ler | bölüm |
+| Casting in Armor | Zırhla Büyü Yapma | bölüm |
+| Gaining Spells | Büyü Edinme | bölüm |
+| Preparing Spells | Büyü Hazırlama | bölüm |
+| Spell Preparation by Class | Sınıfa Göre Büyü Hazırlama | bölüm |
+| Always-Prepared Spells | Her Zaman Hazırlanmış Büyüler | bölüm |
+| Spell Level | Büyü Seviyesi | bölüm |
+| Spell Slots | Büyü Slotları | bölüm |
+| Casting without Slots | Slot Harcamadan Büyü Yapma | bölüm |
+| Schools of Magic | Büyü Okulları | bölüm |
+| Class Spell Lists | Sınıf Büyü Listeleri | bölüm |
+| One Spell with a Spell Slot per Turn | Her Sırada Büyü Slotuyla Tek Büyü | bölüm |
+| Reaction and Bonus Action Triggers | Reaksiyon ve Bonus Eylem Tetikleyicileri | bölüm |
+| Longer Casting Times | Daha Uzun Yapma Süreleri | bölüm |
+| Verbal (V) | Sözlü (S) | bölüm |
+| Somatic (S) | Bedensel (B) | bölüm |
+| Material (M) | Malzeme (M) | bölüm |
+| Identifying an Ongoing Spell | Süren Bir Büyüyü Tanıma | bölüm |
+| Effects | Etkiler | bölüm |
+| Targets | Hedefler | bölüm |
+| Combining Spell Effects | Büyü Etkilerini Birleştirme | bölüm |
 
 ## Kaynaklar
 

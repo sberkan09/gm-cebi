@@ -8,7 +8,7 @@ from gmcebi_pipeline.models import DATASETS
 EXPECTED = {
     "conditions": 15, "spells": 339, "monsters": 330, "classes": 12, "subclasses": 12,
     "species": 9, "backgrounds": 4, "feats": 17, "weapon_mastery": 8, "weapon_properties": 10,
-    "magic_items": 258, "rules": 34,
+    "magic_items": 258, "rules": 52,
 }
 
 
@@ -191,3 +191,111 @@ def test_magic_item_stat_blocks(source):
         i = texts.index(f"### {name}")
         assert texts[i + 2] == ac
         assert any(b["type"] == "table" and b["header"] == STAT_BLOCK_HEADER for b in blocks[i:])
+
+
+SIDEBARS = {  # sidebar title -> (dataset, record id) it ends up in
+    "Exceptions Supersede General Rules": ("rules", "playing-intro"),
+    "Round Down": ("rules", "playing-intro"),
+    "Heroic Inspiration": ("rules", "playing-d20-tests"),
+    "Marching Order": ("rules", "playing-exploration"),
+    "Playing on a Grid": ("rules", "playing-exploration"),
+    "Unseen Attackers and Targets": ("rules", "playing-combat"),
+    "Resting": ("rules", "playing-combat"),
+    "Knocking Out a Creature": ("rules", "playing-damage-and-healing"),
+    "Unaligned Creatures": ("rules", "creation-create-your-character"),
+    "Bonus Feats at Level 20": ("rules", "creation-level-advancement"),
+    "Breaking Your Oath": ("classes", "paladin"),
+    "Expanding and Replacing a Spellbook": ("classes", "wizard"),
+    "Selling Equipment": ("rules", "equipment-intro"),
+    "Improvised Weapons": ("rules", "equipment-weapons"),
+    "Casting in Armor": ("rules", "spells-intro"),
+    "Identifying an Ongoing Spell": ("rules", "spells-casting-spells"),
+    "Magic Item Rules": ("rules", "magic-items-magic-item-categories"),
+}
+
+
+def _strings(obj):
+    if isinstance(obj, str):
+        yield obj
+    elif isinstance(obj, dict):
+        for v in obj.values():
+            yield from _strings(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            yield from _strings(v)
+
+
+def test_sidebars_are_lifted(source):
+    """A sidebar is its own heading + paragraphs, never glued into the text it interrupts."""
+    for title, (name, rid) in SIDEBARS.items():
+        rec = next(r for r in source[name] if r["id"] == rid)
+        assert {f"### {title}", f"#### {title}"} & set(_strings(rec)), title
+    glued = [(name, r["id"], title) for name in DATASETS for r in source[name] for s in _strings(r)
+             for title in SIDEBARS if f"**{title}**" in s]
+    assert not glued, glued
+    # The paragraph the sidebar interrupted reads on; the sidebar follows it.
+    texts = [b.get("text") for b in next(r for r in source["rules"] if r["id"] == "playing-d20-tests")["blocks"]]
+    i = texts.index("#### Heroic Inspiration")
+    assert texts[i - 1] == ("You usually acquire Advantage or Disadvantage through the use of special "
+                            "abilities and actions. The GM can also decide that circumstances grant "
+                            "Advantage or impose Disadvantage.")
+    assert texts[i + 1].startswith("Sometimes the GM or a rule gives you Heroic Inspiration.")
+    assert texts[i + 2].startswith("**Only One at a Time.**")
+    feat = next(f for f in source["feats"] if f["id"] == "boon-of-truesight")
+    assert feat["blocks"][-1]["text"] == "**Truesight.** You have Truesight with a range of 60 feet."
+
+
+def test_spellcasting_rule_sections(source):
+    rules = {r["id"]: r for r in source["rules"]}
+    casting = rules["spells-casting-spells"]
+    assert casting["chapter"] == "Spells" and casting["source"]["page"] == 104
+    texts = [b.get("text") for b in casting["blocks"]]
+    for h in ["### Spell Level", "#### Spell Slots", "### Casting Time", "#### Longer Casting Times",
+              "### Range", "### Components", "#### Verbal (V)", "#### Material (M)", "### Duration",
+              "### Effects", "#### Targets", "#### Combining Spell Effects"]:
+        assert h in texts, h
+    assert ("**Concentration.** A duration that requires Concentration follows the Concentration "
+            "rules (see “Rules Glossary”).") in texts
+    # Run-in labels split as "Rituals" + "." start their own paragraph; formulas keep their tail.
+    assert any(t.startswith("**Rituals**. Certain spells") for t in texts)
+    assert "**Spell save DC** = 8 + your spellcasting ability modifier + your Proficiency Bonus" in texts
+    assert _table(casting, "Schools of Magic")["rows"][-1] == ["Transmutation", "Transforms creatures or objects"]
+    prep = _table(rules["spells-gaining-spells"], "Spell Preparation by Class")
+    assert prep["header"] == ["Class", "Change When You …", "Number of Spells"] and len(prep["rows"]) == 8
+    assert "spells-spell-descriptions" not in rules  # the spell list itself is the spells dataset
+
+
+def test_equipment_rule_sections(source):
+    rules = {r["id"]: r for r in source["rules"]}
+    eq = [r["id"] for r in source["rules"] if r["chapter"] == "Equipment"]
+    assert eq[0] == "equipment-intro" and eq[-1] == "equipment-scribing-spell-scrolls"
+    for rid in ["equipment-coins", "equipment-lifestyle-expenses", "equipment-food-drink-and-lodging",
+                "equipment-hirelings", "equipment-spellcasting", "equipment-magic-items",
+                "equipment-crafting-nonmagical-items", "equipment-brewing-potions-of-healing"]:
+        assert rid in eq, rid
+    food = _table(rules["equipment-food-drink-and-lodging"], "Food, Drink, and Lodging")
+    assert food["header"] == ["Item", "Cost"]
+    assert [r[0] for r in food["rows"]] == [
+        "Ale (mug)", "Bread (loaf)", "Cheese (wedge)",
+        "Inn Stay per Day", "Squalid", "Poor", "Modest", "Comfortable", "Wealthy", "Aristocratic",
+        "Meal", "Squalid", "Poor", "Modest", "Comfortable", "Wealthy", "Aristocratic",
+        "Wine (bottle)", "Common", "Fine"]
+    assert food["rows"][9] == ["Aristocratic", "4 GP"] and food["rows"][16] == ["Aristocratic", "6 SP"]
+    assert food["rows"][-1] == ["Fine", "10 GP"]
+    assert _table(rules["equipment-spellcasting"], "Spellcasting Services")["rows"][-1] == [
+        "9", "City only", "100,000 GP"]
+    assert _table(rules["equipment-scribing-spell-scrolls"], "Spell Scroll Costs")["rows"][-1] == [
+        "9", "120 days", "50,000 GP"]
+    # Item tables and entries already in the equipment datasets are not repeated.
+    titles = {t.get("title") for r in source["rules"] if r["chapter"] == "Equipment" for t in _tables(r)}
+    assert not titles & {"Weapons", "Armor", "Adventuring Gear", "Airborne and Waterborne Vehicles"}
+    weapons = [b.get("text") for b in rules["equipment-weapons"]["blocks"]]
+    assert "#### Finesse" not in weapons and "### Properties" in weapons
+
+
+def test_rule_sections_have_unique_names_and_no_empty_headings(source):
+    names = [r["name"] for r in source["rules"]]
+    assert len(names) == len(set(names))
+    for r in source["rules"]:
+        heads = [i for i, b in enumerate(r["blocks"]) if (b.get("text") or "").startswith("###")]
+        assert not heads or heads[-1] != len(r["blocks"]) - 1, r["id"]

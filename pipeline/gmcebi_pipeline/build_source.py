@@ -11,6 +11,7 @@ from .extract import load_lines
 from .fetch import DEFAULT_PATH, ensure_pdf
 from .license import check_product_identity
 from .models import Record
+from .structure import lift_sidebars
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "source"
@@ -43,7 +44,7 @@ def build(pdf: Path) -> dict[str, list[Record]]:
 
 
 def _parse(pdf: Path) -> dict[str, list[Record]]:
-    lines = load_lines(pdf)
+    lines = lift_sidebars(load_lines(pdf))
     rules, conditions = parse.parse_glossary(lines)
     classes, subclasses = parse.parse_classes(lines)
     backgrounds, species = parse.parse_origins(lines)

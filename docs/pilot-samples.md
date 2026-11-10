@@ -4,10 +4,10 @@
 
 ## Özet
 
-- Çevrilen benzersiz segment: **12139** (sözlükten doğrudan dolanlar hariç: 1871)
-- Veri kümesine göre (ilk geçtiği yer): monsters 2741, spells 2601, magic_items 2022, rules 1718, classes 1306, rules_glossary 704, equipment 344, subclasses 331, species 167, conditions 81, feats 72, weapon_properties 26, backgrounds 13, weapon_mastery 13
-- QC bulgusu olmayan: **12139**, bulgulu: **0** (inceleme kuyruğunda öne alınır)
-- Üretici: `claude-opus-5-5` 12075, `claude-opus-5-5+casefix` 64
+- Çevrilen benzersiz segment: **12513** (sözlükten doğrudan dolanlar hariç: 1975)
+- Veri kümesine göre (ilk geçtiği yer): monsters 2741, spells 2602, rules 2087, magic_items 2029, classes 1306, rules_glossary 704, equipment 344, subclasses 331, species 167, conditions 81, feats 70, weapon_properties 25, backgrounds 13, weapon_mastery 13
+- QC bulgusu olmayan: **12513**, bulgulu: **0** (inceleme kuyruğunda öne alınır)
+- Üretici: `claude-opus-5-5` 12449, `claude-opus-5-5+casefix` 64
 
 ## 20 rastgele örnek (tohum 7)
 

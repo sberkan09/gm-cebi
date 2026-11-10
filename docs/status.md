@@ -2,6 +2,28 @@
 
 Son güncelleme: 2026-11-09 (SRD içeriğinin tamamı Türkçe)
 
+## Kenar kutuları ve kalan SRD bölümleri (dal `claude/srd-remaining`, #19, #20)
+
+- Bölüm ortasındaki 15 kenar kutusu (GillSans 9 pt metin, 11 pt küçük büyük harf başlık) kestiği
+  paragraftan çıkarılıp bulunduğu alt bölümün sonuna "### / #### Başlık" olarak taşınıyor
+  (`lift_sidebars`). Kural bölümleri, Paladin ve Büyücü sınıf özellikleri, Doğruluk Lütfu hüneri ve
+  Hafif silah özelliği düzeldi.
+- **18 yeni kural bölümü** (toplam 52): Büyüler bölümünün başı (s. 104–106: büyü edinme, hazırlama,
+  büyü yapma kuralları) ve Ekipman bölümünün düzyazısı (sikkeler, silah/zırh/alet yetkinliği,
+  binekler ve taşıtlar, yaşam giderleri, yiyecek/konaklama tablosu, kiralık yardımcılar, büyü
+  hizmetleri, büyülü eşya kullanımı, zanaat, iksir ve parşömen). Ekipman veri kümelerinde zaten
+  bulunan eşya girdileri ve tabloları tekrarlanmıyor.
+- Formül satırları ("Spell save DC = …") kendi paragrafı; alt satırı ("+ Proficiency Bonus")
+  artık kaybolmuyor.
+- Çeviri: 76 yeni bölüm başlığı ve 7 yaşam tarzı düzeyi sözlüğe (başlıklar sözlükten doluyor);
+  379 segment toplu çeviri (4 parti, her biri QC'den temiz) ve AI düzeltme turu (18 segment: ör.
+  "Armor Class benefit" → "avantaj" Advantage terimiyle karışıyordu; "Massive Damage"de "artan
+  hasar" yerine "geriye kalan hasar").
+- Bağlam ad alanı: başlığı "Rarity" olan tablo sütunları nadirlik anahtarıyla ("Common" = Yaygın);
+  düz "Common" hücresi şarap kalitesi ("Sıradan"). Sözlük: "Dodge out of harm's way" Kaçınma eylemi
+  sayılmıyor, "unhealthy conditions" Durum terimi sayılmıyor.
+- Bellek: 14.488 segment, QC bulgusu 0. 52 kural bölümünün tamamı Türkçe; asset'ler 4,0 MB.
+
 ## Büyülü eşyalar ve kural bölümleri (dal `claude/magic-items`)
 
 - **258 büyülü eşya** (tür, nadirlik, uyumlanma, italik tür satırı, metin, tablolar ve gömülü stat

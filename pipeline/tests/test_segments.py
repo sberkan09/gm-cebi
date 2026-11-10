@@ -55,3 +55,13 @@ def test_context_namespaces():
     keys = {s.path: s.key for s in record_segments(mon, "monsters")}
     assert keys["details.Languages"] == segment_key("Giant", "lang")
     assert keys["creature_type"] == segment_key("Giant")
+
+
+def test_rarity_columns_use_the_rarity_namespace():
+    from gmcebi_pipeline.segments import record_segments, segment_key
+    rec = {"id": "x", "name": "X", "blocks": [
+        {"type": "table", "title": "", "header": ["Potion", "Rarity"], "rows": [["Potion of Healing", "Common"]]},
+        {"type": "table", "title": "", "header": ["Item", "Cost"], "rows": [["Common", "2 SP"]]}]}
+    keys = {s.path: s.key for s in record_segments(rec, "magic_items")}
+    assert keys["blocks.0.rows.0.1"] == segment_key("Common", "rarity")
+    assert keys["blocks.1.rows.0.0"] == segment_key("Common")

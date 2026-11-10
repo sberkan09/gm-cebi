@@ -522,7 +522,15 @@
    },
    {
     "type": "p",
-    "text": "**Calculating AC.** All creatures start with the same base AC calculation: **Base AC** = 10 + the creature’s Dexterity modifier A creature’s AC can then be modified by armor, magic items, spells, and more."
+    "text": "**Calculating AC.** All creatures start with the same base AC calculation:"
+   },
+   {
+    "type": "p",
+    "text": "**Base AC** = 10 + the creature’s Dexterity modifier"
+   },
+   {
+    "type": "p",
+    "text": "A creature’s AC can then be modified by armor, magic items, spells, and more."
    },
    {
     "type": "p",
@@ -550,7 +558,15 @@
    },
    {
     "type": "p",
-    "text": "You usually acquire Advantage or Disadvantage through the use of special abilities and actions. The **Heroic Inspiration** Sometimes the GM or a rule gives you Heroic Inspiration. If you have Heroic Inspiration, you can expend it to reroll any die immediately after rolling it, and you must use the new roll."
+    "text": "You usually acquire Advantage or Disadvantage through the use of special abilities and actions. The GM can also decide that circumstances grant Advantage or impose Disadvantage."
+   },
+   {
+    "type": "p",
+    "text": "#### Heroic Inspiration"
+   },
+   {
+    "type": "p",
+    "text": "Sometimes the GM or a rule gives you Heroic Inspiration. If you have Heroic Inspiration, you can expend it to reroll any die immediately after rolling it, and you must use the new roll."
    },
    {
     "type": "p",
@@ -562,7 +578,7 @@
    },
    {
     "type": "p",
-    "text": "Other rules might allow your character to gain Heroic Inspiration independent of the GM’s decision. For example, Human characters start each day with Heroic Inspiration. GM can also decide that circumstances grant Advantage or impose Disadvantage."
+    "text": "Other rules might allow your character to gain Heroic Inspiration independent of the GM’s decision. For example, Human characters start each day with Heroic Inspiration."
    },
    {
     "type": "p",
@@ -1135,7 +1151,15 @@
    },
    {
     "type": "p",
-    "text": "Interacting with objects is often simple to resolve. The player tells the GM that their character is doing something, such as moving a lever or opening **Marching Order** The adventurers should establish a marching order while they travel, whether indoors or outdoors. A marching order makes it easier to determine which characters are affected by traps, which ones can spot hidden enemies, and which ones are the closest to those enemies if a fight breaks out. You can change your marching order outside combat and record the order any way you like: write it down, for example, or arrange miniatures to show it. a door, and the GM describes what happens. Sometimes, however, rules govern what you can do with an object, as detailed in the following sections."
+    "text": "Interacting with objects is often simple to resolve. The player tells the GM that their character is doing something, such as moving a lever or opening a door, and the GM describes what happens. Sometimes, however, rules govern what you can do with an object, as detailed in the following sections."
+   },
+   {
+    "type": "p",
+    "text": "#### Marching Order"
+   },
+   {
+    "type": "p",
+    "text": "The adventurers should establish a marching order while they travel, whether indoors or outdoors. A marching order makes it easier to determine which characters are affected by traps, which ones can spot hidden enemies, and which ones are the closest to those enemies if a fight breaks out. You can change your marching order outside combat and record the order any way you like: write it down, for example, or arrange miniatures to show it."
    },
    {
     "type": "p",
@@ -1281,7 +1305,15 @@
    },
    {
     "type": "p",
-    "text": "Travelers in wagons, carriages, or other land vehicles choose a pace as normal. Characters in a waterborne vessel are limited to the speed of the vessel, and they don’t choose a travel pace. Depending on the vessel and the size of the crew, ships might be able to travel for up to 24 hours per day. “Equipment” includes vehicles for sale. **Playing on a Grid** If you play using a square grid and miniatures or other tokens, follow these rules."
+    "text": "Travelers in wagons, carriages, or other land vehicles choose a pace as normal. Characters in a waterborne vessel are limited to the speed of the vessel, and they don’t choose a travel pace. Depending on the vessel and the size of the crew, ships might be able to travel for up to 24 hours per day. “Equipment” includes vehicles for sale."
+   },
+   {
+    "type": "p",
+    "text": "#### Playing on a Grid"
+   },
+   {
+    "type": "p",
+    "text": "If you play using a square grid and miniatures or other tokens, follow these rules."
    },
    {
     "type": "p",
@@ -1398,15 +1430,7 @@
    },
    {
     "type": "p",
-    "text": "If you want to interact with a second object, you need to take the Utilize action. Some magic items and other special objects always require an action to use, as stated in their descriptions. **Unseen Attackers and Targets** When you make an attack roll against a target you can’t see, you have Disadvantage on the roll. This is true whether you’re guessing the target’s location or targeting a creature you can hear but not see. If the target isn’t in the location you targeted, you miss."
-   },
-   {
-    "type": "p",
-    "text": "When a creature can’t see you, you have Advantage on attack rolls against it."
-   },
-   {
-    "type": "p",
-    "text": "If you are hidden when you make an attack roll, you give away your location when the attack hits or misses."
+    "text": "If you want to interact with a second object, you need to take the Utilize action. Some magic items and other special objects always require an action to use, as stated in their descriptions."
    },
    {
     "type": "p",
@@ -1415,6 +1439,22 @@
    {
     "type": "p",
     "text": "**Doing Nothing on Your Turn.** You can forgo moving, taking an action, or doing anything at all on your turn. If you can’t decide what to do, consider taking the defensive Dodge action or the Ready action to delay acting."
+   },
+   {
+    "type": "p",
+    "text": "#### Unseen Attackers and Targets"
+   },
+   {
+    "type": "p",
+    "text": "When you make an attack roll against a target you can’t see, you have Disadvantage on the roll. This is true whether you’re guessing the target’s location or targeting a creature you can hear but not see. If the target isn’t in the location you targeted, you miss."
+   },
+   {
+    "type": "p",
+    "text": "When a creature can’t see you, you have Advantage on attack rolls against it."
+   },
+   {
+    "type": "p",
+    "text": "If you are hidden when you make an attack roll, you give away your location when the attack hits or misses."
    },
    {
     "type": "p",
@@ -1678,7 +1718,15 @@
    },
    {
     "type": "p",
-    "text": "During your move, you can mount a creature that is within 5 feet of you or dismount. Doing so costs an amount of movement equal to half your Speed (round down). For example, if your Speed is 30 feet, you spend 15 feet of movement to mount a horse. **Resting** Adventurers can’t spend every hour adventuring. They need rest. Any creature can take hour-long Short Rests in the midst of a day and an 8-hour Long Rest to end it. Regaining Hit Points is one of the main benefits of a rest. “Rules Glossary” provides the rules for Short and Long Rests."
+    "text": "During your move, you can mount a creature that is within 5 feet of you or dismount. Doing so costs an amount of movement equal to half your Speed (round down). For example, if your Speed is 30 feet, you spend 15 feet of movement to mount a horse."
+   },
+   {
+    "type": "p",
+    "text": "#### Resting"
+   },
+   {
+    "type": "p",
+    "text": "Adventurers can’t spend every hour adventuring. They need rest. Any creature can take hour-long Short Rests in the midst of a day and an 8-hour Long Rest to end it. Regaining Hit Points is one of the main benefits of a rest. “Rules Glossary” provides the rules for Short and Long Rests."
    },
    {
     "type": "p",
@@ -1823,7 +1871,15 @@
    },
    {
     "type": "p",
-    "text": "Each instance of damage has a type, like Fire or Slashing. Damage types are listed in “Rules **Knocking Out a Creature** When you would reduce a creature to 0 Hit Points with a melee attack, you can instead reduce the creature to 1 Hit Point and give it the Unconscious condition. It then starts a Short Rest, at the end of which that condition ends on it. The condition ends early if the creature regains any Hit Points or if someone takes an action to administer first aid to it, making a successful DC 10 Wisdom (Medicine) check. Glossary” and have no rules of their own, but other rules, such as Resistance, rely on damage types."
+    "text": "Each instance of damage has a type, like Fire or Slashing. Damage types are listed in “Rules Glossary” and have no rules of their own, but other rules, such as Resistance, rely on damage types."
+   },
+   {
+    "type": "p",
+    "text": "#### Knocking Out a Creature"
+   },
+   {
+    "type": "p",
+    "text": "When you would reduce a creature to 0 Hit Points with a melee attack, you can instead reduce the creature to 1 Hit Point and give it the Unconscious condition. It then starts a Short Rest, at the end of which that condition ends on it. The condition ends early if the creature regains any Hit Points or if someone takes an action to administer first aid to it, making a successful DC 10 Wisdom (Medicine) check."
    },
    {
     "type": "p",
@@ -2721,7 +2777,7 @@
    },
    {
     "type": "p",
-    "text": "**Neutral (N).** Neutral is the alignment of those who prefer to avoid moral questions and don’t take sides, **Unaligned Creatures** Most creatures that lack the capacity for rational thought don’t have alignments; they are unaligned. Sharks are savage predators, for example, but they aren’t evil; they are unaligned. doing what seems best at the time. Someone who’s bored by moral debate is probably Neutral."
+    "text": "**Neutral (N).** Neutral is the alignment of those who prefer to avoid moral questions and don’t take sides, doing what seems best at the time. Someone who’s bored by moral debate is probably Neutral."
    },
    {
     "type": "p",
@@ -2738,6 +2794,14 @@
    {
     "type": "p",
     "text": "**Chaotic Evil (CE).** Chaotic Evil creatures act with arbitrary violence, spurred by their hatred or bloodlust. A villain pursuing schemes of vengeance and havoc is probably Chaotic Evil."
+   },
+   {
+    "type": "p",
+    "text": "#### Unaligned Creatures"
+   },
+   {
+    "type": "p",
+    "text": "Most creatures that lack the capacity for rational thought don’t have alignments; they are unaligned. Sharks are savage predators, for example, but they aren’t evil; they are unaligned."
    },
    {
     "type": "p",
@@ -2777,11 +2841,11 @@
    },
    {
     "type": "p",
-    "text": "**Passive Perception.** Sometimes your GM will determine whether your character notices something without asking you to make a Wisdom (Perception) check; the GM uses your Passive Perception instead. Passive Perception is a score that reflects a general awareness of your surroundings when you’re not actively looking for something. Use this formula to determine your Passive Perception score: **Passive Perception** = 10 + Wisdom (Perception)"
+    "text": "**Passive Perception.** Sometimes your GM will determine whether your character notices something without asking you to make a Wisdom (Perception) check; the GM uses your Passive Perception instead. Passive Perception is a score that reflects a general awareness of your surroundings when you’re not actively looking for something. Use this formula to determine your Passive Perception score:"
    },
    {
     "type": "p",
-    "text": "- check modifier"
+    "text": "**Passive Perception** = 10 + Wisdom (Perception) check modifier"
    },
    {
     "type": "p",
@@ -2835,19 +2899,15 @@
    },
    {
     "type": "p",
-    "text": "**Attacks.** In the Weapons & Damage Cantrips section of the character sheet, write your starting weapons. The attack roll bonus for a weapon with which you have proficiency is one of the following unless a weapon’s property says otherwise: **Melee attack bonus** = Strength modifier"
+    "text": "**Attacks.** In the Weapons & Damage Cantrips section of the character sheet, write your starting weapons. The attack roll bonus for a weapon with which you have proficiency is one of the following unless a weapon’s property says otherwise:"
    },
    {
     "type": "p",
-    "text": "- + Proficiency Bonus"
+    "text": "**Melee attack bonus** = Strength modifier + Proficiency Bonus"
    },
    {
     "type": "p",
-    "text": "**Ranged attack bonus** = Dexterity modifier"
-   },
-   {
-    "type": "p",
-    "text": "- + Proficiency Bonus"
+    "text": "**Ranged attack bonus** = Dexterity modifier + Proficiency Bonus"
    },
    {
     "type": "p",
@@ -2855,19 +2915,15 @@
    },
    {
     "type": "p",
-    "text": "**Spellcasting.** Note both the saving throw DC for your spells and the attack bonus for attacks you make with them, using these formulas: **Spell save DC** = 8 + spellcasting ability modifier"
+    "text": "**Spellcasting.** Note both the saving throw DC for your spells and the attack bonus for attacks you make with them, using these formulas:"
    },
    {
     "type": "p",
-    "text": "- + Proficiency Bonus"
+    "text": "**Spell save DC** = 8 + spellcasting ability modifier + Proficiency Bonus"
    },
    {
     "type": "p",
-    "text": "**Spell attack bonus** = spellcasting ability modifier"
-   },
-   {
-    "type": "p",
-    "text": "- + Proficiency Bonus"
+    "text": "**Spell attack bonus** = spellcasting ability modifier + Proficiency Bonus"
    },
    {
     "type": "p",
@@ -3073,7 +3129,15 @@
    },
    {
     "type": "p",
-    "text": "With each new level, characters acquire new capabilities that equip them to handle greater challenges. As characters advance in level, the tone of the game also changes, and the stakes of the campaign get higher. It’s helpful to think of a character’s (and a campaign’s) arc in terms of four tiers of play, **Bonus Feats at Level 20** A GM can use feats as a form of advancement after characters reach level 20 to provide greater power to characters who have no more levels to gain. With this approach, each character gains one feat of their choice for every 30,000 XP the character earns above 355,000 XP. Epic Boon feats are especially appropriate for these bonus feats, but a player can choose any feat for which their level 20 character qualifies. describing the journey from a level 1 character just beginning an adventuring career to the epic heights of level 20. These tiers don’t have any rules associated with them; they point to the fact that the play experience evolves as characters gain levels."
+    "text": "With each new level, characters acquire new capabilities that equip them to handle greater challenges. As characters advance in level, the tone of the game also changes, and the stakes of the campaign get higher. It’s helpful to think of a character’s (and a campaign’s) arc in terms of four tiers of play, describing the journey from a level 1 character just beginning an adventuring career to the epic heights of level 20. These tiers don’t have any rules associated with them; they point to the fact that the play experience evolves as characters gain levels."
+   },
+   {
+    "type": "p",
+    "text": "#### Bonus Feats at Level 20"
+   },
+   {
+    "type": "p",
+    "text": "A GM can use feats as a form of advancement after characters reach level 20 to provide greater power to characters who have no more levels to gain. With this approach, each character gains one feat of their choice for every 30,000 XP the character earns above 355,000 XP. Epic Boon feats are especially appropriate for these bonus feats, but a player can choose any feat for which their level 20 character qualifies."
    },
    {
     "type": "p",
@@ -4011,6 +4075,1425 @@
       "A metal urn containing the ashes of a hero"
      ]
     ]
+   }
+  ]
+ },
+ {
+  "id": "equipment-intro",
+  "name": "Equipment",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 89,
+   "heading": [
+    "Equipment"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "### Selling Equipment"
+   },
+   {
+    "type": "p",
+    "text": "Equipment fetches half its cost when sold. In contrast, trade goods and valuables—like gems and art objects—retain their full value in the marketplace. “Magic Items” has prices for magic items."
+   }
+  ]
+ },
+ {
+  "id": "equipment-coins",
+  "name": "Coins",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 89,
+   "heading": [
+    "Equipment",
+    "Coins"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "Characters often find coins on their adventures and can spend those coins in shops, inns, and other businesses. Coins come in different denominations based on the relative worth of their material. The Coin Values table lists coins and how much they’re worth relative to the Gold Piece, which is the game’s main coin. For example, 100 Copper Pieces are worth 1 Gold Piece."
+   },
+   {
+    "type": "p",
+    "text": "A coin weighs about a third of an ounce, so fifty coins weigh a pound."
+   },
+   {
+    "type": "table",
+    "title": "Coin Values",
+    "header": [
+     "Coin",
+     "Value in GP"
+    ],
+    "rows": [
+     [
+      "Copper Piece (CP)",
+      "1/100"
+     ],
+     [
+      "Silver Piece (SP)",
+      "1/10"
+     ],
+     [
+      "Electrum Piece (EP)",
+      "1/2"
+     ],
+     [
+      "Gold Piece (GP)",
+      "1"
+     ],
+     [
+      "Platinum Piece (PP)",
+      "10"
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "id": "equipment-weapons",
+  "name": "Weapons",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 89,
+   "page_end": 90,
+   "heading": [
+    "Equipment",
+    "Weapons"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "The Weapons table in this section shows the game’s main weapons. The table lists the cost and weight of each weapon, as well as the following details:"
+   },
+   {
+    "type": "p",
+    "text": "**Category.** Every weapon falls into a category: Simple or Martial. Weapon proficiencies are usually tied to one of these categories. For example, you might have proficiency with Simple weapons."
+   },
+   {
+    "type": "p",
+    "text": "**Melee or Ranged.** A weapon is classified as either Melee or Ranged. A Melee weapon is used to attack a target within 5 feet, whereas a Ranged weapon is used to attack at a greater distance."
+   },
+   {
+    "type": "p",
+    "text": "**Damage.** The table lists the amount of damage a weapon deals when an attacker hits with it as well as the type of that damage."
+   },
+   {
+    "type": "p",
+    "text": "**Properties.** Any properties a weapon has are listed in the Properties column. Each property is defined in the “Properties” section."
+   },
+   {
+    "type": "p",
+    "text": "**Mastery.** Each weapon has a mastery property, which is defined in the “Mastery Properties” section. To use that property, you must have a feature that lets you use it."
+   },
+   {
+    "type": "p",
+    "text": "### Weapon Proficiency"
+   },
+   {
+    "type": "p",
+    "text": "Anyone can wield a weapon, but you must have proficiency with it to add your Proficiency Bonus to an attack roll you make with it. A player character’s features can provide weapon proficiencies. A monster is proficient with any weapon in its stat block."
+   },
+   {
+    "type": "p",
+    "text": "### Properties"
+   },
+   {
+    "type": "p",
+    "text": "Here are definitions of the properties in the Properties column of the Weapons table."
+   },
+   {
+    "type": "p",
+    "text": "#### Improvised Weapons"
+   },
+   {
+    "type": "p",
+    "text": "If you use an object—such as a table leg, frying pan, or bottle—as a makeshift weapon, see “Improvised Weapons” in “Rules Glossary.” Also see those rules if you wield a weapon in an unusual way, such as using a Ranged weapon to make a melee attack."
+   },
+   {
+    "type": "p",
+    "text": "### Mastery Properties"
+   },
+   {
+    "type": "p",
+    "text": "Each weapon has a mastery property, which is usable only by a character who has a feature, such as Weapon Mastery, that unlocks the property for the character. The properties are defined below."
+   }
+  ]
+ },
+ {
+  "id": "equipment-armor",
+  "name": "Armor",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 92,
+   "heading": [
+    "Equipment",
+    "Armor"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "The Armor table lists the game’s main armor. The table includes the cost and weight of armor, as well as the following details:"
+   },
+   {
+    "type": "p",
+    "text": "**Category.** Every type of armor falls into a category: Light, Medium, or Heavy. The category determines how long it takes to don or doff the armor (as shown in the table)."
+   },
+   {
+    "type": "p",
+    "text": "**Armor Class (AC).** The table’s Armor Class column tells you what your base AC is when you wear a type of armor. For example, if you wear Leather Armor, your base AC is 11 plus your Dexterity modifier, whereas your AC is 16 in Chain Mail."
+   },
+   {
+    "type": "p",
+    "text": "**Strength.** If the table shows a Strength score in the Strength column for an armor type, that armor reduces the wearer’s speed by 10 feet unless the wearer has a Strength score equal to or higher than the listed score."
+   },
+   {
+    "type": "p",
+    "text": "**Stealth.** If the table shows “Disadvantage” in the Stealth column for an armor type, the wearer has Disadvantage on Dexterity (Stealth) checks."
+   },
+   {
+    "type": "p",
+    "text": "### Armor Training"
+   },
+   {
+    "type": "p",
+    "text": "Anyone can don armor or hold a Shield, but only those with training can use them effectively, as explained below. A character’s class and other features determine the character’s armor training. A monster has training with any armor in its stat block."
+   },
+   {
+    "type": "p",
+    "text": "#### Light, Medium, or Heavy Armor"
+   },
+   {
+    "type": "p",
+    "text": "If you wear Light, Medium, or Heavy armor and lack training with it, you have Disadvantage on any D20 Test that involves Strength or Dexterity, and you can’t cast spells."
+   },
+   {
+    "type": "p",
+    "text": "#### Shield"
+   },
+   {
+    "type": "p",
+    "text": "You gain the Armor Class benefit of a Shield only if you have training with it."
+   },
+   {
+    "type": "p",
+    "text": "### One at a Time"
+   },
+   {
+    "type": "p",
+    "text": "A creature can wear only one suit of armor at a time and wield only one Shield at a time."
+   }
+  ]
+ },
+ {
+  "id": "equipment-tools",
+  "name": "Tools",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 93,
+   "page_end": 94,
+   "heading": [
+    "Equipment",
+    "Tools"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "A tool helps you make specialized ability checks, craft certain items, or both. A tool’s description includes the tool’s cost and weight, as well as the following entries:"
+   },
+   {
+    "type": "p",
+    "text": "**Ability.** This entry lists the ability to use when making an ability check with the tool."
+   },
+   {
+    "type": "p",
+    "text": "**Utilize.** This entry lists things you can do with the tool when you take the Utilize action. You can do one of those things each time you take the action. This entry also provides the DC for the action."
+   },
+   {
+    "type": "p",
+    "text": "**Craft.** This entry lists what, if anything, you can craft with the tool. For crafting rules, see “Crafting Nonmagical Items,” “Brewing Potions of Healing,” and “Scribing Spell Scrolls” later in “Equipment.”"
+   },
+   {
+    "type": "p",
+    "text": "**Variants.** This entry appears if the tool has variants, which are listed. Each requires a separate proficiency."
+   },
+   {
+    "type": "p",
+    "text": "### Tool Proficiency"
+   },
+   {
+    "type": "p",
+    "text": "If you have proficiency with a tool, add your Proficiency Bonus to any ability check you make that uses the tool. If you have proficiency in a skill that’s used with that check, you have Advantage on the check too."
+   },
+   {
+    "type": "p",
+    "text": "Your features might give you proficiency with a tool. A monster has proficiency with any tool in its stat block."
+   },
+   {
+    "type": "p",
+    "text": "### Artisan’s Tools"
+   },
+   {
+    "type": "p",
+    "text": "Artisan’s Tools are each focused on crafting items and pursuing a trade. Each of these tools requires a separate proficiency."
+   }
+  ]
+ },
+ {
+  "id": "equipment-adventuring-gear",
+  "name": "Adventuring Gear",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 94,
+   "page_end": 95,
+   "heading": [
+    "Equipment",
+    "Adventuring Gear"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "The Adventuring Gear table in this section includes gear that adventurers often find useful. These items are described here in alphabetical order, with an item’s price appearing after its name."
+   }
+  ]
+ },
+ {
+  "id": "equipment-mounts-and-vehicles",
+  "name": "Mounts and Vehicles",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 100,
+   "page_end": 101,
+   "heading": [
+    "Equipment",
+    "Mounts and Vehicles"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "A mount can help you move more quickly through the wilderness, but its primary purpose is to carry gear that would otherwise slow you down. The Mounts and Other Animals table shows each animal’s carrying capacity. See “Monsters” for the animals’ stat blocks."
+   },
+   {
+    "type": "p",
+    "text": "### Mounts and Cargo"
+   },
+   {
+    "type": "p",
+    "text": "An animal pulling a carriage, cart, chariot, sled, or wagon can move weight up to five times its base carrying capacity, including the weight of the vehicle. If multiple animals pull the same vehicle, add their carrying capacities together."
+   },
+   {
+    "type": "p",
+    "text": "### Barding"
+   },
+   {
+    "type": "p",
+    "text": "Barding is armor designed for a mount. Any type of armor on the Armor table in “Equipment” can be purchased as barding. The cost is four times the normal cost, and it weighs twice as much."
+   },
+   {
+    "type": "p",
+    "text": "### Saddles"
+   },
+   {
+    "type": "p",
+    "text": "A saddle comes with a bit, a bridle, reins, and any other equipment needed to use the saddle. A Military Saddle gives Advantage on any ability check you make to remain mounted. An Exotic Saddle is required for riding an aquatic or a flying mount."
+   },
+   {
+    "type": "p",
+    "text": "### Large Vehicles"
+   },
+   {
+    "type": "p",
+    "text": "The Airborne and Waterborne Vehicles table provides statistics for various types of large vehicles. The following notes apply."
+   },
+   {
+    "type": "p",
+    "text": "#### Speed"
+   },
+   {
+    "type": "p",
+    "text": "A ship sailing against a strong wind moves at half speed. In a dead calm (no wind), waterborne ships can’t move under sail and must be rowed. Keelboats and Rowboats are used on lakes and rivers. If going downstream, add the speed of the current (typically 3 miles per hour) to the speed of the vehicle. These vehicles can’t be rowed against any significant current, but they can be pulled upstream by draft animals on the shores. A Rowboat can be carried and weighs 100 pounds."
+   },
+   {
+    "type": "p",
+    "text": "#### Crew"
+   },
+   {
+    "type": "p",
+    "text": "A ship larger than a Keelboat or Rowboat needs a crew of skilled hirelings (see “Hirelings” later in “Equipment”) to function. The minimum number of skilled hirelings needed to crew a ship depends on the type of ship, as shown in the table."
+   },
+   {
+    "type": "p",
+    "text": "#### Passengers"
+   },
+   {
+    "type": "p",
+    "text": "The table lists the number of Small and Medium passengers the ship can accommodate using hammocks. A ship outfitted with private accommodations can carry one-fifth as many passengers. A passenger usually pays 5 SP per day for a hammock, but prices can vary from ship to ship. A small private cabin usually costs 2 GP per day."
+   },
+   {
+    "type": "p",
+    "text": "#### Damage Threshold"
+   },
+   {
+    "type": "p",
+    "text": "If a vehicle has a damage threshold (see “Rules Glossary”), it’s noted in the table."
+   },
+   {
+    "type": "p",
+    "text": "#### Ship Repair"
+   },
+   {
+    "type": "p",
+    "text": "Repairs to a damaged ship can be made while the vessel is berthed. Repairing 1 Hit Point of damage requires 1 day and costs 20 GP for materials and labor. If the repairs are made in a location where supplies and skilled labor are abundant, such as a city shipyard, the repair time and cost are halved."
+   }
+  ]
+ },
+ {
+  "id": "equipment-lifestyle-expenses",
+  "name": "Lifestyle Expenses",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 101,
+   "heading": [
+    "Equipment",
+    "Lifestyle Expenses"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "Lifestyle expenses summarize the cost of living in a fantasy world. They cover lodging, food, equipment maintenance, and other necessities."
+   },
+   {
+    "type": "p",
+    "text": "At the start of each week or month (GM’s choice), choose a lifestyle below—Wretched, Squalid, Poor, Modest, Comfortable, Wealthy, or Aristocratic—and pay the price to sustain that lifestyle."
+   },
+   {
+    "type": "p",
+    "text": "Lifestyles have no inherent consequences, but the GM might take them into account when determining risks or how others perceive your character."
+   },
+   {
+    "type": "p",
+    "text": "### Wretched (Free)"
+   },
+   {
+    "type": "p",
+    "text": "You survive via chance and charity. You’re often exposed to natural dangers as a result of sleeping outside."
+   },
+   {
+    "type": "p",
+    "text": "### Squalid (1 SP per Day)"
+   },
+   {
+    "type": "p",
+    "text": "You spend the bare minimum for your necessities. You might be exposed to unhealthy conditions and opportunistic criminals."
+   },
+   {
+    "type": "p",
+    "text": "### Poor (2 SP per Day)"
+   },
+   {
+    "type": "p",
+    "text": "You spend frugally for your necessities."
+   },
+   {
+    "type": "p",
+    "text": "### Modest (1 GP per Day)"
+   },
+   {
+    "type": "p",
+    "text": "You support yourself at an average level."
+   },
+   {
+    "type": "p",
+    "text": "### Comfortable (2 GP per Day)"
+   },
+   {
+    "type": "p",
+    "text": "You spend modestly for your necessities and enjoy a few luxuries."
+   },
+   {
+    "type": "p",
+    "text": "### Wealthy (4 GP per Day)"
+   },
+   {
+    "type": "p",
+    "text": "You’re accustomed to the finer things in life and might have servants."
+   },
+   {
+    "type": "p",
+    "text": "### Aristocratic (10 GP per Day)"
+   },
+   {
+    "type": "p",
+    "text": "You pay for the best and might have a staff that supports your lifestyle. Others notice your wealth and might encourage you to share it, either legally or otherwise."
+   }
+  ]
+ },
+ {
+  "id": "equipment-food-drink-and-lodging",
+  "name": "Food, Drink, and Lodging",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 101,
+   "page_end": 102,
+   "heading": [
+    "Equipment",
+    "Food, Drink, and Lodging"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "The Food, Drink, and Lodging table gives prices for food and a single night’s lodging. Prices for daily lodging and meals are included in your lifestyle’s expenses."
+   },
+   {
+    "type": "table",
+    "title": "Food, Drink, and Lodging",
+    "header": [
+     "Item",
+     "Cost"
+    ],
+    "rows": [
+     [
+      "Ale (mug)",
+      "4 CP"
+     ],
+     [
+      "Bread (loaf)",
+      "2 CP"
+     ],
+     [
+      "Cheese (wedge)",
+      "1 SP"
+     ],
+     [
+      "Inn Stay per Day",
+      ""
+     ],
+     [
+      "Squalid",
+      "7 CP"
+     ],
+     [
+      "Poor",
+      "1 SP"
+     ],
+     [
+      "Modest",
+      "5 SP"
+     ],
+     [
+      "Comfortable",
+      "8 SP"
+     ],
+     [
+      "Wealthy",
+      "2 GP"
+     ],
+     [
+      "Aristocratic",
+      "4 GP"
+     ],
+     [
+      "Meal",
+      ""
+     ],
+     [
+      "Squalid",
+      "1 CP"
+     ],
+     [
+      "Poor",
+      "2 CP"
+     ],
+     [
+      "Modest",
+      "1 SP"
+     ],
+     [
+      "Comfortable",
+      "2 SP"
+     ],
+     [
+      "Wealthy",
+      "3 SP"
+     ],
+     [
+      "Aristocratic",
+      "6 SP"
+     ],
+     [
+      "Wine (bottle)",
+      ""
+     ],
+     [
+      "Common",
+      "2 SP"
+     ],
+     [
+      "Fine",
+      "10 GP"
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "id": "equipment-hirelings",
+  "name": "Hirelings",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 102,
+   "heading": [
+    "Equipment",
+    "Hirelings"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "Skilled hirelings include anyone hired to perform a service that involves a proficiency (including weapon, tool, or skill): a mercenary, an artisan, a scribe, or the like. The pay shown on the Hirelings table is a minimum; some expert hirelings require more pay. Untrained hirelings are hired for work that requires no particular proficiencies; they include laborers and porters."
+   },
+   {
+    "type": "table",
+    "title": "Hirelings",
+    "header": [
+     "Service",
+     "Cost"
+    ],
+    "rows": [
+     [
+      "Skilled hireling",
+      "2 GP per day"
+     ],
+     [
+      "Untrained hireling",
+      "2 SP per day"
+     ],
+     [
+      "Messenger",
+      "2 CP per mile"
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "id": "equipment-spellcasting",
+  "name": "Spellcasting",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 102,
+   "heading": [
+    "Equipment",
+    "Spellcasting"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "Most settlements contain individuals who are willing to cast spells in exchange for payment. If a spell has expensive components, add the cost of those components to the cost listed in the Spellcasting Services table. The higher the level of a desired spell, the harder it is to find someone to cast it."
+   },
+   {
+    "type": "table",
+    "title": "Spellcasting Services",
+    "header": [
+     "Spell Level",
+     "Availability",
+     "Cost"
+    ],
+    "rows": [
+     [
+      "Cantrip",
+      "Village, town, or city",
+      "30 GP"
+     ],
+     [
+      "1",
+      "Village, town, or city",
+      "50 GP"
+     ],
+     [
+      "2",
+      "Village, town, or city",
+      "200 GP"
+     ],
+     [
+      "3",
+      "Town or city only",
+      "300 GP"
+     ],
+     [
+      "4–5",
+      "Town or city only",
+      "2,000 GP"
+     ],
+     [
+      "6–8",
+      "City only",
+      "20,000 GP"
+     ],
+     [
+      "9",
+      "City only",
+      "100,000 GP"
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "id": "equipment-magic-items",
+  "name": "Magic Items (Equipment)",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 102,
+   "page_end": 103,
+   "heading": [
+    "Equipment",
+    "Magic Items"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "Adventures hold the promise—but not a guarantee—of finding magic items. Hundreds of magic items are detailed in “Magic Items” later in this document. Here’s what you need to know about using magic items."
+   },
+   {
+    "type": "p",
+    "text": "### Identifying a Magic Item"
+   },
+   {
+    "type": "p",
+    "text": "Some magic items are indistinguishable from their nonmagical counterparts, while others are conspicuously magical. Handling a magic item is enough to give you a sense that it is extraordinary, but learning a magic item’s properties isn’t automatic."
+   },
+   {
+    "type": "p",
+    "text": "The *Identify* spell is the fastest way to reveal an item’s properties. Alternatively, you can focus on one magic item during a Short Rest while being in physical contact with the item. At the end of the rest, you learn its properties and how to use them (but not any curse the item might bear)."
+   },
+   {
+    "type": "p",
+    "text": "Sometimes a magic item carries a clue to its properties. The command word to activate a ring might be etched inside the band, or a feathered design might hint that it’s a *Ring of Feather Falling*."
+   },
+   {
+    "type": "p",
+    "text": "Wearing or experimenting with an item can also offer hints about its properties. In the specific case of Potions, a little taste is enough to tell the taster what a potion does. Other items might require more experimentation. For example, if your character puts on a *Ring of Swimming*, the GM might say, “Your movement feels strangely fluid.” Perhaps you then dive into a river to see what happens. The GM would then say you swim unexpectedly well."
+   },
+   {
+    "type": "p",
+    "text": "### Attunement"
+   },
+   {
+    "type": "p",
+    "text": "Some magic items require a creature to form a bond—called Attunement—with them before the creature can use an item’s magical properties. Without becoming attuned to an item that requires Attunement, you gain only its nonmagical benefits unless its description states otherwise. For example, a magic Shield that requires Attunement provides the benefits of a normal Shield if you aren’t attuned to it, but none of its magical properties."
+   },
+   {
+    "type": "p",
+    "text": "#### Attune during a Short Rest"
+   },
+   {
+    "type": "p",
+    "text": "Attuning to an item requires you to spend a Short Rest focused on only that item while being in physical contact with it (this can’t be the same Short Rest used to learn the item’s properties). This focus can take the form of weapon practice (for a Weapon), meditation (for a Wand), or some other appropriate activity. If the Short Rest is interrupted, the Attunement attempt fails. Otherwise, at the end of the Short Rest, you’re attuned to the magic item and can access its full magical capabilities."
+   },
+   {
+    "type": "p",
+    "text": "#### No More Than Three Items"
+   },
+   {
+    "type": "p",
+    "text": "You can be attuned to no more than three magic items at a time. Any attempt to attune to a fourth item fails; you must end your Attunement to an item first. Additionally, you can’t attune to more than one copy of an item. For example, you can’t attune to more than one *Ring of Protection* at a time."
+   },
+   {
+    "type": "p",
+    "text": "#### Ending Attunement"
+   },
+   {
+    "type": "p",
+    "text": "Your Attunement to an item ends if you no longer satisfy the prerequisites for Attunement, if the item has been more than 100 feet away for at least 24 hours, if you die, or if another creature attunes to the item. You can also voluntarily end Attunement by spending another Short Rest focused on the item unless the item is cursed."
+   },
+   {
+    "type": "p",
+    "text": "### Wearing and Wielding Items"
+   },
+   {
+    "type": "p",
+    "text": "Using a magic item’s properties might mean wearing or wielding it. A magic item meant to be worn must be donned in the intended fashion: boots go on feet, gloves on hands, hats and helmets on a head, and rings on a finger. Magic armor must be donned, a Shield strapped to the arm, a cloak fastened about the shoulders. A weapon must be held."
+   },
+   {
+    "type": "p",
+    "text": "In most cases, a magic item that’s meant to be worn can fit a creature regardless of size or build. Magic garments are made to be easily adjustable, or they magically adjust themselves to the wearer."
+   },
+   {
+    "type": "p",
+    "text": "#### Multiple Items of the Same Kind"
+   },
+   {
+    "type": "p",
+    "text": "You can’t wear more than one of certain magic items. You can’t normally wear more than one pair of footwear, one pair of gloves or gauntlets, one pair of bracers, one suit of armor, one item of headwear, or one cloak. The GM might make exceptions."
+   },
+   {
+    "type": "p",
+    "text": "#### Paired Items"
+   },
+   {
+    "type": "p",
+    "text": "Items that come in pairs—such as boots, bracers, gauntlets, and gloves—impart their benefits only if both items of the pair are worn. For example, a character wearing a *Boot of Striding and Springing* on one foot and a *Boot of Elvenkind* on the other foot gains no benefit from either."
+   }
+  ]
+ },
+ {
+  "id": "equipment-crafting-nonmagical-items",
+  "name": "Crafting Nonmagical Items",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 103,
+   "heading": [
+    "Equipment",
+    "Crafting Nonmagical Items"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "To craft a nonmagical item, you need tools, raw materials, and time, each of which is detailed below. If you meet the requirements, you make the item, and you can use it or sell it at its normal price."
+   },
+   {
+    "type": "p",
+    "text": "### Tools"
+   },
+   {
+    "type": "p",
+    "text": "The “Tools” section of “Equipment” lists which tools are required to make certain items. The GM assigns required tools for items not listed there."
+   },
+   {
+    "type": "p",
+    "text": "You must use the required tool to make an item and have proficiency with that tool. Anyone who helps you must also have proficiency with it."
+   },
+   {
+    "type": "p",
+    "text": "### Raw Materials"
+   },
+   {
+    "type": "p",
+    "text": "To make an item, you need raw materials worth half its purchase cost (round down). For example, you need 750 GP of raw materials to make Plate Armor, which sells for 1,500 GP. The GM determines whether appropriate raw materials are available."
+   },
+   {
+    "type": "p",
+    "text": "### Time"
+   },
+   {
+    "type": "p",
+    "text": "To determine how many days (working 8 hours a day) it takes to make an item, divide its purchase cost in GP by 10 (round a fraction up to a day). For example, you need 5 days to make a Heavy Crossbow, which sells for 50 GP."
+   },
+   {
+    "type": "p",
+    "text": "If an item requires multiple days, the days needn’t be consecutive."
+   },
+   {
+    "type": "p",
+    "text": "Characters can combine their efforts to shorten the crafting time. Divide the time needed to create an item by the number of characters working on it. Normally, only one other character can assist you, but the GM might allow more assistants."
+   }
+  ]
+ },
+ {
+  "id": "equipment-brewing-potions-of-healing",
+  "name": "Brewing Potions of Healing",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 103,
+   "heading": [
+    "Equipment",
+    "Brewing Potions of Healing"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "A character who has proficiency with the Herbalism Kit can create a *Potion of Healing*. Doing so requires using that kit and 25 GP of raw material over the course of 1 day (8 hours of work)."
+   }
+  ]
+ },
+ {
+  "id": "equipment-scribing-spell-scrolls",
+  "name": "Scribing Spell Scrolls",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 103,
+   "heading": [
+    "Equipment",
+    "Scribing Spell Scrolls"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Equipment",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "A spellcaster can transfer a spell to a scroll and create a *Spell Scroll*, using the rules below."
+   },
+   {
+    "type": "p",
+    "text": "### Time and Cost"
+   },
+   {
+    "type": "p",
+    "text": "Scribing a scroll takes an amount of time and money based on the level of the spell, as shown in the Spell Scroll Costs table. For each day of inscription, you must work for 8 hours. If a scroll requires multiple days, those days needn’t be consecutive."
+   },
+   {
+    "type": "table",
+    "title": "Spell Scroll Costs",
+    "header": [
+     "Spell Level",
+     "Time",
+     "Cost"
+    ],
+    "rows": [
+     [
+      "Cantrip",
+      "1 day",
+      "15 GP"
+     ],
+     [
+      "1",
+      "1 day",
+      "25 GP"
+     ],
+     [
+      "2",
+      "3 days",
+      "100 GP"
+     ],
+     [
+      "3",
+      "5 days",
+      "150 GP"
+     ],
+     [
+      "4",
+      "10 days",
+      "1,000 GP"
+     ],
+     [
+      "5",
+      "25 days",
+      "1,500 GP"
+     ],
+     [
+      "6",
+      "40 days",
+      "10,000 GP"
+     ],
+     [
+      "7",
+      "50 days",
+      "12,500 GP"
+     ],
+     [
+      "8",
+      "60 days",
+      "15,000 GP"
+     ],
+     [
+      "9",
+      "120 days",
+      "50,000 GP"
+     ]
+    ]
+   },
+   {
+    "type": "p",
+    "text": "### Prerequisites for the Scribe"
+   },
+   {
+    "type": "p",
+    "text": "To scribe a scroll, you must have proficiency in the Arcana skill or with Calligrapher’s Supplies and have the spell prepared on each day of the inscription. You must also have at hand any Material components required by the spell; if the spell consumes its Material components, they are consumed only when you complete the scroll. The scroll’s spell uses your spell save DC and spell attack bonus."
+   },
+   {
+    "type": "p",
+    "text": "### Cantrips"
+   },
+   {
+    "type": "p",
+    "text": "If the scribed spell is a cantrip, the version on the scroll works as if the caster were your level."
+   }
+  ]
+ },
+ {
+  "id": "spells-intro",
+  "name": "Spells",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 104,
+   "heading": [
+    "Spells"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Spells",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "### Casting in Armor"
+   },
+   {
+    "type": "p",
+    "text": "You must have training with any armor you are wearing to cast spells while wearing it. You are otherwise too hampered by the armor for spellcasting."
+   }
+  ]
+ },
+ {
+  "id": "spells-gaining-spells",
+  "name": "Gaining Spells",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 104,
+   "heading": [
+    "Spells",
+    "Gaining Spells"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Spells",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "Before you can cast a spell, you must have the spell prepared in your mind or have access to the spell from a magic item, such as a *Spell Scroll*. Your features specify which spells you have access to, if any; whether you always have certain spells prepared; and whether you can change the list of spells you have prepared."
+   },
+   {
+    "type": "p",
+    "text": "### Preparing Spells"
+   },
+   {
+    "type": "p",
+    "text": "If you have a list of level 1+ spells you prepare, your spellcasting feature specifies when you can change the list and the number of spells you can change, as summarized in the Spell Preparation by Class table."
+   },
+   {
+    "type": "table",
+    "title": "Spell Preparation by Class",
+    "header": [
+     "Class",
+     "Change When You …",
+     "Number of Spells"
+    ],
+    "rows": [
+     [
+      "Bard",
+      "Gain a level",
+      "One"
+     ],
+     [
+      "Cleric",
+      "Finish a Long Rest",
+      "Any"
+     ],
+     [
+      "Druid",
+      "Finish a Long Rest",
+      "Any"
+     ],
+     [
+      "Paladin",
+      "Finish a Long Rest",
+      "One"
+     ],
+     [
+      "Ranger",
+      "Finish a Long Rest",
+      "One"
+     ],
+     [
+      "Sorcerer",
+      "Gain a level",
+      "One"
+     ],
+     [
+      "Warlock",
+      "Gain a level",
+      "One"
+     ],
+     [
+      "Wizard",
+      "Finish a Long Rest",
+      "Any"
+     ]
+    ]
+   },
+   {
+    "type": "p",
+    "text": "Most spellcasting monsters don’t change their lists of prepared spells, but the GM is free to alter them."
+   },
+   {
+    "type": "p",
+    "text": "### Always-Prepared Spells"
+   },
+   {
+    "type": "p",
+    "text": "Certain features might give you a spell that you always have prepared. If you also have a list of prepared spells that you can change, a spell that you always have prepared doesn’t count against the number of spells on that list."
+   }
+  ]
+ },
+ {
+  "id": "spells-casting-spells",
+  "name": "Casting Spells",
+  "source": {
+   "document": "SRD 5.2.1",
+   "page": 104,
+   "page_end": 106,
+   "heading": [
+    "Spells",
+    "Casting Spells"
+   ]
+  },
+  "kind": "rule_section",
+  "chapter": "Spells",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "Each spell description has a series of entries that provide the details needed to cast the spell. The following sections explain each of those entries, which follow a spell’s name."
+   },
+   {
+    "type": "p",
+    "text": "### Spell Level"
+   },
+   {
+    "type": "p",
+    "text": "Every spell has a level from 0 to 9, which is indicated in a spell’s description. A spell’s level is an indicator of how powerful it is. Cantrips—simple spells that can be cast almost by rote—are level 0. The rules for each spellcasting class say when its members gain access to spells of certain levels."
+   },
+   {
+    "type": "p",
+    "text": "#### Spell Slots"
+   },
+   {
+    "type": "p",
+    "text": "Spellcasting is taxing, so a spellcaster can cast only a limited number of level 1+ spells before resting. Spell slots are the main way a spellcaster’s magical potential is represented. Each spellcasting class gives its members a limited number of spell slots of certain spell levels. For example, a level 3 Wizard has four level 1 spell slots and two level 2 slots."
+   },
+   {
+    "type": "p",
+    "text": "When you cast a spell, you expend a slot of that spell’s level or higher, effectively “filling” a slot with the spell. Imagine a spell slot is a groove of a certain size—small for a level 1 slot and larger for a higher-level spell. A level 1 spell fits into a slot of any size, but a level 2 spell fits only into a slot that’s at least level 2. So when a level 3 Wizard casts *Magic Missile*, a level 1 spell, that Wizard spends one of four level 1 slots and has three remaining."
+   },
+   {
+    "type": "p",
+    "text": "Finishing a Long Rest restores any expended spell slots."
+   },
+   {
+    "type": "p",
+    "text": "#### Casting without Slots"
+   },
+   {
+    "type": "p",
+    "text": "There are several ways to cast a spell without expending a spell slot:"
+   },
+   {
+    "type": "p",
+    "text": "**Cantrips.** A cantrip is cast without a spell slot."
+   },
+   {
+    "type": "p",
+    "text": "**Rituals**. Certain spells have the Ritual tag in the Casting Time entry. Such a spell can be cast following the normal rules for spellcasting, or it can be cast as a Ritual. The Ritual version of a spell takes 10 minutes longer to cast than normal, but it doesn’t expend a spell slot. To cast a spell as a Ritual, a spellcaster must have it prepared."
+   },
+   {
+    "type": "p",
+    "text": "**Special Abilities.** Some characters and monsters have special abilities that allow them to cast specific spells without a spell slot. This casting is usually limited in another way, such as being able to cast the spell a limited number of times per day."
+   },
+   {
+    "type": "p",
+    "text": "**Magic Items.** *Spell Scrolls* and some other magic items contain spells that can be cast without a spell slot. The description of such an item specifies how many times a spell can be cast from it."
+   },
+   {
+    "type": "p",
+    "text": "#### Using a Higher-Level Spell Slot"
+   },
+   {
+    "type": "p",
+    "text": "When a spellcaster casts a spell using a slot that is of a higher level than the spell, the spell takes on the higher level for that casting. For instance, if a Wizard casts *Magic Missile* using a level 2 slot, that *Magic Missile* is level 2. Effectively, the spell expands to fill the slot it is put into."
+   },
+   {
+    "type": "p",
+    "text": "Some spells, such as *Magic Missile* and *Cure Wounds*, have more powerful effects when cast at a higher level, as detailed in a spell’s description."
+   },
+   {
+    "type": "p",
+    "text": "### School of Magic"
+   },
+   {
+    "type": "p",
+    "text": "Each spell belongs to a school of magic. The schools are listed in the Schools of Magic table. These categories help describe spells but have no rules of their own, although some other rules refer to them."
+   },
+   {
+    "type": "table",
+    "title": "Schools of Magic",
+    "header": [
+     "School",
+     "Typical Effects"
+    ],
+    "rows": [
+     [
+      "Abjuration",
+      "Prevents or reverses harmful effects"
+     ],
+     [
+      "Conjuration",
+      "Transports creatures or objects"
+     ],
+     [
+      "Divination",
+      "Reveals information"
+     ],
+     [
+      "Enchantment",
+      "Influences minds"
+     ],
+     [
+      "Evocation",
+      "Channels energy to create effects that are often destructive"
+     ],
+     [
+      "Illusion",
+      "Deceives the mind or senses"
+     ],
+     [
+      "Necromancy",
+      "Manipulates life and death"
+     ],
+     [
+      "Transmutation",
+      "Transforms creatures or objects"
+     ]
+    ]
+   },
+   {
+    "type": "p",
+    "text": "### Class Spell Lists"
+   },
+   {
+    "type": "p",
+    "text": "If a spell is on a class’s spell list, the class’s name appears in parentheses after the spell’s school of magic. Some features add a spell to a character’s spell list even if the character isn’t a member of a class in the parentheses."
+   },
+   {
+    "type": "p",
+    "text": "### Casting Time"
+   },
+   {
+    "type": "p",
+    "text": "Most spells require the Magic action to cast, but some spells require a Bonus Action, a Reaction, or 1 minute or more. A spell’s Casting Time entry specifies which of those is required."
+   },
+   {
+    "type": "p",
+    "text": "#### One Spell with a Spell Slot per Turn"
+   },
+   {
+    "type": "p",
+    "text": "On a turn, you can expend only one spell slot to cast a spell. This rule means you can’t, for example, cast a spell with a spell slot using the Magic action and another one using a Bonus Action on the same turn."
+   },
+   {
+    "type": "p",
+    "text": "#### Reaction and Bonus Action Triggers"
+   },
+   {
+    "type": "p",
+    "text": "A spell that has a casting time of a Reaction is cast in response to a trigger that is defined in the spell’s Casting Time entry. Some spells that have a casting time of a Bonus Action are also cast in response to a trigger defined in the spell."
+   },
+   {
+    "type": "p",
+    "text": "#### Longer Casting Times"
+   },
+   {
+    "type": "p",
+    "text": "Certain spells—including a spell cast as a Ritual—require more time to cast: minutes or even hours. While you cast a spell with a casting time of 1 minute or more, you must take the Magic action on each of your turns, and you must maintain Concentration (see “Rules Glossary”) while you do so. If your Concentration is broken, the spell fails, but you don’t expend a spell slot. To cast the spell again, you must start over."
+   },
+   {
+    "type": "p",
+    "text": "### Range"
+   },
+   {
+    "type": "p",
+    "text": "A spell’s range indicates how far from the spellcaster the spell’s effect can originate, and the spell’s description specifies which part of the effect is limited by the range."
+   },
+   {
+    "type": "p",
+    "text": "A range usually takes one of the following forms:"
+   },
+   {
+    "type": "p",
+    "text": "**Distance.** The range is expressed in feet."
+   },
+   {
+    "type": "p",
+    "text": "**Touch**. The spell’s effect originates on something, as defined by the spell, that the spellcaster must touch within their reach."
+   },
+   {
+    "type": "p",
+    "text": "**Self.** The spell is cast on the spellcaster or emanates from them, as specified in the spell. If a spell has movable effects, they aren’t restricted by its range unless the spell’s description says otherwise."
+   },
+   {
+    "type": "p",
+    "text": "### Components"
+   },
+   {
+    "type": "p",
+    "text": "A spell’s components are physical requirements the spellcaster must meet to cast the spell. Each spell’s description indicates whether it requires Verbal (V), Somatic (S), or Material (M) components. If the spellcaster can’t provide one or more of a spell’s components, the spellcaster can’t cast the spell."
+   },
+   {
+    "type": "p",
+    "text": "#### Verbal (V)"
+   },
+   {
+    "type": "p",
+    "text": "A Verbal component is the chanting of esoteric words that sound like nonsense to the uninitiated. The words must be uttered in a normal speaking voice. The words themselves aren’t the source of the spell’s power; rather, the particular combination of sounds, with specific pitch and resonance, sets the threads of magic in motion. Thus, a creature who is gagged or in an area of magical silence can’t cast a spell with a Verbal component."
+   },
+   {
+    "type": "p",
+    "text": "#### Somatic (S)"
+   },
+   {
+    "type": "p",
+    "text": "A Somatic component is a forceful gesticulation or an intricate set of gestures. A spellcaster must use at least one of their hands to perform these movements."
+   },
+   {
+    "type": "p",
+    "text": "#### Material (M)"
+   },
+   {
+    "type": "p",
+    "text": "A Material component is a particular material used in a spell’s casting, as specified in parentheses in the Components entry. These materials aren’t consumed by the spell unless the spell’s description states otherwise. The spellcaster must have a hand free to access them, but it can be the same hand used to perform Somatic components, if any."
+   },
+   {
+    "type": "p",
+    "text": "If a spell doesn’t consume its materials and doesn’t specify a cost for them, a spellcaster can use a Component Pouch (see “Equipment”) instead of providing the materials specified in the spell, or the spellcaster can substitute a Spellcasting Focus if the caster has a feature that allows that substitution. To use a Component Pouch, you must have a hand free to reach into it, and to use a Spellcasting Focus, you must hold it unless its description says otherwise (see “Equipment” for descriptions)."
+   },
+   {
+    "type": "p",
+    "text": "#### Identifying an Ongoing Spell"
+   },
+   {
+    "type": "p",
+    "text": "You can try to identify a non-instantaneous spell by its observable effects if its duration is ongoing. To identify it, you must take the Study action and succeed on a DC 15 Intelligence (Arcana) check."
+   },
+   {
+    "type": "p",
+    "text": "### Duration"
+   },
+   {
+    "type": "p",
+    "text": "A spell’s duration is the length of time the spell persists after it is cast. A duration typically takes one of the following forms:"
+   },
+   {
+    "type": "p",
+    "text": "**Concentration.** A duration that requires Concentration follows the Concentration rules (see “Rules Glossary”)."
+   },
+   {
+    "type": "p",
+    "text": "**Instantaneous.** An instantaneous duration means the spell’s magic appears only for a moment and then disappears."
+   },
+   {
+    "type": "p",
+    "text": "**Time Span.** A duration that provides a time span specifies how long the spell lasts in rounds, minutes, hours, or the like. For example, a Duration entry might say “1 minute,” meaning the spell ends after 1 minute has passed. While a time-span spell that you cast is ongoing, you can dismiss it (no action required) if you don’t have the Incapacitated condition."
+   },
+   {
+    "type": "p",
+    "text": "### Effects"
+   },
+   {
+    "type": "p",
+    "text": "The effects of a spell are detailed after its duration entry. Those details present exactly what the spell does, which ignores mundane physical laws; any outcomes beyond those effects are under the GM’s purview. Whatever the effects, they typically deal with targets, saving throws, attack rolls, or all three, each of which is detailed below."
+   },
+   {
+    "type": "p",
+    "text": "#### Targets"
+   },
+   {
+    "type": "p",
+    "text": "A typical spell requires the caster to pick one or more targets to be affected by the spell’s magic. A spell’s description says whether the spell targets creatures, objects, or something else."
+   },
+   {
+    "type": "p",
+    "text": "**A Clear Path to the Target.** To target something with a spell, a caster must have a clear path to it, so it can’t be behind Total Cover."
+   },
+   {
+    "type": "p",
+    "text": "**Targeting Yourself.** If a spell targets a creature of your choice, you can choose yourself unless the creature must be Hostile or specifically a creature other than you."
+   },
+   {
+    "type": "p",
+    "text": "**Areas of Effect.** Some spells, such as *Thunderwave*, cover an area called an area of effect, which is defined in “Rules Glossary.” The area determines what the spell targets. The description of a spell specifies whether it has an area of effect, which is typically one of these shapes: Cone, Cube, Cylinder, Emanation, Line, or Sphere."
+   },
+   {
+    "type": "p",
+    "text": "**Awareness of Being Targeted.** Unless a spell has a perceptible effect, a creature doesn’t know it was targeted by the spell. An effect like lightning is obvious, but a more subtle effect, such as an attempt to read thoughts, goes unnoticed unless a spell’s description says otherwise."
+   },
+   {
+    "type": "p",
+    "text": "**Invalid Targets.** If you cast a spell on someone or something that can’t be affected by it, nothing happens to that target, but if you used a spell slot to cast the spell, the slot is still expended."
+   },
+   {
+    "type": "p",
+    "text": "If the spell normally has no effect on a target that succeeds on a saving throw, the invalid target appears to have succeeded on its saving throw, even though it didn’t attempt one (giving no hint that the creature is an invalid target). Otherwise, you perceive that the spell did nothing to the target."
+   },
+   {
+    "type": "p",
+    "text": "#### Saving Throws"
+   },
+   {
+    "type": "p",
+    "text": "Many spells specify that a target makes a saving throw to avoid some or all of a spell’s effects. The spell specifies the ability that the target uses for the save and what happens on a success or failure. Here’s how to calculate the DC for your spells:"
+   },
+   {
+    "type": "p",
+    "text": "**Spell save DC** = 8 + your spellcasting ability modifier + your Proficiency Bonus"
+   },
+   {
+    "type": "p",
+    "text": "#### Attack Rolls"
+   },
+   {
+    "type": "p",
+    "text": "Some spells require the caster to make an attack roll to determine whether the spell hits a target. Here’s how to calculate the attack modifier for your spells:"
+   },
+   {
+    "type": "p",
+    "text": "**Spell attack modifier** = your spellcasting ability modifier + your Proficiency Bonus"
+   },
+   {
+    "type": "p",
+    "text": "#### Combining Spell Effects"
+   },
+   {
+    "type": "p",
+    "text": "The effects of different spells add together while their durations overlap. In contrast, the effects of the same spell cast multiple times don’t combine. Instead, the most potent effect—such as the highest bonus—from those castings applies while their durations overlap. The most recent effect applies if the castings are equally potent and their durations overlap. For example, if two Clerics cast *Bless* on the same target, that target gains the spell’s benefit only once; the target doesn’t receive two bonus dice. But if the durations of the spells overlap, the effect continues until the duration of the second *Bless* ends."
    }
   ]
  },
@@ -5694,7 +7177,15 @@
    },
    {
     "type": "p",
-    "text": "Unless its description notes otherwise, a rod can be used as an Arcane Focus. **Magic Item Rules** Rules for identifying, attuning to, and using magic items appear in “Equipment.” Additional rules are presented below."
+    "text": "Unless its description notes otherwise, a rod can be used as an Arcane Focus."
+   },
+   {
+    "type": "p",
+    "text": "#### Magic Item Rules"
+   },
+   {
+    "type": "p",
+    "text": "Rules for identifying, attuning to, and using magic items appear in “Equipment.” Additional rules are presented below."
    },
    {
     "type": "p",
