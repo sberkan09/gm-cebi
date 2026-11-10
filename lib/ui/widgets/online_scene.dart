@@ -245,7 +245,10 @@ class _SceneFormState extends ConsumerState<_SceneForm> {
         ),
         const SizedBox(height: 6),
         Text(
-          _mode == SceneMode.map ? 'Çizimin düzeni korunur, yukarıdan bakış.' : 'Daha serbest ve atmosferik; düzen birebir korunmaz.',
+          _mode == SceneMode.map
+              ? 'Çizimin düzeni korunur, yukarıdan bakış. Ağaçları küçük dairelerle çiz; nehri, suyu ve masa, '
+                  'sandalye gibi küçük eşyaları açıklamada da belirt.'
+              : 'Daha serbest ve atmosferik; düzen birebir korunmaz.',
           style: t.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
         ),
         const SizedBox(height: 12),
@@ -258,7 +261,7 @@ class _SceneFormState extends ConsumerState<_SceneForm> {
           textInputAction: TextInputAction.done,
           decoration: const InputDecoration(
             labelText: 'Sahneyi anlat (isteğe bağlı)',
-            hintText: 'Ör. Nehrin üzerinde ahşap bir köprü, kuzeyde sık bir orman',
+            hintText: 'Ör. İki kıyı arasında akan bir nehir, üzerinde ahşap bir köprü; kuzeyde sık bir orman',
             border: OutlineInputBorder(),
           ),
         ),

@@ -84,7 +84,7 @@ olarak işaretlenir ve ürün sahibine sorulur.
 
 - 2026-11-09 — Özellik isteğe bağlı ve derleme zamanında: yalnızca `NC_API_URL` + `NC_APP_TOKEN` verilen derlemelerde görünür; verilmezse arayüzde iz yok ve Android manifestinde İnternet izni yok (`src/online/AndroidManifest.xml` yalnızca bu derlemelerde birleşir). Ayrıntı: `docs/online-scene.md`.
 - 2026-11-09 — Onay verilmeden hiçbir istek gitmez (oturum bile açılmaz). Onay metni alt işleyiciyi (Anthropic, ABD) ve saklama sürelerini söyler.
-- 2026-11-09 — Oturum harita açılınca açılır (GPU ~40 sn ısınır), heartbeat yalnızca ön planda; haritadan çıkınca 5 dk sonra kapanır (hemen geri dönen GM ısınmış GPU'yu kaybetmesin). `410`'da sessizce yenilenir; `401`'de özellik "güncelleme gerekiyor" ile kapanır.
+- 2026-11-09 — Oturum harita açılınca açılır (GPU soğuksa ~75 sn, yedek veri merkezinde ~120 sn ısınır), heartbeat yalnızca ön planda; haritadan çıkınca 5 dk sonra kapanır (hemen geri dönen GM ısınmış GPU'yu kaybetmesin). `410`'da sessizce yenilenir; `401`'de özellik "güncelleme gerekiyor" ile kapanır.
 - 2026-11-09 — Sonuç PNG'si drift'te karşılaşmaya bağlı saklanır (`map_scenes`, şema 3; sunucu 7 gün sonra siler). Bildirilen resim yerelde hemen gizlenir.
 - 2026-11-09 — Resim indirmede 302 elle takip edilir: uygulama token'ı ve kurulum kimliği yalnızca NeuraCraft'a gider, depolama sağlayıcısına gitmez.
 - 2026-11-09 — "Verilerimi sil" yerel verileri siler ve yeni kurulum kimliği üretir; sunucu tarafı silme `partner:manage` gerektirdiği ve GM Cebi'nin sunucusu olmadığı için "en geç 7 gün" açıklaması gösterilir.
