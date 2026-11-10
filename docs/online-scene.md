@@ -92,8 +92,8 @@ Betik şunları sırayla dener:
 
 ### Oturum
 
-- **Ne zaman açılır:** savaş haritası açılınca. GPU'nun ısınması ~40 sn sürüyor; çizim gönderilirken
-  açmak geç kalır. Onay verilmeden hiç açılmaz, yani kurulum kimliği bile gönderilmez.
+- **Ne zaman açılır:** savaş haritası açılınca. GPU soğuksa ısınması ~75 sn (yedek veri merkezinde
+  ~120 sn) sürüyor; çizim gönderilirken açmak geç kalır. Onay verilmeden hiç açılmaz, yani kurulum kimliği bile gönderilmez.
 - **Heartbeat:** `heartbeatSeconds`'ta bir, yalnızca uygulama ön plandayken
   (`AppLifecycleState.resumed`). Arka planda durur, dönünce hemen bir heartbeat gider.
 - **`410 session.closed`:** sessizce yeni oturum açılır (uygulama arka plandaysa ön plana dönünce).
@@ -174,14 +174,18 @@ hazırlığı (PR #4) çevrimdışı derleme içindir.
   inceleme temiz çıkarsa geri geliyor). Uygulama yerel kopyayı yine her durumda gizliyor.
 - **Canlı servis (2026-11-09, `https://api.neuracraft.app`):** `tool/nc_smoke.dart`
   (`NC_SMOKE_PRODUCTION=1`) tüm adımları geçti.
-  - Kapasite: oturum açılınca `warming` (eta 90 sn), 96 sn'de `ready`. Servise göre normal soğuk
-    başlangıç 40–60 sn; ana veri merkezi dışındaki GPU'da +30 sn.
+  - Kapasite: oturum açılınca `warming` (eta 90 sn), 96 sn'de `ready`. Servisin güncel tahmini
+    (#43): model önbelleğiyle ~75 sn, yedek veri merkezinde (`gpu.modelCache: false`) ~120 sn.
+    Hangi GPU'nun çalıştığı `capacity.gpu` ve `job.gpu`'da (yalnızca günlük için; uygulama okumuyor).
   - İş: map modu, Türkçe tarif, 7,2 sn'de bitti (6 adım); 512×512 PNG yönlendirmeyle indi.
   - Bildirim sonrası resim 404; iptal `cancelled`; hata kodları beklendiği gibi.
   - Stok yokken kapasite `unavailable: no GPU available at the provider` ve iş
     `503 job.no_gpu_worker` döndü. Servis artık GPU türlerini sırayla deniyor (neuracraft-cloud #41).
-- **Kalite:** düzen korunuyor (nehir kıyıları, köprü, daireler aynı yerde), ama ilk denemede sonuç
-  kuşbakışı bir savaş haritası değil, yandan bir sahne gibi; daireler ağaç yerine yuvarlak nesnelere
-  dönüştü. Map modunun istemi ve örnek çizimler neuracraft-cloud tarafında ayarlanmalı
-  (`docs/reports/sketch-to-scene.md`).
+- **Kalite (2026-11-10, neuracraft-cloud #42 sonrası):** harita modu artık kuşbakışı, aydınlık,
+  düz bir savaş haritası çiziyor; daireler ağaç tepesi oluyor, düzen birebir korunuyor. Ama iki
+  çizgi arasındaki nehir şeridi hâlâ su olmuyor (yürüme yolu ya da hendek oluyor, su yanındaki boş
+  alana taşıyor); içini taramak, doldurmak ya da açıklamada belirtmek değiştirmedi. Ayrıntı ve
+  resimler: [`online-scene/2026-11-10-map-mode.md`](online-scene/2026-11-10-map-mode.md).
+  Uygulama harita modunda kısa bir çizim ipucu gösteriyor (ağaçlar daire; nehir, su ve küçük
+  eşyalar açıklamada).
 - **Cihaz:** gerçek telefon ya da tablette denenmedi.
