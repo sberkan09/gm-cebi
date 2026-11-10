@@ -52,6 +52,7 @@ class AppSettings {
     this.gmPackOverride,
     this.partyLevel = 1,
     this.partySize = 4,
+    this.penModeChoice,
   });
 
   /// Default language of detail pages (each page has a one-tap toggle).
@@ -70,6 +71,13 @@ class AppSettings {
   /// Encounter difficulty: party size when the encounter has no players.
   final int partySize;
 
+  /// Battle map "Kalem modu": only a stylus draws; fingers pan, zoom and move
+  /// tokens (palm rejection). Null until decided: the first stylus touch
+  /// turns it on, but never over the user's own choice (toolbar or Settings).
+  final bool? penModeChoice;
+
+  bool get penMode => penModeChoice ?? false;
+
   AppSettings copyWith({
     Lang? contentLang,
     ThemeMode? themeMode,
@@ -77,6 +85,7 @@ class AppSettings {
     bool clearOverride = false,
     int? partyLevel,
     int? partySize,
+    bool? penModeChoice,
   }) =>
       AppSettings(
         contentLang: contentLang ?? this.contentLang,
@@ -84,6 +93,7 @@ class AppSettings {
         gmPackOverride: clearOverride ? null : (gmPackOverride ?? this.gmPackOverride),
         partyLevel: partyLevel ?? this.partyLevel,
         partySize: partySize ?? this.partySize,
+        penModeChoice: penModeChoice ?? this.penModeChoice,
       );
 }
 
@@ -99,6 +109,7 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
       gmPackOverride: switch (m['gmPackOverride']) { 'true' => true, 'false' => false, _ => null },
       partyLevel: clampLevel(int.tryParse(m['partyLevel'] ?? '') ?? 1),
       partySize: (int.tryParse(m['partySize'] ?? '') ?? 4).clamp(minPartySize, maxPartySize),
+      penModeChoice: switch (m['mapPenMode']) { 'true' => true, 'false' => false, _ => null },
     );
   }
 
@@ -129,6 +140,20 @@ class SettingsNotifier extends AsyncNotifier<AppSettings> {
     final n = size.clamp(minPartySize, maxPartySize);
     state = AsyncData(_current.copyWith(partySize: n));
     await _db.writeSetting('partySize', '$n');
+  }
+
+  /// The user's choice (map toolbar or Settings).
+  Future<void> setPenMode(bool v) async {
+    state = AsyncData(_current.copyWith(penModeChoice: v));
+    await _db.writeSetting('mapPenMode', '$v');
+  }
+
+  /// A stylus touched the map: turn pen mode on, unless it was ever decided
+  /// (or the settings are not loaded yet, so the choice is not known).
+  Future<void> stylusSeen() async {
+    final s = state.value;
+    if (s == null || s.penModeChoice != null) return;
+    await setPenMode(true);
   }
 }
 
