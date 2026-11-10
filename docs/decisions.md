@@ -47,7 +47,7 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-10-23 — Arayüz tek dilli (Türkçe), metinler doğrudan widget'larda; gen-l10n kurulmadı. İçerik etiketleri (ZS, CP, Yapma Süresi…) gösterilen içeriğin diline uyar.
 - 2026-10-23 — Tek elle kullanım: alt gezinme (Ara, Zar, İnisiyatif, Notlar), arama kutusu ekranın altında, ana eylem düğmeleri altta ve en az 56 dp.
 - 2026-10-23 — Kayıt sayfasındaki TR/EN düğmesi yalnızca o sayfayı değiştirir; varsayılan dil Ayarlar'da.
-- 2026-10-23 — Özellik bayrakları: `Feature` → `Entitlement` (ücretsiz / GM Paketi / ses aboneliği). Hak `--dart-define=GMCEBI_GM_PACK` ile gelir; `GMCEBI_INTERNAL` test sürümlerinde Ayarlar'a test anahtarı ekler. Satın alma kodu yok. NPC üretici ve ses özeti yalnızca bayrak olarak ayrıldı.
+- 2026-10-23 — Özellik bayrakları: `Feature` → `Entitlement` (ücretsiz / GM Paketi / ses aboneliği). Hak `--dart-define=GMCEBI_GM_PACK` ile gelir; `GMCEBI_INTERNAL` test sürümlerinde Ayarlar'a test anahtarı ekler. Satın alma kodu yok. NPC üretici ve ses özeti yalnızca bayrak olarak ayrıldı (NPC üretici 2026-11-09'da yapıldı).
 - 2026-10-23 — İnisiyatif: tek etkin karşılaşma; "Sonraki" ilk kez basılana kadar sıra imleci en üstte kalır (`started`), sonrasında yeni katılımcı eklense de aynı yaratıkta kalır. "Yeni karşılaşma" oyuncuları tam CP ile taşıyabilir.
 - 2026-10-23 — Notlar 800 ms gecikmeyle ve ekrandan çıkarken kendiliğinden kaydedilir; boş not tutulmaz.
 - 2026-10-23 — Zar dili: `NdM`, `kh/kl/dh/dl/k`, `+ - * /`, parantez, `d%`; Türk oyuncular için `z` de zar harfi (2z6). En çok 100 zar, 1000 yüz. `Random.secure()`.
@@ -88,6 +88,20 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-11-09 — Sonuç PNG'si drift'te karşılaşmaya bağlı saklanır (`map_scenes`, şema 3; sunucu 7 gün sonra siler). Bildirilen resim yerelde hemen gizlenir.
 - 2026-11-09 — Resim indirmede 302 elle takip edilir: uygulama token'ı ve kurulum kimliği yalnızca NeuraCraft'a gider, depolama sağlayıcısına gitmez.
 - 2026-11-09 — "Verilerimi sil" yerel verileri siler ve yeni kurulum kimliği üretir; sunucu tarafı silme `partner:manage` gerektirdiği ve GM Cebi'nin sunucusu olmadığı için "en geç 7 gün" açıklaması gösterilir.
+
+## Karşılaşma zorluğu (2026-11-09)
+
+- 2026-11-09 — Zorluk SRD 5.2.1 "Combat Encounters" (s. 202) kuralıyla: karakter başına TP bütçesi (seviye × Düşük/Orta/Yüksek) karakterlerin toplamı; karşılaşma TP'si her canavarın normal TP'sinin toplamı (in lair değeri değil), çarpan yok. Karışık seviyeli grupta her karakter kendi satırından sayılır.
+- 2026-11-09 — Bantlar: bütçe o zorlukta harcanabilecek en çok TP olduğu için Düşük bütçesine kadar "Düşük", Orta bütçesine kadar "Orta", Yüksek bütçesine kadar "Yüksek". SRD'de olmayan iki dış bant tablo dışı olduğunu belli eden adlarla: Yüksek bütçesini aşan "Yüksek üstü", Düşük bütçesinin yarısından az olan "Düşük altı" (yarı eşiği uygulamanın kendi kuralı, SRD'den değil). Çipte karşılaşma TP'si bandın üst bütçesine bölünmüş gösterilir.
+- 2026-11-09 — Grup = karşılaşmadaki oyuncu karakterleri. Seviye `combatants.level`'da (boş olabilir; şema 4, geçiş testli); "Yeni karşılaşma" seviyeyi taşır. Seviyesi girilmemiş oyuncu ve oyuncusuz karşılaşma "Grup seviyesi" ayarını (varsayılan 1), oyuncusuz karşılaşma "Grup büyüklüğü" ayarını (varsayılan 4) kullanır; ikisi `settings` tablosunda. Ada göre ayarda saklamak kırılgan olduğu için sütun seçildi.
+- 2026-11-09 — Canavar TP'si kayıttaki İngilizce `xp` metninden okunur (dilden bağımsız; adlara bakılmaz), eksikse TD'den. Elle eklenen ve canavar kaydı olmayan katılımcılar "TP bilinmiyor" olarak gösterilir, toplama katılmaz.
+
+## NPC üretici (2026-11-09)
+
+- 2026-11-09 — NPC tabloları (`lib/features/npc/npc_tables.dart`) tamamen özgün içeriktir: hiçbir yayımlanmış kitabın isim ya da özellik tablosu kopyalanmaz veya çevrilmez; ürün kimliği adları, dünya/mekân adları, tanrılar ve adı geçen karakterler kullanılmaz. Oyun içeriğinden yalnızca SRD 5.2.1 soy adları (sözlükteki Türkçeleriyle) ve Etkileme eyleminin tavırları (Dostça/Kayıtsız/Düşmanca) alınır. Yasaklı adlar ve en az liste boyları testle denetlenir.
+- 2026-11-09 — NPC üretici GM Paketi'nde, Notlar ekranının üst çubuğundan açılır (yeni sekme yok; GM Paketi kilitliyken düğme görünmez). Üretim çevrimdışı ve zarla aynı `Random`'ı kullanır (testlerde tohumlu). Son 10 NPC, filtreler ve kilitler yalnızca oturum boyunca bellekte (ekrandan çıkıp dönünce durur); kalıcı olması istenen NPC "Nota kaydet" ile not olur, şema değişmez.
+- 2026-11-09 — Kilitli ad soyu ve cinsiyeti de korur (ad soya uysun); bu sırada soy/cinsiyet filtreleri kapalıdır ve ekranda söylenir. Kilitli görünüş yeni soya uymuyorsa (Ejderdoğan'da saç, Elf'te kuyruk zili) yeniden üretilir; uyuyorsa korunur. Görünüş satırları her cinsiyete uyar; cüce sakal satırı da kadın cüceler için geçerlidir (bilinçli seçim).
+- 2026-11-09 — Tutarlılık kuralları: iki karşıt özellik birlikte gelmez (`npcOppositeTraits`), lakap özellikle çelişmez ("Kurnaz" + "saf" yok, `npcEpithetClashes`), soyadı verilen adı tekrarlamaz ("Fındık Fındıkdibi" yok). Gerçek dinî topluluk çağrışımı yapan sözcükler ("tarikat") kullanılmaz.
 
 ## Onay bekleyenler
 

@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/stat_input.dart';
 import '../../data/reference.dart';
 import '../../db/database.dart';
+import '../../features/encounter_difficulty.dart';
 import '../../features/flags.dart';
 import '../../providers.dart';
+import '../widgets/encounter_difficulty.dart';
 import '../widgets/locked.dart';
 import 'detail_screen.dart';
-import 'dice_screen.dart';
 import 'map_screen.dart';
 
 /// Initiative tracker (GM pack). Big next/previous buttons at the bottom for
@@ -73,10 +75,12 @@ class _Tracker extends ConsumerWidget {
     final db = ref.read(databaseProvider);
     final list = state.combatants;
     final current = state.current;
+    final difficulty = ref.watch(encounterDifficultyProvider);
     return Column(children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-        child: Row(children: [
+        // Narrow screen with large text: "Ekle" becomes an icon button.
+        child: LayoutBuilder(builder: (context, box) => Row(children: [
           Text('${state.encounter.round}. tur', key: const Key('round'), style: t.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(width: 12),
           Expanded(
@@ -89,14 +93,27 @@ class _Tracker extends ConsumerWidget {
                     style: t.titleMedium?.copyWith(color: scheme.primary),
                   ),
           ),
-          FilledButton.tonalIcon(
-            key: const Key('add-combatant'),
-            onPressed: () => _showAddSheet(context, ref),
-            icon: const Icon(Icons.person_add_alt_1),
-            label: const Text('Ekle'),
-          ),
-        ]),
+          if (box.maxWidth < MediaQuery.textScalerOf(context).scale(260))
+            IconButton.filledTonal(
+              key: const Key('add-combatant'),
+              tooltip: 'Ekle',
+              onPressed: () => _showAddSheet(context, ref),
+              icon: const Icon(Icons.person_add_alt_1),
+            )
+          else
+            FilledButton.tonalIcon(
+              key: const Key('add-combatant'),
+              onPressed: () => _showAddSheet(context, ref),
+              icon: const Icon(Icons.person_add_alt_1),
+              label: const Text('Ekle'),
+            ),
+        ])),
       ),
+      if (difficulty != null && difficulty.hasRating)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+          child: Align(alignment: AlignmentDirectional.centerStart, child: DifficultyChip(summary: difficulty)),
+        ),
       Expanded(
         child: list.isEmpty
             ? Center(
@@ -268,10 +285,7 @@ Future<bool?> _confirmNewEncounter(BuildContext context) => showDialog<bool>(
     );
 
 /// Accepts an optional leading minus only ("5-3" is rejected, not silently dropped).
-int? _int(String s) {
-  final t = s.trim().replaceAll('−', '-');
-  return RegExp(r'^-?\d+$').hasMatch(t) ? int.parse(t) : null;
-}
+int? _int(String s) => parseStat(s);
 
 Future<void> _showAddSheet(BuildContext context, WidgetRef ref) async {
   final choice = await showModalBottomSheet<String>(
@@ -307,7 +321,17 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
   final bonus = TextEditingController(text: '0');
   final hp = TextEditingController();
   final ac = TextEditingController();
+  final level = TextEditingController();
   var isPlayer = true;
+  var tried = false; // errors show after the first "Ekle"
+  String? nameError() => name.text.trim().isEmpty ? 'Ad gerekli' : null;
+  String? hpError() => statError(hp.text, min: 1);
+  String? acError() => statError(ac.text, min: 1);
+  bool valid() =>
+      nameError() == null && statError(init.text) == null && statError(bonus.text) == null && hpError() == null && acError() == null;
+  ValueChanged<String> changed(StateSetter setState) => (_) {
+        if (tried) setState(() {});
+      };
   final ok = await showDialog<bool>(
     context: context,
     builder: (context) => StatefulBuilder(
@@ -320,7 +344,8 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
               controller: name,
               autofocus: true,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Ad'),
+              onChanged: changed(setState),
+              decoration: InputDecoration(labelText: 'Ad', errorText: tried ? nameError() : null),
             ),
             const SizedBox(height: 8),
             SwitchListTile(
@@ -330,44 +355,93 @@ Future<void> _addManual(BuildContext context, WidgetRef ref) async {
               onChanged: (v) => setState(() => isPlayer = v),
             ),
             Row(children: [
-              Expanded(child: _numField(init, 'İnisiyatif', key: const Key('combatant-init'))),
+              Expanded(
+                child: _numField(init, 'İnisiyatif',
+                    key: const Key('combatant-init'), onChanged: changed(setState), errorText: tried ? statError(init.text) : null),
+              ),
               const SizedBox(width: 8),
-              Expanded(child: _numField(bonus, 'İnis. bonusu')),
+              Expanded(
+                child: _numField(bonus, 'İnis. bonusu', onChanged: changed(setState), errorText: tried ? statError(bonus.text) : null),
+              ),
             ]),
             const SizedBox(height: 8),
             Row(children: [
-              Expanded(child: _numField(hp, 'Can Puanı', key: const Key('combatant-hp'))),
+              Expanded(
+                child: _numField(hp, 'Can Puanı',
+                    key: const Key('combatant-hp'), onChanged: changed(setState), errorText: tried ? hpError() : null),
+              ),
               const SizedBox(width: 8),
-              Expanded(child: _numField(ac, 'ZS')),
+              Expanded(
+                child: _numField(ac, 'ZS', key: const Key('combatant-ac'), onChanged: changed(setState), errorText: tried ? acError() : null),
+              ),
             ]),
+            if (isPlayer) ...[
+              const SizedBox(height: 8),
+              _levelField(level, key: const Key('combatant-level'), onChanged: (_) => setState(() {})),
+            ],
           ]),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
-          FilledButton(key: const Key('combatant-save'), onPressed: () => Navigator.pop(context, true), child: const Text('Ekle')),
+          FilledButton(
+            key: const Key('combatant-save'),
+            onPressed: isPlayer && _levelError(level.text) != null
+                ? null
+                : () {
+                    if (valid()) {
+                      Navigator.pop(context, true);
+                    } else {
+                      setState(() => tried = true);
+                    }
+                  },
+            child: const Text('Ekle'),
+          ),
         ],
       ),
     ),
   );
-  if (ok == true && name.text.trim().isNotEmpty) {
-    final hpValue = _int(hp.text);
+  if (ok == true) {
     await ref.read(databaseProvider).addCombatant(
           name: name.text.trim(),
           initiative: _int(init.text),
           initBonus: _int(bonus.text) ?? 0,
-          hp: hpValue == null || hpValue < 1 ? null : hpValue,
+          hp: _int(hp.text),
           ac: _int(ac.text),
           isPlayer: isPlayer,
+          level: isPlayer ? _level(level.text) : null,
         );
   }
 }
 
-Widget _numField(TextEditingController c, String label, {Key? key}) => TextField(
+/// A level 1–20, or null (empty or out of range).
+int? _level(String s) {
+  final v = int.tryParse(s.trim());
+  return v == null || v < minLevel || v > maxLevel ? null : v;
+}
+
+/// Inline error for a typed level; empty is not an error (the party level is used).
+String? _levelError(String s) => s.trim().isEmpty || _level(s) != null ? null : '$minLevel–$maxLevel arası bir seviye gir';
+
+Widget _levelField(TextEditingController c,
+        {Key? key, required ValueChanged<String> onChanged, String helper = 'Boşsa grup seviyesi kullanılır'}) =>
+    TextField(
       key: key,
       controller: c,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(2)],
+      onChanged: onChanged,
+      decoration: InputDecoration(labelText: 'Seviye (isteğe bağlı)', helperText: helper, errorText: _levelError(c.text)),
+    );
+
+Widget _numField(TextEditingController c, String label, {Key? key, ValueChanged<String>? onChanged, String? errorText}) =>
+    TextField(
+      key: key,
+      controller: c,
+      onChanged: onChanged,
+      maxLength: statFieldMaxLength,
       keyboardType: const TextInputType.numberWithOptions(signed: true),
       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[-−0-9]'))],
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(labelText: label, counterText: '', errorText: errorText, errorMaxLines: 2),
     );
 
 Future<void> _addMonster(BuildContext context, WidgetRef ref) async {
@@ -496,6 +570,34 @@ Future<void> _editInitiative(BuildContext context, WidgetRef ref, Combatant c) a
   await ref.read(databaseProvider).setInitiative(c.id, _int(v));
 }
 
+Future<void> _editLevel(BuildContext context, WidgetRef ref, Combatant c) async {
+  final ctrl = TextEditingController(text: c.level?.toString() ?? '');
+  // '' from "Temizle" clears the level; "Kaydet" is enabled only for 1–20.
+  final v = await showDialog<String>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        title: Text('${c.name} · seviye'),
+        content: _levelField(ctrl,
+            key: const Key('level-field'),
+            helper: '"Temizle" ile grup seviyesi kullanılır',
+            onChanged: (_) => setState(() {})),
+        actions: [
+          TextButton(key: const Key('level-clear'), onPressed: () => Navigator.pop(context, ''), child: const Text('Temizle')),
+          FilledButton(
+            key: const Key('level-save'),
+            onPressed: _level(ctrl.text) == null ? null : () => Navigator.pop(context, ctrl.text),
+            child: const Text('Kaydet'),
+          ),
+        ],
+      ),
+    ),
+  );
+  if (v == null) return;
+  if (v.isNotEmpty && _level(v) == null) return;
+  await ref.read(databaseProvider).setLevel(c.id, _level(v));
+}
+
 Future<void> _showCombatantMenu(BuildContext context, WidgetRef ref, Combatant c) async {
   final data = ref.read(referenceProvider).value?.data;
   final lang = ref.read(currentSettingsProvider).contentLang;
@@ -527,6 +629,14 @@ Future<void> _showCombatantMenu(BuildContext context, WidgetRef ref, Combatant c
             if (live.hpCurrent != null)
               ListTile(leading: const Icon(Icons.favorite_outline), title: const Text('Hasar / iyileştirme'), onTap: () => _changeHp(context, ref, live)),
             ListTile(leading: const Icon(Icons.flag_outlined), title: const Text('İnisiyatifi değiştir'), onTap: () => _editInitiative(context, ref, live)),
+            if (live.isPlayer)
+              ListTile(
+                key: const Key('edit-level'),
+                leading: const Icon(Icons.trending_up),
+                title: const Text('Seviye'),
+                subtitle: Text(live.level == null ? 'Girilmedi (grup seviyesi kullanılır)' : '${live.level}. seviye'),
+                onTap: () => _editLevel(context, ref, live),
+              ),
             if (monster != null)
               ListTile(
                 leading: const Icon(Icons.menu_book_outlined),

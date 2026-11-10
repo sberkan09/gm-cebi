@@ -9,20 +9,21 @@ void main() {
     }
   });
 
-  test('GM pack gates initiative and notes', () {
+  test('GM pack gates initiative, notes and the NPC generator', () {
     const free = Entitlements();
     const paid = Entitlements(gmPack: true);
     expect(free.isLocked(Feature.initiative), isTrue);
     expect(free.isLocked(Feature.sessionNotes), isTrue);
     expect(paid.allows(Feature.initiative), isTrue);
     expect(paid.allows(Feature.sessionNotes), isTrue);
+    expect(free.isLocked(Feature.npcGenerator), isTrue);
+    expect(paid.allows(Feature.npcGenerator), isTrue);
   });
 
   test('reserved features are never available or shown as locked', () {
     const all = Entitlements(gmPack: true, audioSubscription: true);
-    expect(all.allows(Feature.npcGenerator), isFalse);
     expect(all.allows(Feature.sessionAudioSummary), isFalse);
-    expect(const Entitlements().isLocked(Feature.npcGenerator), isFalse);
+    expect(const Entitlements().isLocked(Feature.sessionAudioSummary), isFalse);
   });
 
   test('store builds ignore a test override left by an internal build', () {

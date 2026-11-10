@@ -83,6 +83,7 @@ void main() {
       await v2.customStatement('DROP TABLE map_strokes');
       await v2.customStatement('ALTER TABLE combatants DROP COLUMN pos_x');
       await v2.customStatement('ALTER TABLE combatants DROP COLUMN pos_y');
+      await v2.customStatement('ALTER TABLE combatants DROP COLUMN level');
       await v2.customStatement('PRAGMA user_version = 1');
       await v2.close();
 
@@ -90,11 +91,12 @@ void main() {
       final s = await upgraded.watchEncounterState().first;
       expect(s.combatants.single.name, 'Goblin');
       expect(s.combatants.single.mapPosition, isNull);
+      expect(s.combatants.single.level, isNull);
       await upgraded.setTokenPosition(s.combatants.single.id, const Offset01(0.5, 0.5));
       await upgraded.addStroke(const [Offset01(0, 0), Offset01(1, 1)]);
       expect((await upgraded.watchStrokes().first).length, 1);
       final version = await upgraded.customSelect('PRAGMA user_version').getSingle();
-      expect(version.data.values.first, 3);
+      expect(version.data.values.first, 4);
       await upgraded.addScene(assetId: 'a', png: Uint8List.fromList([1]), mode: 'map', narrative: '', seed: 1);
       expect(await upgraded.watchActiveScene().first, isNotNull);
       await upgraded.close();
@@ -163,6 +165,37 @@ void main() {
       await upgraded.addScene(assetId: 'a', png: Uint8List.fromList([1, 2]), mode: 'atmosphere', narrative: 'köprü', seed: 7);
       expect((await upgraded.watchActiveScene().first)!.seed, 7);
       await upgraded.close();
+    } finally {
+      await dir.delete(recursive: true);
+    }
+  });
+
+  test('schema 3 databases get the level column; data kept', () async {
+    final dir = await Directory.systemTemp.createTemp('gmcebi-migration');
+    final file = File('${dir.path}/v3.sqlite');
+    try {
+      final db4 = AppDatabase(NativeDatabase(file));
+      await db4.addCombatant(name: 'Ayla', isPlayer: true, hp: 20);
+      await db4.customStatement('ALTER TABLE combatants DROP COLUMN level');
+      await db4.customStatement('PRAGMA user_version = 3');
+      await db4.close();
+      final upgraded = AppDatabase(NativeDatabase(file));
+      final ayla = (await upgraded.watchEncounterState().first).combatants.single;
+      expect(ayla.name, 'Ayla');
+      expect(ayla.level, isNull);
+      await upgraded.setLevel(ayla.id, 5);
+      expect((await upgraded.watchEncounterState().first).combatants.single.level, 5);
+      final version = await upgraded.customSelect('PRAGMA user_version').getSingle();
+      expect(version.data.values.first, 4);
+      await upgraded.close();
+
+      // Already has the column but still says 3 (killed before user_version was written).
+      final again = AppDatabase(NativeDatabase(file));
+      await again.customStatement('PRAGMA user_version = 3');
+      await again.close();
+      final reopened = AppDatabase(NativeDatabase(file));
+      expect((await reopened.watchEncounterState().first).combatants.single.level, 5);
+      await reopened.close();
     } finally {
       await dir.delete(recursive: true);
     }

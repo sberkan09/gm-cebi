@@ -76,4 +76,31 @@ void main() {
     await settle(tester);
     expect(find.text('3. oturum – Gölgeli Orman'), findsNothing);
   });
+  appTest('initiative add dialog rejects bad numbers', gmPack: true, (tester, db) async {
+    await openTab(tester, 'İnisiyatif');
+    await tester.tap(find.byKey(const Key('add-combatant')));
+    await settle(tester);
+    await tester.tap(find.text('Oyuncu ya da serbest ekle'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('combatant-save')));
+    await settle(tester);
+    expect(find.text('Ad gerekli'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('combatant-name')), 'Ayla');
+    await tester.enterText(find.byKey(const Key('combatant-hp')), '0');
+    await tester.enterText(find.byKey(const Key('combatant-ac')), '-');
+    await tester.enterText(find.byKey(const Key('combatant-init')), '99999999999999999999');
+    await tester.tap(find.byKey(const Key('combatant-save')));
+    await settle(tester);
+    expect(find.text('Ad gerekli'), findsNothing);
+    expect(find.text('En az 1'), findsOneWidget);
+    expect(find.text('Geçerli bir sayı yaz'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('combatant-hp')), '20');
+    await tester.enterText(find.byKey(const Key('combatant-ac')), '14');
+    await tester.tap(find.byKey(const Key('combatant-save')));
+    await settle(tester);
+    expect(find.text('Ayla'), findsOneWidget);
+    expect(find.text('9999'), findsOneWidget); // initiative cut to 4 digits
+    expect(find.text('CP 20/20'), findsOneWidget);
+    expect(find.text('ZS 14'), findsOneWidget);
+  });
 }

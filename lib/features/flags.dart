@@ -36,6 +36,7 @@ const builtFeatures = {
   Feature.dice,
   Feature.initiative,
   Feature.sessionNotes,
+  Feature.npcGenerator,
 };
 
 /// `--dart-define=GMCEBI_INTERNAL=true` for test-group builds: shows the
