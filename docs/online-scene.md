@@ -10,25 +10,27 @@ da kota dolduysa harita çizim ve jetonlarla aynı şekilde sürer.
 
 ## Derleme
 
-Özellik yalnızca iki değer verilen derlemelerde görünür:
+Özellik yalnızca `NC_API_URL` verilen derlemelerde görünür. GM Cebi'nin istemci kimliği
+(`nc_client_hZnpzu714IuIGtH2S5C26q8S`, herkese açık) kodda gömülüdür
+(`lib/data/neuracraft/config.dart`); `NC_CLIENT_ID` yalnızca başka bir sunucu için gerekir:
 
 ```bash
-flutter run \
-  --dart-define=NC_API_URL=http://10.0.2.2:8080 \   # emülatörden geliştirici makinesi
-  --dart-define=NC_CLIENT_ID=nc_client_…
+flutter run --dart-define=NC_API_URL=https://api.neuracraft.app
+# yerel geliştirme sunucusu (emülatörden):
+flutter run --dart-define=NC_API_URL=http://10.0.2.2:8080 --dart-define=NC_CLIENT_ID=nc_client_…
 ```
 
-- **Değerler verilmezse** (mağaza ve test APK'si bugün böyle): arayüzde hiçbir iz yok. Android
+- **`NC_API_URL` verilmezse** (mağaza ve test APK'si bugün böyle): arayüzde hiçbir iz yok. Android
   manifestinde **İnternet izni de yok**. `android/app/build.gradle.kts`, `NC_API_URL` verildiğinde
   `src/online/AndroidManifest.xml`'i (yalnızca `INTERNET`) birleştirir. Yerelde iki release APK
   derlenip `aapt2 dump permissions` ile doğrulandı.
-- **Test APK (GitHub):** `release-apk` iş akışı (`v*-test*` etiketi), depoda `NC_API_URL` ve
-  `NC_CLIENT_ID` **değişkenleri** (Settings → Secrets and variables → Actions → Variables) varsa
-  çevrimiçi sahneyi açar; yoksa APK eskisi gibi tamamen çevrimdışıdır. Play ve TestFlight derlemeleri
+- **Test APK (GitHub):** `release-apk` iş akışı (`v*-test*` etiketi), depoda `NC_API_URL`
+  **değişkeni** (Settings → Secrets and variables → Actions → Variables) varsa çevrimiçi sahneyi
+  açar (`NC_CLIENT_ID` değişkeni verilirse gömülü kimliğin yerine geçer); yoksa APK eskisi gibi tamamen çevrimdışıdır. Play ve TestFlight derlemeleri
   gizlilik beyanları güncellenene kadar çevrimdışı kalır.
 - **APK'de gizli bir şey yok.** İstemci kimliği (`nc_client_…`) herkese açıktır ve tek başına hiçbir
   yetki vermez: kullanıcı e-postasına gelen kodla giriş yapar, uygulama o kullanıcıya ait kısa ömürlü
-  token'lar alır (aşağıda "Giriş"). Bu yüzden gizli değer (secret) değil, değişkendir. Eski uygulama
+  token'lar alır (aşağıda "Giriş"). Bu yüzden kodda durabilir. Eski uygulama
   token'ı (`nc_app_…`) ve `X-End-User` başlığı tamamen kaldırıldı. **`v*-test*` etiketleri ancak bu
   derlemeyle yeniden güvenli:** daha eski bir commit'ten etiketlenen APK'nin içinde uygulama token'ı
   olabilir. Servis tarafında `partner.js --require-end-user-tokens on` açılınca eski derlemeler
@@ -126,7 +128,7 @@ NC_API_URL=http://127.0.0.1:8080 NC_CLIENT_ID=nc_client_… NC_EMAIL=sen@example
 # e-posta yerine önceki çalıştırmanın yazdığı yenileme token'ı
 NC_API_URL=… NC_CLIENT_ID=… NC_REFRESH_TOKEN=nc_rt_… dart run tool/nc_smoke.dart sketch.png
 # canlı servis: kota adımını atlar (GPU harcamaz); sonda hesabı siler
-NC_SMOKE_PRODUCTION=1 NC_SMOKE_DELETE_ACCOUNT=1 NC_API_URL=https://api.neuracraft.app NC_CLIENT_ID=… NC_EMAIL=… dart run tool/nc_smoke.dart sketch.png out.png
+NC_SMOKE_PRODUCTION=1 NC_SMOKE_DELETE_ACCOUNT=1 NC_API_URL=https://api.neuracraft.app NC_EMAIL=… dart run tool/nc_smoke.dart sketch.png out.png
 ```
 
 Betik şunları sırayla dener:

@@ -41,7 +41,7 @@ yüzden TestFlight derlemesi de mağaza bayraklarıyla yapılır:
    birincil dil Türkçe, bundle id yukarıdaki, SKU (ör. `gmcebi-ios`).
 4. **Uygulama Gizliliği (App Privacy):** "Veri toplamıyoruz" (*Data Not Collected*).
    Gizlilik politikası URL'si (`docs/store/privacy-policy-*.md` yayımlandıktan sonra).
-   Çevrimiçi sahne açık bir derleme (`NC_API_URL` + `NC_CLIENT_ID`) gönderilirse bu cevap değişir:
+   Çevrimiçi sahne açık bir derleme (`NC_API_URL` verilmiş) gönderilirse bu cevap değişir:
    Contact Info → *Email Address* (App Functionality, kullanıcıya bağlı, izleme yok) ve User Content
    (çizim ve tarif, App Functionality). Hesap uygulama içinden silinebilir (Ayarlar → "Hesabımı
    sil"). Ayrıntı: `docs/online-scene.md`, "Gizlilik ve mağaza beyanları".

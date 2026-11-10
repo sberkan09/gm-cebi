@@ -25,7 +25,7 @@ Gerekçe (Play tanımlarına göre):
 - Google Play'in kendi topladığı kurulum/çökme istatistikleri (Android vitals)
   uygulamanın beyanına girmez.
 
-## Çevrimiçi sahne açık derleme (`NC_API_URL` + `NC_CLIENT_ID`)
+## Çevrimiçi sahne açık derleme (`NC_API_URL` verilmiş)
 
 Yukarıdaki "Hayır" yalnızca çevrimdışı mağaza derlemesi içindir. Çevrimiçi sahne açık bir derleme
 Play'e giderse form şöyle doldurulur (`docs/online-scene.md`, "Gizlilik ve mağaza beyanları";
@@ -74,8 +74,8 @@ kaynak: neuracraft-cloud `docs/PRIVACY.md`):
   `drift_flutter`, `sqlite3`, `path_provider`; ayrıca yalnızca çevrimiçi sahnenin kullandığı
   `http` ve `flutter_secure_storage`. Analitik, reklam ya da çökme raporlama paketi yok
   (`firebase`, `sentry`, `dio`, `url_launcher` vb. yok).
-- Ağ isteği yapan tek kod çevrimiçi sahnedir (`lib/data/neuracraft/`). `NC_API_URL` ve
-  `NC_CLIENT_ID` verilmeyen mağaza derlemesinde hiç çalışmaz: arayüzde görünmez, güvenli depo
+- Ağ isteği yapan tek kod çevrimiçi sahnedir (`lib/data/neuracraft/`). `NC_API_URL`
+  verilmeyen mağaza derlemesinde hiç çalışmaz: arayüzde görünmez, güvenli depo
   okunmaz, manifestte İnternet izni yoktur. Koddaki diğer URL'ler SRD atıf metnindeki düz
   metin adresler; tıklanabilir değil.
 - Android `src/main/AndroidManifest.xml` hiçbir `uses-permission` içermiyor.

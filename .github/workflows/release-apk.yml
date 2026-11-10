@@ -25,22 +25,24 @@ jobs:
       - run: flutter pub get
       - run: flutter test
       # Online scene (docs/online-scene.md): on when the repository has the
-      # variables NC_API_URL and NC_CLIENT_ID (Settings → Secrets and variables
-      # → Actions → Variables; the client id is public, not a secret: users
-      # sign in with an emailed code); otherwise the APK is fully offline as
-      # before. Only this test-group APK gets it: the Play and TestFlight
-      # builds stay offline until the privacy declarations change.
+      # variable NC_API_URL (Settings → Secrets and variables → Actions →
+      # Variables); otherwise the APK is fully offline as before. No secret goes
+      # into the APK: GM Cebi's public client id is built in (an NC_CLIENT_ID
+      # variable overrides it) and users sign in with an emailed code. Only this
+      # test-group APK gets it: the Play and TestFlight builds stay offline until
+      # the privacy declarations change.
       - name: Build internal APK
         env:
           NC_API_URL: ${{ vars.NC_API_URL }}
           NC_CLIENT_ID: ${{ vars.NC_CLIENT_ID }}
         run: |
           defines="--dart-define=GMCEBI_INTERNAL=true --dart-define=GMCEBI_GM_PACK=true"
-          if [ -n "$NC_API_URL" ] && [ -n "$NC_CLIENT_ID" ]; then
-            defines="$defines --dart-define=NC_API_URL=$NC_API_URL --dart-define=NC_CLIENT_ID=$NC_CLIENT_ID"
-            echo "online scene: on ($NC_API_URL, $NC_CLIENT_ID)"
+          if [ -n "$NC_API_URL" ]; then
+            defines="$defines --dart-define=NC_API_URL=$NC_API_URL"
+            if [ -n "$NC_CLIENT_ID" ]; then defines="$defines --dart-define=NC_CLIENT_ID=$NC_CLIENT_ID"; fi
+            echo "online scene: on ($NC_API_URL)"
           else
-            echo "online scene: off (NC_API_URL / NC_CLIENT_ID not set)"
+            echo "online scene: off (NC_API_URL not set)"
           fi
           flutter build apk --release $defines
       - name: Create pre-release with the APK

@@ -41,11 +41,11 @@ Future<NcApiException?> apiError(Future<Object?> Function() f) async {
 
 Future<void> main(List<String> args) async {
   final env = Platform.environment;
-  final config = NcConfig(baseUrl: env['NC_API_URL'] ?? '', clientId: env['NC_CLIENT_ID'] ?? '');
+  final config = NcConfig(baseUrl: env['NC_API_URL'] ?? '', clientId: env['NC_CLIENT_ID'] ?? gmCebiClientId);
   final email = env['NC_EMAIL'] ?? '';
   final refreshToken = env['NC_REFRESH_TOKEN'] ?? '';
   if (!config.isConfigured || args.isEmpty || (email.isEmpty && refreshToken.isEmpty)) {
-    stderr.writeln('usage: NC_API_URL=… NC_CLIENT_ID=… (NC_EMAIL=… | NC_REFRESH_TOKEN=…) dart run tool/nc_smoke.dart sketch.png [out.png]');
+    stderr.writeln('usage: NC_API_URL=… [NC_CLIENT_ID=…] (NC_EMAIL=… | NC_REFRESH_TOKEN=…) dart run tool/nc_smoke.dart sketch.png [out.png]');
     exit(2);
   }
   final sketch = Uint8List.fromList(File(args[0]).readAsBytesSync());

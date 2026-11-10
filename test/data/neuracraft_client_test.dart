@@ -65,6 +65,12 @@ Map<String, Object?> jobJson(String state, {List<Map<String, Object?>> outputs =
 final png = Uint8List.fromList([0x89, 0x50, 0x4e, 0x47, 1, 2, 3]);
 
 void main() {
+  test("GM Cebi's public client id is built in; the feature still needs NC_API_URL", () {
+    expect(NcConfig.fromEnvironment.clientId, gmCebiClientId);
+    expect(gmCebiClientId, startsWith('nc_client_'));
+    expect(NcConfig.fromEnvironment.isConfigured, isFalse); // no NC_API_URL in tests: offline build
+  });
+
   group('requests', () {
     test('every request carries the access token, and no X-End-User', () async {
       final seen = <http.BaseRequest>[];

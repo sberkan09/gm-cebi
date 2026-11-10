@@ -74,7 +74,7 @@ ustalıkları. Asset'ler 2,9 MB (bütçe 10 MB).
 ## Çevrimiçi sahne (isteğe bağlı, NeuraCraft Cloud)
 
 Dal: `claude/online-scene` (savaş haritası dalının üstünde). Haritadaki arazi çizimi sunucuda resme
-dönüşür, resim alt katman olur, jetonlar üstte kalır. Yalnızca `NC_API_URL` + `NC_CLIENT_ID` ile
+dönüşür, resim alt katman olur, jetonlar üstte kalır. Yalnızca `NC_API_URL` ile
 derlenen sürümlerde görünür; mağaza/test derlemeleri bugünkü gibi tamamen çevrimdışı.
 İstemci, oturum yöneticisi, üretim akışı, Ayarlar (aç/kapa, gizlilik, hesap), Türkçe hata mesajları ve
 testler hazır; yerel neuracraft-cloud API'sine karşı `tool/nc_smoke.dart` ile uçtan uca denendi.
