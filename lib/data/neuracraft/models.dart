@@ -155,6 +155,61 @@ class NcJobProgressed extends NcJobEvent {
   final NcProgress progress;
 }
 
+/// What `sketch_to_scene` takes beyond the sketch, as `GET /v1/presets`
+/// advertises it. The listing looks like:
+///
+/// ```json
+/// {"presets": [{"id": "sketch_to_scene", "version": 1, "oldestVersion": 1, "description": "…",
+///   "latency": "interactive",
+///   "params": {"mode": {"type": "enum", "options": ["map", "atmosphere"], "required": true, "doc": "…"},
+///              "ground": {"type": "enum", "options": ["grass", "stone", …], "default": "grass", "doc": "…"}, …},
+///   "inputs": [{"name": "sketch", "doc": "…", "contentTypes": ["image/png"], "maxBytes": 524288, "maxSide": 1024},
+///              {"name": "regions", …}]}]}
+/// ```
+///
+/// The service refuses inputs and parameters it does not list, so only what
+/// is listed by name is sent.
+class NcSceneFeatures {
+  const NcSceneFeatures({this.regions = false, this.grounds = const []});
+
+  static const none = NcSceneFeatures();
+
+  /// Never throws: an unexpected shape is "not supported".
+  factory NcSceneFeatures.fromPresets(Map<String, dynamic> json, {required int minVersion}) {
+    final list = json['presets'];
+    if (list is! List) return none;
+    for (final p in list) {
+      if (p is! Map<String, dynamic> || p['id'] != 'sketch_to_scene') continue;
+      final v = p['version'];
+      if (v is! num || v < minVersion) return none;
+      final inputs = p['inputs'];
+      final regions = inputs is List && inputs.any((i) => i is Map && i['name'] == 'regions');
+      if (!regions) return none;
+      final params = p['params'];
+      final ground = params is Map ? params['ground'] : null;
+      final List<String> grounds;
+      if (ground is Map) {
+        final options = ground['options'];
+        grounds = options is List ? [for (final g in groundValues) if (options.contains(g)) g] : const [...groundValues];
+      } else {
+        grounds = const [];
+      }
+      return NcSceneFeatures(regions: true, grounds: grounds);
+    }
+    return none;
+  }
+
+  /// The grounds this app knows (client.dart `sceneGrounds`); `grass` is the
+  /// service's default.
+  static const groundValues = ['grass', 'stone', 'dirt', 'sand', 'snow'];
+
+  /// The service takes `inputs.regions`.
+  final bool regions;
+
+  /// The `params.ground` values it takes (empty: send no ground).
+  final List<String> grounds;
+}
+
 enum SceneMode {
   /// Keeps the sketch's layout, top-down (~3 s on a warm GPU).
   map,

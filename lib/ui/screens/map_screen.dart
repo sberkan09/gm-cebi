@@ -21,6 +21,10 @@ import '../widgets/online_scene.dart';
 /// One gesture does everything: a drag that starts on a token moves it,
 /// any other drag draws (or erases, in eraser mode). Two fingers pan and zoom.
 ///
+/// Two layers: pen lines (Çiz) and painted areas (Alan: water, road, forest,
+/// stone floor, wall, sand in fixed colours, under the lines and tokens). The
+/// eraser erases the layer of the last tool chosen; undo covers both.
+///
 /// Kalem modu (pen mode, turned on by the first stylus touch): only a stylus
 /// draws or erases; a finger (or a resting palm) never draws, it pans the map
 /// and still moves tokens. The stylus' eraser end or barrel button erases for
@@ -36,7 +40,7 @@ class MapScreen extends ConsumerStatefulWidget {
   ConsumerState<MapScreen> createState() => _MapScreenState();
 }
 
-enum _Tool { pen, eraser }
+enum _Tool { pen, area, eraser }
 
 /// What the pointers on the map are doing.
 enum _Gesture { none, pending, draw, erase, token, pan, pinch, ignore }
@@ -66,6 +70,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   _Tool _tool = _Tool.pen;
   int _color = 0;
   bool _grid = true;
+
+  /// The layer drawn and erased: areas after "Alan" was chosen, lines after
+  /// "Çiz". The eraser keeps the layer of the tool before it.
+  bool _areaLayer = false;
+  RegionKind _region = RegionKind.water;
+
+  /// Index into [regionWidths]; wide by default (areas are rough).
+  int _regionWidth = regionWidths.length - 1;
 
   /// Stroke being drawn, in map units.
   List<Offset01>? _drawing;
@@ -127,6 +139,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   bool get _penActive => _byStylus && _pointer != null;
 
+  /// The stroke in progress is an area (the "Alan" tool), not a line.
+  bool get _drawingArea => _tool == _Tool.area;
+
   /// Decoded points per stroke id. Strokes never change after they are
   /// saved, so each is parsed once, not on every pointer move.
   final Map<int, List<Offset01>> _decoded = {};
@@ -178,10 +193,27 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       color: _color,
       penMode: penMode,
       onPenMode: (v) => ref.read(settingsProvider.notifier).setPenMode(v),
-      onTool: (t) => setState(() => _tool = t),
+      areaLayer: _areaLayer,
+      region: _region,
+      regionWidth: _regionWidth,
+      onTool: (t) => setState(() {
+        _tool = t;
+        if (t != _Tool.eraser) _areaLayer = t == _Tool.area;
+      }),
       onColor: (c) => setState(() {
         _color = c;
         _tool = _Tool.pen;
+        _areaLayer = false;
+      }),
+      onRegion: (r) => setState(() {
+        _region = r;
+        _tool = _Tool.area;
+        _areaLayer = true;
+      }),
+      onRegionWidth: (w) => setState(() {
+        _regionWidth = w;
+        _tool = _Tool.area;
+        _areaLayer = true;
       }),
     );
     final canvas = _canvas(context, state, strokes, combatants, placed, background);
@@ -306,8 +338,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               strokes: [
                                 if (background == null)
                                   for (final s in strokes)
-                                    if (!_erasing.containsKey(s.id)) SketchStroke(_points(s), s.color),
-                                if (_drawing != null) SketchStroke(_drawing!, _color),
+                                    if (!s.isRegion && !_erasing.containsKey(s.id)) SketchStroke(_points(s), s.color),
+                                if (_drawing != null && !_drawingArea) SketchStroke(_drawing!, _color),
+                              ],
+                              regions: [
+                                if (background == null)
+                                  for (final s in strokes)
+                                    if (s.isRegion && !_erasing.containsKey(s.id))
+                                      RegionStroke(_points(s), RegionKind.of(s.region!), s.width ?? regionWidths.last),
+                                if (_drawing != null && _drawingArea) RegionStroke(_drawing!, _region, regionWidths[_regionWidth]),
                               ],
                               tokens: [
                                 for (final c in placed)
@@ -341,8 +380,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                                       at: h.at,
                                       eraser: h.erases,
                                       // On screen: the eraser keeps its size when zoomed, the pen line grows with the map.
-                                      radius: h.erases ? eraserRadius(side) : strokeWidth(side) * _scale / 2,
-                                      color: theme.palette[_color],
+                                      radius: h.erases
+                                          ? eraserRadius(side)
+                                          : (_areaLayer ? regionWidths[_regionWidth] * side : strokeWidth(side)) * _scale / 2,
+                                      color: _areaLayer ? _region.color : theme.palette[_color],
                                       outline: scheme.onSurface,
                                     ),
                                     size: Size.square(side),
@@ -680,7 +721,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       case _Gesture.draw when _drawing != null && _drawing!.isNotEmpty && (tap || moved):
         // A tap leaves a dot (a tree, a rock, a torch…).
         final pts = tap ? [_drawing!.first] : simplify(_drawing!);
-        db.addStroke(pts, color: _color).then((id) {
+        final area = _drawingArea;
+        db.addStroke(pts, color: area ? 0 : _color, region: area ? _region.index : null, width: area ? regionWidths[_regionWidth] : null).then((id) {
           if (mounted) setState(() => _pushUndo(_Added(id)));
         });
       case _Gesture.none || _Gesture.pending || _Gesture.draw || _Gesture.erase || _Gesture.pan || _Gesture.pinch || _Gesture.ignore:
@@ -698,12 +740,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     });
   }
 
-  /// Erases every stroke within the eraser's reach of the swipe [from] → [to];
-  /// each stroke is deleted once per gesture. The reach is the same on screen
-  /// at any zoom, so a zoomed-in eraser is finer.
+  /// Erases every stroke of the current layer (lines, or areas after "Alan")
+  /// within the eraser's reach of the swipe [from] → [to]; each stroke is
+  /// deleted once per gesture. The reach is the same on screen at any zoom, so
+  /// a zoomed-in eraser is finer; an area is hit anywhere on its painted width.
   void _erase(Offset01 from, Offset01 to) {
-    final live = [for (final s in _strokes) if (!_erasing.containsKey(s.id)) s];
-    final hits = strokesNearPath(live.map((s) => (s.id, _points(s))), from, to, eraserRadius(_side) / _side / _scale);
+    final live = [for (final s in _strokes) if (s.isRegion == _areaLayer && !_erasing.containsKey(s.id)) s];
+    final half = {for (final s in live) if (s.isRegion) s.id: (s.width ?? regionWidths.last) / 2};
+    final hits = strokesNearPath(live.map((s) => (s.id, _points(s))), from, to, eraserRadius(_side) / _side / _scale, pad: (id) => half[id] ?? 0);
     if (hits.isEmpty) return;
     for (final s in live) {
       if (hits.contains(s.id)) _erasing[s.id] = s;
@@ -786,17 +830,40 @@ class _Toolbar extends StatelessWidget {
     required this.tool,
     required this.color,
     required this.penMode,
+    required this.areaLayer,
+    required this.region,
+    required this.regionWidth,
     required this.onTool,
     required this.onColor,
     required this.onPenMode,
+    required this.onRegion,
+    required this.onRegionWidth,
   });
 
   final _Tool tool;
   final int color;
   final bool penMode;
+  final bool areaLayer;
+  final RegionKind region;
+  final int regionWidth;
   final ValueChanged<bool> onPenMode;
   final ValueChanged<_Tool> onTool;
   final ValueChanged<int> onColor;
+  final ValueChanged<RegionKind> onRegion;
+  final ValueChanged<int> onRegionWidth;
+
+  /// A 44 dp touch target around a swatch.
+  static Widget _swatch({required Key key, required String label, required bool selected, required VoidCallback onTap, required Widget child}) =>
+      Semantics(
+        button: true,
+        selected: selected,
+        label: label,
+        excludeSemantics: true,
+        child: Tooltip(
+          message: label,
+          child: InkResponse(key: key, onTap: onTap, radius: 22, child: SizedBox(width: 44, height: 44, child: Center(child: child))),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -812,13 +879,23 @@ class _Toolbar extends StatelessWidget {
         spacing: 8,
         runSpacing: 4,
         children: [
-          SegmentedButton<_Tool>(
-            segments: const [
-              ButtonSegment(value: _Tool.pen, icon: Icon(Icons.edit), label: Text('Çiz')),
-              ButtonSegment(value: _Tool.eraser, icon: Icon(Icons.auto_fix_normal), label: Text('Sil')),
-            ],
-            selected: {tool},
-            onSelectionChanged: (v) => onTool(v.first),
+          // Scaled down rather than overflowing in a narrow side column with large text.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: SegmentedButton<_Tool>(
+              showSelectedIcon: false,
+              segments: [
+                const ButtonSegment(value: _Tool.pen, icon: Icon(Icons.edit), label: Text('Çiz')),
+                const ButtonSegment(value: _Tool.area, icon: Icon(Icons.format_paint_outlined), label: Text('Alan')),
+                ButtonSegment(
+                    value: _Tool.eraser,
+                    icon: const Icon(Icons.auto_fix_normal),
+                    label: const Text('Sil'),
+                    tooltip: areaLayer ? 'Alanları sil' : 'Çizgileri sil'),
+              ],
+              selected: {tool},
+              onSelectionChanged: (v) => onTool(v.first),
+            ),
           ),
           // Pen mode: only the stylus draws, fingers pan and zoom. Its own
           // Wrap child, so with large text it moves down instead of overflowing.
@@ -833,39 +910,64 @@ class _Toolbar extends StatelessWidget {
               onPressed: () => onPenMode(!penMode),
             ),
           ),
-          Row(mainAxisSize: MainAxisSize.min, children: [
-            for (var i = 0; i < mapPaletteNames.length; i++)
-              Semantics(
-                button: true,
-                selected: tool == _Tool.pen && color == i,
-                label: 'Renk: ${mapPaletteNames[i]}',
-                excludeSemantics: true,
-                child: Tooltip(
-                  message: mapPaletteNames[i],
-                  child: InkResponse(
-                    key: Key('map-color-$i'),
-                    onTap: () => onColor(i),
-                    radius: 22,
-                    // 44 dp touch target around a 30 dp swatch.
-                    child: SizedBox(
-                      width: 44,
-                      height: 44,
-                      child: Center(
-                        child: Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            color: theme.palette[i],
-                            shape: BoxShape.circle,
-                            border: Border.all(color: tool == _Tool.pen && color == i ? primary : Colors.transparent, width: 3),
-                          ),
-                        ),
-                      ),
+          if (!areaLayer)
+            Row(mainAxisSize: MainAxisSize.min, children: [
+              for (var i = 0; i < mapPaletteNames.length; i++)
+                _swatch(
+                  key: Key('map-color-$i'),
+                  label: 'Renk: ${mapPaletteNames[i]}',
+                  selected: tool == _Tool.pen && color == i,
+                  onTap: () => onColor(i),
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: theme.palette[i],
+                      shape: BoxShape.circle,
+                      border: Border.all(color: tool == _Tool.pen && color == i ? primary : Colors.transparent, width: 3),
                     ),
                   ),
                 ),
-              ),
-          ]),
+            ]),
+          // Area brush: the six region kinds (rounded squares, unlike the pen's
+          // circles) and the brush width.
+          if (areaLayer)
+            Wrap(children: [
+              for (final r in RegionKind.values)
+                _swatch(
+                  key: Key('map-region-${r.name}'),
+                  label: 'Alan: ${r.label}',
+                  selected: tool == _Tool.area && region == r,
+                  onTap: () => onRegion(r),
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: r.color,
+                      borderRadius: BorderRadius.circular(7),
+                      border: Border.all(color: tool == _Tool.area && region == r ? primary : Colors.transparent, width: 3),
+                    ),
+                  ),
+                ),
+            ]),
+          if (areaLayer)
+            Row(mainAxisSize: MainAxisSize.min, children: [
+              for (var i = 0; i < regionWidths.length; i++)
+                _swatch(
+                  key: Key('map-width-$i'),
+                  label: 'Fırça: ${regionWidthNames[i]}',
+                  selected: regionWidth == i,
+                  onTap: () => onRegionWidth(i),
+                  child: Container(
+                    width: 10.0 + 8 * i,
+                    height: 10.0 + 8 * i,
+                    decoration: BoxDecoration(
+                      color: regionWidth == i ? primary : Theme.of(context).colorScheme.onSurfaceVariant,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+            ]),
         ],
       ),
     );

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gm_cebi/db/database.dart';
+import 'package:gm_cebi/features/map_sketch.dart';
 import 'package:gm_cebi/features/online_scene/online_settings.dart';
 import 'package:gm_cebi/features/online_scene/scene_controller.dart';
 import 'package:gm_cebi/providers.dart';
@@ -196,6 +197,96 @@ void main() {
     await tester.tap(find.byKey(const Key('map-undo')));
     await settle(tester);
     expect(await strokesOf(tester, db), hasLength(1));
+  });
+
+  appTest('Alan: paint areas under the lines; the eraser erases the layer of the tool; undo', gmPack: true, (tester, db) async {
+    await openMap(tester);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    // A pen line first, across the middle.
+    await tester.dragFrom(at(canvas, 0.2, 0.5), Offset(canvas.width * 0.6, 0));
+    await settle(tester);
+
+    await tester.tap(find.text('Alan'));
+    await settle(tester);
+    expect(find.byKey(const Key('map-color-0')), findsNothing, reason: 'the area palette replaces the pen colours');
+    for (final kind in ['water', 'road', 'forest', 'stone', 'wall', 'sand']) {
+      expect(find.byKey(Key('map-region-$kind')), findsOneWidget);
+    }
+    expect(find.bySemanticsLabel('Alan: Taş zemin'), findsOneWidget);
+    // Water, wide by default: a river across the top.
+    await tester.dragFrom(at(canvas, 0.1, 0.25), Offset(canvas.width * 0.8, 0));
+    await settle(tester);
+    // A thin road dot.
+    await tester.tap(find.byKey(const Key('map-region-road')));
+    await tester.tap(find.byKey(const Key('map-width-0')));
+    await tester.tapAt(at(canvas, 0.8, 0.8));
+    await settle(tester);
+    var strokes = await strokesOf(tester, db);
+    expect(strokes, hasLength(3));
+    expect(strokes[0].isRegion, isFalse);
+    expect(strokes[1].region, RegionKind.water.index);
+    expect(strokes[1].width, regionWidths.last);
+    expect(strokes[1].offsets.first.y, closeTo(0.25, 0.03));
+    expect(strokes[2].region, RegionKind.road.index);
+    expect(strokes[2].width, regionWidths.first);
+    expect(strokes[2].offsets, hasLength(1));
+
+    // The eraser after "Alan" erases areas: a swipe down the middle crosses the
+    // river and the pen line, only the river goes.
+    await tester.tap(find.text('Sil'));
+    await settle(tester);
+    await tester.dragFrom(at(canvas, 0.5, 0.05), Offset(0, canvas.height * 0.6));
+    await settle(tester);
+    strokes = await strokesOf(tester, db);
+    expect(strokes.map((s) => s.region), [null, RegionKind.road.index], reason: 'the pen line stays');
+
+    // Undo brings the river back.
+    await tester.tap(find.byKey(const Key('map-undo')));
+    await settle(tester);
+    expect(await strokesOf(tester, db), hasLength(3));
+
+    // After "Çiz", the eraser erases lines and leaves the areas.
+    await tester.tap(find.text('Çiz'));
+    await settle(tester);
+    await tester.tap(find.text('Sil'));
+    await settle(tester);
+    expect(find.byKey(const Key('map-color-0')), findsOneWidget);
+    await tester.dragFrom(at(canvas, 0.5, 0.05), Offset(0, canvas.height * 0.6));
+    await settle(tester);
+    strokes = await strokesOf(tester, db);
+    expect(strokes.map((s) => s.region), [RegionKind.water.index, RegionKind.road.index]);
+
+    // Undo the drawing itself: the newest area first.
+    await tester.tap(find.byKey(const Key('map-undo'))); // the erased line back
+    await tester.tap(find.byKey(const Key('map-undo'))); // the road dot gone
+    await settle(tester);
+    expect((await strokesOf(tester, db)).map((s) => s.region), [null, RegionKind.water.index]);
+  });
+
+  appTest('Alan with a stylus: pen mode rules apply; the eraser end erases areas', gmPack: true, (tester, db) async {
+    await openMap(tester);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    await tester.tap(find.text('Alan'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('map-region-forest')));
+    await settle(tester);
+    await penLine(tester, canvas, 0.2, 0.7, 0.3);
+    expect(penModeOn(tester), isTrue);
+    var strokes = await strokesOf(tester, db);
+    expect(strokes.single.region, RegionKind.forest.index);
+    expect(strokes.single.offsets.first.x, closeTo(0.2, 0.002), reason: 'the area starts where the pen touched');
+
+    // Pen mode: a finger pans, it never paints.
+    await tester.dragFrom(at(canvas, 0.2, 0.7), Offset(canvas.width * 0.5, 0));
+    await settle(tester);
+    expect(await strokesOf(tester, db), hasLength(1));
+
+    // The eraser end erases the area (it is about 0.045 of the side away: within its painted width).
+    await penLineDown(tester, canvas, 0.45, 0.1, 0.25, kind: PointerDeviceKind.invertedStylus);
+    expect(await strokesOf(tester, db), isEmpty);
+    await penLine(tester, canvas, 0.2, 0.7, 0.6);
+    strokes = await strokesOf(tester, db);
+    expect(strokes.single.region, RegionKind.forest.index, reason: 'the tip still paints areas');
   });
 
   appTest('landscape tablet: the map takes the full height, controls on the side', gmPack: true, surface: const Size(1280, 800), (tester, db) async {

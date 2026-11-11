@@ -71,7 +71,9 @@ class Combatants extends Table {
   IntColumn get level => integer().nullable()();
 }
 
-/// One pen stroke of an encounter's battle map (schema 2).
+/// One stroke of an encounter's battle map (schema 2): a pen line, or (schema
+/// 5) a stroke of the area brush ("Alan": water, road, forest…), painted under
+/// the lines and sent to the online scene as a separate region layer.
 class MapStrokes extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get encounterId => integer().references(Encounters, #id, onDelete: KeyAction.cascade)();
@@ -82,6 +84,13 @@ class MapStrokes extends Table {
   /// Index into the map palette (0 ink, 1 water, 2 plants, 3 danger).
   IntColumn get color => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime()();
+
+  /// Area brush: the region kind (`RegionKind.index`: 0 water, 1 road,
+  /// 2 forest, 3 stone floor, 4 wall, 5 sand); null for a pen line. (schema 5)
+  IntColumn get region => integer().nullable()();
+
+  /// Area brush width, 0..1 of the map's side; null for a pen line. (schema 5)
+  RealColumn get width => real().nullable()();
 }
 
 /// A picture made online from an encounter's map sketch (schema 3). Kept
@@ -140,6 +149,9 @@ List<Offset01> decodePoints(String s) {
 
 extension MapStrokeX on MapStroke {
   List<Offset01> get offsets => decodePoints(points);
+
+  /// A stroke of the area brush (painted region), not a pen line.
+  bool get isRegion => region != null;
 }
 
 /// Initiative order: highest initiative first, unrolled at the end, then the
@@ -176,7 +188,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: 'gm_cebi'));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -191,6 +203,11 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 3) await m.createTable(mapScenes); // CREATE TABLE IF NOT EXISTS
           if (from < 4 && !await _hasColumn('combatants', 'level')) await m.addColumn(combatants, combatants.level);
+          if (from < 5) {
+            // Old strokes keep null: pen lines, as before.
+            if (!await _hasColumn('map_strokes', 'region')) await m.addColumn(mapStrokes, mapStrokes.region);
+            if (!await _hasColumn('map_strokes', 'width')) await m.addColumn(mapStrokes, mapStrokes.width);
+          }
         }),
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
@@ -416,13 +433,18 @@ class AppDatabase extends _$AppDatabase {
     return q.watch().map((rows) => [for (final r in rows) r.readTable(mapStrokes)]);
   }
 
-  Future<int> addStroke(List<Offset01> points, {int color = 0}) async {
+  /// A pen line in palette [color], or with [region] (and its [width], 0..1
+  /// of the map's side) a stroke of the area brush.
+  Future<int> addStroke(List<Offset01> points, {int color = 0, int? region, double? width}) async {
+    assert((region == null) == (width == null), 'an area stroke has a kind and a width');
     final e = await activeEncounter();
     return into(mapStrokes).insert(MapStrokesCompanion.insert(
       encounterId: e.id,
       points: encodePoints(points),
       color: Value(color),
       createdAt: DateTime.now(),
+      region: Value(region),
+      width: Value(width),
     ));
   }
 
@@ -437,7 +459,7 @@ class AppDatabase extends _$AppDatabase {
   Future<void> restoreStrokes(Iterable<MapStroke> rows) =>
       batch((b) => b.insertAll(mapStrokes, rows, mode: InsertMode.insertOrIgnore));
 
-  /// Removes the newest stroke of the active map (undo).
+  /// Removes the newest stroke (line or area) of the active map (undo).
   Future<void> undoStroke() async {
     final e = await activeEncounter();
     final last = await (select(mapStrokes)
@@ -448,7 +470,7 @@ class AppDatabase extends _$AppDatabase {
     if (last != null) await deleteStrokes([last.id]);
   }
 
-  /// Clears the drawing; tokens stay where they are.
+  /// Clears the drawing, lines and areas; tokens stay where they are.
   Future<void> clearStrokes() async {
     final e = await activeEncounter();
     await (delete(mapStrokes)..where((s) => s.encounterId.equals(e.id))).go();

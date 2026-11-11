@@ -96,7 +96,7 @@ void main() {
       await upgraded.addStroke(const [Offset01(0, 0), Offset01(1, 1)]);
       expect((await upgraded.watchStrokes().first).length, 1);
       final version = await upgraded.customSelect('PRAGMA user_version').getSingle();
-      expect(version.data.values.first, 4);
+      expect(version.data.values.first, 5);
       await upgraded.addScene(assetId: 'a', png: Uint8List.fromList([1]), mode: 'map', narrative: '', seed: 1);
       expect(await upgraded.watchActiveScene().first, isNotNull);
       await upgraded.close();
@@ -186,7 +186,7 @@ void main() {
       await upgraded.setLevel(ayla.id, 5);
       expect((await upgraded.watchEncounterState().first).combatants.single.level, 5);
       final version = await upgraded.customSelect('PRAGMA user_version').getSingle();
-      expect(version.data.values.first, 4);
+      expect(version.data.values.first, 5);
       await upgraded.close();
 
       // Already has the column but still says 3 (killed before user_version was written).
@@ -195,6 +195,72 @@ void main() {
       await again.close();
       final reopened = AppDatabase(NativeDatabase(file));
       expect((await reopened.watchEncounterState().first).combatants.single.level, 5);
+      await reopened.close();
+    } finally {
+      await dir.delete(recursive: true);
+    }
+  });
+
+  test('area strokes: kind and width kept; undo, erase-restore and clear work as for lines', () async {
+    final line = await db.addStroke(const [Offset01(0.1, 0.5), Offset01(0.9, 0.5)], color: 1);
+    final water = await db.addStroke(const [Offset01(0.2, 0.2), Offset01(0.8, 0.3)], region: 0, width: 0.09);
+    final wall = await db.addStroke(const [Offset01(0.5, 0.5)], region: 4, width: 0.025);
+    var rows = await db.watchStrokes().first;
+    expect(rows.map((s) => s.id), [line, water, wall]);
+    expect(rows[0].isRegion, isFalse);
+    expect(rows[0].region, isNull);
+    expect(rows[0].width, isNull);
+    expect(rows[1].isRegion, isTrue);
+    expect(rows[1].region, 0);
+    expect(rows[1].width, closeTo(0.09, 1e-9));
+    expect(rows[2].offsets, const [Offset01(0.5, 0.5)]);
+
+    await db.undoStroke(); // the newest, whatever its layer
+    rows = await db.watchStrokes().first;
+    expect(rows.map((s) => s.id), [line, water]);
+    await db.clearStrokes();
+    await db.restoreStrokes(rows);
+    rows = await db.watchStrokes().first;
+    expect(rows[1].region, 0, reason: 'undo of "clear" brings the area back as an area');
+    expect(rows[1].width, closeTo(0.09, 1e-9));
+
+    await db.newEncounter();
+    expect(await db.select(db.mapStrokes).get(), isEmpty, reason: 'areas are deleted with their encounter');
+  });
+
+  test('schema 4 databases get the area columns; old strokes stay pen lines', () async {
+    final dir = await Directory.systemTemp.createTemp('gmcebi-migration');
+    final file = File('${dir.path}/v4.sqlite');
+    try {
+      final db4 = AppDatabase(NativeDatabase(file));
+      await db4.addStroke(const [Offset01(0.1, 0.1), Offset01(0.9, 0.9)], color: 2);
+      await db4.customStatement('ALTER TABLE map_strokes DROP COLUMN region');
+      await db4.customStatement('ALTER TABLE map_strokes DROP COLUMN width');
+      await db4.customStatement('PRAGMA user_version = 4');
+      await db4.close();
+
+      final upgraded = AppDatabase(NativeDatabase(file));
+      var rows = await upgraded.watchStrokes().first;
+      expect(rows.single.color, 2);
+      expect(rows.single.isRegion, isFalse);
+      expect(rows.single.offsets.last, const Offset01(0.9, 0.9));
+      await upgraded.addStroke(const [Offset01(0.3, 0.3), Offset01(0.4, 0.4)], region: 5, width: 0.05);
+      rows = await upgraded.watchStrokes().first;
+      expect(rows.last.region, 5);
+      final version = await upgraded.customSelect('PRAGMA user_version').getSingle();
+      expect(version.data.values.first, 5);
+      await upgraded.close();
+
+      // Already has one column but still says 4 (killed half way): runs again.
+      final half = AppDatabase(NativeDatabase(file));
+      await half.customStatement('ALTER TABLE map_strokes DROP COLUMN width');
+      await half.customStatement('PRAGMA user_version = 4');
+      await half.close();
+      final reopened = AppDatabase(NativeDatabase(file));
+      rows = await reopened.watchStrokes().first;
+      expect(rows, hasLength(2));
+      expect(rows.last.region, 5);
+      expect(rows.last.width, isNull, reason: 'the dropped column comes back empty');
       await reopened.close();
     } finally {
       await dir.delete(recursive: true);

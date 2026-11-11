@@ -82,6 +82,9 @@ testler hazır; yerel neuracraft-cloud API'sine karşı `tool/nc_smoke.dart` ile
 token'lar güvenli depoda, tek uçuşlu yenileme, uygulama içi "Hesabımı sil". Girişli sürüm canlı
 serviste henüz denenmedi (servis bugün `auth.sign_in_unavailable` dönüyor). Mağazaya açık derleme gitmeden önce gizlilik beyanları güncellenmeli
 (`docs/online-scene.md`, "Gizlilik ve mağaza beyanları").
+2026-11-10 (dal `claude/map-regions`): haritada **Alan fırçası** (Su, Yol, Orman, Taş zemin, Duvar, Kum; üç kalınlık;
+çevrimdışı haritada da görünür, şema 5). Harita modunda boyanan alanlar ikinci PNG ve "Zemin" ile gider (neuracraft-cloud #42),
+ama yalnızca `GET /v1/presets` bunu duyurduğunda; sunucu tarafı henüz canlı değil, o zamana kadar çizim tek başına gider.
 
 ## Savaş haritası (GM Paketi, çevrimdışı)
 

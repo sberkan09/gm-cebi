@@ -1995,6 +1995,24 @@ class $MapStrokesTable extends MapStrokes
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _regionMeta = const VerificationMeta('region');
+  @override
+  late final GeneratedColumn<int> region = GeneratedColumn<int>(
+    'region',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _widthMeta = const VerificationMeta('width');
+  @override
+  late final GeneratedColumn<double> width = GeneratedColumn<double>(
+    'width',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2002,6 +2020,8 @@ class $MapStrokesTable extends MapStrokes
     points,
     color,
     createdAt,
+    region,
+    width,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2051,6 +2071,18 @@ class $MapStrokesTable extends MapStrokes
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('region')) {
+      context.handle(
+        _regionMeta,
+        region.isAcceptableOrUnknown(data['region']!, _regionMeta),
+      );
+    }
+    if (data.containsKey('width')) {
+      context.handle(
+        _widthMeta,
+        width.isAcceptableOrUnknown(data['width']!, _widthMeta),
+      );
+    }
     return context;
   }
 
@@ -2080,6 +2112,14 @@ class $MapStrokesTable extends MapStrokes
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      region: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}region'],
+      ),
+      width: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}width'],
+      ),
     );
   }
 
@@ -2099,12 +2139,21 @@ class MapStroke extends DataClass implements Insertable<MapStroke> {
   /// Index into the map palette (0 ink, 1 water, 2 plants, 3 danger).
   final int color;
   final DateTime createdAt;
+
+  /// Area brush: the region kind (`RegionKind.index`: 0 water, 1 road,
+  /// 2 forest, 3 stone floor, 4 wall, 5 sand); null for a pen line. (schema 5)
+  final int? region;
+
+  /// Area brush width, 0..1 of the map's side; null for a pen line. (schema 5)
+  final double? width;
   const MapStroke({
     required this.id,
     required this.encounterId,
     required this.points,
     required this.color,
     required this.createdAt,
+    this.region,
+    this.width,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2114,6 +2163,12 @@ class MapStroke extends DataClass implements Insertable<MapStroke> {
     map['points'] = Variable<String>(points);
     map['color'] = Variable<int>(color);
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || region != null) {
+      map['region'] = Variable<int>(region);
+    }
+    if (!nullToAbsent || width != null) {
+      map['width'] = Variable<double>(width);
+    }
     return map;
   }
 
@@ -2124,6 +2179,12 @@ class MapStroke extends DataClass implements Insertable<MapStroke> {
       points: Value(points),
       color: Value(color),
       createdAt: Value(createdAt),
+      region: region == null && nullToAbsent
+          ? const Value.absent()
+          : Value(region),
+      width: width == null && nullToAbsent
+          ? const Value.absent()
+          : Value(width),
     );
   }
 
@@ -2138,6 +2199,8 @@ class MapStroke extends DataClass implements Insertable<MapStroke> {
       points: serializer.fromJson<String>(json['points']),
       color: serializer.fromJson<int>(json['color']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      region: serializer.fromJson<int?>(json['region']),
+      width: serializer.fromJson<double?>(json['width']),
     );
   }
   @override
@@ -2149,6 +2212,8 @@ class MapStroke extends DataClass implements Insertable<MapStroke> {
       'points': serializer.toJson<String>(points),
       'color': serializer.toJson<int>(color),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'region': serializer.toJson<int?>(region),
+      'width': serializer.toJson<double?>(width),
     };
   }
 
@@ -2158,12 +2223,16 @@ class MapStroke extends DataClass implements Insertable<MapStroke> {
     String? points,
     int? color,
     DateTime? createdAt,
+    Value<int?> region = const Value.absent(),
+    Value<double?> width = const Value.absent(),
   }) => MapStroke(
     id: id ?? this.id,
     encounterId: encounterId ?? this.encounterId,
     points: points ?? this.points,
     color: color ?? this.color,
     createdAt: createdAt ?? this.createdAt,
+    region: region.present ? region.value : this.region,
+    width: width.present ? width.value : this.width,
   );
   MapStroke copyWithCompanion(MapStrokesCompanion data) {
     return MapStroke(
@@ -2174,6 +2243,8 @@ class MapStroke extends DataClass implements Insertable<MapStroke> {
       points: data.points.present ? data.points.value : this.points,
       color: data.color.present ? data.color.value : this.color,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      region: data.region.present ? data.region.value : this.region,
+      width: data.width.present ? data.width.value : this.width,
     );
   }
 
@@ -2184,13 +2255,16 @@ class MapStroke extends DataClass implements Insertable<MapStroke> {
           ..write('encounterId: $encounterId, ')
           ..write('points: $points, ')
           ..write('color: $color, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('region: $region, ')
+          ..write('width: $width')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, encounterId, points, color, createdAt);
+  int get hashCode =>
+      Object.hash(id, encounterId, points, color, createdAt, region, width);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2199,7 +2273,9 @@ class MapStroke extends DataClass implements Insertable<MapStroke> {
           other.encounterId == this.encounterId &&
           other.points == this.points &&
           other.color == this.color &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.region == this.region &&
+          other.width == this.width);
 }
 
 class MapStrokesCompanion extends UpdateCompanion<MapStroke> {
@@ -2208,12 +2284,16 @@ class MapStrokesCompanion extends UpdateCompanion<MapStroke> {
   final Value<String> points;
   final Value<int> color;
   final Value<DateTime> createdAt;
+  final Value<int?> region;
+  final Value<double?> width;
   const MapStrokesCompanion({
     this.id = const Value.absent(),
     this.encounterId = const Value.absent(),
     this.points = const Value.absent(),
     this.color = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.region = const Value.absent(),
+    this.width = const Value.absent(),
   });
   MapStrokesCompanion.insert({
     this.id = const Value.absent(),
@@ -2221,6 +2301,8 @@ class MapStrokesCompanion extends UpdateCompanion<MapStroke> {
     required String points,
     this.color = const Value.absent(),
     required DateTime createdAt,
+    this.region = const Value.absent(),
+    this.width = const Value.absent(),
   }) : encounterId = Value(encounterId),
        points = Value(points),
        createdAt = Value(createdAt);
@@ -2230,6 +2312,8 @@ class MapStrokesCompanion extends UpdateCompanion<MapStroke> {
     Expression<String>? points,
     Expression<int>? color,
     Expression<DateTime>? createdAt,
+    Expression<int>? region,
+    Expression<double>? width,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2237,6 +2321,8 @@ class MapStrokesCompanion extends UpdateCompanion<MapStroke> {
       if (points != null) 'points': points,
       if (color != null) 'color': color,
       if (createdAt != null) 'created_at': createdAt,
+      if (region != null) 'region': region,
+      if (width != null) 'width': width,
     });
   }
 
@@ -2246,6 +2332,8 @@ class MapStrokesCompanion extends UpdateCompanion<MapStroke> {
     Value<String>? points,
     Value<int>? color,
     Value<DateTime>? createdAt,
+    Value<int?>? region,
+    Value<double?>? width,
   }) {
     return MapStrokesCompanion(
       id: id ?? this.id,
@@ -2253,6 +2341,8 @@ class MapStrokesCompanion extends UpdateCompanion<MapStroke> {
       points: points ?? this.points,
       color: color ?? this.color,
       createdAt: createdAt ?? this.createdAt,
+      region: region ?? this.region,
+      width: width ?? this.width,
     );
   }
 
@@ -2274,6 +2364,12 @@ class MapStrokesCompanion extends UpdateCompanion<MapStroke> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (region.present) {
+      map['region'] = Variable<int>(region.value);
+    }
+    if (width.present) {
+      map['width'] = Variable<double>(width.value);
+    }
     return map;
   }
 
@@ -2284,7 +2380,9 @@ class MapStrokesCompanion extends UpdateCompanion<MapStroke> {
           ..write('encounterId: $encounterId, ')
           ..write('points: $points, ')
           ..write('color: $color, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('region: $region, ')
+          ..write('width: $width')
           ..write(')'))
         .toString();
   }
@@ -4293,6 +4391,8 @@ typedef $$MapStrokesTableCreateCompanionBuilder = MapStrokesCompanion Function({
   required String points,
   Value<int> color,
   required DateTime createdAt,
+  Value<int?> region,
+  Value<double?> width,
 });
 typedef $$MapStrokesTableUpdateCompanionBuilder = MapStrokesCompanion Function({
   Value<int> id,
@@ -4300,6 +4400,8 @@ typedef $$MapStrokesTableUpdateCompanionBuilder = MapStrokesCompanion Function({
   Value<String> points,
   Value<int> color,
   Value<DateTime> createdAt,
+  Value<int?> region,
+  Value<double?> width,
 });
 
 final class $$MapStrokesTableReferences
@@ -4350,6 +4452,16 @@ class $$MapStrokesTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get region => $composableBuilder(
+    column: $table.region,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get width => $composableBuilder(
+    column: $table.width,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4406,6 +4518,16 @@ class $$MapStrokesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get region => $composableBuilder(
+    column: $table.region,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get width => $composableBuilder(
+    column: $table.width,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$EncountersTableOrderingComposer get encounterId {
     final $$EncountersTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4450,6 +4572,12 @@ class $$MapStrokesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get region =>
+      $composableBuilder(column: $table.region, builder: (column) => column);
+
+  GeneratedColumn<double> get width =>
+      $composableBuilder(column: $table.width, builder: (column) => column);
 
   $$EncountersTableAnnotationComposer get encounterId {
     final $$EncountersTableAnnotationComposer composer = $composerBuilder(
@@ -4508,12 +4636,16 @@ class $$MapStrokesTableTableManager
                 Value<String> points = const Value.absent(),
                 Value<int> color = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<int?> region = const Value.absent(),
+                Value<double?> width = const Value.absent(),
               }) => MapStrokesCompanion(
                 id: id,
                 encounterId: encounterId,
                 points: points,
                 color: color,
                 createdAt: createdAt,
+                region: region,
+                width: width,
               ),
           createCompanionCallback:
               ({
@@ -4522,12 +4654,16 @@ class $$MapStrokesTableTableManager
                 required String points,
                 Value<int> color = const Value.absent(),
                 required DateTime createdAt,
+                Value<int?> region = const Value.absent(),
+                Value<double?> width = const Value.absent(),
               }) => MapStrokesCompanion.insert(
                 id: id,
                 encounterId: encounterId,
                 points: points,
                 color: color,
                 createdAt: createdAt,
+                region: region,
+                width: width,
               ),
           withReferenceMapper: (p0) => p0
               .map(

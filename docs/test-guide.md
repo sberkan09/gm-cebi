@@ -49,6 +49,11 @@ Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
    avuç içi ve parmak çizmez (tek parmak haritayı kaydırır, jetonlar parmakla taşınır); kalemin silgi ucu ya da yan
    tuşu o çizgi için siler; kalem ekranın üstünde gezinirken fırça/silgi imleci görünür. Kalem modunu haritadaki
    kalem düğmesinden ya da Ayarlar'dan kapat.
+   **Alan fırçası:** araç çubuğunda "Alan"a dokun; renkler yerine altı alan türü (Su, Yol, Orman, Taş zemin, Duvar,
+   Kum) ve üç fırça kalınlığı (ince, orta, kalın) çıkar. Bir nehri ya da odanın zeminini kabaca boya: boya yarı saydam,
+   ızgara ve çizgiler üstünde okunur kalmalı, jetonlar boyanın üstünde durmalı. "Alan"dan sonra "Sil" yalnızca alanları,
+   "Çiz"den sonra "Sil" yalnızca çizgileri siler; geri al ikisinde de çalışır. Kalemle de dene (kalem modu kuralları
+   aynı, silgi ucu alanları siler). Uygulamayı kapatıp açınca boyalar yerinde durmalı.
 6. **Notlar** — Oturum notu al; yazdıkların kendiliğinden kaydedilir.
 7. **NPC üretici** — Notlar ekranında sağ üstteki maske simgesine dokun, **NPC üret**'e bas.
    Bir alana dokununca yalnızca o alan değişir; kilit simgesiyle alanı sabitle, sonra

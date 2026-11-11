@@ -28,6 +28,14 @@ const maxNarrativeChars = 500;
 const maxPromptChars = 400;
 const maxNegativeChars = 300;
 const maxSketchBytes = 512 * 1024;
+
+/// The optional region layer (neuracraft-cloud #42): a PNG the size of the
+/// sketch, transparent where unpainted.
+const maxRegionsBytes = 512 * 1024;
+
+/// `params.ground`: what the service fills the unpainted area with, when a
+/// region layer is sent. `grass` is the service's default.
+const sceneGrounds = NcSceneFeatures.groundValues;
 const maxReportNoteChars = 500;
 
 class NeuraCraftClient {
@@ -93,6 +101,11 @@ class NeuraCraftClient {
 
   /// Sends the terrain sketch (a PNG of dark strokes on light, tokens never
   /// included) with a Turkish [narrative] or an English [prompt].
+  ///
+  /// [regionsPng] is the optional region layer (painted areas in the contract
+  /// colours, transparent elsewhere) and [ground] what fills the rest; both
+  /// are sent only when given, and only when [sceneFeatures] says the service
+  /// takes them (it refuses unknown inputs and parameters).
   Future<NcJob> submitScene({
     required Uint8List sketchPng,
     required SceneMode mode,
@@ -100,6 +113,8 @@ class NeuraCraftClient {
     String? prompt,
     String? negative,
     int? seed,
+    Uint8List? regionsPng,
+    String? ground,
   }) async {
     final text = narrative?.trim();
     final en = prompt?.trim();
@@ -110,6 +125,14 @@ class NeuraCraftClient {
     if (en != null && en.length > maxPromptChars) throw ArgumentError('prompt is longer than $maxPromptChars');
     if (negative != null && negative.length > maxNegativeChars) throw ArgumentError('negative is longer than $maxNegativeChars');
     if (sketchPng.length > maxSketchBytes) throw ArgumentError('sketch is larger than $maxSketchBytes bytes');
+    if (regionsPng != null) {
+      if (regionsPng.length > maxRegionsBytes) throw ArgumentError('regions is larger than $maxRegionsBytes bytes');
+      if (!_isPng(regionsPng)) throw ArgumentError('regions is not a PNG');
+    }
+    if (ground != null) {
+      if (!sceneGrounds.contains(ground)) throw ArgumentError('ground must be one of ${sceneGrounds.join(', ')}');
+      if (regionsPng == null) throw ArgumentError('ground is only sent with regions');
+    }
     final body = {
       'version': sketchToSceneVersion,
       'params': {
@@ -118,9 +141,11 @@ class NeuraCraftClient {
         if (en != null && en.isNotEmpty) 'prompt': en,
         if (negative != null && negative.isNotEmpty) 'negative': negative,
         'seed': ?seed,
+        'ground': ?ground,
       },
       'inputs': {
         'sketch': {'inline': base64Encode(sketchPng), 'contentType': 'image/png'},
+        if (regionsPng != null) 'regions': {'inline': base64Encode(regionsPng), 'contentType': 'image/png'},
       },
     };
     final r = await _json('POST', '/v1/presets/sketch_to_scene/jobs', body: body);
@@ -257,6 +282,29 @@ class NeuraCraftClient {
       if (n != null && n.isNotEmpty) 'note': n,
     });
   }
+
+  /// What the service's `sketch_to_scene` takes beyond the sketch (the region
+  /// layer and `ground`), read from `GET /v1/presets` once per client (the
+  /// client lives as long as the sign-in and configuration do). The region
+  /// layer was agreed in neuracraft-cloud #42 before the server had it, so the
+  /// app sends it only once the preset advertises it: an `inputs` entry named
+  /// `regions` and, for the ground, a `ground` parameter. Anything unexpected
+  /// (an unknown shape, an older preset) means "not supported", which is
+  /// cached; a failed request is not cached, so the next call asks again.
+  Future<NcSceneFeatures> sceneFeatures() => _features ??= _loadFeatures();
+  Future<NcSceneFeatures>? _features;
+
+  Future<NcSceneFeatures> _loadFeatures() async {
+    try {
+      return NcSceneFeatures.fromPresets(await _json('GET', '/v1/presets'), minVersion: sketchToSceneVersion);
+    } on Object {
+      _features = null;
+      return NcSceneFeatures.none;
+    }
+  }
+
+  static bool _isPng(Uint8List b) =>
+      b.length > 8 && b[0] == 0x89 && b[1] == 0x50 && b[2] == 0x4E && b[3] == 0x47 && b[4] == 0x0D && b[5] == 0x0A && b[6] == 0x1A && b[7] == 0x0A;
 
   /// Whether the service offers `sketch_to_scene` at a version this app knows.
   Future<bool> supportsSketchToScene() async {
