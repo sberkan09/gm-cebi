@@ -20,6 +20,22 @@ oradadır, işin bitince kaldırabilirsin.
 Bu test sürümünde **GM Paketi açık** gelir. Kilitli hâlini görmek için:
 Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
 
+### Yeni APK'dan önce yedek al
+
+Yeni bir test APK'sı bazen eskisini kaldırmadan kurulmaz; kaldırınca notlar, karşılaşma ve harita da silinir.
+Önce yedek al:
+
+1. Ara → sağ üstteki dişli → **Yedekleme** → **Yedek al**.
+2. **Dosyaya kaydet** (ör. İndirilenler) ya da **Paylaş** (kendine e-posta, Drive…). Dosyanın adı
+   `gm-cebi-yedek-YYYY-AA-GG.json`. "Son yedek" satırı güncellenir.
+3. Eski uygulamayı kaldır, yeni APK'yı kur.
+4. Yeni uygulamada **Yedekleme** → **Yedekten geri yükle** → dosyayı seç → onayla. Buradaki veriler silinir,
+   yedektekiler gelir (geri alınamaz).
+
+Yedekte notlar, karşılaşma, savaş haritası, çevrimiçi resimler ve ayarlar (tema, içerik dili, grup seviyesi…)
+vardır. Giriş bilgileri ve çevrimiçi sahne onayı yedeğe girmez; yeni kurulumda yeniden giriş yaparsın. Yedek
+GM Paketi kilitliyken de alınır; kilitliyken notlar okunur ama düzenlenmez.
+
 ## Ne deneyelim (masada, gerçek oturumda)
 
 1. **Ara** — Alttaki kutuya Türkçe ya da İngilizce yaz: "kör", "ateş topu",
@@ -54,12 +70,15 @@ Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
    ızgara ve çizgiler üstünde okunur kalmalı, jetonlar boyanın üstünde durmalı. "Alan"dan sonra "Sil" yalnızca alanları,
    "Çiz"den sonra "Sil" yalnızca çizgileri siler; geri al ikisinde de çalışır. Kalemle de dene (kalem modu kuralları
    aynı, silgi ucu alanları siler). Uygulamayı kapatıp açınca boyalar yerinde durmalı.
-6. **Notlar** — Oturum notu al; yazdıkların kendiliğinden kaydedilir.
+6. **Notlar** — Oturum notu al; yazdıkların kendiliğinden kaydedilir. Notun sağ üstündeki menüden **Notu paylaş**
+   ile başlığı ve metni düz yazı olarak gönder.
 7. **NPC üretici** — Notlar ekranında sağ üstteki maske simgesine dokun, **NPC üret**'e bas.
    Bir alana dokununca yalnızca o alan değişir; kilit simgesiyle alanı sabitle, sonra
    **Yeniden üret**. Filtrelerden soy, cinsiyet ve tavrı seç. **Nota kaydet** ve
    **İnisiyatife ekle**'yi dene. İsimler ve tablolar masada doğal okunuyor mu, söyle.
 8. **Genel** — Tek elle kullanım, yazı büyüklüğü, koyu/açık tema (Ayarlar).
+9. **Yedekleme** — Yedek al, birkaç not ekle, yedekten geri yükle: eklediğin notlar gitmeli, eskiler dönmeli;
+   karşılaşma sırası (kimin sırası, tur) ve harita aynen gelmeli.
 
 ## Bilinen eksikler (bildirmene gerek yok)
 
