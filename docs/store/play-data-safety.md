@@ -17,8 +17,8 @@ Gerekçe (Play tanımlarına göre):
 
 - **Toplama**, verinin cihazdan geliştiriciye ya da üçüncü bir tarafa gönderilmesidir.
   Uygulama hiçbir veriyi cihazdan dışarı göndermez. Mağaza derlemesinde İnternet izni yok.
-- Notlar, karşılaşmalar, savaş haritası (çizgiler, boyanan alanlar, jeton yerleri) ve ayarlar
-  yalnızca cihazda işlenir. Play, yalnızca cihazda kalan veriyi "toplanan veri" saymaz.
+- Notlar, karşılaşmalar, savaş haritası (çizgiler, boyanan alanlar, jeton yerleri, yüklenen harita
+  resmi) ve ayarlar yalnızca cihazda işlenir. Play, yalnızca cihazda kalan veriyi "toplanan veri" saymaz.
 - "Yedek al" (Ayarlar → Yedekleme) kullanıcının kendi başlattığı bir dışa aktarmadır: dosya cihazda
   kalır, kullanıcı isterse kendisi paylaşır; geliştiriciye ya da bir sunucuya gitmez. Play'in
   tanımına göre bu da toplama değildir.
@@ -97,7 +97,9 @@ kaynak: neuracraft-cloud `docs/PRIVACY.md`):
 - Kullanıcı verisi: `lib/db/database.dart` → `settings`, `notes`, `encounters`,
   `combatants` (jeton yerleri: `posX`, `posY`), `map_strokes` (harita çizgileri; `region`, `width`:
   alan fırçası), `map_scenes` (çevrimiçi resimler: PNG, tarif, sunucudaki numara; yalnızca
-  çevrimiçi sahneli derlemede dolar) tabloları, uygulamanın belge klasöründe
+  çevrimiçi sahneli derlemede dolar), `map_images` (kullanıcının yüklediği harita resmi: dosyanın
+  baytları, boyutu, yerleşimi; sistemin dosya seçicisiyle `file_picker`, `FileType.image`, izin yok)
+  tabloları, uygulamanın belge klasöründe
   (`getApplicationDocumentsDirectory`) yerel SQLite dosyası.
 - Yedek dosyaları: Ayarlar → Yedekleme → "Yedek al" ile kullanıcı oluşturur; cihazda kalır,
   kullanıcı paylaşmadıkça bir yere gitmez. Giriş token'ları veritabanında değil güvenli depoda
@@ -106,7 +108,8 @@ kaynak: neuracraft-cloud `docs/PRIVACY.md`):
 Çevrimiçi sahneli derleme (ek olarak):
 
 - Gönderilenler: `lib/data/neuracraft/client.dart` → iş gönderimi (çizim PNG'si, servis destekliyorsa
-  `inputs.regions` boyanan alanlar, tarif), giriş çağrıları (e-posta, kod), hesap silme
+  `inputs.regions` boyanan alanlar, tarif; yüklenen harita resmi hiçbir zaman gönderilmez:
+  `test/features/scene_controller_test.dart`, "map_images"), giriş çağrıları (e-posta, kod), hesap silme
   (`DELETE /v1/me`).
 - Resim bildirimi: `NeuraCraftClient.report` → `POST /v1/assets/{id}/report`, gövde `reason`
   (`sexual`, `violence_gore`, `hate`, `minor_safety`, `other`) ve isteğe bağlı `note` (en çok 500

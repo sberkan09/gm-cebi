@@ -131,8 +131,11 @@ void main() {
       // Build a schema-1 file: today's schema minus what schema 2 added.
       final v2 = AppDatabase(NativeDatabase(file));
       await v2.addCombatant(name: 'Goblin', initiative: 12, hp: 7);
+      await v2.customStatement('DROP TABLE map_images');
       await v2.customStatement('DROP TABLE map_scenes');
       await v2.customStatement('DROP TABLE map_strokes');
+      await v2.customStatement('ALTER TABLE encounters DROP COLUMN token_scale');
+      await v2.customStatement('ALTER TABLE encounters DROP COLUMN map_background');
       await v2.customStatement('ALTER TABLE combatants DROP COLUMN pos_x');
       await v2.customStatement('ALTER TABLE combatants DROP COLUMN pos_y');
       await v2.customStatement('ALTER TABLE combatants DROP COLUMN level');
@@ -148,7 +151,7 @@ void main() {
       await upgraded.addStroke(const [Offset01(0, 0), Offset01(1, 1)]);
       expect((await upgraded.watchStrokes().first).length, 1);
       final version = await upgraded.customSelect('PRAGMA user_version').getSingle();
-      expect(version.data.values.first, 5);
+      expect(version.data.values.first, 6);
       await upgraded.addScene(assetId: 'a', png: Uint8List.fromList([1]), mode: 'map', narrative: '', seed: 1);
       expect(await upgraded.watchActiveScene().first, isNotNull);
       await upgraded.close();
@@ -238,7 +241,7 @@ void main() {
       await upgraded.setLevel(ayla.id, 5);
       expect((await upgraded.watchEncounterState().first).combatants.single.level, 5);
       final version = await upgraded.customSelect('PRAGMA user_version').getSingle();
-      expect(version.data.values.first, 5);
+      expect(version.data.values.first, 6);
       await upgraded.close();
 
       // Already has the column but still says 3 (killed before user_version was written).
@@ -288,6 +291,9 @@ void main() {
       await db4.addStroke(const [Offset01(0.1, 0.1), Offset01(0.9, 0.9)], color: 2);
       await db4.customStatement('ALTER TABLE map_strokes DROP COLUMN region');
       await db4.customStatement('ALTER TABLE map_strokes DROP COLUMN width');
+      await db4.customStatement('DROP TABLE map_images');
+      await db4.customStatement('ALTER TABLE encounters DROP COLUMN token_scale');
+      await db4.customStatement('ALTER TABLE encounters DROP COLUMN map_background');
       await db4.customStatement('PRAGMA user_version = 4');
       await db4.close();
 
@@ -300,7 +306,7 @@ void main() {
       rows = await upgraded.watchStrokes().first;
       expect(rows.last.region, 5);
       final version = await upgraded.customSelect('PRAGMA user_version').getSingle();
-      expect(version.data.values.first, 5);
+      expect(version.data.values.first, 6);
       await upgraded.close();
 
       // Already has one column but still says 4 (killed half way): runs again.
@@ -374,5 +380,106 @@ void main() {
     final row = await (db.select(db.mapScenes)..where((s) => s.id.equals(old!))).getSingle();
     expect(row.hidden, isTrue);
     expect(row.png, isEmpty);
+  });
+
+  test('schema 5 databases get the picture table and the map settings; old encounters keep their look', () async {
+    final dir = await Directory.systemTemp.createTemp('gmcebi-migration');
+    final file = File('${dir.path}/v5.sqlite');
+    try {
+      final db5 = AppDatabase(NativeDatabase(file));
+      await db5.addCombatant(name: 'Goblin', hp: 7);
+      await db5.addStroke(const [Offset01(0.1, 0.1), Offset01(0.9, 0.9)]);
+      await db5.customStatement('DROP TABLE map_images');
+      await db5.customStatement('ALTER TABLE encounters DROP COLUMN token_scale');
+      await db5.customStatement('ALTER TABLE encounters DROP COLUMN map_background');
+      await db5.customStatement('PRAGMA user_version = 5');
+      await db5.close();
+
+      final upgraded = AppDatabase(NativeDatabase(file));
+      final s = await upgraded.watchEncounterState().first;
+      expect(s.combatants.single.name, 'Goblin');
+      expect(s.encounter.tokenScale, 1.0);
+      expect(s.encounter.mapBackground, 'online', reason: 'an online picture shows when there is one, as before');
+      expect((await upgraded.watchStrokes().first), hasLength(1));
+      expect(await upgraded.watchActiveMapImage().first, isNull);
+      await upgraded.setMapImage(Uint8List.fromList([1, 2, 3]), width: 20, height: 10);
+      expect((await upgraded.watchActiveMapImage().first)!.width, 20);
+      final version = await upgraded.customSelect('PRAGMA user_version').getSingle();
+      expect(version.data.values.first, 6);
+      await upgraded.close();
+
+      // Killed half way: one column there, still says 5. Runs again; the picture stays.
+      final half = AppDatabase(NativeDatabase(file));
+      await half.customStatement('ALTER TABLE encounters DROP COLUMN map_background');
+      await half.customStatement('PRAGMA user_version = 5');
+      await half.close();
+      final reopened = AppDatabase(NativeDatabase(file));
+      expect((await reopened.watchEncounterState().first).encounter.mapBackground, 'online');
+      expect((await reopened.watchActiveMapImage().first)!.height, 10);
+      await reopened.close();
+    } finally {
+      await dir.delete(recursive: true);
+    }
+  });
+
+  test('uploaded picture: upload selects it, replace gets a new id and keeps the fit, remove; one per encounter', () async {
+    expect(await db.watchActiveMapImage().first, isNull);
+    final a = await db.setMapImage(Uint8List.fromList([1, 2, 3]), width: 200, height: 100);
+    var info = (await db.watchActiveMapImage().first)!;
+    expect((info.id, info.width, info.height, info.fit), (a, 200, 100, 'contain'), reason: 'Sığdır by default');
+    expect(await db.mapImageBytes(a), [1, 2, 3]);
+    expect((await db.activeEncounter()).mapBackground, 'upload', reason: 'uploading selects the upload');
+
+    await db.setMapImageFit('cover');
+    await db.setMapBackground('none');
+    final b = await db.setMapImage(Uint8List.fromList([9, 9]), width: 50, height: 80);
+    info = (await db.watchActiveMapImage().first)!;
+    expect(info.id, isNot(a), reason: 'a new id: the decoded image is cached by id');
+    expect((info.width, info.height, info.fit), (50, 80, 'cover'), reason: 'a replaced picture keeps its fit');
+    expect(await db.select(db.mapImages).get(), hasLength(1), reason: 'replaced, not added');
+    expect(await db.mapImageBytes(a), isNull);
+    expect((await db.activeEncounter()).mapBackground, 'upload');
+
+    await db.addStroke(const [Offset01(0.1, 0.1), Offset01(0.2, 0.2)]);
+    await db.removeMapImage();
+    expect(await db.watchActiveMapImage().first, isNull);
+    expect(await db.mapImageBytes(b), isNull);
+    expect(await db.watchStrokes().first, hasLength(1), reason: 'the drawing stays');
+
+    await db.setMapImage(Uint8List.fromList([4]), width: 1, height: 1);
+    await db.newEncounter();
+    expect(await db.watchActiveMapImage().first, isNull, reason: 'deleted with its encounter');
+    expect(await db.select(db.mapImages).get(), isEmpty);
+  });
+
+  test('a new online picture becomes the background; token size is stored per encounter', () async {
+    await db.setMapImage(Uint8List.fromList([1]), width: 1, height: 1);
+    expect((await db.activeEncounter()).mapBackground, 'upload');
+    await db.addScene(assetId: 'a1', png: Uint8List.fromList([1]), mode: 'map', narrative: '', seed: 1);
+    expect((await db.activeEncounter()).mapBackground, 'online');
+    await db.setTokenScale(0.6);
+    expect((await db.watchEncounterState().first).encounter.tokenScale, 0.6);
+    await db.newEncounter();
+    expect((await db.activeEncounter()).tokenScale, 1.0, reason: 'a new map starts with normal tokens');
+  });
+
+  test('"Haritayı tut" carries the uploaded picture, its fit, the token size and the background', () async {
+    await db.addStroke(const [Offset01(0.1, 0.1), Offset01(0.2, 0.2)]);
+    final id = await db.setMapImage(Uint8List.fromList([7, 7, 7]), width: 300, height: 150);
+    await db.setMapImageFit('cover');
+    await db.setTokenScale(1.5);
+    expect(await db.activeMapContents(), (drawing: true, picture: false, upload: true));
+    final old = await db.activeEncounter();
+    await db.newEncounter(keepMap: true);
+    final e = await db.activeEncounter();
+    expect(e.id, isNot(old.id));
+    expect((e.tokenScale, e.mapBackground), (1.5, 'upload'));
+    final info = (await db.watchActiveMapImage().first)!;
+    expect((info.id, info.width, info.fit), (id, 300, 'cover'));
+    expect(await db.mapImageBytes(id), [7, 7, 7]);
+    expect(await db.watchStrokes().first, hasLength(1));
+
+    await db.newEncounter();
+    expect(await db.activeMapContents(), (drawing: false, picture: false, upload: false));
   });
 }

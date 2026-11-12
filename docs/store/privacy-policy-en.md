@@ -39,6 +39,9 @@ you choose to save them). It never reaches us:
   condition tags you enter.
 - **Battle map:** the lines you draw, the areas you paint with the area brush and where the tokens
   are on the map, kept with the encounter.
+- **Map pictures you load:** the picture you choose as the battle map (through the system's file
+  picker, no permission asked), kept with the encounter. It never leaves your device; it is only
+  included in the backups you make yourself.
 - **Online pictures** (only in an online scene build, if you use the feature): the generated map
   pictures, the description you wrote and the picture's id on the server, kept with the encounter.
 - **Backup files:** files you create yourself with Ayarlar → Yedekleme → "Yedek al" (Settings →

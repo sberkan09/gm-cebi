@@ -86,6 +86,16 @@ GM Paketi kilitliyken de alınır; kilitliyken notlar okunur ama düzenlenmez.
    ızgara ve çizgiler üstünde okunur kalmalı, jetonlar boyanın üstünde durmalı. "Alan"dan sonra "Sil" yalnızca alanları,
    "Çiz"den sonra "Sil" yalnızca çizgileri siler; geri al ikisinde de çalışır. Kalemle de dene (kalem modu kuralları
    aynı, silgi ucu alanları siler). Uygulamayı kapatıp açınca boyalar yerinde durmalı.
+   **Kendi harita resmin:** haritanın ⋮ menüsünden **Harita resmi yükle**'ye dokun ve hazır bir savaş haritası ya da
+   elle çizdiğin haritanın fotoğrafını seç (izin sorulmamalı). Resim haritanın altına gelir; ızgarası olan bir resimse
+   ilk seferde çıkan uyarıdaki "Izgarayı kapat"la ya da üstteki ızgara düğmesiyle uygulamanın ızgarasını kapat. Kare
+   olmayan resimde menüden **Resim: Sığdır** (tamamı görünür, kenarlarda kâğıt rengi) ile **Resim: Doldur** (kare
+   dolar, uzun kenar ortadan kırpılır) arasında geç. **Jeton boyutu: Küçük / Orta / Büyük** ile jetonları resmin
+   karelerine uydur; dokunma alanı da jetonla büyüyüp küçülmeli. Resmin üstüne çiz ve boya: çizgiler ve yarı saydam
+   alanlar resmin üstünde görünmeli. **Resmi değiştir** / **Resmi kaldır** menüde; telefonla çekilmiş dikey fotoğraf
+   dik görünmeli. Çevrimiçi resim de varsa menüdeki **Arka plan** seçenekleriyle (Yok / Yüklediğim resim / Çevrimiçi
+   resim) hangisinin görüneceğini seç; tablette bu seçimler sağdaki sütunda da var. "Yeni karşılaşma"da "Haritayı
+   tut" işaretliyse resim, yerleşimi ve jeton boyutu yeni karşılaşmaya geçmeli. Resim cihazdan çıkmaz.
 6. **Notlar** — Oturum notu al; yazdıkların kendiliğinden kaydedilir. Notun sağ üstündeki menüden **Notu paylaş**
    ile başlığı ve metni düz yazı olarak gönder.
 7. **NPC üretici** — Notlar ekranında sağ üstteki maske simgesine dokun, **NPC üret**'e bas.
@@ -100,6 +110,9 @@ GM Paketi kilitliyken de alınır; kilitliyken notlar okunur ama düzenlenmez.
 
 - Çevirilerin tamamı makine destekli; insan incelemesi sürüyor. Terim önerilerin bu yüzden çok değerli.
 - Satın alma yok.
+- Yüklenen harita resminde: uygulamanın ızgarası resmin ızgarasına hizalanamaz (kare boyu, kaydırma); harita resmin
+  en-boy oranını almaz, hep karedir; resim serbestçe kırpılamaz ya da yakınlaştırılamaz (yalnızca Sığdır / Doldur);
+  savaş sisi (fog of war) yok.
 
 ## Geri bildirim
 

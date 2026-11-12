@@ -1,6 +1,6 @@
 /// Files in and out of the app through the system: the share sheet, the
-/// "save as" dialog and the file picker. Behind an interface so widget tests
-/// can fake it ([deviceFilesProvider]). None of these needs a permission:
+/// "save as" dialog and the file picker (backups, map pictures). Behind an
+/// interface so widget tests can fake it ([deviceFilesProvider]). None of these needs a permission:
 /// the system dialogs hand the app just the one file the user chose.
 library;
 
@@ -10,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../map_image.dart' show MapImageException, imageTooLargeMessage, maxPickBytes;
 import 'backup.dart';
 
 abstract class DeviceFiles {
@@ -26,6 +27,11 @@ abstract class DeviceFiles {
   /// Lets the user pick one .json file and returns its bytes, or null if
   /// cancelled. Throws a [BackupException] for a file over [maxBytes].
   Future<Uint8List?> pickJson({int maxBytes = maxBackupBytes});
+
+  /// "Harita resmi yükle": lets the user pick one picture and returns its
+  /// bytes, or null if cancelled. Throws a [MapImageException] for a file
+  /// over [maxBytes].
+  Future<Uint8List?> pickImage({int maxBytes = maxPickBytes});
 }
 
 class SystemDeviceFiles implements DeviceFiles {
@@ -57,6 +63,16 @@ class SystemDeviceFiles implements DeviceFiles {
     if (f == null) return null;
     final size = f.lengthSync() ?? await f.length();
     if (size != null && size > maxBytes) throw const BackupException(tooLargeMessage);
+    return f.readAsBytes();
+  }
+
+  @override
+  Future<Uint8List?> pickImage({int maxBytes = maxPickBytes}) async {
+    // The system's photo / file picker: no permission, just the one file.
+    final f = await FilePicker.pickFile(type: FileType.image);
+    if (f == null) return null;
+    final size = f.lengthSync() ?? await f.length();
+    if (size != null && size > maxBytes) throw const MapImageException(imageTooLargeMessage);
     return f.readAsBytes();
   }
 }

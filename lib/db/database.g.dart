@@ -688,6 +688,30 @@ class $EncountersTable extends Encounters
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _tokenScaleMeta = const VerificationMeta(
+    'tokenScale',
+  );
+  @override
+  late final GeneratedColumn<double> tokenScale = GeneratedColumn<double>(
+    'token_scale',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1.0),
+  );
+  static const VerificationMeta _mapBackgroundMeta = const VerificationMeta(
+    'mapBackground',
+  );
+  @override
+  late final GeneratedColumn<String> mapBackground = GeneratedColumn<String>(
+    'map_background',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('online'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -697,6 +721,8 @@ class $EncountersTable extends Encounters
     started,
     active,
     createdAt,
+    tokenScale,
+    mapBackground,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -751,6 +777,21 @@ class $EncountersTable extends Encounters
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('token_scale')) {
+      context.handle(
+        _tokenScaleMeta,
+        tokenScale.isAcceptableOrUnknown(data['token_scale']!, _tokenScaleMeta),
+      );
+    }
+    if (data.containsKey('map_background')) {
+      context.handle(
+        _mapBackgroundMeta,
+        mapBackground.isAcceptableOrUnknown(
+          data['map_background']!,
+          _mapBackgroundMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -788,6 +829,14 @@ class $EncountersTable extends Encounters
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      tokenScale: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}token_scale'],
+      )!,
+      mapBackground: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}map_background'],
+      )!,
     );
   }
 
@@ -812,6 +861,16 @@ class Encounter extends DataClass implements Insertable<Encounter> {
   final bool started;
   final bool active;
   final DateTime createdAt;
+
+  /// Battle-map token size, a factor of the painter's token radius: 0.6
+  /// (Küçük), 1.0 (Orta) or 1.5 (Büyük). (schema 6)
+  final double tokenScale;
+
+  /// The picture chosen under the battle map: `none` (the drawing alone),
+  /// `upload` (the user's own picture, [MapImages]) or `online` (the newest
+  /// [MapScenes] picture). A choice whose picture does not exist falls back
+  /// to the other picture, then to none (`shownBackground`). (schema 6)
+  final String mapBackground;
   const Encounter({
     required this.id,
     required this.name,
@@ -820,6 +879,8 @@ class Encounter extends DataClass implements Insertable<Encounter> {
     required this.started,
     required this.active,
     required this.createdAt,
+    required this.tokenScale,
+    required this.mapBackground,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -831,6 +892,8 @@ class Encounter extends DataClass implements Insertable<Encounter> {
     map['started'] = Variable<bool>(started);
     map['active'] = Variable<bool>(active);
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['token_scale'] = Variable<double>(tokenScale);
+    map['map_background'] = Variable<String>(mapBackground);
     return map;
   }
 
@@ -843,6 +906,8 @@ class Encounter extends DataClass implements Insertable<Encounter> {
       started: Value(started),
       active: Value(active),
       createdAt: Value(createdAt),
+      tokenScale: Value(tokenScale),
+      mapBackground: Value(mapBackground),
     );
   }
 
@@ -859,6 +924,8 @@ class Encounter extends DataClass implements Insertable<Encounter> {
       started: serializer.fromJson<bool>(json['started']),
       active: serializer.fromJson<bool>(json['active']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      tokenScale: serializer.fromJson<double>(json['tokenScale']),
+      mapBackground: serializer.fromJson<String>(json['mapBackground']),
     );
   }
   @override
@@ -872,6 +939,8 @@ class Encounter extends DataClass implements Insertable<Encounter> {
       'started': serializer.toJson<bool>(started),
       'active': serializer.toJson<bool>(active),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'tokenScale': serializer.toJson<double>(tokenScale),
+      'mapBackground': serializer.toJson<String>(mapBackground),
     };
   }
 
@@ -883,6 +952,8 @@ class Encounter extends DataClass implements Insertable<Encounter> {
     bool? started,
     bool? active,
     DateTime? createdAt,
+    double? tokenScale,
+    String? mapBackground,
   }) => Encounter(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -891,6 +962,8 @@ class Encounter extends DataClass implements Insertable<Encounter> {
     started: started ?? this.started,
     active: active ?? this.active,
     createdAt: createdAt ?? this.createdAt,
+    tokenScale: tokenScale ?? this.tokenScale,
+    mapBackground: mapBackground ?? this.mapBackground,
   );
   Encounter copyWithCompanion(EncountersCompanion data) {
     return Encounter(
@@ -901,6 +974,12 @@ class Encounter extends DataClass implements Insertable<Encounter> {
       started: data.started.present ? data.started.value : this.started,
       active: data.active.present ? data.active.value : this.active,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      tokenScale: data.tokenScale.present
+          ? data.tokenScale.value
+          : this.tokenScale,
+      mapBackground: data.mapBackground.present
+          ? data.mapBackground.value
+          : this.mapBackground,
     );
   }
 
@@ -913,14 +992,25 @@ class Encounter extends DataClass implements Insertable<Encounter> {
           ..write('turnIndex: $turnIndex, ')
           ..write('started: $started, ')
           ..write('active: $active, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('tokenScale: $tokenScale, ')
+          ..write('mapBackground: $mapBackground')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, round, turnIndex, started, active, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    round,
+    turnIndex,
+    started,
+    active,
+    createdAt,
+    tokenScale,
+    mapBackground,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -931,7 +1021,9 @@ class Encounter extends DataClass implements Insertable<Encounter> {
           other.turnIndex == this.turnIndex &&
           other.started == this.started &&
           other.active == this.active &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.tokenScale == this.tokenScale &&
+          other.mapBackground == this.mapBackground);
 }
 
 class EncountersCompanion extends UpdateCompanion<Encounter> {
@@ -942,6 +1034,8 @@ class EncountersCompanion extends UpdateCompanion<Encounter> {
   final Value<bool> started;
   final Value<bool> active;
   final Value<DateTime> createdAt;
+  final Value<double> tokenScale;
+  final Value<String> mapBackground;
   const EncountersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -950,6 +1044,8 @@ class EncountersCompanion extends UpdateCompanion<Encounter> {
     this.started = const Value.absent(),
     this.active = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.tokenScale = const Value.absent(),
+    this.mapBackground = const Value.absent(),
   });
   EncountersCompanion.insert({
     this.id = const Value.absent(),
@@ -959,6 +1055,8 @@ class EncountersCompanion extends UpdateCompanion<Encounter> {
     this.started = const Value.absent(),
     this.active = const Value.absent(),
     required DateTime createdAt,
+    this.tokenScale = const Value.absent(),
+    this.mapBackground = const Value.absent(),
   }) : createdAt = Value(createdAt);
   static Insertable<Encounter> custom({
     Expression<int>? id,
@@ -968,6 +1066,8 @@ class EncountersCompanion extends UpdateCompanion<Encounter> {
     Expression<bool>? started,
     Expression<bool>? active,
     Expression<DateTime>? createdAt,
+    Expression<double>? tokenScale,
+    Expression<String>? mapBackground,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -977,6 +1077,8 @@ class EncountersCompanion extends UpdateCompanion<Encounter> {
       if (started != null) 'started': started,
       if (active != null) 'active': active,
       if (createdAt != null) 'created_at': createdAt,
+      if (tokenScale != null) 'token_scale': tokenScale,
+      if (mapBackground != null) 'map_background': mapBackground,
     });
   }
 
@@ -988,6 +1090,8 @@ class EncountersCompanion extends UpdateCompanion<Encounter> {
     Value<bool>? started,
     Value<bool>? active,
     Value<DateTime>? createdAt,
+    Value<double>? tokenScale,
+    Value<String>? mapBackground,
   }) {
     return EncountersCompanion(
       id: id ?? this.id,
@@ -997,6 +1101,8 @@ class EncountersCompanion extends UpdateCompanion<Encounter> {
       started: started ?? this.started,
       active: active ?? this.active,
       createdAt: createdAt ?? this.createdAt,
+      tokenScale: tokenScale ?? this.tokenScale,
+      mapBackground: mapBackground ?? this.mapBackground,
     );
   }
 
@@ -1024,6 +1130,12 @@ class EncountersCompanion extends UpdateCompanion<Encounter> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (tokenScale.present) {
+      map['token_scale'] = Variable<double>(tokenScale.value);
+    }
+    if (mapBackground.present) {
+      map['map_background'] = Variable<String>(mapBackground.value);
+    }
     return map;
   }
 
@@ -1036,7 +1148,9 @@ class EncountersCompanion extends UpdateCompanion<Encounter> {
           ..write('turnIndex: $turnIndex, ')
           ..write('started: $started, ')
           ..write('active: $active, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('tokenScale: $tokenScale, ')
+          ..write('mapBackground: $mapBackground')
           ..write(')'))
         .toString();
   }
@@ -2945,6 +3059,466 @@ class MapScenesCompanion extends UpdateCompanion<MapScene> {
   }
 }
 
+class $MapImagesTable extends MapImages
+    with TableInfo<$MapImagesTable, MapImage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MapImagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _encounterIdMeta = const VerificationMeta(
+    'encounterId',
+  );
+  @override
+  late final GeneratedColumn<int> encounterId = GeneratedColumn<int>(
+    'encounter_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'UNIQUE REFERENCES encounters (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _bytesMeta = const VerificationMeta('bytes');
+  @override
+  late final GeneratedColumn<Uint8List> bytes = GeneratedColumn<Uint8List>(
+    'bytes',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _widthMeta = const VerificationMeta('width');
+  @override
+  late final GeneratedColumn<int> width = GeneratedColumn<int>(
+    'width',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _heightMeta = const VerificationMeta('height');
+  @override
+  late final GeneratedColumn<int> height = GeneratedColumn<int>(
+    'height',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fitMeta = const VerificationMeta('fit');
+  @override
+  late final GeneratedColumn<String> fit = GeneratedColumn<String>(
+    'fit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('contain'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    encounterId,
+    bytes,
+    width,
+    height,
+    fit,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'map_images';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MapImage> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('encounter_id')) {
+      context.handle(
+        _encounterIdMeta,
+        encounterId.isAcceptableOrUnknown(
+          data['encounter_id']!,
+          _encounterIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_encounterIdMeta);
+    }
+    if (data.containsKey('bytes')) {
+      context.handle(
+        _bytesMeta,
+        bytes.isAcceptableOrUnknown(data['bytes']!, _bytesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bytesMeta);
+    }
+    if (data.containsKey('width')) {
+      context.handle(
+        _widthMeta,
+        width.isAcceptableOrUnknown(data['width']!, _widthMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_widthMeta);
+    }
+    if (data.containsKey('height')) {
+      context.handle(
+        _heightMeta,
+        height.isAcceptableOrUnknown(data['height']!, _heightMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_heightMeta);
+    }
+    if (data.containsKey('fit')) {
+      context.handle(
+        _fitMeta,
+        fit.isAcceptableOrUnknown(data['fit']!, _fitMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MapImage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MapImage(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      encounterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}encounter_id'],
+      )!,
+      bytes: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}bytes'],
+      )!,
+      width: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}width'],
+      )!,
+      height: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}height'],
+      )!,
+      fit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fit'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MapImagesTable createAlias(String alias) {
+    return $MapImagesTable(attachedDatabase, alias);
+  }
+}
+
+class MapImage extends DataClass implements Insertable<MapImage> {
+  final int id;
+  final int encounterId;
+
+  /// The file as picked (PNG, JPEG, WebP, GIF), or a PNG scaled down to
+  /// 2048 px on its longer side when the file was too large.
+  final Uint8List bytes;
+
+  /// Size in pixels as shown (after an EXIF rotation).
+  final int width;
+  final int height;
+
+  /// How a non-square picture sits in the square map: `contain` (Sığdır:
+  /// all of it, paper around it) or `cover` (Doldur: centre-cropped).
+  final String fit;
+  final DateTime createdAt;
+  const MapImage({
+    required this.id,
+    required this.encounterId,
+    required this.bytes,
+    required this.width,
+    required this.height,
+    required this.fit,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['encounter_id'] = Variable<int>(encounterId);
+    map['bytes'] = Variable<Uint8List>(bytes);
+    map['width'] = Variable<int>(width);
+    map['height'] = Variable<int>(height);
+    map['fit'] = Variable<String>(fit);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  MapImagesCompanion toCompanion(bool nullToAbsent) {
+    return MapImagesCompanion(
+      id: Value(id),
+      encounterId: Value(encounterId),
+      bytes: Value(bytes),
+      width: Value(width),
+      height: Value(height),
+      fit: Value(fit),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory MapImage.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MapImage(
+      id: serializer.fromJson<int>(json['id']),
+      encounterId: serializer.fromJson<int>(json['encounterId']),
+      bytes: serializer.fromJson<Uint8List>(json['bytes']),
+      width: serializer.fromJson<int>(json['width']),
+      height: serializer.fromJson<int>(json['height']),
+      fit: serializer.fromJson<String>(json['fit']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'encounterId': serializer.toJson<int>(encounterId),
+      'bytes': serializer.toJson<Uint8List>(bytes),
+      'width': serializer.toJson<int>(width),
+      'height': serializer.toJson<int>(height),
+      'fit': serializer.toJson<String>(fit),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  MapImage copyWith({
+    int? id,
+    int? encounterId,
+    Uint8List? bytes,
+    int? width,
+    int? height,
+    String? fit,
+    DateTime? createdAt,
+  }) => MapImage(
+    id: id ?? this.id,
+    encounterId: encounterId ?? this.encounterId,
+    bytes: bytes ?? this.bytes,
+    width: width ?? this.width,
+    height: height ?? this.height,
+    fit: fit ?? this.fit,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  MapImage copyWithCompanion(MapImagesCompanion data) {
+    return MapImage(
+      id: data.id.present ? data.id.value : this.id,
+      encounterId: data.encounterId.present
+          ? data.encounterId.value
+          : this.encounterId,
+      bytes: data.bytes.present ? data.bytes.value : this.bytes,
+      width: data.width.present ? data.width.value : this.width,
+      height: data.height.present ? data.height.value : this.height,
+      fit: data.fit.present ? data.fit.value : this.fit,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MapImage(')
+          ..write('id: $id, ')
+          ..write('encounterId: $encounterId, ')
+          ..write('bytes: $bytes, ')
+          ..write('width: $width, ')
+          ..write('height: $height, ')
+          ..write('fit: $fit, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    encounterId,
+    $driftBlobEquality.hash(bytes),
+    width,
+    height,
+    fit,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MapImage &&
+          other.id == this.id &&
+          other.encounterId == this.encounterId &&
+          $driftBlobEquality.equals(other.bytes, this.bytes) &&
+          other.width == this.width &&
+          other.height == this.height &&
+          other.fit == this.fit &&
+          other.createdAt == this.createdAt);
+}
+
+class MapImagesCompanion extends UpdateCompanion<MapImage> {
+  final Value<int> id;
+  final Value<int> encounterId;
+  final Value<Uint8List> bytes;
+  final Value<int> width;
+  final Value<int> height;
+  final Value<String> fit;
+  final Value<DateTime> createdAt;
+  const MapImagesCompanion({
+    this.id = const Value.absent(),
+    this.encounterId = const Value.absent(),
+    this.bytes = const Value.absent(),
+    this.width = const Value.absent(),
+    this.height = const Value.absent(),
+    this.fit = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  MapImagesCompanion.insert({
+    this.id = const Value.absent(),
+    required int encounterId,
+    required Uint8List bytes,
+    required int width,
+    required int height,
+    this.fit = const Value.absent(),
+    required DateTime createdAt,
+  }) : encounterId = Value(encounterId),
+       bytes = Value(bytes),
+       width = Value(width),
+       height = Value(height),
+       createdAt = Value(createdAt);
+  static Insertable<MapImage> custom({
+    Expression<int>? id,
+    Expression<int>? encounterId,
+    Expression<Uint8List>? bytes,
+    Expression<int>? width,
+    Expression<int>? height,
+    Expression<String>? fit,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (encounterId != null) 'encounter_id': encounterId,
+      if (bytes != null) 'bytes': bytes,
+      if (width != null) 'width': width,
+      if (height != null) 'height': height,
+      if (fit != null) 'fit': fit,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  MapImagesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? encounterId,
+    Value<Uint8List>? bytes,
+    Value<int>? width,
+    Value<int>? height,
+    Value<String>? fit,
+    Value<DateTime>? createdAt,
+  }) {
+    return MapImagesCompanion(
+      id: id ?? this.id,
+      encounterId: encounterId ?? this.encounterId,
+      bytes: bytes ?? this.bytes,
+      width: width ?? this.width,
+      height: height ?? this.height,
+      fit: fit ?? this.fit,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (encounterId.present) {
+      map['encounter_id'] = Variable<int>(encounterId.value);
+    }
+    if (bytes.present) {
+      map['bytes'] = Variable<Uint8List>(bytes.value);
+    }
+    if (width.present) {
+      map['width'] = Variable<int>(width.value);
+    }
+    if (height.present) {
+      map['height'] = Variable<int>(height.value);
+    }
+    if (fit.present) {
+      map['fit'] = Variable<String>(fit.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MapImagesCompanion(')
+          ..write('id: $id, ')
+          ..write('encounterId: $encounterId, ')
+          ..write('bytes: $bytes, ')
+          ..write('width: $width, ')
+          ..write('height: $height, ')
+          ..write('fit: $fit, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2954,6 +3528,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CombatantsTable combatants = $CombatantsTable(this);
   late final $MapStrokesTable mapStrokes = $MapStrokesTable(this);
   late final $MapScenesTable mapScenes = $MapScenesTable(this);
+  late final $MapImagesTable mapImages = $MapImagesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2965,6 +3540,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     combatants,
     mapStrokes,
     mapScenes,
+    mapImages,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2988,6 +3564,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('map_scenes', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'encounters',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('map_images', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -3347,6 +3930,8 @@ typedef $$EncountersTableCreateCompanionBuilder = EncountersCompanion Function({
   Value<bool> started,
   Value<bool> active,
   required DateTime createdAt,
+  Value<double> tokenScale,
+  Value<String> mapBackground,
 });
 typedef $$EncountersTableUpdateCompanionBuilder = EncountersCompanion Function({
   Value<int> id,
@@ -3356,6 +3941,8 @@ typedef $$EncountersTableUpdateCompanionBuilder = EncountersCompanion Function({
   Value<bool> started,
   Value<bool> active,
   Value<DateTime> createdAt,
+  Value<double> tokenScale,
+  Value<String> mapBackground,
 });
 
 final class $$EncountersTableReferences
@@ -3415,6 +4002,24 @@ final class $$EncountersTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$MapImagesTable, List<MapImage>>
+  _mapImagesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.mapImages,
+    aliasName: 'encounters__id__map_images__encounter_id',
+  );
+
+  $$MapImagesTableProcessedTableManager get mapImagesRefs {
+    final manager = $$MapImagesTableTableManager(
+      $_db,
+      $_db.mapImages,
+    ).filter((f) => f.encounterId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_mapImagesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$EncountersTableFilterComposer
@@ -3458,6 +4063,16 @@ class $$EncountersTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get tokenScale => $composableBuilder(
+    column: $table.tokenScale,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mapBackground => $composableBuilder(
+    column: $table.mapBackground,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3535,6 +4150,31 @@ class $$EncountersTableFilterComposer
     );
     return f(composer);
   }
+
+  Expression<bool> mapImagesRefs(
+    Expression<bool> Function($$MapImagesTableFilterComposer f) f,
+  ) {
+    final $$MapImagesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.mapImages,
+      getReferencedColumn: (t) => t.encounterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MapImagesTableFilterComposer(
+            $db: $db,
+            $table: $db.mapImages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$EncountersTableOrderingComposer
@@ -3580,6 +4220,16 @@ class $$EncountersTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get tokenScale => $composableBuilder(
+    column: $table.tokenScale,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mapBackground => $composableBuilder(
+    column: $table.mapBackground,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$EncountersTableAnnotationComposer
@@ -3611,6 +4261,16 @@ class $$EncountersTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<double> get tokenScale => $composableBuilder(
+    column: $table.tokenScale,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get mapBackground => $composableBuilder(
+    column: $table.mapBackground,
+    builder: (column) => column,
+  );
 
   Expression<T> combatantsRefs<T extends Object>(
     Expression<T> Function($$CombatantsTableAnnotationComposer a) f,
@@ -3686,6 +4346,31 @@ class $$EncountersTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> mapImagesRefs<T extends Object>(
+    Expression<T> Function($$MapImagesTableAnnotationComposer a) f,
+  ) {
+    final $$MapImagesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.mapImages,
+      getReferencedColumn: (t) => t.encounterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MapImagesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.mapImages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$EncountersTableTableManager
@@ -3705,6 +4390,7 @@ class $$EncountersTableTableManager
             bool combatantsRefs,
             bool mapStrokesRefs,
             bool mapScenesRefs,
+            bool mapImagesRefs,
           })
         > {
   $$EncountersTableTableManager(_$AppDatabase db, $EncountersTable table)
@@ -3727,6 +4413,8 @@ class $$EncountersTableTableManager
                 Value<bool> started = const Value.absent(),
                 Value<bool> active = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<double> tokenScale = const Value.absent(),
+                Value<String> mapBackground = const Value.absent(),
               }) => EncountersCompanion(
                 id: id,
                 name: name,
@@ -3735,6 +4423,8 @@ class $$EncountersTableTableManager
                 started: started,
                 active: active,
                 createdAt: createdAt,
+                tokenScale: tokenScale,
+                mapBackground: mapBackground,
               ),
           createCompanionCallback:
               ({
@@ -3745,6 +4435,8 @@ class $$EncountersTableTableManager
                 Value<bool> started = const Value.absent(),
                 Value<bool> active = const Value.absent(),
                 required DateTime createdAt,
+                Value<double> tokenScale = const Value.absent(),
+                Value<String> mapBackground = const Value.absent(),
               }) => EncountersCompanion.insert(
                 id: id,
                 name: name,
@@ -3753,6 +4445,8 @@ class $$EncountersTableTableManager
                 started: started,
                 active: active,
                 createdAt: createdAt,
+                tokenScale: tokenScale,
+                mapBackground: mapBackground,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -3767,6 +4461,7 @@ class $$EncountersTableTableManager
                 combatantsRefs = false,
                 mapStrokesRefs = false,
                 mapScenesRefs = false,
+                mapImagesRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -3774,6 +4469,7 @@ class $$EncountersTableTableManager
                     if (combatantsRefs) db.combatants,
                     if (mapStrokesRefs) db.mapStrokes,
                     if (mapScenesRefs) db.mapScenes,
+                    if (mapImagesRefs) db.mapImages,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -3841,6 +4537,27 @@ class $$EncountersTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (mapImagesRefs)
+                        await $_getPrefetchedData<
+                          Encounter,
+                          $EncountersTable,
+                          MapImage
+                        >(
+                          currentTable: table,
+                          referencedTable: $$EncountersTableReferences
+                              ._mapImagesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$EncountersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).mapImagesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.encounterId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -3865,6 +4582,7 @@ typedef $$EncountersTableProcessedTableManager =
         bool combatantsRefs,
         bool mapStrokesRefs,
         bool mapScenesRefs,
+        bool mapImagesRefs,
       })
     >;
 typedef $$CombatantsTableCreateCompanionBuilder = CombatantsCompanion Function({
@@ -5115,6 +5833,351 @@ typedef $$MapScenesTableProcessedTableManager =
       MapScene,
       PrefetchHooks Function({bool encounterId})
     >;
+typedef $$MapImagesTableCreateCompanionBuilder = MapImagesCompanion Function({
+  Value<int> id,
+  required int encounterId,
+  required Uint8List bytes,
+  required int width,
+  required int height,
+  Value<String> fit,
+  required DateTime createdAt,
+});
+typedef $$MapImagesTableUpdateCompanionBuilder = MapImagesCompanion Function({
+  Value<int> id,
+  Value<int> encounterId,
+  Value<Uint8List> bytes,
+  Value<int> width,
+  Value<int> height,
+  Value<String> fit,
+  Value<DateTime> createdAt,
+});
+
+final class $$MapImagesTableReferences
+    extends BaseReferences<_$AppDatabase, $MapImagesTable, MapImage> {
+  $$MapImagesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $EncountersTable _encounterIdTable(_$AppDatabase db) =>
+      db.encounters.createAlias('map_images__encounter_id__encounters__id');
+
+  $$EncountersTableProcessedTableManager get encounterId {
+    final $_column = $_itemColumn<int>('encounter_id')!;
+
+    final manager = $$EncountersTableTableManager(
+      $_db,
+      $_db.encounters,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_encounterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$MapImagesTableFilterComposer
+    extends Composer<_$AppDatabase, $MapImagesTable> {
+  $$MapImagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get bytes => $composableBuilder(
+    column: $table.bytes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get width => $composableBuilder(
+    column: $table.width,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get height => $composableBuilder(
+    column: $table.height,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fit => $composableBuilder(
+    column: $table.fit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$EncountersTableFilterComposer get encounterId {
+    final $$EncountersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableFilterComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MapImagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MapImagesTable> {
+  $$MapImagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get bytes => $composableBuilder(
+    column: $table.bytes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get width => $composableBuilder(
+    column: $table.width,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get height => $composableBuilder(
+    column: $table.height,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fit => $composableBuilder(
+    column: $table.fit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$EncountersTableOrderingComposer get encounterId {
+    final $$EncountersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableOrderingComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MapImagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MapImagesTable> {
+  $$MapImagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get bytes =>
+      $composableBuilder(column: $table.bytes, builder: (column) => column);
+
+  GeneratedColumn<int> get width =>
+      $composableBuilder(column: $table.width, builder: (column) => column);
+
+  GeneratedColumn<int> get height =>
+      $composableBuilder(column: $table.height, builder: (column) => column);
+
+  GeneratedColumn<String> get fit =>
+      $composableBuilder(column: $table.fit, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$EncountersTableAnnotationComposer get encounterId {
+    final $$EncountersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MapImagesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MapImagesTable,
+          MapImage,
+          $$MapImagesTableFilterComposer,
+          $$MapImagesTableOrderingComposer,
+          $$MapImagesTableAnnotationComposer,
+          $$MapImagesTableCreateCompanionBuilder,
+          $$MapImagesTableUpdateCompanionBuilder,
+          (MapImage, $$MapImagesTableReferences),
+          MapImage,
+          PrefetchHooks Function({bool encounterId})
+        > {
+  $$MapImagesTableTableManager(_$AppDatabase db, $MapImagesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MapImagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MapImagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MapImagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> encounterId = const Value.absent(),
+                Value<Uint8List> bytes = const Value.absent(),
+                Value<int> width = const Value.absent(),
+                Value<int> height = const Value.absent(),
+                Value<String> fit = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => MapImagesCompanion(
+                id: id,
+                encounterId: encounterId,
+                bytes: bytes,
+                width: width,
+                height: height,
+                fit: fit,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int encounterId,
+                required Uint8List bytes,
+                required int width,
+                required int height,
+                Value<String> fit = const Value.absent(),
+                required DateTime createdAt,
+              }) => MapImagesCompanion.insert(
+                id: id,
+                encounterId: encounterId,
+                bytes: bytes,
+                width: width,
+                height: height,
+                fit: fit,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MapImagesTable, MapImage>(table),
+                  $$MapImagesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({encounterId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (encounterId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.encounterId,
+                        referencedTable: $$MapImagesTableReferences
+                            ._encounterIdTable(db),
+                        referencedColumn: $$MapImagesTableReferences
+                            ._encounterIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$MapImagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MapImagesTable,
+      MapImage,
+      $$MapImagesTableFilterComposer,
+      $$MapImagesTableOrderingComposer,
+      $$MapImagesTableAnnotationComposer,
+      $$MapImagesTableCreateCompanionBuilder,
+      $$MapImagesTableUpdateCompanionBuilder,
+      (MapImage, $$MapImagesTableReferences),
+      MapImage,
+      PrefetchHooks Function({bool encounterId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5131,4 +6194,6 @@ class $AppDatabaseManager {
       $$MapStrokesTableTableManager(_db, _db.mapStrokes);
   $$MapScenesTableTableManager get mapScenes =>
       $$MapScenesTableTableManager(_db, _db.mapScenes);
+  $$MapImagesTableTableManager get mapImages =>
+      $$MapImagesTableTableManager(_db, _db.mapImages);
 }
