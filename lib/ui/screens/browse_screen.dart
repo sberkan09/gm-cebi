@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/reference.dart';
 import '../../providers.dart';
+import '../widgets/content.dart';
 import 'search_screen.dart';
 
 /// All records of one dataset, in Turkish alphabetical order.
@@ -18,7 +19,7 @@ class BrowseScreen extends ConsumerWidget {
     final list = r?.data.sorted(dataset.id, lang) ?? const <RefRecord>[];
     return Scaffold(
       appBar: AppBar(title: Text(dataset.plural)),
-      body: ListView.builder(
+      body: ReadingList(
         itemCount: list.length,
         itemBuilder: (context, i) => RecordTile(record: list[i], lang: lang),
       ),

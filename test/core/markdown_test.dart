@@ -16,6 +16,38 @@ void main() {
     expect(parseInline('**açık'), [const MdRun('**açık')]);
   });
 
+  test('footnote asterisks stay literal next to real italics', () {
+    // rules/magic-items-magic-item-rarity: a footnote that mentions an italic item name.
+    expect(parseInline('*Halve the value for an item other than a *Spell Scroll*. The value of a *Spell Scroll* is double.'), [
+      const MdRun('*Halve the value for an item other than a '),
+      const MdRun('Spell Scroll', italic: true),
+      const MdRun('. The value of a '),
+      const MdRun('Spell Scroll', italic: true),
+      const MdRun(' is double.'),
+    ]);
+    expect(parseInline('*Değeri, *Büyü Parşömeni* dışındaki eşyalar için yarıya indir. Bir *Büyü Parşömeni*\'nin değeri iki katıdır.'), [
+      const MdRun('*Değeri, '),
+      const MdRun('Büyü Parşömeni', italic: true),
+      const MdRun(' dışındaki eşyalar için yarıya indir. Bir '),
+      const MdRun('Büyü Parşömeni', italic: true),
+      const MdRun('\'nin değeri iki katıdır.'),
+    ]);
+    // rules/magic-items-crafting-magic-items
+    expect(parseInline('*The time and cost are halved for an item other than a *Spell Scroll*, whose cost is given.'), [
+      const MdRun('*The time and cost are halved for an item other than a '),
+      const MdRun('Spell Scroll', italic: true),
+      const MdRun(', whose cost is given.'),
+    ]);
+    // Markers at the end of a table cell or before a space are not emphasis.
+    expect(parseInline('Value*'), [const MdRun('Value*')]);
+    expect(parseInline('Fast* and Slow*'), [const MdRun('Fast* and Slow*')]);
+    expect(parseInline('2 * 3 * 4'), [const MdRun('2 * 3 * 4')]);
+    expect(parseInline('5* then *italic* text'), [const MdRun('5* then '), const MdRun('italic', italic: true), const MdRun(' text')]);
+    expect(parseInline('**Bold.** *Note without an end.'), [const MdRun('Bold.', bold: true), const MdRun(' *Note without an end.')]);
+    expect(stripMarkup('*Halve the value of a *Spell Scroll*.'), '*Halve the value of a Spell Scroll.');
+    expect(stripMarkup('Value*'), 'Value*');
+  });
+
   test('italic inside bold', () {
     expect(parseInline('**Ateş *Topu***'), [
       const MdRun('Ateş ', bold: true),

@@ -52,16 +52,26 @@ List<MdRun> parseInline(String text) {
   }
 
   // Only treat a marker as markup when its closing partner exists.
-  bool hasClosing(int from, String marker) {
-    var i = text.indexOf(marker, from);
-    while (i != -1) {
-      if (marker == '*' && i + 1 < text.length && text[i + 1] == '*') {
-        i = text.indexOf(marker, i + 2);
-        continue;
-      }
-      return true;
+  bool hasClosing(int from, String marker) => text.indexOf(marker, from) != -1;
+
+  bool isSpace(int i) => i < 0 || i >= text.length || text[i] == ' ' || text[i] == '\n' || text[i] == '\t';
+
+  // The next lone `*` (not half of a `**`) from [from] on, or -1.
+  int nextStar(int from) {
+    var i = text.indexOf('*', from);
+    while (i != -1 && i + 1 < text.length && text[i + 1] == '*') {
+      i = text.indexOf('*', i + 2);
     }
-    return false;
+    return i;
+  }
+
+  // A lone `*` opens italics only when a word follows it and the next lone `*`
+  // ends a word. Footnote markers do neither ("Value*", "2 * 3", or the first
+  // `*` of "*Halve the value of a *Spell Scroll*"): they stay literal.
+  bool opensItalic(int i) {
+    if (isSpace(i + 1)) return false;
+    final close = nextStar(i + 1);
+    return close != -1 && !isSpace(close - 1);
   }
 
   var i = 0;
@@ -76,7 +86,7 @@ List<MdRun> parseInline(String text) {
       i += 2;
       continue;
     }
-    if (text[i] == '*' && (italic || hasClosing(i + 1, '*'))) {
+    if (text[i] == '*' && (italic || opensItalic(i))) {
       flush();
       italic = !italic;
       i += 1;
@@ -100,6 +110,17 @@ MdParagraph parseParagraph(String text) {
 List<MdParagraph> parseParagraphs(String text) =>
     [for (final p in text.split('\n\n')) if (p.trim().isNotEmpty) parseParagraph(p.trim())];
 
-/// Removes markup, for search indexing and list subtitles.
-String stripMarkup(String text) =>
-    text.replaceAll('**', '').replaceAll('*', '').replaceFirst(RegExp(r'^#{3,4} '), '').replaceFirst(RegExp(r'^- '), '');
+/// Removes markup, for search indexing and list subtitles. A lone asterisk
+/// that is not markup (a footnote marker) is kept, as [parseInline] shows it.
+String stripMarkup(String text) {
+  var plain = text;
+  if (text.contains('*')) {
+    // Most marked-up text is bold only: no need to parse it (the index strips every string).
+    plain = text.replaceAll('**', '');
+    if (plain.contains('*')) plain = parseInline(text).map((r) => r.text).join();
+  }
+  return plain.replaceFirst(_headingRe, '').replaceFirst(_bulletRe, '');
+}
+
+final _headingRe = RegExp(r'^#{3,4} ');
+final _bulletRe = RegExp(r'^- ');
