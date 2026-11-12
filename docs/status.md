@@ -1,6 +1,26 @@
 # Durum
 
-Son güncelleme: 2026-11-09 (SRD içeriğinin tamamı Türkçe)
+Son güncelleme: 2026-11-12 (uygulama incelemesi ve düzeltmeleri)
+
+## Uygulama incelemesi (2026-11-12, #28–#30)
+
+Uygulama telefon, tablet ve büyük yazı boyutunda gezildi; kod üç alanda incelendi. Çökme bulunmadı.
+Test çalıştırılarak doğrulanan hatalar üç PR'da düzeltildi (428 test):
+
+- **Arama ve kayıt sayfaları (#28):** çekimli Türkçe sorgular, telefonda taşan tablolar, sınıf
+  sayfalarındaki İngilizce etiketler, çalışmayan "ayrıca bak" bağlantıları, büyük yazıda göz at
+  ızgarası, tablette okuma genişliği, görünmeyen sonuç sınırı.
+- **Harita ve çevrimiçi sahne (#29):** yarım kalabilen çıkış/hesap silme, süresi dolmayan iş,
+  boşta GPU'yu sıcak tutan oturum, cihazda kalan bildirilmiş resim, etiketsiz alan renkleri,
+  kalemle gezinirken tüm haritanın yeniden çizilmesi, giriş sayfası ve onay boşlukları.
+- **İnisiyatif, zar, ekran yönü (#30):** haritayı uyarısız silen "Yeni karşılaşma", atlanan
+  sıralar, eşitlik sıralama, katılımcı düzenleme, klavyeyle taşan zar paneli, yatayda
+  kullanılamayan telefon düzeni (telefonlar dikeye kilitlendi).
+
+Açık kalanlar (karar ya da ayrı iş): test APK'ları için sabit imza anahtarı, yenileme yanıtı
+kaybolunca yeniden giriş (sunucuda tolerans süresi), çevrimiçi sürüm için mağaza metinleri,
+APK boyutu (yalnızca ARM), yedekleme/dışa aktarma, kendi resmini harita olarak yükleme.
+
 
 ## Kenar kutuları ve kalan SRD bölümleri (dal `claude/srd-remaining`, #19, #20)
 
