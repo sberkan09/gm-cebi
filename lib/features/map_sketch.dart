@@ -151,7 +151,13 @@ class MapPainter extends CustomPainter {
     this.regionOpacity = regionScreenOpacity,
     this.labelStyle,
     this.background,
+    this.paper = true,
   });
+
+  /// Whether the paper is painted first. False for a layer painted over the
+  /// map (the battle map screen paints the saved drawing and what pointer
+  /// moves change, the line in progress and the tokens, as two layers).
+  final bool paper;
 
   /// The online picture made from the sketch: the bottom layer, under the
   /// grid, the strokes and the tokens.
@@ -175,7 +181,7 @@ class MapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final side = size.shortestSide;
-    canvas.drawRect(Offset.zero & size, Paint()..color = theme.paper);
+    if (paper) canvas.drawRect(Offset.zero & size, Paint()..color = theme.paper);
     final bg = background;
     if (bg != null) {
       canvas.drawImageRect(

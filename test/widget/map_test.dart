@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gm_cebi/db/database.dart';
@@ -603,8 +604,7 @@ void main() {
   appTest('a hovering stylus does not rebuild the map layer', gmPack: true, (tester, db) async {
     await openMap(tester);
     final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
-    CustomPainter? mapPainter() =>
-        tester.widget<CustomPaint>(find.descendant(of: find.byKey(const Key('map-view')), matching: find.byType(CustomPaint))).painter;
+    CustomPainter? mapPainter() => tester.widget<CustomPaint>(find.byKey(const Key('map-saved'))).painter;
     final before = mapPainter();
     final pen = await tester.createGesture(kind: PointerDeviceKind.stylus);
     await pen.addPointer(location: at(canvas, 0.5, 0.5));
@@ -616,6 +616,113 @@ void main() {
     expect(identical(mapPainter(), before), isTrue, reason: 'only the cursor layer was rebuilt');
     await pen.removePointer();
     await tester.pump();
+  });
+
+  appTest('the saved map is painted only when the drawing changes: not on hover, token drags, a line in progress, pan or zoom', gmPack: true,
+      (tester, db) async {
+    final goblin = await db.addCombatant(name: 'Goblin', initiative: 15, hp: 7);
+    await db.setTokenPosition(goblin, const Offset01(0.5, 0.2));
+    await db.addStroke(const [Offset01(0.1, 0.9), Offset01(0.9, 0.9)]);
+    await db.addStroke(const [Offset01(0.1, 0.7), Offset01(0.9, 0.7)], region: RegionKind.water.index, width: 0.09);
+    await openMap(tester);
+    final canvas = tester.getRect(find.byKey(const Key('map-canvas')));
+    final saved = tester.renderObject(find.byKey(const Key('map-saved')));
+    final live = tester.renderObject(find.byKey(const Key('map-live')));
+    var savedPaints = 0, livePaints = 0;
+    debugOnProfilePaint = (ro) {
+      if (identical(ro, saved)) savedPaints++;
+      if (identical(ro, live)) livePaints++;
+    };
+    try {
+      // A hovering stylus: 20 frames, the cursor follows, nothing else is painted.
+      final pen = await tester.createGesture(kind: PointerDeviceKind.stylus);
+      await pen.addPointer(location: at(canvas, 0.5, 0.5));
+      await tester.pump();
+      savedPaints = livePaints = 0;
+      for (var i = 1; i <= 20; i++) {
+        await pen.moveTo(at(canvas, 0.5 + i / 200, 0.5));
+        await tester.pump();
+      }
+      expect(find.byKey(const ValueKey('map-hover-pen')), findsOneWidget);
+      expect(savedPaints, 0, reason: 'hover does not repaint the map');
+      expect(livePaints, 0, reason: 'nor the tokens: the cursor has its own layer');
+      await pen.removePointer();
+      await tester.pump();
+
+      // Dragging a token: the tokens are painted each frame, the map is not.
+      savedPaints = livePaints = 0;
+      final finger = await tester.startGesture(at(canvas, 0.5, 0.2));
+      for (var i = 1; i <= 10; i++) {
+        await finger.moveTo(at(canvas, 0.5 + i / 50, 0.2 + i / 50));
+        await tester.pump();
+      }
+      expect(livePaints, greaterThanOrEqualTo(10));
+      expect(savedPaints, 0, reason: 'a token drag does not repaint the map');
+      await finger.up();
+      await settle(tester);
+      expect((await combatant(tester, db, goblin)).posX, closeTo(0.7, 0.02));
+
+      // Drawing a line with the stylus: the line in progress is in the live layer.
+      savedPaints = livePaints = 0;
+      final draw = await tester.createGesture(kind: PointerDeviceKind.stylus);
+      await draw.down(at(canvas, 0.2, 0.4));
+      await tester.pump();
+      savedPaints = 0; // the first stylus touch turns pen mode on, which rebuilds the screen once
+      for (var i = 1; i <= 10; i++) {
+        await draw.moveTo(at(canvas, 0.2 + i / 25, 0.4));
+        await tester.pump();
+      }
+      expect(livePaints, greaterThanOrEqualTo(10));
+      expect(savedPaints, 0, reason: 'a line in progress does not repaint the saved map');
+      await draw.up();
+      await settle(tester);
+      expect(await strokesOf(tester, db), hasLength(3));
+      expect(savedPaints, greaterThan(0), reason: 'the new line is part of the saved map now');
+
+      // Pan and zoom move the layer; they do not paint it again.
+      savedPaints = 0;
+      final a = await tester.startGesture(canvas.center - const Offset(40, 0));
+      final b = await tester.startGesture(canvas.center + const Offset(40, 0));
+      for (var i = 1; i <= 8; i++) {
+        await a.moveTo(canvas.center - Offset(40.0 + 5 * i, 0));
+        await b.moveTo(canvas.center + Offset(40.0 + 5 * i, 0));
+        await tester.pump();
+      }
+      await a.up();
+      await b.up();
+      await tester.pump();
+      expect(mapView(tester).getMaxScaleOnAxis(), greaterThan(1.5));
+      expect(savedPaints, 0, reason: 'zooming does not repaint the saved map');
+
+      // The grid and the eraser change the saved map: it is painted again.
+      await tester.tap(find.byKey(const Key('map-grid')));
+      await tester.pump();
+      expect(savedPaints, 1);
+    } finally {
+      debugOnProfilePaint = null;
+    }
+  });
+
+  appTest('Alan: the chosen kind is named next to the swatches; each swatch has a tooltip and a semantics label', gmPack: true,
+      (tester, db) async {
+    final semantics = tester.ensureSemantics();
+    await openMap(tester);
+    expect(find.byKey(const Key('map-region-name')), findsNothing, reason: 'the pen is selected');
+    await tester.tap(find.text('Alan'));
+    await settle(tester);
+    expect(tester.widget<Text>(find.byKey(const Key('map-region-name'))).data, 'Su');
+    for (final r in RegionKind.values) {
+      expect(find.byTooltip('Alan: ${r.label}'), findsOneWidget);
+      expect(tester.getSemantics(find.byKey(Key('map-region-${r.name}'))).label, 'Alan: ${r.label}');
+    }
+    // The two greys: the name says which is which.
+    await tester.tap(find.byKey(const Key('map-region-stone')));
+    await settle(tester);
+    expect(tester.widget<Text>(find.byKey(const Key('map-region-name'))).data, 'Taş zemin');
+    await tester.tap(find.byKey(const Key('map-region-wall')));
+    await settle(tester);
+    expect(tester.widget<Text>(find.byKey(const Key('map-region-name'))).data, 'Duvar');
+    semantics.dispose();
   });
 
   appTest('zoomed in, a token from the tray lands in the part of the map in view', gmPack: true, (tester, db) async {
