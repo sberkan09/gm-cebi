@@ -69,8 +69,9 @@ class ContentLabels {
           'legendary_actions': 'Legendary Actions',
         };
 
-  /// Stat-block detail rows and equipment table columns are stored under their
-  /// English SRD names; this gives the Turkish label (unknown keys stay as they are).
+  /// Stat-block detail rows, class core traits and equipment table columns are
+  /// stored under their English SRD names; this gives the Turkish label from
+  /// the glossary (unknown keys stay as they are).
   String fieldLabel(String key) => _t ? (_fieldTr[key] ?? key) : key;
 
   static const _fieldTr = {
@@ -82,6 +83,15 @@ class ContentLabels {
     'Resistances': 'Dirençler',
     'Vulnerabilities': 'Zafiyetler',
     'Gear': 'Teçhizat',
+    // Class core traits
+    'Primary Ability': 'Birincil Yetenek',
+    'Hit Point Die': 'Can Zarı',
+    'Saving Throw Proficiencies': 'Kurtarma Zarı Yetkinlikleri',
+    'Skill Proficiencies': 'Beceri Yetkinlikleri',
+    'Weapon Proficiencies': 'Silah Yetkinlikleri',
+    'Tool Proficiencies': 'Alet Yetkinlikleri',
+    'Armor Training': 'Zırh Eğitimi',
+    'Starting Equipment': 'Başlangıç Ekipmanı',
     // Equipment
     'Cost': 'Fiyat',
     'Weight': 'Ağırlık',

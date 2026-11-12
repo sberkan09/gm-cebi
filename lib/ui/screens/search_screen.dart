@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/reference.dart';
 import '../../data/search.dart';
+import '../../features/flags.dart';
 import '../../providers.dart';
 import '../widgets/content.dart';
 import 'browse_screen.dart';
@@ -12,7 +15,11 @@ import 'settings_screen.dart';
 /// One box, Turkish or English, offline. The box sits at the bottom of the
 /// screen so it can be reached with the thumb.
 class SearchScreen extends ConsumerStatefulWidget {
-  const SearchScreen({super.key});
+  const SearchScreen({super.key, this.showTiming = kInternalBuild});
+
+  /// Shows how long the search took next to the hit count. A developer
+  /// figure: on in internal (test-group) builds only.
+  final bool showTiming;
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -21,7 +28,10 @@ class SearchScreen extends ConsumerStatefulWidget {
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _controller = TextEditingController();
   final _focus = FocusNode();
-  List<SearchHit> _hits = const [];
+  /// Results are shown a page at a time; "Daha fazla göster" adds a page.
+  static const _pageSize = 60;
+
+  SearchResults _results = const SearchResults([], 0);
   int _micros = 0;
 
   @override
@@ -31,12 +41,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     super.dispose();
   }
 
-  void _run(SearchIndex index, String q) {
+  void _run(SearchIndex index, String q, {int limit = _pageSize}) {
     final sw = Stopwatch()..start();
-    final hits = index.search(q);
+    final results = index.searchAll(q, limit: limit);
     sw.stop();
     setState(() {
-      _hits = hits;
+      _results = results;
       _micros = sw.elapsedMicroseconds;
     });
   }
@@ -69,7 +79,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           Expanded(
             child: _controller.text.trim().isEmpty
                 ? _BrowseGrid(data: r.data, lang: lang)
-                : _Results(hits: _hits, lang: lang, micros: _micros),
+                : _Results(
+                    results: _results,
+                    lang: lang,
+                    micros: widget.showTiming ? _micros : null,
+                    onMore: () => _run(r.index, _controller.text, limit: _results.hits.length + _pageSize),
+                  ),
           ),
           _SearchBox(
             controller: _controller,
@@ -123,31 +138,51 @@ class _SearchBox extends StatelessWidget {
 }
 
 class _Results extends StatelessWidget {
-  const _Results({required this.hits, required this.lang, required this.micros});
+  const _Results({required this.results, required this.lang, required this.micros, required this.onMore});
 
-  final List<SearchHit> hits;
+  final SearchResults results;
   final Lang lang;
-  final int micros;
+
+  /// Search time, when it is to be shown (internal builds).
+  final int? micros;
+  final VoidCallback onMore;
 
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
-    final ms = (micros / 1000).toStringAsFixed(micros < 10000 ? 1 : 0);
+    final hits = results.hits;
     if (hits.isEmpty) {
       return Center(child: Text('Sonuç yok', style: t.titleMedium?.copyWith(color: scheme.onSurfaceVariant)));
     }
-    final approximate = hits.first.approximate;
-    return ListView.builder(
+    // Only the best hits are listed: say how many there are, and offer the rest.
+    final more = results.total > hits.length;
+    final summary = [
+      more ? '${results.total} sonuçtan ilk ${hits.length}' : '${hits.length} sonuç',
+      if (micros != null) '${(micros! / 1000).toStringAsFixed(micros! < 10000 ? 1 : 0)} ms',
+      if (hits.first.approximate) 'yakın eşleşmeler',
+    ].join(' · ');
+    return ReadingList(
       key: const Key('search-results'),
-      itemCount: hits.length + 1,
+      itemCount: hits.length + (more ? 2 : 1),
       itemBuilder: (context, i) {
         if (i == 0) {
           return Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: Text(
-              '${hits.length} sonuç · $ms ms${approximate ? ' · yakın eşleşmeler' : ''}',
-              style: t.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
+            child: Text(summary, key: const Key('search-summary'), style: t.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
+          );
+        }
+        if (i > hits.length) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: const Key('search-more'),
+                icon: const Icon(Icons.expand_more),
+                label: const Text('Daha fazla göster'),
+                onPressed: onMore,
+              ),
             ),
           );
         }
@@ -187,64 +222,132 @@ class RecordTile extends StatelessWidget {
   }
 }
 
+/// Columns and tile height of the browse grid for the text as it will really
+/// be drawn (font, weight, the user's text scale).
+///
+/// As many columns as fit tiles of up to [_BrowseGrid.maxTile], fewer when a
+/// name would have to break inside a word ("Canavarlar" at 1.3× on a 360dp
+/// phone: one column). Names may wrap between words; every tile is as tall as
+/// the tallest name needs, so nothing is cut off at any text scale.
+({int columns, int titleLines, double height}) fitBrowseGrid({
+  required double width,
+  required Iterable<String> names,
+  required TextStyle titleStyle,
+  required TextStyle countStyle,
+  required TextScaler scaler,
+  TextDirection direction = TextDirection.ltr,
+}) {
+  final painter = TextPainter(textDirection: direction, textScaler: scaler);
+  double textWidth(int columns) => (width - _BrowseGrid.gap * (columns - 1)) / columns - _BrowseGrid.tileChrome;
+  var longestWord = 0.0;
+  for (final word in names.expand((n) => n.split(' '))) {
+    painter
+      ..text = TextSpan(text: word, style: titleStyle)
+      ..layout();
+    longestWord = math.max(longestWord, painter.width);
+  }
+  var columns = math.max(1, ((width + _BrowseGrid.gap) / (_BrowseGrid.maxTile + _BrowseGrid.gap)).ceil());
+  while (columns > 1 && textWidth(columns) < longestWord) {
+    columns--;
+  }
+  var titleLines = 1;
+  var titleHeight = 0.0;
+  for (final name in names) {
+    painter
+      ..text = TextSpan(text: name, style: titleStyle)
+      ..layout(maxWidth: math.max(1, textWidth(columns).floorToDouble()));
+    titleLines = math.max(titleLines, painter.computeLineMetrics().length);
+    titleHeight = math.max(titleHeight, painter.height);
+  }
+  painter
+    ..text = TextSpan(text: '0', style: countStyle)
+    ..layout();
+  final height = math.max(_BrowseGrid.minTileHeight, titleHeight + painter.height + 2 * _BrowseGrid.tilePadding);
+  painter.dispose();
+  return (columns: columns, titleLines: titleLines, height: height.ceilToDouble());
+}
+
 class _BrowseGrid extends StatelessWidget {
   const _BrowseGrid({required this.data, required this.lang});
 
   final ReferenceData data;
   final Lang lang;
 
+  static const maxTile = 260.0;
+  static const minTileHeight = 76.0;
+  static const gap = 8.0;
+  static const margin = 12.0;
+  static const tilePadding = 14.0;
+
+  /// Tile width that is not text: side padding, icon, space after the icon.
+  static const tileChrome = 2 * tilePadding + 24 + 12;
+
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
+    final base = DefaultTextStyle.of(context).style;
+    final titleStyle = base.merge(t.titleMedium?.copyWith(fontWeight: FontWeight.w600));
+    final countStyle = base.merge(t.labelMedium?.copyWith(color: scheme.onSurfaceVariant));
     final shown = datasets.where((d) => (data.byDataset[d.id]?.isNotEmpty ?? false)).toList();
-    return CustomScrollView(slivers: [
-      SliverPadding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-        sliver: SliverToBoxAdapter(
-          child: Text(
-            'Göz at · ${data.translatedCount} / ${data.recordCount} kayıt Türkçe',
-            style: t.labelLarge?.copyWith(color: scheme.onSurfaceVariant),
+    return LayoutBuilder(builder: (context, box) {
+      final grid = fitBrowseGrid(
+        width: box.maxWidth - 2 * margin,
+        names: shown.map((d) => d.plural),
+        titleStyle: titleStyle,
+        countStyle: countStyle,
+        scaler: MediaQuery.textScalerOf(context),
+        direction: Directionality.of(context),
+      );
+      return CustomScrollView(slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'Göz at · ${data.translatedCount} / ${data.recordCount} kayıt Türkçe',
+              style: t.labelLarge?.copyWith(color: scheme.onSurfaceVariant),
+            ),
           ),
         ),
-      ),
-      SliverPadding(
-        padding: const EdgeInsets.all(12),
-        sliver: SliverGrid.builder(
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 260,
-            mainAxisExtent: 76,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemCount: shown.length,
-          itemBuilder: (context, i) {
-            final d = shown[i];
-            final n = data.byDataset[d.id]!.length;
-            return Material(
-              color: scheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(16),
-              child: InkWell(
+        SliverPadding(
+          padding: const EdgeInsets.all(margin),
+          sliver: SliverGrid.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: grid.columns,
+              mainAxisExtent: grid.height,
+              crossAxisSpacing: gap,
+              mainAxisSpacing: gap,
+            ),
+            itemCount: shown.length,
+            itemBuilder: (context, i) {
+              final d = shown[i];
+              final n = data.byDataset[d.id]!.length;
+              return Material(
+                key: ValueKey('browse-${d.id}'),
+                color: scheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(16),
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => BrowseScreen(dataset: d))),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: Row(children: [
-                    Icon(datasetIcon(d.id), color: scheme.primary),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(d.plural, style: t.titleMedium?.copyWith(fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis),
-                        Text('$n', style: t.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
-                      ]),
-                    ),
-                  ]),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => BrowseScreen(dataset: d))),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: tilePadding),
+                    child: Row(children: [
+                      Icon(datasetIcon(d.id), color: scheme.primary),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(d.plural, style: titleStyle, maxLines: grid.titleLines, overflow: TextOverflow.ellipsis),
+                          Text('$n', style: countStyle),
+                        ]),
+                      ),
+                    ]),
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
-      ),
-    ]);
+      ]);
+    });
   }
 }
