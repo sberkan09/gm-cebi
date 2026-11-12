@@ -17,8 +17,11 @@ Gerekçe (Play tanımlarına göre):
 
 - **Toplama**, verinin cihazdan geliştiriciye ya da üçüncü bir tarafa gönderilmesidir.
   Uygulama hiçbir veriyi cihazdan dışarı göndermez. Mağaza derlemesinde İnternet izni yok.
-- Notlar, karşılaşmalar ve ayarlar yalnızca cihazda işlenir. Play, yalnızca cihazda
-  kalan veriyi "toplanan veri" saymaz.
+- Notlar, karşılaşmalar, savaş haritası (çizgiler, boyanan alanlar, jeton yerleri) ve ayarlar
+  yalnızca cihazda işlenir. Play, yalnızca cihazda kalan veriyi "toplanan veri" saymaz.
+- "Yedek al" (Ayarlar → Yedekleme) kullanıcının kendi başlattığı bir dışa aktarmadır: dosya cihazda
+  kalır, kullanıcı isterse kendisi paylaşır; geliştiriciye ya da bir sunucuya gitmez. Play'in
+  tanımına göre bu da toplama değildir.
 - Android'in kendi yedekleme hizmeti (Google hesabına yedekleme) kullanıcının hesabında
   Google tarafından yapılır. Geliştirici bu yedeğe erişmez. Play bunu geliştiricinin
   veri toplaması olarak tanımlamaz. Gizlilik politikasında ayrıca belirtildi.
@@ -42,7 +45,7 @@ kaynak: neuracraft-cloud `docs/PRIVACY.md`):
 |---|---|---|---|---|
 | Kişisel bilgiler → **E-posta adresi** | Evet (giriş kodu için; NeuraCraft adresi değil HMAC özetini saklar, kodu Brevo/AB gönderir) | Hayır (hizmet sağlayıcı / işleyici) | İsteğe bağlı | Uygulama işlevi, hesap yönetimi |
 | Fotoğraflar ve videolar → **Diğer resimler** (arazi çizimi) | Evet (24 saat; sonuç resmi 7 gün) | Hayır | İsteğe bağlı | Uygulama işlevi |
-| Uygulama etkinliği → **Diğer kullanıcı içeriği** (sahne tarifi) | Evet (iş bittikten 24 saat sonrasına kadar; kimliksiz olarak çeviri için Anthropic/ABD'ye gidebilir) | Hayır | İsteğe bağlı | Uygulama işlevi |
+| Uygulama etkinliği → **Diğer kullanıcı içeriği** (sahne tarifi; bildirilen resmin nedeni ve notu) | Evet (tarif iş bittikten 24 saat sonrasına kadar; kimliksiz olarak çeviri için Anthropic/ABD'ye gidebilir. Bildirim: resim numarası, seçilen neden ve isteğe bağlı en çok 500 karakterlik not) | Hayır | İsteğe bağlı | Uygulama işlevi; bildirimde güvenlik ve kötüye kullanımın önlenmesi |
 
 - Reklam ya da pazarlama için kullanım ve paylaşım **yok**; analitik **yok**.
 - Hizmet sağlayıcıya (işleyici) aktarım Play'in tanımına göre "paylaşım" sayılmaz.
@@ -70,19 +73,43 @@ kaynak: neuracraft-cloud `docs/PRIVACY.md`):
 
 ## Kanıt (kod taraması, 1.0.0)
 
+Çevrimdışı mağaza derlemesi:
+
 - Çalışma zamanı bağımlılıkları (`pubspec.yaml`): `flutter_riverpod`, `drift`,
   `drift_flutter`, `sqlite3`, `path_provider`; ayrıca yalnızca çevrimiçi sahnenin kullandığı
   `http` ve `flutter_secure_storage`. Analitik, reklam ya da çökme raporlama paketi yok
   (`firebase`, `sentry`, `dio`, `url_launcher` vb. yok).
-- Ağ isteği yapan tek kod çevrimiçi sahnedir (`lib/data/neuracraft/`). `NC_API_URL`
-  verilmeyen mağaza derlemesinde hiç çalışmaz: arayüzde görünmez, güvenli depo
-  okunmaz, manifestte İnternet izni yoktur. Koddaki diğer URL'ler SRD atıf metnindeki düz
+- Ağ isteği yapan tek kod çevrimiçi sahnedir (`lib/data/neuracraft/`). Bu kod her derlemede
+  derlenmiş durur (AAB'nin `libapp.so`'sunda `package:gm_cebi/data/neuracraft/…` adları görülür),
+  ama `NC_API_URL` verilmeyen mağaza derlemesinde **derleme anında kapalıdır** ve hiç çalışmaz:
+  sunucu adresi ikilide yoktur, arayüzde görünmez, güvenli depo okunmaz, manifestte İnternet izni
+  yoktur. Yerelde doğrulandı: `NC_API_URL=https://example.invalid` ile derlenen AAB'nin
+  `libapp.so`'sunda adres var, `NC_API_URL`'siz derlemede `example.invalid` ve `api.neuracraft.app`
+  yok. "Uygulamada ağ kodu yok" demek bu yüzden yanlış; doğrusu "mağaza derlemesi ağ isteği yapmaz,
+  Android'de ağ izni yoktur". Koddaki diğer URL'ler SRD atıf metnindeki düz
   metin adresler; tıklanabilir değil.
 - Android `src/main/AndroidManifest.xml` hiçbir `uses-permission` içermiyor.
   `INTERNET` yalnızca `src/debug` ve `src/profile` manifestlerinde var. Bunlar Flutter
   geliştirme araçları içindir, release derlemesine girmez.
-  `tool/check_store_build.sh` bunu her mağaza AAB'sinde denetler.
+  `tool/check_store_build.sh` bunu her mağaza AAB'sinde (`release-aab`) ve her PR'da
+  (`ci.yml`: mağaza bayraklarıyla debug imzalı AAB) denetler.
 - iOS `Info.plist` hiçbir izin açıklaması (`NS…UsageDescription`) içermiyor.
 - Kullanıcı verisi: `lib/db/database.dart` → `settings`, `notes`, `encounters`,
-  `combatants` tabloları, uygulamanın belge klasöründe (`getApplicationDocumentsDirectory`)
-  yerel SQLite dosyası.
+  `combatants` (jeton yerleri: `posX`, `posY`), `map_strokes` (harita çizgileri; `region`, `width`:
+  alan fırçası), `map_scenes` (çevrimiçi resimler: PNG, tarif, sunucudaki numara; yalnızca
+  çevrimiçi sahneli derlemede dolar) tabloları, uygulamanın belge klasöründe
+  (`getApplicationDocumentsDirectory`) yerel SQLite dosyası.
+- Yedek dosyaları: Ayarlar → Yedekleme → "Yedek al" ile kullanıcı oluşturur; cihazda kalır,
+  kullanıcı paylaşmadıkça bir yere gitmez. Giriş token'ları veritabanında değil güvenli depoda
+  (`flutter_secure_storage`) tutulduğu için yedeğe girmez.
+
+Çevrimiçi sahneli derleme (ek olarak):
+
+- Gönderilenler: `lib/data/neuracraft/client.dart` → iş gönderimi (çizim PNG'si, servis destekliyorsa
+  `inputs.regions` boyanan alanlar, tarif), giriş çağrıları (e-posta, kod), hesap silme
+  (`DELETE /v1/me`).
+- Resim bildirimi: `NeuraCraftClient.report` → `POST /v1/assets/{id}/report`, gövde `reason`
+  (`sexual`, `violence_gore`, `hate`, `minor_safety`, `other`) ve isteğe bağlı `note` (en çok 500
+  karakter, `maxReportNoteChars`). Bildirilen resim yerelde de gizlenir (`map_scenes.hidden`).
+- Manifest: `android/app/src/online/AndroidManifest.xml` (yalnızca `INTERNET`) yalnızca `NC_API_URL`
+  verilince birleşir; `check_store_build.sh --online` bunu her PR'da denetler.

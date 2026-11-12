@@ -14,7 +14,12 @@ bayrakların anlamı: `docs/release.md`.
   ikon şeffaflık içermiyor (`tool/make_icons.py`).
 - `ITSAppUsesNonExemptEncryption = false` (Info.plist): uygulama şifreleme
   kullanmadığı için TestFlight'taki ihracat uyumluluğu sorusu çıkmaz.
-- Hiçbir izin istenmez (`NS…UsageDescription` yok), ağ kodu yok, veri toplanmaz.
+- Hiçbir izin istenmez (`NS…UsageDescription` yok). Mağaza derlemesi **ağ isteği yapmaz** ve veri
+  toplamaz. İsteğe bağlı çevrimiçi sahnenin kodu (`lib/data/neuracraft/`) uygulamada derlenmiş durur,
+  ama derleme anında kapatılmıştır: `NC_API_URL` verilmeyen derlemede sunucu adresi yoktur, özellik
+  arayüzde görünmez ve hiçbir istek gitmez (`docs/online-scene.md`). "Ağ kodu yok" demek bu yüzden
+  doğru değil; doğru ifade "mağaza derlemesi ağ isteği yapmaz, çevrimiçi özellik derlemede kapalı".
+  Yüklemeden önce bunu aşağıdaki "Yükleme öncesi denetim" ile doğrula.
 - CI: `.github/workflows/ios-build.yml`, macOS'ta imzasız `flutter build ios` ile
   projenin derlendiğini doğrular (elle tetiklenir, `v*` etiketlerinde de çalışır).
 - Mağaza materyalleri: `docs/store/` (metinler, gizlilik politikası, 6,9" iPhone ekran
@@ -79,6 +84,32 @@ Flutter 3.47.7, CocoaPods ya da Swift Package Manager (Flutter seçer).
    ```
 
    Çıktı: `build/ios/archive/Runner.xcarchive` ve `build/ios/ipa/*.ipa`.
+
+   **Yükleme öncesi denetim (elle, her yüklemede):** IPA'nın `NC_API_URL` olmadan derlendiğini
+   doğrula. Dart kodu ve `--dart-define` değerleri `App.framework/App` içindeki derlenmiş koddadır
+   (`Runner` ikilisinde değil). Sunucu adresi yalnızca `NC_API_URL` verilince oraya girer:
+
+   ```bash
+   rm -rf /tmp/gmcebi-ipa && mkdir /tmp/gmcebi-ipa && unzip -q build/ios/ipa/*.ipa -d /tmp/gmcebi-ipa
+   app=/tmp/gmcebi-ipa/Payload/Runner.app/Frameworks/App.framework/App
+   host=api.neuracraft.app   # NC_API_URL'de kullandığın sunucu adı; başka sunucu kullanıyorsan onu yaz
+   strings "$app" | grep -F "$host" && echo "DUR: çevrimiçi derleme" || echo "tamam: $host yok"
+   ```
+
+   - Çıktı "tamam" olmalı. Adres görünürse derleme komutunda `NC_API_URL` vardır: yükleme,
+     `--dart-define=NC_API_URL` olmadan yeniden derle.
+   - Genel kalıplarla (`https://api.`, `neuracraft`) arama: Flutter'ın hata metinlerindeki
+     `https://api.flutter.dev/…` adresleri ve özelliğin derlenmiş durduğunu gösteren
+     `package:gm_cebi/data/neuracraft/…` adları her derlemede bulunur. Bu ikisi beklenir; yalnızca
+     sunucu adını ara.
+   - Çevrimiçi sahneli bir derlemeyi bilerek gönderiyorsan adresin görünmesi beklenir; o zaman App
+     Privacy ve gizlilik politikası "çevrimiçi sahne" sürümüne geçmiş olmalı (A.4).
+   - Aynı yöntem Android'de denendi: `NC_API_URL=https://example.invalid` ile derlenen AAB'nin
+     `libapp.so`'sunda adres bulundu, `NC_API_URL`'siz derlemede bulunmadı. İstemci kimliği
+     (`nc_client_…`) her iki derlemede de bulunur; aramada kullanma.
+   - `ios-build` iş akışı IPA değil imzasız `Runner.app` üretir ve çıktıyı saklamaz; bu denetim
+     bu yüzden iş akışında değil, elle yapılır.
+
 4. Yükle (biri yeter):
    - **Xcode → Window → Organizer →** arşivi seç → *Distribute App* → *App Store
      Connect* → *Upload*.

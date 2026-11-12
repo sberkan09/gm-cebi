@@ -1,5 +1,12 @@
-# Test-group release: pushing a tag like v0.1.0-test.1 builds the internal APK
-# and attaches it to a GitHub pre-release.
+# Test-group release: pushing a tag like v0.1.0-test.1 builds the internal APKs
+# (one per ABI: arm64 and arm32) and attaches them to a GitHub pre-release.
+#
+# Signing (docs/release.md, "Test APK imza anahtarı"): when the four repository
+# secrets TEST_KEYSTORE_BASE64, TEST_KEYSTORE_PASSWORD, TEST_KEY_ALIAS and
+# TEST_KEY_PASSWORD exist, the APKs are signed with that fixed test key, so a new
+# tag installs over the previous one and testers keep their data. Without them
+# the runner's throwaway debug key is used: the job log and the release notes
+# then say that the build cannot be installed over the previous one.
 name: release-apk
 on:
   push:
@@ -17,6 +24,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -24,6 +32,37 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter test
+
+      # Never prints a secret: only whether each one is set.
+      - name: Prepare the test signing key
+        id: signing
+        env:
+          TEST_KEYSTORE_BASE64: ${{ secrets.TEST_KEYSTORE_BASE64 }}
+          TEST_KEYSTORE_PASSWORD: ${{ secrets.TEST_KEYSTORE_PASSWORD }}
+          TEST_KEY_ALIAS: ${{ secrets.TEST_KEY_ALIAS }}
+          TEST_KEY_PASSWORD: ${{ secrets.TEST_KEY_PASSWORD }}
+        run: |
+          missing=""
+          for v in TEST_KEYSTORE_BASE64 TEST_KEYSTORE_PASSWORD TEST_KEY_ALIAS TEST_KEY_PASSWORD; do
+            if [ -z "${!v}" ]; then missing="$missing $v"; fi
+          done
+          if [ -z "$missing" ]; then
+            # Outside the workspace, removed in the last step.
+            keystore="$RUNNER_TEMP/test-keystore.jks"
+            # Tolerates line breaks and a Windows CRLF pasted into the secret.
+            printf '%s' "$TEST_KEYSTORE_BASE64" | tr -d '\r\n ' | base64 --decode > "$keystore"
+            echo "ANDROID_KEYSTORE_PATH=$keystore" >> "$GITHUB_ENV"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+            echo "Signing: fixed test key (installs over the previous test APK)."
+          else
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Test APK is DEBUG-SIGNED::Missing repository secrets:${missing}. This build cannot be installed over the previous test APK; testers must back up, uninstall and reinstall (docs/release.md, \"Test APK imza anahtarı\")."
+            echo "############################################################"
+            echo "# DEBUG-SIGNED BUILD: cannot install over the previous APK. #"
+            echo "# Missing secrets:${missing}"
+            echo "############################################################"
+          fi
+
       # Online scene (docs/online-scene.md): on when the repository has the
       # variable NC_API_URL (Settings → Secrets and variables → Actions →
       # Variables); otherwise the APK is fully offline as before. No secret goes
@@ -31,10 +70,18 @@ jobs:
       # variable overrides it) and users sign in with an emailed code. Only this
       # test-group APK gets it: the Play and TestFlight builds stay offline until
       # the privacy declarations change.
-      - name: Build internal APK
+      #
+      # Only arm64 and arm32: x86_64 is for emulators and a few Chromebooks, and a
+      # universal APK carrying all three was ~66 MB.
+      - name: Build internal APKs
         env:
           NC_API_URL: ${{ vars.NC_API_URL }}
           NC_CLIENT_ID: ${{ vars.NC_CLIENT_ID }}
+          # Read by android/app/build.gradle.kts together with ANDROID_KEYSTORE_PATH;
+          # without that path (no test key) they are ignored and the debug key is used.
+          ANDROID_KEYSTORE_PASSWORD: ${{ steps.signing.outputs.signed == 'true' && secrets.TEST_KEYSTORE_PASSWORD || '' }}
+          ANDROID_KEY_ALIAS: ${{ steps.signing.outputs.signed == 'true' && secrets.TEST_KEY_ALIAS || '' }}
+          ANDROID_KEY_PASSWORD: ${{ steps.signing.outputs.signed == 'true' && secrets.TEST_KEY_PASSWORD || '' }}
         run: |
           defines="--dart-define=GMCEBI_INTERNAL=true --dart-define=GMCEBI_GM_PACK=true"
           if [ -n "$NC_API_URL" ]; then
@@ -44,12 +91,51 @@ jobs:
           else
             echo "online scene: off (NC_API_URL not set)"
           fi
-          flutter build apk --release $defines
-      - name: Create pre-release with the APK
+          flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64 $defines
+
+      - name: Check the APK signatures
+        env:
+          SIGNED: ${{ steps.signing.outputs.signed }}
+        run: |
+          apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)
+          for apk in build/app/outputs/flutter-apk/app-arm64-v8a-release.apk build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk; do
+            certs=$("$apksigner" verify --print-certs "$apk")
+            echo "$apk"
+            grep -E 'certificate (DN|SHA-256 digest)' <<< "$certs" | head -n 2
+            if [ "$SIGNED" = "true" ] && grep -q 'CN=Android Debug' <<< "$certs"; then
+              echo "::error::Test key secrets are set, but $apk is signed with the debug key"
+              exit 1
+            fi
+          done
+
+      - name: Create pre-release with the APKs
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
+          SIGNED: ${{ steps.signing.outputs.signed }}
         run: |
-          cp build/app/outputs/flutter-apk/app-release.apk "gm-cebi-${TAG}.apk"
-          gh release create "$TAG" "gm-cebi-${TAG}.apk" --prerelease \
-            --title "GM Cebi ${TAG} (test)" --notes-file docs/test-guide.md
+          out=build/app/outputs/flutter-apk
+          cp "$out/app-arm64-v8a-release.apk" "gm-cebi-${TAG}-arm64.apk"
+          cp "$out/app-armeabi-v7a-release.apk" "gm-cebi-${TAG}-arm32.apk"
+          notes="$RUNNER_TEMP/release-notes.md"
+          {
+            if [ "$SIGNED" != "true" ]; then
+              echo "> **Uyarı: debug imzalı: önceki sürümün üzerine kurulamaz, önce yedek al.**"
+              echo "> Ayarlar → Yedekleme → \"Yedek al\" ile yedeğini al, eski \"GM Cebi Test\"i kaldır, sonra bu sürümü kur."
+              echo
+            fi
+            echo "**Hangi dosya?**"
+            echo
+            echo "- \`gm-cebi-${TAG}-arm64.apk\`: çoğu cihaz için (son yıllarda çıkan telefon ve tabletlerin hemen hepsi)."
+            echo "- \`gm-cebi-${TAG}-arm32.apk\`: yalnızca arm64 kurulmazsa (eski ya da 32 bit cihazlar)."
+            echo
+            echo "---"
+            echo
+            cat docs/test-guide.md
+          } > "$notes"
+          gh release create "$TAG" "gm-cebi-${TAG}-arm64.apk" "gm-cebi-${TAG}-arm32.apk" --prerelease \
+            --title "GM Cebi ${TAG} (test)" --notes-file "$notes"
+
+      - name: Remove signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/test-keystore.jks"
