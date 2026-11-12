@@ -148,6 +148,58 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   List<Offset01> _points(MapStroke s) => _decoded.putIfAbsent(s.id, () => s.offsets);
 
+  /// The painter of the saved map (picture, areas, grid, lines) and what it
+  /// was made from. It is kept until one of those changes: the same painter
+  /// means the layer is not painted again (see [_savedLayer]).
+  MapPainter? _saved;
+  List<Object?> _savedFrom = const [];
+
+  /// Bumped whenever [_erasing] changes (strokes hidden while they are erased).
+  int _erasingRev = 0;
+
+  /// The saved map: everything under the tokens that pointer moves do not
+  /// change. It sits behind its own repaint boundary, so a hovering stylus, a
+  /// token drag, a line being drawn, a pan or a zoom never paint it again;
+  /// only a change to the drawing (or the picture, the grid, the theme) does.
+  ///
+  /// An area being painted belongs here too, so that it looks the same while
+  /// it is drawn as after (under the grid and the lines, one opacity for the
+  /// whole area layer): this layer is repainted on each move of the area
+  /// brush, and only then.
+  MapPainter _savedLayer(List<MapStroke> strokes, ui.Image? background, MapTheme theme, ColorScheme scheme) {
+    final painting = _drawing != null && _drawingArea;
+    final from = [strokes, background, _grid, scheme, _erasingRev];
+    final kept = _saved;
+    if (!painting && kept != null && from.length == _savedFrom.length) {
+      var same = true;
+      for (var i = 0; same && i < from.length; i++) {
+        same = identical(from[i], _savedFrom[i]) || from[i] == _savedFrom[i];
+      }
+      if (same) return kept;
+    }
+    final painter = MapPainter(
+      background: background,
+      // Over the picture the sketch is hidden: the picture was made from it.
+      strokes: [
+        if (background == null)
+          for (final s in strokes)
+            if (!s.isRegion && !_erasing.containsKey(s.id)) SketchStroke(_points(s), s.color),
+      ],
+      regions: [
+        if (background == null)
+          for (final s in strokes)
+            if (s.isRegion && !_erasing.containsKey(s.id)) RegionStroke(_points(s), RegionKind.of(s.region!), s.width ?? regionWidths.last),
+        if (painting) RegionStroke(_drawing!, _region, regionWidths[_regionWidth]),
+      ],
+      tokens: const [],
+      grid: _grid,
+      theme: theme,
+    );
+    _saved = painting ? null : painter;
+    _savedFrom = painting ? const [] : from;
+    return painter;
+  }
+
   void _pushUndo(_Op op) {
     _undo.add(op);
     if (_undo.length > _maxUndo) _undo.removeAt(0);
@@ -293,9 +345,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final scheme = Theme.of(context).colorScheme;
     final theme = MapTheme.of(scheme);
     final current = state?.current;
+    // Layers, so that a frame paints only what changed:
+    // - the canvas as a whole: a rebuild under a LayoutBuilder marks the
+    //   builder for painting, and without a boundary here every pointer move
+    //   repainted the whole screen (toolbar, status bar, turn bar);
+    // - the saved map ([_savedLayer]);
+    // - the line in progress and the tokens;
+    // - the hover cursor.
     return AspectRatio(
       aspectRatio: 1,
-      child: LayoutBuilder(builder: (context, box) {
+      child: RepaintBoundary(
+          child: LayoutBuilder(builder: (context, box) {
         final side = box.maxWidth;
         _side = side;
         _strokes = strokes;
@@ -331,62 +391,66 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         Transform(
                           key: const Key('map-view'),
                           transform: Matrix4.diagonal3Values(_scale, _scale, 1)..setTranslationRaw(_pan.dx * side, _pan.dy * side, 0),
-                          child: CustomPaint(
-                            painter: MapPainter(
-                              background: background,
-                              // Over the picture the sketch is hidden: the picture was made from it.
-                              strokes: [
-                                if (background == null)
-                                  for (final s in strokes)
-                                    if (!s.isRegion && !_erasing.containsKey(s.id)) SketchStroke(_points(s), s.color),
-                                if (_drawing != null && !_drawingArea) SketchStroke(_drawing!, _color),
-                              ],
-                              regions: [
-                                if (background == null)
-                                  for (final s in strokes)
-                                    if (s.isRegion && !_erasing.containsKey(s.id))
-                                      RegionStroke(_points(s), RegionKind.of(s.region!), s.width ?? regionWidths.last),
-                                if (_drawing != null && _drawingArea) RegionStroke(_drawing!, _region, regionWidths[_regionWidth]),
-                              ],
-                              tokens: [
-                                for (final c in placed)
-                                  MapToken(
-                                    position: c.id == _dragId ? _dragPos! : c.mapPosition!,
-                                    order: combatants.indexOf(c) + 1,
-                                    label: c.name,
-                                    isPlayer: c.isPlayer,
-                                    isCurrent: current?.id == c.id,
-                                    isDown: c.isDown,
-                                    hpFraction: (c.hpCurrent != null && (c.hpMax ?? 0) > 0) ? (c.hpCurrent! / c.hpMax!).clamp(0.0, 1.0) : null,
-                                  ),
-                              ],
-                              grid: _grid,
-                              theme: theme,
-                              labelStyle: Theme.of(context).textTheme.labelLarge,
+                          child: Stack(children: [
+                            // The saved map, in its own layer (see [_savedLayer]).
+                            RepaintBoundary(
+                              child: CustomPaint(
+                                key: const Key('map-saved'),
+                                painter: _savedLayer(strokes, background, theme, scheme),
+                                size: Size.square(side),
+                              ),
                             ),
-                            size: Size.square(side),
-                          ),
+                            // What pointer moves change: the line being drawn and the tokens.
+                            RepaintBoundary(
+                              child: CustomPaint(
+                                key: const Key('map-live'),
+                                painter: MapPainter(
+                                  paper: false,
+                                  strokes: [if (_drawing != null && !_drawingArea) SketchStroke(_drawing!, _color)],
+                                  tokens: [
+                                    for (final c in placed)
+                                      MapToken(
+                                        position: c.id == _dragId ? _dragPos! : c.mapPosition!,
+                                        order: combatants.indexOf(c) + 1,
+                                        label: c.name,
+                                        isPlayer: c.isPlayer,
+                                        isCurrent: current?.id == c.id,
+                                        isDown: c.isDown,
+                                        hpFraction: (c.hpCurrent != null && (c.hpMax ?? 0) > 0) ? (c.hpCurrent! / c.hpMax!).clamp(0.0, 1.0) : null,
+                                      ),
+                                  ],
+                                  grid: false,
+                                  theme: theme,
+                                  labelStyle: Theme.of(context).textTheme.labelLarge,
+                                ),
+                                size: Size.square(side),
+                              ),
+                            ),
+                          ]),
                         ),
-                        // The hover cursor has its own listenable: a hovering
-                        // stylus (120–240 events a second) repaints only this.
+                        // The hover cursor has its own listenable and its own
+                        // layer: a hovering stylus (120–240 events a second)
+                        // repaints only this, not the map or the tokens.
                         ValueListenableBuilder<_Hover?>(
                           valueListenable: _hover,
                           builder: (context, h, _) => h == null
                               ? const SizedBox.shrink()
                               : IgnorePointer(
-                                  child: CustomPaint(
-                                    key: ValueKey(h.erases ? 'map-hover-eraser' : 'map-hover-pen'),
-                                    painter: _CursorPainter(
-                                      at: h.at,
-                                      eraser: h.erases,
-                                      // On screen: the eraser keeps its size when zoomed, the pen line grows with the map.
-                                      radius: h.erases
-                                          ? eraserRadius(side)
-                                          : (_areaLayer ? regionWidths[_regionWidth] * side : strokeWidth(side)) * _scale / 2,
-                                      color: _areaLayer ? _region.color : theme.palette[_color],
-                                      outline: scheme.onSurface,
+                                  child: RepaintBoundary(
+                                    child: CustomPaint(
+                                      key: ValueKey(h.erases ? 'map-hover-eraser' : 'map-hover-pen'),
+                                      painter: _CursorPainter(
+                                        at: h.at,
+                                        eraser: h.erases,
+                                        // On screen: the eraser keeps its size when zoomed, the pen line grows with the map.
+                                        radius: h.erases
+                                            ? eraserRadius(side)
+                                            : (_areaLayer ? regionWidths[_regionWidth] * side : strokeWidth(side)) * _scale / 2,
+                                        color: _areaLayer ? _region.color : theme.palette[_color],
+                                        outline: scheme.onSurface,
+                                      ),
+                                      size: Size.square(side),
                                     ),
-                                    size: Size.square(side),
                                   ),
                                 ),
                         ),
@@ -409,7 +473,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
           ),
         );
-      }),
+      })),
     );
   }
 
@@ -563,6 +627,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (_erasing.isNotEmpty) {
       ref.read(databaseProvider).restoreStrokes(_erasing.values.toList());
       _erasing.clear();
+      _erasingRev++;
     }
     setState(() {
       _gesture = _touches.isEmpty ? _Gesture.none : _Gesture.ignore;
@@ -752,6 +817,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     for (final s in live) {
       if (hits.contains(s.id)) _erasing[s.id] = s;
     }
+    _erasingRev++;
     ref.read(databaseProvider).deleteStrokes(hits);
   }
 
@@ -760,6 +826,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (_erasing.isEmpty) return;
     final rows = _erasing.values.toList();
     _erasing.clear();
+    _erasingRev++;
     setState(() => _pushUndo(_Removed(rows)));
   }
 
@@ -852,8 +919,11 @@ class _Toolbar extends StatelessWidget {
   final ValueChanged<RegionKind> onRegion;
   final ValueChanged<int> onRegionWidth;
 
-  /// A 44 dp touch target around a swatch.
-  static Widget _swatch({required Key key, required String label, required bool selected, required VoidCallback onTap, required Widget child}) =>
+  /// A 44 dp touch target around a swatch. [label] is its tooltip and
+  /// semantics label; [caption] is written under it (the chosen area kind's
+  /// name), over the toolbar's own spacing so the layout does not change.
+  static Widget _swatch(
+          {required Key key, required String label, required bool selected, required VoidCallback onTap, required Widget child, Widget? caption}) =>
       Semantics(
         button: true,
         selected: selected,
@@ -861,7 +931,22 @@ class _Toolbar extends StatelessWidget {
         excludeSemantics: true,
         child: Tooltip(
           message: label,
-          child: InkResponse(key: key, onTap: onTap, radius: 22, child: SizedBox(width: 44, height: 44, child: Center(child: child))),
+          child: InkResponse(
+            key: key,
+            onTap: onTap,
+            radius: 22,
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: caption == null
+                  ? Center(child: child)
+                  : Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [
+                      child,
+                      // Wider than the swatch if it must be ("Taş zemin"), centred under it.
+                      Positioned(left: 0, right: 0, bottom: -8, height: 15, child: OverflowBox(maxWidth: 120, child: caption)),
+                    ]),
+            ),
+          ),
         ),
       );
 
@@ -930,7 +1015,10 @@ class _Toolbar extends StatelessWidget {
                 ),
             ]),
           // Area brush: the six region kinds (rounded squares, unlike the pen's
-          // circles) and the brush width.
+          // circles) and the brush width. The colours alone are hard to tell
+          // apart (stone floor and wall are two greys): the chosen kind's name
+          // is written under its swatch, and every swatch has its name as
+          // tooltip and semantics label.
           if (areaLayer)
             Wrap(children: [
               for (final r in RegionKind.values)
@@ -939,6 +1027,17 @@ class _Toolbar extends StatelessWidget {
                   label: 'Alan: ${r.label}',
                   selected: tool == _Tool.area && region == r,
                   onTap: () => onRegion(r),
+                  caption: tool == _Tool.area && region == r
+                      ? Text(
+                          r.label,
+                          key: const Key('map-region-name'),
+                          maxLines: 1,
+                          softWrap: false,
+                          // Fixed room under the swatch: large text settings grow it only a little.
+                          textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.15),
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w700, height: 1, color: Theme.of(context).colorScheme.onSurface),
+                        )
+                      : null,
                   child: Container(
                     width: 30,
                     height: 30,

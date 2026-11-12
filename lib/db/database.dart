@@ -502,27 +502,52 @@ class AppDatabase extends _$AppDatabase {
     return q.watch().map((rows) => rows.isEmpty ? null : rows.first.readTable(mapScenes));
   }
 
+  /// Pictures kept per encounter (reported ones included); storing a new one
+  /// deletes the older ones.
+  static const maxScenesPerEncounter = 5;
+
   /// Stores a picture with [encounterId] (the encounter the sketch belonged
-  /// to; default the active one). Nothing is stored if that encounter is gone.
+  /// to; default the active one) and prunes that encounter's older pictures
+  /// ([maxScenesPerEncounter]). Nothing is stored if that encounter is gone.
   Future<int?> addScene({required String assetId, required Uint8List png, required String mode, required String narrative, required int seed, int? encounterId}) async {
     final id = encounterId ?? (await activeEncounter()).id;
     final exists = await (select(encounters)..where((e) => e.id.equals(id))).getSingleOrNull();
     if (exists == null) return null;
-    return into(mapScenes).insert(MapScenesCompanion.insert(
-      encounterId: id,
-      assetId: assetId,
-      png: png,
-      mode: mode,
-      narrative: Value(narrative),
-      seed: seed,
-      createdAt: DateTime.now(),
-    ));
+    return transaction(() async {
+      final row = await into(mapScenes).insert(MapScenesCompanion.insert(
+        encounterId: id,
+        assetId: assetId,
+        png: png,
+        mode: mode,
+        narrative: Value(narrative),
+        seed: seed,
+        createdAt: DateTime.now(),
+      ));
+      await _pruneScenes(id);
+      return row;
+    });
   }
 
-  /// After a report: the picture is never shown again (kept hidden, not
-  /// deleted, so a re-download cannot bring it back by accident).
-  Future<void> hideScene(int id) =>
-      (update(mapScenes)..where((s) => s.id.equals(id))).write(const MapScenesCompanion(hidden: Value(true)));
+  /// Keeps the newest [maxScenesPerEncounter] pictures of [encounterId]. Also
+  /// drops the bytes of pictures reported before [hideScene] did so itself.
+  Future<void> _pruneScenes(int encounterId) async {
+    final keep = await (selectOnly(mapScenes)
+          ..addColumns([mapScenes.id])
+          ..where(mapScenes.encounterId.equals(encounterId))
+          ..orderBy([OrderingTerm.desc(mapScenes.id)])
+          ..limit(maxScenesPerEncounter))
+        .map((r) => r.read(mapScenes.id)!)
+        .get();
+    await (delete(mapScenes)..where((s) => s.encounterId.equals(encounterId) & s.id.isNotIn(keep))).go();
+    await (update(mapScenes)..where((s) => s.hidden.equals(true) & s.png.length.isBiggerThanValue(0)))
+        .write(MapScenesCompanion(png: Value(Uint8List(0))));
+  }
+
+  /// After a report: the picture's bytes are deleted at once (they must not
+  /// stay on the device or in its backup). The emptied row stays as a marker:
+  /// hidden, never shown again.
+  Future<void> hideScene(int id) => (update(mapScenes)..where((s) => s.id.equals(id)))
+      .write(MapScenesCompanion(hidden: const Value(true), png: Value(Uint8List(0))));
 
   Future<void> deleteScene(int id) => (delete(mapScenes)..where((s) => s.id.equals(id))).go();
 

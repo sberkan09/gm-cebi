@@ -3,6 +3,8 @@
 /// consent and sign-in, and the report sheet.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -188,24 +190,7 @@ class SceneStatusBar extends ConsumerWidget {
 /// "Sahneyi canlandır": asks for consent the first time, then for sign-in
 /// when signed out, then the mode and the description.
 Future<void> showSceneSheet(BuildContext context, WidgetRef ref) async {
-  final settings = ref.read(onlineSettingsProvider).value;
-  if (settings == null) return;
-  if (!settings.consented) {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(consentTitle),
-        content: const SingleChildScrollView(child: Text(consentText)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
-          FilledButton(key: const Key('consent-accept'), onPressed: () => Navigator.pop(context, true), child: const Text('Kabul et')),
-        ],
-      ),
-    );
-    if (ok != true) return;
-    await ref.read(onlineSettingsProvider.notifier).setConsented(true);
-  }
-  if (!context.mounted) return;
+  if (!await ensureOnlineConsent(context) || !context.mounted) return;
   await ref.read(ncAccountProvider.notifier).load();
   if (!context.mounted) return;
   final account = ref.read(ncAccountProvider);
@@ -216,6 +201,9 @@ Future<void> showSceneSheet(BuildContext context, WidgetRef ref) async {
   if (!account.signedIn) {
     if (!await showSignInSheet(context) || !context.mounted) return;
   }
+  // The GM is about to send a sketch: ask for a session (a warm GPU) again if
+  // an untouched map let the last one go.
+  unawaited(ref.read(onlineSessionProvider.notifier).ensureOpen());
   final last = ref.read(activeSceneProvider).value;
   final result = await showModalBottomSheet<({SceneMode mode, String narrative, String? ground})>(
     context: context,
@@ -227,7 +215,7 @@ Future<void> showSceneSheet(BuildContext context, WidgetRef ref) async {
       initialGround: ref.read(sceneControllerProvider.notifier).lastGround,
     ),
   );
-  if (result != null) {
+  if (result != null && context.mounted) {
     ref.read(sceneVisibleProvider.notifier).set(true);
     await ref.read(sceneControllerProvider.notifier).generate(mode: result.mode, narrative: result.narrative, ground: result.ground);
   }
@@ -274,11 +262,23 @@ class _SceneFormState extends ConsumerState<_SceneForm> {
     final scheme = Theme.of(context).colorScheme;
     final session = ref.watch(onlineSessionProvider);
     final rows = ref.watch(mapStrokesProvider).value ?? const [];
-    final hasSketch = rows.any((s) => !s.isRegion);
+    final hasLines = rows.any((s) => !s.isRegion);
     final regions = regionStrokesOf(rows);
     // The region layer goes only to a service that takes it (neuracraft-cloud #42).
-    final features = ref.watch(sceneFeaturesProvider).value ?? NcSceneFeatures.none;
+    final asked = ref.watch(sceneFeaturesProvider);
+    final features = asked.value ?? NcSceneFeatures.none;
     final withRegions = _mode == SceneMode.map && features.regions;
+    // What can be sent: pen lines, or painted areas alone as the region layer
+    // (over a blank sketch). Otherwise say what is missing; nothing while the
+    // service has not said yet whether it takes the layer.
+    final canSend = hasLines || (regions.isNotEmpty && withRegions);
+    final missing = canSend
+        ? null
+        : regions.isEmpty
+            ? 'Önce haritaya araziyi çiz: nehir, yol, duvar, orman…'
+            : _mode != SceneMode.map
+                ? linesNeededForAtmosphereMessage
+                : (asked.hasValue ? linesNeededMessage : null);
     final grounds = withRegions ? features.grounds : const <String>[];
     final ground = grounds.contains(_ground) ? _ground! : (grounds.contains(defaultGround(regions)) ? defaultGround(regions) : null);
     final warning = capacityWarning(session);
@@ -347,13 +347,13 @@ class _SceneFormState extends ConsumerState<_SceneForm> {
           Text(warning, key: const Key('scene-capacity-warning'), style: t.bodySmall?.copyWith(color: scheme.tertiary)),
           const SizedBox(height: 8),
         ],
-        if (!hasSketch) ...[
-          Text('Önce haritaya araziyi çiz: nehir, yol, duvar, orman…', style: t.bodySmall?.copyWith(color: scheme.error)),
+        if (missing != null) ...[
+          Text(missing, key: const Key('scene-missing'), style: t.bodySmall?.copyWith(color: scheme.error)),
           const SizedBox(height: 8),
         ],
         FilledButton.icon(
           key: const Key('scene-generate'),
-          onPressed: hasSketch
+          onPressed: canSend
               ? () => Navigator.pop(context, (mode: _mode, narrative: _text.text, ground: ground != null && regions.isNotEmpty ? ground : null))
               : null,
           icon: const Icon(Icons.auto_awesome),
@@ -372,7 +372,7 @@ Future<void> showReportSheet(BuildContext context, WidgetRef ref, MapSceneView s
     showDragHandle: true,
     builder: (context) => const _ReportForm(),
   );
-  if (picked == null) return;
+  if (picked == null || !context.mounted) return;
   final message = await reportScene(ref.read(databaseProvider), ref.read(ncClientProvider), scene, picked.$1, note: picked.$2);
   if (context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message ?? 'Resim bildirildi ve gizlendi.')));

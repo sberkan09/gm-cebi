@@ -6,7 +6,14 @@
 /// - `limit.concurrent_jobs` / `rate_limited` → wait a few seconds, at most twice;
 /// - a job that fails with an unexpected code → once more with a new seed, then
 ///   give up quietly;
-/// - `content.flagged` / `content.unchecked` → tell the user, never charged.
+/// - `content.flagged` / `content.unchecked` → tell the user, never charged;
+/// - a job that has no picture [SceneController.jobDeadline] after it was
+///   accepted → cancelled on the server, the user may try again;
+/// - a picture that was made but could not be downloaded → "Yeniden dene"
+///   downloads it again (a new job would count against the quota again).
+///
+/// Sketch: the pen lines. A map with painted areas only is sent as a blank
+/// sketch with the region layer, when the service takes the layer.
 ///
 /// Region layer (neuracraft-cloud #42): in map mode, areas painted with the
 /// "Alan" brush go as a second PNG (`inputs.regions`) with the chosen
@@ -82,6 +89,10 @@ final sketchExporterProvider = Provider<SketchExporter>((ref) => () async {
       return renderTerrainPng(lines);
     });
 
+/// A blank sketch (white, the size of the region layer): what goes with the
+/// regions when the map has painted areas but no pen line.
+final blankSketchExporterProvider = Provider<Future<Uint8List> Function()>((ref) => () => renderTerrainPng(const []));
+
 /// The region layer of the active encounter (areas painted with the "Alan"
 /// brush); null when nothing is painted. Throws [RegionsTooLarge].
 final regionsExporterProvider = Provider<SketchExporter>((ref) => () async {
@@ -92,8 +103,24 @@ final regionsExporterProvider = Provider<SketchExporter>((ref) => () async {
 /// Overridden in tests for repeatable seeds.
 final sceneRandomProvider = Provider<Random>((ref) => Random.secure());
 
+/// A picture the service made that is not on the device yet.
+typedef _Picture = ({String assetId, String? jobId, SceneMode mode, String narrative, int seed, int encounterId});
+
+/// The job ran past [SceneController.jobDeadline].
+class _JobDeadlineExceeded implements Exception {
+  const _JobDeadlineExceeded();
+}
+
 class SceneController extends Notifier<SceneJobState> {
+  /// The longest silence between two events of a job. Per event: polling
+  /// yields one a second, so on its own this never ends a job that just stays
+  /// queued. [jobDeadline] does.
   static const jobTimeout = Duration(minutes: 4);
+
+  /// The whole wait for one job, from accepted to finished (a warm GPU needs
+  /// seconds, a cold one about two minutes). After it the job is cancelled.
+  static const jobDeadline = Duration(minutes: 4);
+
   /// Shortened in tests.
   static Duration retrySoonDelay = const Duration(seconds: 3);
 
@@ -118,6 +145,10 @@ class SceneController extends Notifier<SceneJobState> {
   int _generation = 0;
   ({SceneMode mode, String narrative, String? ground})? _last;
 
+  /// A finished job's picture whose download failed: [retry] fetches it
+  /// again instead of starting (and paying for) a new job.
+  _Picture? _undelivered;
+
   /// The ground of the last request (for "Yeniden dene" from the picture's menu).
   String? get lastGround => _last?.ground;
 
@@ -129,13 +160,21 @@ class SceneController extends Notifier<SceneJobState> {
 
   bool get busy => state is SceneWorking;
 
+  /// Nothing is sent while the feature is switched off or before the user's
+  /// consent (the UI does not offer it then; this is the second lock).
+  bool get _allowed => ref.read(onlineFeatureVisibleProvider) && (ref.read(onlineSettingsProvider).value?.consented ?? false);
+
   /// Makes a picture from the current sketch. [narrative] is the GM's Turkish
   /// description (≤ 500 characters, may be empty: a generic battle-map prompt
   /// is sent then). [ground] (`grass`, `stone`…) fills what is not painted;
   /// it goes only with the region layer.
+  ///
+  /// A map without pen lines but with painted areas goes as a blank sketch
+  /// with the region layer, in map mode, when the service takes the layer.
   Future<void> generate({required SceneMode mode, required String narrative, String? ground}) async {
-    if (busy) return;
+    if (busy || !_allowed) return;
     _last = (mode: mode, narrative: narrative, ground: ground);
+    _undelivered = null;
     final gen = ++_generation;
     final client = ref.read(ncClientProvider);
     if (client == null) return;
@@ -150,13 +189,24 @@ class SceneController extends Notifier<SceneJobState> {
       // The picture belongs to the encounter whose sketch is sent, even if a
       // new encounter starts while it is being made.
       final encounterId = (await ref.read(databaseProvider).activeEncounter()).id;
-      final png = await ref.read(sketchExporterProvider)();
-      if (png == null) {
-        state = const SceneFailed('Önce haritaya araziyi çiz.', retryable: false);
-        return;
+      var png = await ref.read(sketchExporterProvider)();
+      final regions = png == null || mode == SceneMode.map ? await ref.read(regionsExporterProvider)() : null;
+      final ({Uint8List regions, String? ground})? extra;
+      if (png != null) {
+        await ref.read(onlineSessionProvider.notifier).ensureOpen();
+        extra = await _regionLayer(client, mode, ground, regions);
+      } else {
+        // No pen line. Painted areas alone can go, as the region layer over a
+        // blank sketch; asked before a session (a GPU) is opened for nothing.
+        final reason = regions == null ? drawFirstMessage : (mode == SceneMode.map ? null : linesNeededForAtmosphereMessage);
+        extra = reason == null ? await _regionLayer(client, mode, ground, regions) : null;
+        if (extra == null) {
+          if (gen == _generation) state = SceneFailed(reason ?? linesNeededMessage, retryable: false);
+          return;
+        }
+        png = await ref.read(blankSketchExporterProvider)();
+        await ref.read(onlineSessionProvider.notifier).ensureOpen();
       }
-      await ref.read(onlineSessionProvider.notifier).ensureOpen();
-      final extra = await _regionLayer(client, mode, ground);
       var autoRetried = false;
       while (true) {
         final seed = ref.read(sceneRandomProvider).nextInt(1 << 31);
@@ -172,13 +222,10 @@ class SceneController extends Notifier<SceneJobState> {
         final done = await _wait(client, job.id, gen);
         if (gen != _generation) return;
         if (done.state == NcJobState.succeeded && done.outputs.isNotEmpty) {
-          state = SceneWorking(ScenePhase.downloading, jobId: job.id);
-          final out = done.outputs.first;
-          final bytes = await client.downloadAsset(out.assetId);
-          if (gen != _generation) return;
-          await ref.read(databaseProvider).addScene(
-              assetId: out.assetId, png: bytes, mode: mode.name, narrative: narrative.trim(), seed: seed, encounterId: encounterId);
-          state = const SceneIdle();
+          await _deliver(
+              client,
+              (assetId: done.outputs.first.assetId, jobId: job.id, mode: mode, narrative: narrative.trim(), seed: seed, encounterId: encounterId),
+              gen);
           return;
         }
         if (done.state == NcJobState.cancelled) {
@@ -195,9 +242,7 @@ class SceneController extends Notifier<SceneJobState> {
       }
     } on NcException catch (e) {
       if (gen != _generation) return;
-      ref.read(onlineSessionProvider.notifier).accountRejected(e.reaction);
-      if (e is NcApiException && e.reaction == NcReaction.bug) debugPrint('NeuraCraft rejected the request: ${e.code} ${e.params}');
-      state = SceneFailed(messageFor(e), retryable: !_notRetryable.contains(e.reaction));
+      _failed(e);
     } on RegionsTooLarge {
       if (gen != _generation) return;
       state = const SceneFailed('Boyanan alanlar gönderilemeyecek kadar büyük; birkaçını silip yeniden dene.', retryable: false);
@@ -205,6 +250,12 @@ class SceneController extends Notifier<SceneJobState> {
       if (gen != _generation) return;
       unawaited(_cancelOnServer(client));
       state = SceneFailed(messageForReaction(NcReaction.offline));
+    } on _JobDeadlineExceeded {
+      // The service answers but the picture does not come (a job stuck in the
+      // queue): stop it there too, and let the user try again.
+      if (gen != _generation) return;
+      unawaited(_cancelOnServer(client));
+      state = SceneFailed(messageForReaction(NcReaction.busy));
     } catch (e, st) {
       // Anything else (unexpected JSON, a database error…): never leave the
       // map stuck on "sending".
@@ -216,16 +267,68 @@ class SceneController extends Notifier<SceneJobState> {
     }
   }
 
-  /// "Yeniden dene": the same mode and description with a new seed.
+  /// "Yeniden dene": a picture that was made but not downloaded is fetched
+  /// again; otherwise the same mode and description with a new seed.
   Future<void> retry() async {
+    if (busy) return;
+    final waiting = _undelivered;
+    if (waiting != null && await _fetchAgain(waiting)) return;
     final l = _last;
     if (l != null) await generate(mode: l.mode, narrative: l.narrative, ground: l.ground);
+  }
+
+  /// Downloads [p] and keeps it with its encounter. A failed download leaves
+  /// it in [_undelivered] when trying again can help.
+  Future<void> _deliver(NeuraCraftClient client, _Picture p, int gen) async {
+    state = SceneWorking(ScenePhase.downloading, jobId: p.jobId);
+    final Uint8List bytes;
+    try {
+      bytes = await client.downloadAsset(p.assetId);
+    } on NcException catch (e) {
+      if (gen == _generation) _undelivered = e.reaction == NcReaction.notFound || _notRetryable.contains(e.reaction) ? null : p;
+      rethrow;
+    }
+    if (gen != _generation) return;
+    _undelivered = null;
+    await ref
+        .read(databaseProvider)
+        .addScene(assetId: p.assetId, png: bytes, mode: p.mode.name, narrative: p.narrative, seed: p.seed, encounterId: p.encounterId);
+    state = const SceneIdle();
+  }
+
+  /// True when [p] was dealt with (downloaded, or failed again with its
+  /// message); false when the service no longer has it: then a new job.
+  Future<bool> _fetchAgain(_Picture p) async {
+    final client = ref.read(ncClientProvider);
+    if (client == null || !_allowed) return true;
+    final gen = ++_generation;
+    try {
+      await _deliver(client, p, gen);
+    } on NcException catch (e) {
+      if (gen != _generation) return true;
+      if (e.reaction == NcReaction.notFound) {
+        state = const SceneIdle();
+        return false;
+      }
+      _failed(e);
+    } catch (e, st) {
+      debugPrint('scene download failed: $e\n$st');
+      if (gen == _generation) state = SceneFailed(messageForReaction(NcReaction.bug), retryable: false);
+    }
+    return true;
+  }
+
+  void _failed(NcException e) {
+    ref.read(onlineSessionProvider.notifier).accountRejected(e.reaction);
+    if (e is NcApiException && e.reaction == NcReaction.bug) debugPrint('NeuraCraft rejected the request: ${e.code} ${e.params}');
+    state = SceneFailed(messageFor(e), retryable: !_notRetryable.contains(e.reaction));
   }
 
   /// The user gave up waiting.
   Future<void> cancel() async {
     final client = ref.read(ncClientProvider);
     _generation++;
+    _undelivered = null;
     // Not awaited: cancelling a stream that never closes can wait forever,
     // and the cancel button must not.
     final w = _watch;
@@ -250,10 +353,8 @@ class SceneController extends Notifier<SceneJobState> {
   /// The region layer and ground to send, or null: atmosphere mode, nothing
   /// painted, or a service that does not take them yet (then the sketch goes
   /// alone, as before). The ground is sent only if the service lists it.
-  Future<({Uint8List regions, String? ground})?> _regionLayer(NeuraCraftClient client, SceneMode mode, String? ground) async {
-    if (mode != SceneMode.map) return null;
-    final regions = await ref.read(regionsExporterProvider)();
-    if (regions == null) return null;
+  Future<({Uint8List regions, String? ground})?> _regionLayer(NeuraCraftClient client, SceneMode mode, String? ground, Uint8List? regions) async {
+    if (mode != SceneMode.map || regions == null) return null;
     final features = await client.sceneFeatures();
     if (!features.regions) return null;
     return (regions: regions, ground: features.grounds.contains(ground) ? ground : null);
@@ -293,7 +394,15 @@ class SceneController extends Notifier<SceneJobState> {
 
   Future<NcJob> _wait(NeuraCraftClient client, String jobId, int gen) {
     final done = _pending = Completer<NcJob>();
-    _watch = client.watchJob(jobId).timeout(jobTimeout).listen(
+    late final StreamSubscription<NcJobEvent> watch;
+    final deadline = Timer(jobDeadline, () {
+      if (done.isCompleted) return;
+      // Not awaited (see [cancel]); stops the polling too.
+      unawaited(watch.cancel());
+      if (identical(_watch, watch)) _watch = null;
+      done.completeError(const _JobDeadlineExceeded());
+    });
+    _watch = watch = client.watchJob(jobId).timeout(jobTimeout).listen(
       (e) {
         if (gen != _generation) return;
         switch (e) {
@@ -317,16 +426,18 @@ class SceneController extends Notifier<SceneJobState> {
       },
       cancelOnError: true,
     );
-    return done.future;
+    return done.future.whenComplete(deadline.cancel);
   }
 }
 
 final sceneControllerProvider = NotifierProvider<SceneController, SceneJobState>(SceneController.new);
 
 /// What the service takes beyond the sketch (the region layer, the ground);
-/// [NcSceneFeatures.none] offline, signed out or before it answers. The
-/// client caches the answer, so reopening the sheet does not ask again.
+/// [NcSceneFeatures.none] offline, signed out or before it answers, and
+/// (without asking) while the feature is off or before consent. The client
+/// caches the answer, so reopening the sheet does not ask again.
 final sceneFeaturesProvider = FutureProvider.autoDispose<NcSceneFeatures>((ref) async {
+  if (!ref.watch(onlineFeatureActiveProvider)) return NcSceneFeatures.none;
   final client = ref.watch(ncClientProvider);
   return client == null ? NcSceneFeatures.none : client.sceneFeatures();
 });
@@ -349,7 +460,8 @@ final activeSceneIdProvider = Provider<int?>((ref) => ref.watch(activeSceneProvi
 /// image is never painted.
 final sceneImageProvider = FutureProvider.autoDispose.family<ui.Image?, int>((ref, id) async {
   final row = await (ref.read(databaseProvider).select(ref.read(databaseProvider).mapScenes)..where((s) => s.id.equals(id))).getSingleOrNull();
-  if (row == null) return null;
+  // A reported picture is an emptied marker row: nothing to show.
+  if (row == null || row.hidden || row.png.isEmpty) return null;
   final codec = await ui.instantiateImageCodec(row.png);
   final image = (await codec.getNextFrame()).image;
   codec.dispose();

@@ -7,7 +7,15 @@
 ///   moment does not throw the warm GPU away.
 /// - Heartbeats run every `heartbeatSeconds` while the app is in the
 ///   foreground, and stop in the background.
-/// - `410 session.closed` → a new session, silently.
+/// - `410 session.closed` on a periodic heartbeat (the session idled out or
+///   ran its 8 hours while the map just stood open) → idle. A new session is
+///   opened only when the user needs one again: the scene sheet opens, a
+///   sketch is sent, the map comes back to the foreground or is opened again.
+///   Otherwise an untouched map would keep a GPU warm for as long as it is on
+///   screen. (The contract gives the 410 a `reason` but does not list its
+///   values, so every 410 on a periodic heartbeat is treated this way.)
+/// - `410 session.closed` on a job request, or on the heartbeat sent when the
+///   map comes back → a new session, silently.
 /// - Nothing is opened before the user's consent and sign-in
 ///   ([onlineFeatureActiveProvider]).
 /// - The server ended the sign-in → idle (the UI asks to sign in again);
@@ -26,7 +34,8 @@ import 'online_settings.dart';
 
 enum SessionPhase {
   /// No session and none wanted (map closed, feature off, no consent or not
-  /// signed in).
+  /// signed in), or the session ended on the server while the map stood
+  /// untouched and nobody has needed one since.
   idle,
   opening,
   open,
@@ -121,7 +130,7 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
     if (state.sessionId != null && _users == 1) {
       // Back on the map within the grace period: release() stopped the
       // heartbeats, so restart them (and refresh the capacity now).
-      unawaited(_beat());
+      unawaited(_beat(reopen: true));
       _startHeartbeat();
     } else {
       _ensureOpen();
@@ -152,12 +161,14 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
     if (state.sessionId == null) {
       _ensureOpen();
     } else {
-      unawaited(_beat()); // refresh capacity at once; detects a session that timed out meanwhile
+      unawaited(_beat(reopen: true)); // refresh capacity at once; a session that timed out meanwhile is opened again
       _startHeartbeat();
     }
   }
 
-  /// Before sending a sketch: make sure a session exists so the GPU starts.
+  /// The user needs the session: the scene sheet opens, or a sketch is about
+  /// to be sent. Makes sure a session exists so the GPU starts (also after a
+  /// heartbeat found it closed and the map went idle).
   /// Never throws; a failed open does not block the job.
   Future<void> ensureOpen() async {
     if (!_active) return;
@@ -214,6 +225,10 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
     state = state.copyWith(phase: SessionPhase.opening, clearError: true);
     try {
       final s = await client.openSession();
+      if (!ref.mounted) {
+        unawaited(client.closeSession(s.id).catchError((_) {}));
+        return;
+      }
       if (!_active || (_users == 0 && _closeTimer == null)) {
         // Nobody wants it any more (closed while we waited).
         unawaited(client.closeSession(s.id).catchError((_) {}));
@@ -224,13 +239,24 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
       state = OnlineSessionState(phase: SessionPhase.open, sessionId: s.id, capacity: s.capacity);
       _startHeartbeat();
     } on NcException catch (e) {
-      if (accountRejected(e.reaction)) return;
-      state = state.copyWith(phase: SessionPhase.failed, error: e.reaction, clearSession: true);
-      if (_users > 0 && _foreground) {
-        _retryTimer = Timer(retryDelay, () {
-          if (_users > 0 && _foreground && _active) _ensureOpen();
-        });
-      }
+      if (!ref.mounted || accountRejected(e.reaction)) return;
+      _openFailed(e.reaction);
+    } catch (e) {
+      // Not the service's answer as we know it (a FormatException or a
+      // TypeError from its JSON): the same end as any failed open, never a
+      // map left on "Bağlanıyor…". Only the error's type is logged.
+      debugPrint('opening the online session failed: ${e.runtimeType}');
+      if (ref.mounted) _openFailed(NcReaction.unknown);
+    }
+  }
+
+  /// Failed, with the normal retry [retryDelay] later while the map is open.
+  void _openFailed(NcReaction reason) {
+    state = state.copyWith(phase: SessionPhase.failed, error: reason, clearSession: true);
+    if (_users > 0 && _foreground) {
+      _retryTimer = Timer(retryDelay, () {
+        if (_users > 0 && _foreground && _active) _ensureOpen();
+      });
     }
   }
 
@@ -240,24 +266,36 @@ class OnlineSessionController extends Notifier<OnlineSessionState> {
     _heartbeat = Timer.periodic(Duration(seconds: _heartbeatSeconds), (_) => _beat());
   }
 
-  Future<void> _beat() async {
+  /// One heartbeat. When the session turns out to be closed: with [reopen]
+  /// (the map just came back: the user is here) a new one is opened; on a
+  /// periodic beat the map goes idle instead (see the library comment).
+  Future<void> _beat({bool reopen = false}) async {
     final client = _client;
     final id = state.sessionId;
     if (client == null || id == null) return;
     try {
       final s = await client.heartbeat(id);
-      if (state.sessionId == id) state = state.copyWith(capacity: s.capacity, clearError: true);
+      if (ref.mounted && state.sessionId == id) state = state.copyWith(capacity: s.capacity, clearError: true);
     } on NcException catch (e) {
-      if (state.sessionId != id) return;
+      if (!ref.mounted || state.sessionId != id) return;
       switch (e.reaction) {
         case NcReaction.sessionClosed || NcReaction.notFound:
-          await sessionClosed();
+          if (reopen) {
+            await sessionClosed();
+          } else {
+            _cancelTimers();
+            state = const OnlineSessionState();
+          }
         case NcReaction.authInvalid || NcReaction.blocked || NcReaction.signInRequired:
           accountRejected(e.reaction);
         default:
           // Network blip: keep the session; the next beat tries again.
           state = state.copyWith(error: e.reaction);
       }
+    } catch (e) {
+      // An answer that is not the service's (see [_open]): like a blip.
+      debugPrint('online session heartbeat failed: ${e.runtimeType}');
+      if (ref.mounted && state.sessionId == id) state = state.copyWith(error: NcReaction.unknown);
     }
   }
 
