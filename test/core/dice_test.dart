@@ -72,6 +72,40 @@ void main() {
     expect(roll('1d6', FixedRandom([1])).isFumble, isFalse);
   });
 
+  test('natural 20 and 1 are reported for the one kept d20, whatever else is rolled', () {
+    expect(roll('1d20+1d4', FixedRandom([20, 2])).isCritical, isTrue, reason: 'Bless');
+    expect(roll('1d20+1d4+5', FixedRandom([20, 3])).isCritical, isTrue);
+    expect(roll('1d4+1d20-2', FixedRandom([3, 1])).isFumble, isTrue);
+    expect(roll('2d20kh1+1d4', FixedRandom([1, 20, 4])).isCritical, isTrue);
+    expect(roll('2d20kl1+2d6+3', FixedRandom([1, 20, 6, 6])).isFumble, isTrue);
+    expect(roll('1d20+1d4', FixedRandom([19, 4])).isCritical, isFalse);
+    expect(roll('1d20+1d4', FixedRandom([2, 1])).isFumble, isFalse, reason: 'the 1 is on the d4');
+    // More than one kept d20: no single "natural" die.
+    expect(roll('2d20', FixedRandom([20, 20])).isCritical, isFalse);
+    expect(roll('1d20+1d20', FixedRandom([20, 3])).isCritical, isFalse);
+    expect(roll('3d20kh2', FixedRandom([1, 1, 1])).isFumble, isFalse);
+    expect(roll('5+3', FixedRandom([20])).isCritical, isFalse);
+  });
+
+  test('advantage and disadvantage only rewrite a single d20 roll', () {
+    expect(withAdvantage('1d20'), '2d20kh1');
+    expect(withAdvantage('d20+4'), '2d20kh1+4');
+    expect(withAdvantage(' 1D20 + 4 − 1 '), '2d20kh1+4-1');
+    expect(withAdvantage('1z20-2', disadvantage: true), '2d20kl1-2');
+    expect(withAdvantage('3+1d20'), '3+2d20kh1');
+    expect(withAdvantage(''), '2d20kh1', reason: 'an empty field means a plain d20');
+    // Already rolled with (dis)advantage: the buttons switch between the two.
+    expect(withAdvantage('2d20kh1+5', disadvantage: true), '2d20kl1+5');
+    expect(withAdvantage('2d20kl1+5'), '2d20kh1+5');
+    expect(withAdvantage('2d20k'), '2d20kh1');
+    expect(withAdvantage('2d20dl1-1'), '2d20kh1-1');
+    // Anything else is left alone.
+    for (final e in ['2d6+3', '1d20+1d4', '2d20', '3d20kh1', '2d20kh2', '1d20*2', '5-1d20', '(1d20)+2', '1d20+', '1d12', '8', 'abc']) {
+      expect(withAdvantage(e), isNull, reason: e);
+      expect(withAdvantage(e, disadvantage: true), isNull, reason: e);
+    }
+  });
+
   test('random rolls stay within bounds', () {
     final rng = Random(42);
     for (var i = 0; i < 500; i++) {
