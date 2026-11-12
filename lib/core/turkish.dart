@@ -236,3 +236,52 @@ String possessive3(String word, {bool apostrophe = false}) {
   final suffix = _endsWithVowel(r) ? 's$i' : i;
   return apostrophe ? "$word'$suffix" : '$word$suffix';
 }
+
+// ---------------------------------------------------------------- stems
+
+/// Noun suffixes on folded text (ı → i, ü → u, ö → o), one layer each:
+/// plural, possessive/accusative, genitive, dative, locative, ablative,
+/// "with", "is", "-ed/-less"; the y/n/s variants carry the buffer letter.
+const _stemSuffixes = [
+  'lar', 'ler',
+  'i', 'u', 'si', 'su', 'yi', 'yu', 'ni', 'nu',
+  'in', 'un', 'nin', 'nun',
+  'a', 'e', 'ya', 'ye', 'na', 'ne',
+  'da', 'de', 'ta', 'te', 'nda', 'nde',
+  'dan', 'den', 'tan', 'ten', 'ndan', 'nden',
+  'la', 'le', 'yla', 'yle',
+  'dir', 'dur', 'tir', 'tur',
+  'li', 'lu', 'siz', 'suz',
+];
+
+/// Stem-final consonants that soften before a vowel: kitap → kitabı,
+/// kanat → kanadı, köpek → köpeği (ç → c is the same letter once folded).
+const _hardened = {'b': 'p', 'd': 't', 'g': 'k'};
+
+/// Possible stems of a folded word ([trFold]) for search, longest first:
+/// "puanlarinin" → puanlarin, puanlari, puanlar, puan. Up to three stacked
+/// suffixes are removed ("puan-lar-ı-nın"), and a stem that lost a
+/// vowel-initial suffix also comes with its consonant hardened ("kitab" →
+/// "kitap"). This is a guess list, not a morphological analysis: the caller
+/// checks the candidates against real names. Stems keep at least three
+/// letters (two after a three-letter suffix: "oklar" → "ok").
+List<String> trStems(String folded) {
+  final out = <String>{};
+  var layer = [folded];
+  for (var depth = 0; depth < 3 && layer.isNotEmpty; depth++) {
+    final next = <String>[];
+    for (final w in layer) {
+      for (final s in _stemSuffixes) {
+        final n = w.length - s.length;
+        if (n < (s.length >= 3 ? 2 : 3) || !w.endsWith(s)) continue;
+        final stem = w.substring(0, n);
+        if (!out.add(stem)) continue;
+        next.add(stem);
+        final hard = _hardened[stem[n - 1]];
+        if (hard != null && 'aeiu'.contains(s[0])) out.add(stem.substring(0, n - 1) + hard);
+      }
+    }
+    layer = next;
+  }
+  return out.toList()..sort((a, b) => b.length.compareTo(a.length));
+}

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gm_cebi/data/reference.dart';
+import 'package:gm_cebi/core/turkish.dart';
 
 import '../support.dart';
 
@@ -69,6 +70,71 @@ void main() {
     expect(index.search('körlük').first.record.key, 'spells/blindness-deafness');
   });
 
+  test('inflected Turkish queries find the record by its stem', () {
+    expect(top('can puanları').first, 'rules_glossary/hit-points');
+    expect(top('kurtarma zarları').first, 'rules_glossary/saving-throw');
+    expect(top('yetenek testleri').first, 'rules_glossary/ability-check');
+    expect(top('büyü slotları').first, 'terms/spell-slot');
+    expect(top('körün').first, 'conditions/blinded');
+    expect(top('korun').first, 'conditions/blinded'); // typed without diacritics
+    expect(top('iskeletin').first, 'monsters/skeleton');
+    expect(top('ateş topuyla').first, 'spells/fireball');
+    expect(top('kısa dinlenmeden').first, 'rules_glossary/short-rest');
+    expect(index.search('körün').first.approximate, isTrue);
+  });
+
+  test('stems: stacked suffixes, buffer letters and consonant softening', () {
+    expect(trStems('puanlarinin'), containsAll(['puanlar', 'puan']));
+    expect(trStems('zarina'), contains('zar'));
+    expect(trStems('buyucunun'), contains('buyucu'));
+    expect(trStems('kitabi'), contains('kitap')); // p → b
+    expect(trStems('kanadi'), contains('kanat')); // t → d
+    expect(trStems('kopegi'), contains('kopek')); // k → ğ (folded g)
+    expect(trStems('oklar'), contains('ok'));
+    expect(trStems('kor'), isEmpty);
+    // Softened stems reach the record: "kalkana" → Kalkan, "değneği" → Değnek…
+    expect(top('asanın', 5).join(' '), contains('staff'));
+    expect(top('kitaba', 5).every((k) => k.contains('tome') || k.contains('book') || k.contains('manual')), isTrue);
+  });
+
+  test('longer stems rank before shorter ones', () {
+    final keys = top('büyüleri', 3);
+    expect(keys.first, 'rules/spells-intro'); // "Büyüler"
+    expect(keys.skip(1), containsAll(['rules_glossary/magic', 'rules_glossary/spell'])); // "Büyü"
+  });
+
+  test('glossary terms rank below records that match by name', () {
+    for (final q in ['goblin', 'ejderha', 'dragon', 'goblinler']) {
+      final hits = index.search(q);
+      expect(hits.first.record.dataset, isNot('terms'), reason: q);
+      final lastNamed = hits.lastIndexWhere((h) => h.record.dataset != 'terms' && h.score > 200);
+      final firstTerm = hits.indexWhere((h) => h.record.dataset == 'terms');
+      expect(firstTerm == -1 || firstTerm > lastNamed, isTrue, reason: q);
+    }
+    expect(top('fırsat saldırısı').first, 'rules_glossary/opportunity-attacks');
+    expect(top('fırsat saldırısı', 2).last, 'terms/opportunity-attack');
+  });
+
+  test('English names rank the same in any letter case', () {
+    List<String> scores(String q) => [for (final h in index.search(q).take(5)) '${h.record.key} ${h.score}'];
+    expect(scores('invisible'), scores('Invisible'));
+    expect(scores('INVISIBLE'), scores('Invisible'));
+    expect(scores('initiative'), scores('Initiative'));
+    expect(top('invisible').first, 'conditions/invisible');
+    // The exact-spelling bonus still separates Turkish letters.
+    expect(top('ISIK', 1), top('ısık', 1));
+  });
+
+  test('total hit count is reported beyond the limit', () {
+    final r = index.searchAll('büyü');
+    expect(r.hits.length, 60);
+    expect(r.total, greaterThan(800));
+    expect(index.searchAll('büyü', limit: 120).hits.take(60).map((h) => h.record.key), r.hits.map((h) => h.record.key));
+    final few = index.searchAll('aboleth');
+    expect(few.total, few.hits.length);
+    expect(index.searchAll('').total, 0);
+  });
+
   test('terms: glossary entries without a record', () {
     final hits = index.search('çeviklik');
     expect(hits.first.record.dataset, 'terms');
@@ -107,6 +173,24 @@ void main() {
       index.search(q);
       sw.stop();
       expect(sw.elapsedMilliseconds, lessThan(100), reason: q);
+    }
+  });
+
+  test('inflected queries stay within the per-keystroke budget (5 ms)', () {
+    const queries = ['can puanları', 'kurtarma zarlarından', 'büyü slotları', 'körün', 'ejderhalarının', 'fırsat saldırısı', 'strahd'];
+    for (final q in queries) {
+      index.search(q); // warm-up
+      var best = 1 << 30;
+      final sw = Stopwatch();
+      for (var i = 0; i < 5; i++) {
+        sw
+          ..reset()
+          ..start();
+        index.search(q);
+        sw.stop();
+        if (sw.elapsedMicroseconds < best) best = sw.elapsedMicroseconds;
+      }
+      expect(best, lessThan(5000), reason: q);
     }
   });
 
