@@ -1,7 +1,34 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../core/markdown.dart';
 import '../../data/reference.dart';
+
+/// Widest comfortable column of running text. Wider screens (tablets) centre it.
+const kReadingWidth = 720.0;
+
+/// Side margin that keeps a column inside a width of [available] at most
+/// [kReadingWidth] wide and centred, never less than [min].
+double readingMargin(double available, {double min = 0}) => math.max(min, (available - kReadingWidth) / 2);
+
+/// A lazily built list of rows that stays within the reading width on tablets,
+/// centred; the list itself keeps the full width, so it scrolls from the margins too.
+class ReadingList extends StatelessWidget {
+  const ReadingList({super.key, required this.itemCount, required this.itemBuilder});
+
+  final int itemCount;
+  final NullableIndexedWidgetBuilder itemBuilder;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, box) => ListView.builder(
+          padding: EdgeInsets.symmetric(horizontal: readingMargin(box.maxWidth)),
+          itemCount: itemCount,
+          itemBuilder: itemBuilder,
+        ),
+      );
+}
 
 /// Inline markdown (`**bold**`, `*italic*`) as a rich text.
 class MdText extends StatelessWidget {
@@ -107,6 +134,30 @@ class BlocksView extends StatelessWidget {
       );
 }
 
+/// Key column of a key/value table: as wide as its longest key, but at most
+/// [fraction] of the table, and never squeezed below that (the value column
+/// gives way and wraps instead).
+class _KeyColumnWidth extends TableColumnWidth {
+  const _KeyColumnWidth(this.fraction);
+
+  final double fraction;
+
+  double _width(Iterable<RenderBox> cells, double containerWidth) {
+    final content = const IntrinsicColumnWidth().maxIntrinsicWidth(cells, containerWidth);
+    return containerWidth.isFinite ? math.min(content, containerWidth * fraction) : content;
+  }
+
+  @override
+  double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) => _width(cells, containerWidth);
+
+  @override
+  double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) => _width(cells, containerWidth);
+}
+
+/// A table block. Tables with a header row keep their natural column widths
+/// and scroll sideways when they are wider than the screen. Header-less
+/// two-column tables are key/value lists ("Hit Point Die | D12 per level"):
+/// they always fit the width, the value column wraps.
 class DataTableView extends StatelessWidget {
   const DataTableView(this.block, {super.key});
 
@@ -120,14 +171,36 @@ class DataTableView extends StatelessWidget {
     final rows = ((block['rows'] as List?) ?? const []).map((r) => (r as List).cast<String>()).toList();
     final cols = [header.length, for (final r in rows) r.length].fold<int>(0, (a, b) => a > b ? a : b);
     if (cols == 0) return const SizedBox.shrink();
+    final keyValue = header.isEmpty && cols == 2;
     Widget cell(String s, {bool head = false}) => Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 260),
+            constraints: BoxConstraints(maxWidth: keyValue ? double.infinity : 260),
             child: MdText(s, style: (head ? t.labelLarge?.copyWith(fontWeight: FontWeight.w700) : t.bodyMedium)),
           ),
         );
     List<String> pad(List<String> r) => [...r, for (var i = r.length; i < cols; i++) ''];
+    final table = DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: scheme.outlineVariant),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Table(
+        defaultColumnWidth: const IntrinsicColumnWidth(),
+        // Key/value: the key column takes what it needs up to 40%; the value
+        // column is shrunk by the table to the width that is left.
+        columnWidths: keyValue ? const {0: _KeyColumnWidth(0.4)} : null,
+        border: TableBorder.symmetric(inside: BorderSide(color: scheme.outlineVariant)),
+        children: [
+          if (header.isNotEmpty)
+            TableRow(
+              decoration: BoxDecoration(color: scheme.surfaceContainerHigh),
+              children: [for (final h in pad(header)) cell(h, head: true)],
+            ),
+          for (final r in rows) TableRow(children: [for (final c in pad(r)) cell(c)]),
+        ],
+      ),
+    );
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -136,27 +209,7 @@ class DataTableView extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 6),
             child: Text(block['title'] as String, style: t.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
           ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border.all(color: scheme.outlineVariant),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Table(
-              defaultColumnWidth: const IntrinsicColumnWidth(),
-              border: TableBorder.symmetric(inside: BorderSide(color: scheme.outlineVariant)),
-              children: [
-                if (header.isNotEmpty)
-                  TableRow(
-                    decoration: BoxDecoration(color: scheme.surfaceContainerHigh),
-                    children: [for (final h in pad(header)) cell(h, head: true)],
-                  ),
-                for (final r in rows) TableRow(children: [for (final c in pad(r)) cell(c)]),
-              ],
-            ),
-          ),
-        ),
+        if (keyValue) table else SingleChildScrollView(scrollDirection: Axis.horizontal, child: table),
       ]),
     );
   }

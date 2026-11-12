@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/turkish.dart';
 import '../../data/reference.dart';
 import '../../features/flags.dart';
 import '../../providers.dart';
@@ -17,6 +18,24 @@ class DetailScreen extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<DetailScreen> createState() => _DetailScreenState();
+}
+
+/// The record a cross-reference title ("See also") leads to: the record with
+/// that English or Turkish name; else the first section of the rule chapter of
+/// that name ("Character Creation" has no section called that); else the
+/// glossary term ("NPC"). Null when the title leads nowhere.
+RefRecord? resolveTitle(ReferenceData data, String title) {
+  final named = data.findByTitle(title);
+  if (named != null) return named;
+  final f = trFold(title);
+  bool same(Object? name) => name is String && trFold(name) == f;
+  for (final r in data.byDataset['rules'] ?? const <RefRecord>[]) {
+    if (same(r.en['chapter']) || same(r.tr?['chapter'])) return r;
+  }
+  for (final r in data.byDataset['terms'] ?? const <RefRecord>[]) {
+    if (same(r.enName) || same(r.trName)) return r;
+  }
+  return null;
 }
 
 class _DetailScreenState extends ConsumerState<DetailScreen> {
@@ -42,7 +61,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
             child: SegmentedButton<Lang>(
               key: const Key('lang-toggle'),
               showSelectedIcon: false,
-              style: SegmentedButton.styleFrom(minimumSize: const Size(52, 44), visualDensity: VisualDensity.compact),
+              // Each segment is a full 48dp tap target (the app bar is 56dp tall).
+              style: SegmentedButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                visualDensity: VisualDensity.standard,
+                tapTargetSize: MaterialTapTargetSize.padded,
+              ),
               segments: const [
                 ButtonSegment(value: Lang.tr, label: Text('TR')),
                 ButtonSegment(value: Lang.en, label: Text('EN')),
@@ -54,47 +78,54 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
         ],
       ),
       body: SelectionArea(
-        child: ListView(
-          key: const Key('detail-list'),
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-          children: [
-            Text(r.displayName(_lang), key: const Key('detail-title'), style: t.headlineMedium?.copyWith(fontWeight: FontWeight.w700)),
-            if (other != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Text(other, style: t.titleMedium?.copyWith(color: scheme.onSurfaceVariant)),
-              ),
-            const SizedBox(height: 8),
-            Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-              DatasetChip(r.info),
-              // Conditions all carry the "Condition" tag: redundant next to the dataset chip.
-              if (r.dataset != 'conditions')
-                for (final tag in (c['tags'] as List?)?.cast<String>() ?? const <String>[])
-                  Chip(label: Text(tag), visualDensity: VisualDensity.compact),
-              if (source != null)
-                Text('SRD 5.2.1 · s. ${source['page']}', style: t.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
-            ]),
-            if (_lang == Lang.tr && !r.hasTr) ...[
-              const SizedBox(height: 12),
-              Container(
-                key: const Key('untranslated-banner'),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: scheme.secondaryContainer, borderRadius: BorderRadius.circular(12)),
-                child: Row(children: [
-                  Icon(Icons.translate, color: scheme.onSecondaryContainer),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Bu kayıt henüz Türkçeye çevrilmedi; İngilizcesi gösteriliyor.',
-                      style: t.bodyMedium?.copyWith(color: scheme.onSecondaryContainer),
-                    ),
+        // Tablets: the text column stays at a readable width, centred; the
+        // list keeps the full width, so it also scrolls from the margins.
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final side = readingMargin(box.maxWidth, min: 16);
+            return ListView(
+              key: const Key('detail-list'),
+              padding: EdgeInsets.fromLTRB(side, 8, side, 32),
+              children: [
+                Text(r.displayName(_lang), key: const Key('detail-title'), style: t.headlineMedium?.copyWith(fontWeight: FontWeight.w700)),
+                if (other != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(other, style: t.titleMedium?.copyWith(color: scheme.onSurfaceVariant)),
                   ),
+                const SizedBox(height: 8),
+                Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                  DatasetChip(r.info),
+                  // Conditions all carry the "Condition" tag: redundant next to the dataset chip.
+                  if (r.dataset != 'conditions')
+                    for (final tag in (c['tags'] as List?)?.cast<String>() ?? const <String>[])
+                      Chip(label: Text(tag), visualDensity: VisualDensity.compact),
+                  if (source != null)
+                    Text('SRD 5.2.1 · s. ${source['page']}', style: t.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
                 ]),
-              ),
-            ],
-            const SizedBox(height: 16),
-            ..._body(context, r, c, labels),
-          ],
+                if (_lang == Lang.tr && !r.hasTr) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    key: const Key('untranslated-banner'),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: scheme.secondaryContainer, borderRadius: BorderRadius.circular(12)),
+                    child: Row(children: [
+                      Icon(Icons.translate, color: scheme.onSecondaryContainer),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Bu kayıt henüz Türkçeye çevrilmedi; İngilizcesi gösteriliyor.',
+                          style: t.bodyMedium?.copyWith(color: scheme.onSecondaryContainer),
+                        ),
+                      ),
+                    ]),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                ..._body(context, r, c, labels),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -125,14 +156,20 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       case 'terms':
         return [TermView(r)];
       default:
-        return [GenericView(c, l, onOpen: _open)];
+        // Chips that lead nowhere are hidden (all are shown until the data is there to tell).
+        final loaded = ref.watch(referenceProvider).hasValue;
+        return [GenericView(c, l, onOpen: _open, canOpen: loaded ? (title) => _target('rules_glossary', title) != null : null)];
     }
   }
 
-  void _open(String dataset, String idOrTitle) {
+  RefRecord? _target(String dataset, String idOrTitle) {
     final data = ref.read(referenceProvider).value?.data;
-    if (data == null) return;
-    final target = data.find(dataset, idOrTitle) ?? data.findByTitle(idOrTitle);
+    if (data == null) return null;
+    return data.find(dataset, idOrTitle) ?? resolveTitle(data, idOrTitle);
+  }
+
+  void _open(String dataset, String idOrTitle) {
+    final target = _target(dataset, idOrTitle);
     if (target == null) return;
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => DetailScreen(record: target, initialLang: _lang)));
   }
@@ -318,7 +355,7 @@ class ClassView extends StatelessWidget {
     final t = Theme.of(context).textTheme;
     final core = (c['core_traits'] as Map<String, dynamic>).cast<String, String>();
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      DataTableView({'header': const <String>[], 'rows': [for (final e in core.entries) ['**${e.key}**', e.value]]}),
+      DataTableView({'header': const <String>[], 'rows': [for (final e in core.entries) ['**${l.fieldLabel(e.key)}**', e.value]]}),
       BlocksView(c['blocks'] as List),
       Padding(
         padding: const EdgeInsets.only(top: 12, bottom: 6),
@@ -399,11 +436,14 @@ class TermView extends StatelessWidget {
 /// Rules, conditions, species, backgrounds, feats, equipment, subclasses,
 /// weapon properties and masteries.
 class GenericView extends StatelessWidget {
-  const GenericView(this.c, this.l, {super.key, required this.onOpen});
+  const GenericView(this.c, this.l, {super.key, required this.onOpen, this.canOpen});
 
   final Map<String, dynamic> c;
   final ContentLabels l;
   final void Function(String dataset, String title) onOpen;
+
+  /// Whether a "see also" title leads to a record; chips that lead nowhere are left out.
+  final bool Function(String title)? canOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -422,7 +462,10 @@ class GenericView extends StatelessWidget {
         for (final e in (c['fields'] as Map<String, dynamic>).entries)
           if ((e.value as String).isNotEmpty) ['**${l.fieldLabel(e.key)}**', e.value as String],
     ];
-    final seeAlso = (c['see_also'] as List?)?.cast<String>() ?? const <String>[];
+    final seeAlso = [
+      for (final s in (c['see_also'] as List?)?.cast<String>() ?? const <String>[])
+        if (canOpen?.call(s) ?? true) s,
+    ];
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       // Magic item category/rarity line; chapter of a rule section (not repeated on the
       // chapter's own intro section, which carries the chapter name).

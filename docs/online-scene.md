@@ -173,9 +173,13 @@ geçti. Girişli sürüm henüz gerçek sunucuya karşı çalıştırılmadı: c
   açılmaz.
 - **Heartbeat:** `heartbeatSeconds`'ta bir, yalnızca uygulama ön plandayken
   (`AppLifecycleState.resumed`). Arka planda durur, dönünce hemen bir heartbeat gider.
-- **`410 session.closed`:** sessizce yeni oturum açılır (uygulama arka plandaysa ön plana dönünce).
-  Sunucu bugün 410'u yalnızca heartbeat'te döndürüyor; iş gönderiminde gelirse diye istek bir kez
-  tekrarlanacak şekilde de hazır.
+- **`410 session.closed`:** heartbeat'te gelirse oturum boşta kalır, kendiliğinden yeniden
+  açılmaz (sunucu boşta kalan oturumu GPU'yu bırakmak için kapatır; hemen yenisini açmak GPU'yu
+  boşuna sıcak tutardı). Yeni oturum, bir sonraki gerekli kullanıcı eyleminde açılır: sahne sayfası
+  açılınca, çizim gönderilince, uygulama ön plana dönünce ya da haritaya yeniden girilince. İş
+  gönderiminde gelirse istek yeni oturumla bir kez tekrarlanır.
+- **İş süresi:** her iş için toplam 4 dakikalık tek bir süre sınırı var (olaylar arası bekleme
+  sınırına ek olarak). Süre dolunca sorgulama durur, iş sunucuda iptal edilir, "tekrar dene" çıkar.
 - **Haritaya geri dönüş:** bekleme süresi içinde haritaya dönülürse aynı oturum sürer; hemen bir
   heartbeat gider ve heartbeat'ler yeniden başlar.
 - **Kapanış:** haritadan çıkıldıktan **5 dakika sonra** `DELETE`. GM haritayı kapatıp hemen geri

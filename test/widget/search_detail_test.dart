@@ -9,7 +9,7 @@ void main() {
 
     await tester.enterText(find.byKey(const Key('search-field')), 'kör');
     await settle(tester);
-    expect(find.textContaining('sonuç ·'), findsOneWidget);
+    expect(find.textContaining('sonuçtan ilk 60'), findsOneWidget); // hit count; no timing in store builds
     await tester.tap(find.text('Kör').first);
     await settle(tester);
 

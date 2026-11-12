@@ -333,4 +333,46 @@ void main() {
     await db.deleteAllScenes();
     expect(await db.select(db.mapScenes).get(), isEmpty);
   });
+
+  test('a reported picture: its bytes are deleted at once, the row stays as a marker and is never shown', () async {
+    final keep = await db.addScene(assetId: 'a1', png: Uint8List(1000), mode: 'map', narrative: 'köprü', seed: 1);
+    final bad = await db.addScene(assetId: 'a2', png: Uint8List(1000), mode: 'map', narrative: 'köprü', seed: 2);
+    await db.hideScene(bad!);
+    final row = await (db.select(db.mapScenes)..where((s) => s.id.equals(bad))).getSingle();
+    expect(row.hidden, isTrue);
+    expect(row.png, isEmpty, reason: 'the reported picture does not stay on the device (or in a backup)');
+    expect(row.assetId, 'a2');
+    final other = await (db.select(db.mapScenes)..where((s) => s.id.equals(keep!))).getSingle();
+    expect(other.png, hasLength(1000), reason: 'other pictures are untouched');
+    expect((await db.watchActiveScene().first)!.id, keep);
+  });
+
+  test('pictures: at most the latest ${AppDatabase.maxScenesPerEncounter} per encounter are kept', () async {
+    final first = await db.activeEncounter();
+    final ids = <int>[];
+    for (var i = 0; i < AppDatabase.maxScenesPerEncounter + 3; i++) {
+      ids.add((await db.addScene(assetId: 'a$i', png: Uint8List(100), mode: 'map', narrative: '', seed: i))!);
+    }
+    var rows = await db.select(db.mapScenes).get();
+    expect(rows.map((r) => r.id), ids.sublist(3), reason: 'the three oldest were deleted');
+    expect((await db.watchActiveScene().first)!.id, ids.last);
+
+    // Per encounter: a picture stored for another encounter prunes only that one's.
+    await db.customStatement('UPDATE encounters SET active = 0');
+    final second = await db.into(db.encounters).insert(EncountersCompanion.insert(createdAt: DateTime.now()));
+    await db.addScene(assetId: 'b0', png: Uint8List(100), mode: 'map', narrative: '', seed: 1, encounterId: second);
+    rows = await db.select(db.mapScenes).get();
+    expect(rows.where((r) => r.encounterId == first.id), hasLength(AppDatabase.maxScenesPerEncounter));
+    expect(rows.where((r) => r.encounterId == second), hasLength(1));
+  });
+
+  test('a picture reported before its bytes were dropped loses them when the next picture is stored', () async {
+    final old = await db.addScene(assetId: 'a1', png: Uint8List(1000), mode: 'map', narrative: '', seed: 1);
+    // As an older version of the app left it: hidden, bytes kept.
+    await (db.update(db.mapScenes)..where((s) => s.id.equals(old!))).write(const MapScenesCompanion(hidden: Value(true)));
+    await db.addScene(assetId: 'a2', png: Uint8List(10), mode: 'map', narrative: '', seed: 2);
+    final row = await (db.select(db.mapScenes)..where((s) => s.id.equals(old!))).getSingle();
+    expect(row.hidden, isTrue);
+    expect(row.png, isEmpty);
+  });
 }

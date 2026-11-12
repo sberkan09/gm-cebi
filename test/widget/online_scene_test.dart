@@ -37,12 +37,22 @@ class FakeService {
   /// The `GET /v1/presets` answer (null: 404, as if the region layer were unknown).
   Map<String, Object?>? presets;
 
+  /// Requests (as `METHOD path`) that wait for this before they answer: a
+  /// slow network. Create the completer inside the test body (its zone).
+  final hold = <String, Completer<void>>{};
+
+  /// Heartbeats find the session closed (it idled out on the server).
+  bool sessionIdledOut = false;
+
+  int count(String call) => calls.where((c) => c == call).length;
+
   http.StreamedResponse _json(Object body, [int status = 200]) =>
       http.StreamedResponse(Stream.value(utf8.encode(jsonEncode(body))), status, headers: {'content-type': 'application/json'});
 
   Future<http.StreamedResponse> handle(http.BaseRequest r) async {
     final p = r.url.path;
     calls.add('${r.method} $p');
+    await hold['${r.method} $p']?.future;
     if (p.startsWith('/v1/auth/')) {
       expect(r.headers.containsKey('Authorization'), isFalse, reason: 'sign-in calls carry no token');
       authBodies[p] = jsonDecode((r as http.Request).body) as Map<String, dynamic>;
@@ -66,6 +76,7 @@ class FakeService {
     if (p == '/v1/sessions') {
       return _json({'session': {'id': 's1', 'heartbeatSeconds': 120}, 'capacity': {'state': 'warming', 'etaSeconds': 35}}, 201);
     }
+    if (p.endsWith('/heartbeat') && sessionIdledOut) return _json({'error': {'code': 'session.closed', 'params': {'reason': 'idle'}}}, 410);
     if (p.endsWith('/heartbeat')) return _json({'session': {'id': 's1', 'heartbeatSeconds': 120}, 'capacity': {'state': 'ready'}});
     if (r.method == 'DELETE') return _json({'closed': true});
     if (p == '/v1/presets' && presets != null) return _json(presets!);
@@ -92,6 +103,9 @@ List<Override> online(FakeService service, {MemoryTokenStore? store}) => [
       ncHttpClientProvider.overrideWithValue(MockClient.streaming((r, _) => service.handle(r))),
       ncTokenStoreProvider.overrideWithValue(store ?? MemoryTokenStore(signedInTokens())),
       sceneRandomProvider.overrideWithValue(Random(1)),
+      // The test's fake clock, so the resend countdown follows pump().
+      ncClockProvider.overrideWithValue(() => TestWidgetsFlutterBinding.instance.clock.now()),
+      blankSketchExporterProvider.overrideWithValue(() async => tinyPng),
       // Picture.toImage never completes in the fake-async widget test zone;
       // the real export is tested in test/core/map_sketch_test.dart.
       sketchExporterProvider.overrideWith((ref) => () async {
@@ -335,6 +349,8 @@ void main() {
   final outStore = MemoryTokenStore(signedInTokens());
   appTest("Settings: the account with today's quota; sign out revokes and forgets the tokens", gmPack: true, overrides: online(out, store: outStore),
       (tester, db) async {
+    db.writeSetting('ncConsent', 'true');
+    await settle(tester);
     await openOnlineSettings(tester, const Key('online-sign-out'));
     expect(find.text('gm@example.com\nBugün: 3/20 harita'), findsOneWidget);
     await tester.tap(find.byKey(const Key('online-sign-out')));
@@ -383,6 +399,275 @@ void main() {
     expect(offlineStore.tokens, isNotNull);
     expect(await pumped(tester, db.select(db.mapScenes).get()), hasLength(1));
     expect(find.byKey(const Key('online-sign-out')), findsOneWidget);
+  });
+
+  final fromSettings = FakeService();
+  final fromSettingsStore = MemoryTokenStore();
+  appTest('Settings: sign-in asks for the consent first; declined, nothing is sent and no sheet opens', gmPack: true,
+      overrides: online(fromSettings, store: fromSettingsStore), (tester, db) async {
+    await openOnlineSettings(tester, const Key('online-sign-in'));
+    expect(find.text('İlk kullanımda onay istenir'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('online-sign-in')));
+    await settle(tester);
+    expect(find.text('Çevrimiçi sahne'), findsWidgets);
+    expect(find.byKey(const Key('consent-accept')), findsOneWidget, reason: 'the same consent as on the map');
+    expect(find.byKey(const Key('signin-email')), findsNothing);
+    await tester.tap(find.text('Vazgeç'));
+    await settle(tester);
+    expect(find.byKey(const Key('signin-email')), findsNothing, reason: 'no consent, no sign-in');
+    expect((await pumped(tester, db.readSettings()))['ncConsent'], isNot('true'));
+
+    await tester.tap(find.byKey(const Key('online-sign-in')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('consent-accept')));
+    await settle(tester);
+    expect((await pumped(tester, db.readSettings()))['ncConsent'], 'true');
+    expect(find.byKey(const Key('signin-email')), findsOneWidget);
+    expect(fromSettings.calls, isEmpty, reason: 'nothing left the device before the address was sent');
+    await tester.enterText(find.byKey(const Key('signin-email')), 'gm@example.com');
+    await tester.tap(find.byKey(const Key('signin-send')));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('signin-code')), '123456');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('signin-verify')));
+    await settle(tester);
+    expect(fromSettingsStore.tokens, isNotNull);
+    expect(find.text('gm@example.com\nBugün: 3/20 harita'), findsOneWidget);
+    expect(find.text('Onay verildi'), findsOneWidget);
+  });
+
+  final quiet = FakeService();
+  appTest('Settings: signed in but no consent, or switched off: no request of any kind', gmPack: true,
+      overrides: online(quiet, store: MemoryTokenStore(signedInTokens())), (tester, db) async {
+    // Signed in by a version that did not ask for the consent in Settings.
+    await openOnlineSettings(tester, const Key('online-sign-out'));
+    expect(find.byKey(const Key('online-account-details')), findsOneWidget);
+    expect(find.text('gm@example.com'), findsOneWidget, reason: 'the address is kept on the device; the quota line is left out');
+    expect(quiet.calls, isEmpty, reason: 'no GET /v1/me before consent');
+
+    await goBack(tester);
+    db.writeSetting('ncConsent', 'true');
+    db.writeSetting('ncEnabled', 'false');
+    await settle(tester);
+    await openOnlineSettings(tester, const Key('online-sign-out'));
+    expect(find.text('gm@example.com'), findsOneWidget);
+    expect(quiet.calls, isEmpty, reason: 'no GET /v1/me while the feature is switched off');
+  });
+
+  final off = FakeService();
+  appTest('Settings, switched off: no sign-in until the feature is on again', gmPack: true, overrides: online(off, store: MemoryTokenStore()),
+      (tester, db) async {
+    db.writeSetting('ncConsent', 'true');
+    db.writeSetting('ncEnabled', 'false');
+    await settle(tester);
+    await openOnlineSettings(tester, const Key('online-sign-in'));
+    expect(tester.widget<ListTile>(find.byKey(const Key('online-sign-in'))).enabled, isFalse);
+    expect(find.text('Giriş yapmak için önce "Haritadan resim üret"i aç.'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('online-sign-in')));
+    await settle(tester);
+    expect(find.byKey(const Key('signin-email')), findsNothing);
+    await tester.ensureVisible(find.byKey(const Key('online-enabled')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('online-enabled')));
+    await settle(tester);
+    await tester.ensureVisible(find.byKey(const Key('online-sign-in')));
+    await settle(tester);
+    expect(tester.widget<ListTile>(find.byKey(const Key('online-sign-in'))).enabled, isTrue);
+    await tester.tap(find.byKey(const Key('online-sign-in')));
+    await settle(tester);
+    expect(find.byKey(const Key('signin-email')), findsOneWidget);
+    expect(off.calls, isEmpty);
+  });
+
+  final slow = FakeService();
+  final slowStore = MemoryTokenStore(signedInTokens());
+  appTest('Settings: while the account is being deleted, a spinner shows and the buttons are off', gmPack: true,
+      overrides: online(slow, store: slowStore), (tester, db) async {
+    slow.hold['DELETE /v1/me'] = Completer<void>();
+    db.addScene(assetId: 'asset-1', png: tinyPng, mode: 'map', narrative: 'köprü', seed: 1);
+    db.writeSetting('ncConsent', 'true');
+    await settle(tester);
+    await openOnlineSettings(tester, const Key('online-delete-account'));
+    expect(find.byKey(const Key('online-account-busy')), findsNothing);
+    await tester.tap(find.byKey(const Key('online-delete-account')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('online-delete-account-confirm')));
+    // Not settle(): the spinner never settles while the request is on its way.
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(slow.calls, contains('DELETE /v1/me'));
+    expect(find.descendant(of: find.byKey(const Key('online-delete-account')), matching: find.byKey(const Key('online-account-busy'))), findsOneWidget);
+    expect(tester.widget<ListTile>(find.byKey(const Key('online-delete-account'))).enabled, isFalse);
+    expect(tester.widget<ListTile>(find.byKey(const Key('online-sign-out'))).enabled, isFalse);
+    await tester.tap(find.byKey(const Key('online-sign-out')), warnIfMissed: false);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(slow.calls, isNot(contains('POST /v1/auth/revoke')), reason: 'no second action meanwhile');
+    expect(slowStore.tokens, isNotNull);
+
+    slow.hold['DELETE /v1/me']!.complete();
+    await settle(tester);
+    expect(find.byKey(const Key('online-account-busy')), findsNothing);
+    expect(find.text('Hesabın ve tüm verilerin silindi.'), findsOneWidget);
+    expect(slowStore.tokens, isNull);
+    expect(await pumped(tester, db.select(db.mapScenes).get()), isEmpty);
+    expect(tester.widget<ListTile>(find.byKey(const Key('online-delete-local'))).enabled, isTrue);
+  });
+
+  final held = FakeService();
+  appTest('sign-in sheet: it stays while a request is on its way; closed and opened again it goes on at the code step', gmPack: true,
+      overrides: online(held, store: MemoryTokenStore()), (tester, db) async {
+    held.hold['POST /v1/auth/email/start'] = Completer<void>();
+    db.writeSetting('ncConsent', 'true');
+    await openMapWithSketch(tester, db);
+    await tester.tap(find.byKey(const Key('scene-open')));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('signin-email')), 'gm@example.com');
+    await tester.tap(find.byKey(const Key('signin-send')));
+    Future<void> wait() async {
+      for (var i = 0; i < 8; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    }
+
+    await wait();
+    expect(held.count('POST /v1/auth/email/start'), 1);
+    final sheet = tester.getRect(find.byKey(const Key('signin-sheet')));
+    // The back button, a tap outside, a drag on the handle: the sheet stays.
+    await tester.binding.handlePopRoute();
+    await wait();
+    expect(find.byKey(const Key('signin-email')), findsOneWidget, reason: 'back does not close it while busy');
+    await tester.tapAt(const Offset(20, 60));
+    await wait();
+    expect(find.byKey(const Key('signin-email')), findsOneWidget, reason: 'a tap outside does not close it while busy');
+    await tester.dragFrom(sheet.topCenter + const Offset(0, 24), const Offset(0, 500));
+    await wait();
+    expect(find.byKey(const Key('signin-email')), findsOneWidget, reason: 'dragging does not close it while busy');
+
+    held.hold.remove('POST /v1/auth/email/start')!.complete();
+    await settle(tester);
+    expect(find.byKey(const Key('signin-code')), findsOneWidget);
+    expect(find.text('Yeniden gönder (60 sn)'), findsOneWidget);
+
+    // Idle again: dragging the handle down closes it, as any sheet.
+    await tester.dragFrom(tester.getRect(find.byKey(const Key('signin-sheet'))).topCenter + const Offset(0, 24), const Offset(0, 500));
+    await settle(tester);
+    expect(find.byKey(const Key('signin-sheet')), findsNothing);
+
+    // Opened again 20 seconds later: the code step, the countdown where it is, no second code asked for.
+    await tester.pump(const Duration(seconds: 20));
+    await tester.tap(find.byKey(const Key('scene-open')));
+    await settle(tester);
+    expect(find.byKey(const Key('signin-code')), findsOneWidget);
+    expect(find.textContaining('gm@example.com adresine gönderdik'), findsOneWidget);
+    expect(find.text('Yeniden gönder (40 sn)'), findsOneWidget);
+    expect(held.count('POST /v1/auth/email/start'), 1);
+
+    // The same address typed again: back to the code step, still no request.
+    await tester.tap(find.byKey(const Key('signin-change-email')));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('signin-email')), 'GM@example.com');
+    await tester.tap(find.byKey(const Key('signin-send')));
+    await settle(tester);
+    expect(find.byKey(const Key('signin-code')), findsOneWidget);
+    expect(held.count('POST /v1/auth/email/start'), 1);
+
+    // After the resend time a new code can be asked for.
+    await tester.pump(const Duration(seconds: 41));
+    expect(find.text('Kodu yeniden gönder'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('signin-resend')));
+    await settle(tester);
+    expect(held.count('POST /v1/auth/email/start'), 2);
+    expect(find.text('Yeniden gönder (60 sn)'), findsOneWidget);
+
+    // Signed in: nothing is remembered; a tap outside closed the sheet before.
+    await tester.enterText(find.byKey(const Key('signin-code')), '123456');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('signin-verify')));
+    await settle(tester);
+    expect(find.byKey(const Key('scene-narrative')), findsOneWidget);
+  });
+
+  final expired = FakeService();
+  appTest('sign-in sheet: a code that has expired is not offered again', gmPack: true, overrides: online(expired, store: MemoryTokenStore()),
+      (tester, db) async {
+    db.writeSetting('ncConsent', 'true');
+    await openMapWithSketch(tester, db);
+    await tester.tap(find.byKey(const Key('scene-open')));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('signin-email')), 'gm@example.com');
+    await tester.tap(find.byKey(const Key('signin-send')));
+    await settle(tester);
+    expect(find.byKey(const Key('signin-code')), findsOneWidget);
+    await tester.tapAt(const Offset(20, 60)); // a tap outside closes it
+    await settle(tester);
+    expect(find.byKey(const Key('signin-sheet')), findsNothing);
+    await tester.pump(const Duration(minutes: 11));
+    await tester.tap(find.byKey(const Key('scene-open')));
+    await settle(tester);
+    expect(find.byKey(const Key('signin-email')), findsOneWidget, reason: 'ten minutes on, the code is no good: the email step');
+  });
+
+  final areasOnly = FakeService()..presets = regionService.presets;
+  appTest('painted areas only, a service that takes them: the sheet lets it be sent', gmPack: true, overrides: online(areasOnly),
+      (tester, db) async {
+    db.writeSetting('ncConsent', 'true');
+    db.addStroke(const [Offset01(0.1, 0.5), Offset01(0.9, 0.5)], region: 0, width: 0.09); // a river, no pen line
+    await settle(tester);
+    await openTab(tester, 'İnisiyatif');
+    await tester.tap(find.byKey(const Key('open-map')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('scene-open')));
+    await settle(tester);
+    expect(find.byKey(const Key('scene-missing')), findsNothing);
+    expect(tester.widget<FilledButton>(find.byKey(const Key('scene-generate'))).onPressed, isNotNull);
+    // Atmosphere takes no region layer: lines are needed there.
+    await tester.tap(find.text('Atmosfer'));
+    await settle(tester);
+    expect(find.text('Çizgiyle de çiz: boyanan alanlar yalnızca Harita modunda gönderilir.'), findsOneWidget);
+    expect(tester.widget<FilledButton>(find.byKey(const Key('scene-generate'))).onPressed, isNull);
+    await tester.tap(find.descendant(of: find.byKey(const Key('scene-mode')), matching: find.text('Harita')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('scene-generate')));
+    await settle(tester);
+    final body = areasOnly.bodies.single;
+    expect((body['inputs'] as Map).keys, ['sketch', 'regions']);
+    expect(body['params']['ground'], 'grass');
+    expect(find.byKey(const Key('scene-error')), findsNothing);
+    expect(await pumped(tester, db.select(db.mapScenes).get()), hasLength(1));
+  });
+
+  final noRegions = FakeService();
+  appTest('painted areas only, a service without the region layer: told to draw lines too', gmPack: true, overrides: online(noRegions),
+      (tester, db) async {
+    db.writeSetting('ncConsent', 'true');
+    db.addStroke(const [Offset01(0.1, 0.5), Offset01(0.9, 0.5)], region: 0, width: 0.09);
+    await settle(tester);
+    await openTab(tester, 'İnisiyatif');
+    await tester.tap(find.byKey(const Key('open-map')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('scene-open')));
+    await settle(tester);
+    expect(find.text('Çizgiyle de çiz: sunucu henüz alanları desteklemiyor.'), findsOneWidget);
+    expect(tester.widget<FilledButton>(find.byKey(const Key('scene-generate'))).onPressed, isNull);
+    expect(noRegions.bodies, isEmpty);
+  });
+
+  final idled = FakeService()..sessionIdledOut = true;
+  appTest('an untouched map lets the session go; opening the scene sheet asks for one again', gmPack: true, overrides: online(idled),
+      (tester, db) async {
+    db.writeSetting('ncConsent', 'true');
+    await openMapWithSketch(tester, db);
+    expect(idled.count('POST /v1/sessions'), 1);
+    await tester.pump(const Duration(seconds: 121)); // the heartbeat: 410, idled out
+    await settle(tester);
+    await tester.pump(const Duration(minutes: 30));
+    expect(idled.count('POST /v1/sessions'), 1, reason: 'no new session while nobody asks for a picture');
+    expect(find.byKey(const Key('capacity-label')), findsNothing, reason: 'idle and no picture: no status bar');
+    await tester.tap(find.byKey(const Key('scene-open')));
+    await settle(tester);
+    expect(idled.count('POST /v1/sessions'), 2, reason: 'the GPU starts warming while the GM types');
+    expect(find.byKey(const Key('scene-narrative')), findsOneWidget);
   });
 
   final del = FakeService();
