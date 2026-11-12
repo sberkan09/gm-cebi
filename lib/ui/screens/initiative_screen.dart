@@ -46,8 +46,8 @@ class InitiativeScreen extends ConsumerWidget {
           PopupMenuButton<String>(
             onSelected: (v) async {
               if (v == 'new') {
-                final keep = await _confirmNewEncounter(context);
-                if (keep != null) await db.newEncounter(keepPlayers: keep);
+                final choice = await _confirmNewEncounter(context, db);
+                if (choice != null) await db.newEncounter(keepPlayers: choice.keepPlayers, keepMap: choice.keepMap);
               }
             },
             itemBuilder: (_) => const [PopupMenuItem(value: 'new', child: Text('Yeni karşılaşma'))],
@@ -63,13 +63,58 @@ class InitiativeScreen extends ConsumerWidget {
   }
 }
 
-class _Tracker extends ConsumerWidget {
+class _Tracker extends ConsumerStatefulWidget {
   const _Tracker({required this.state});
 
   final EncounterState state;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_Tracker> createState() => _TrackerState();
+}
+
+class _TrackerState extends ConsumerState<_Tracker> {
+  /// One key per card, to scroll the current combatant's card into view.
+  final _cardKeys = <int, GlobalKey>{};
+
+  /// Counts the scroll requests: only the newest one moves the list.
+  int _reveals = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _revealCurrent(animate: false);
+  }
+
+  @override
+  void didUpdateWidget(_Tracker old) {
+    super.didUpdateWidget(old);
+    final was = old.state, now = widget.state;
+    _cardKeys.removeWhere((id, _) => !now.combatants.any((c) => c.id == id));
+    // A new turn, or the current combatant moved in the order.
+    if (was.current?.id != now.current?.id || was.encounter.turnIndex != now.encounter.turnIndex) _revealCurrent();
+  }
+
+  /// Scrolls just far enough to show the whole card of the current combatant
+  /// (after this frame: the card may have just moved or been added).
+  void _revealCurrent({bool animate = true}) {
+    final request = ++_reveals;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      for (final policy in const [ScrollPositionAlignmentPolicy.keepVisibleAtEnd, ScrollPositionAlignmentPolicy.keepVisibleAtStart]) {
+        final card = _cardKeys[widget.state.current?.id]?.currentContext;
+        if (!mounted || request != _reveals || card == null) return;
+        await Scrollable.ensureVisible(
+          card,
+          duration: animate ? const Duration(milliseconds: 250) : Duration.zero,
+          curve: Curves.easeOut,
+          alignmentPolicy: policy,
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = widget.state;
     final t = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
     final db = ref.read(databaseProvider);
@@ -126,24 +171,42 @@ class _Tracker extends ConsumerWidget {
                   ),
                 ),
               )
-            : ListView.builder(
-                itemCount: list.length,
+            // Not a lazy list: every card is built, so the current one can
+            // always be scrolled to (an encounter has a handful of cards).
+            : SingleChildScrollView(
+                key: const Key('combatant-list'),
                 padding: const EdgeInsets.only(bottom: 8),
-                itemBuilder: (context, i) => _CombatantCard(c: list[i], isCurrent: current?.id == list[i].id),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  for (final c in list)
+                    _CombatantCard(key: _cardKeys.putIfAbsent(c.id, GlobalKey.new), c: c, isCurrent: current?.id == c.id),
+                ]),
               ),
       ),
       Material(
         color: scheme.surfaceContainerLow,
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: Row(children: [
+          // "Önceki" never breaks in the middle of the word: it is drawn a
+          // little smaller, and on a narrow screen with large text the
+          // button shows the icon alone.
+          child: LayoutBuilder(builder: (context, box) => Row(children: [
             Expanded(
-              child: OutlinedButton.icon(
-                key: const Key('prev-turn'),
-                onPressed: list.isEmpty ? null : db.previousTurn,
-                icon: const Icon(Icons.chevron_left),
-                label: const Text('Önceki'),
-              ),
+              child: _previousLabelFits(context, (box.maxWidth - 12) / 3)
+                  ? OutlinedButton.icon(
+                      key: const Key('prev-turn'),
+                      onPressed: list.isEmpty ? null : db.previousTurn,
+                      icon: const Icon(Icons.chevron_left),
+                      label: const FittedBox(fit: BoxFit.scaleDown, child: Text('Önceki', maxLines: 1, softWrap: false)),
+                    )
+                  : Tooltip(
+                      message: 'Önceki',
+                      child: OutlinedButton(
+                        key: const Key('prev-turn'),
+                        style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                        onPressed: list.isEmpty ? null : db.previousTurn,
+                        child: const Icon(Icons.chevron_left, size: 28),
+                      ),
+                    ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -154,19 +217,38 @@ class _Tracker extends ConsumerWidget {
                   key: const Key('next-turn'),
                   onPressed: list.isEmpty ? null : db.nextTurn,
                   icon: const Icon(Icons.chevron_right, size: 28),
-                  label: const Text('Sonraki', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                  label: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Sonraki', maxLines: 1, softWrap: false, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                  ),
                 ),
               ),
             ),
-          ]),
+          ])),
         ),
       ),
     ]);
   }
 }
 
+/// Whether an outlined icon button [width] wide has room for "Önceki" on one
+/// line at the current text size, or nearly: the label may be drawn up to a
+/// fifth smaller (so a 360 dp phone at the default text size keeps the word).
+bool _previousLabelFits(BuildContext context, double width) {
+  final style = OutlinedButtonTheme.of(context).style?.textStyle?.resolve(const {}) ?? Theme.of(context).textTheme.labelLarge;
+  final label = TextPainter(
+    text: TextSpan(text: 'Önceki', style: style),
+    textDirection: TextDirection.ltr,
+    textScaler: MediaQuery.textScalerOf(context),
+    maxLines: 1,
+  )..layout();
+  final needed = label.width * 0.8 + 16 + 18 + 8 + 24; // padding, icon, gap, padding
+  label.dispose();
+  return width >= needed;
+}
+
 class _CombatantCard extends ConsumerWidget {
-  const _CombatantCard({required this.c, required this.isCurrent});
+  const _CombatantCard({super.key, required this.c, required this.isCurrent});
 
   final Combatant c;
   final bool isCurrent;
@@ -271,18 +353,81 @@ class _CombatantCard extends ConsumerWidget {
 
 // ---------------------------------------------------------------- dialogs
 
-Future<bool?> _confirmNewEncounter(BuildContext context) => showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Yeni karşılaşma'),
-        content: const Text('Mevcut karşılaşma kapanır. Oyuncu karakterleri tam Can Puanıyla yeni karşılaşmaya taşınsın mı?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Vazgeç')),
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Herkesi sil')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Oyuncuları tut')),
-        ],
-      ),
+typedef _NewEncounterChoice = ({bool keepPlayers, bool keepMap});
+
+/// Asks before "Yeni karşılaşma" and says what it deletes. The map (drawing
+/// and online picture) is only mentioned when there is one.
+Future<_NewEncounterChoice?> _confirmNewEncounter(BuildContext context, AppDatabase db) async {
+  final map = await db.activeMapContents();
+  if (!context.mounted) return null;
+  return showDialog<_NewEncounterChoice>(
+    context: context,
+    builder: (context) => _NewEncounterDialog(hasDrawing: map.drawing, hasPicture: map.picture),
+  );
+}
+
+class _NewEncounterDialog extends StatefulWidget {
+  const _NewEncounterDialog({required this.hasDrawing, required this.hasPicture});
+
+  final bool hasDrawing;
+  final bool hasPicture;
+
+  @override
+  State<_NewEncounterDialog> createState() => _NewEncounterDialogState();
+}
+
+class _NewEncounterDialogState extends State<_NewEncounterDialog> {
+  /// On when there is a drawing to lose.
+  late bool _keepMap = widget.hasDrawing;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final hasMap = widget.hasDrawing || widget.hasPicture;
+    final map = widget.hasDrawing && widget.hasPicture
+        ? 'Harita çizimi (çizgiler ve alanlar) ve çevrimiçi resim'
+        : (widget.hasDrawing ? 'Harita çizimi (çizgiler ve alanlar)' : 'Haritanın çevrimiçi resmi');
+    return AlertDialog(
+      title: const Text('Yeni karşılaşma'),
+      scrollable: true,
+      content: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+        const Text(
+          'Mevcut karşılaşma silinir: oyuncu olmayan katılımcılar, inisiyatifler, durumlar, tur sayısı ve jetonların haritadaki yerleri. Bu geri alınamaz.',
+        ),
+        if (hasMap)
+          CheckboxListTile(
+            key: const Key('keep-map'),
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: _keepMap,
+            onChanged: (v) => setState(() => _keepMap = v ?? false),
+            title: const Text('Haritayı tut'),
+            subtitle: Text(
+              _keepMap ? '$map yeni karşılaşmaya taşınır.' : '$map silinir.',
+              key: const Key('keep-map-effect'),
+              style: _keepMap ? null : TextStyle(color: scheme.error),
+            ),
+          )
+        else
+          const SizedBox(height: 12),
+        const Text('Oyuncu karakterleri tam Can Puanıyla yeni karşılaşmaya taşınsın mı?'),
+      ]),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Vazgeç')),
+        TextButton(
+          key: const Key('new-encounter-all'),
+          onPressed: () => Navigator.pop(context, (keepPlayers: false, keepMap: hasMap && _keepMap)),
+          child: const Text('Herkesi sil'),
+        ),
+        FilledButton(
+          key: const Key('new-encounter-players'),
+          onPressed: () => Navigator.pop(context, (keepPlayers: true, keepMap: hasMap && _keepMap)),
+          child: const Text('Oyuncuları tut'),
+        ),
+      ],
     );
+  }
+}
 
 /// Accepts an optional leading minus only ("5-3" is rejected, not silently dropped).
 int? _int(String s) => parseStat(s);
@@ -433,7 +578,8 @@ Widget _levelField(TextEditingController c,
       decoration: InputDecoration(labelText: 'Seviye (isteğe bağlı)', helperText: helper, errorText: _levelError(c.text)),
     );
 
-Widget _numField(TextEditingController c, String label, {Key? key, ValueChanged<String>? onChanged, String? errorText}) =>
+Widget _numField(TextEditingController c, String label,
+        {Key? key, ValueChanged<String>? onChanged, String? errorText, String? helperText}) =>
     TextField(
       key: key,
       controller: c,
@@ -441,7 +587,8 @@ Widget _numField(TextEditingController c, String label, {Key? key, ValueChanged<
       maxLength: statFieldMaxLength,
       keyboardType: const TextInputType.numberWithOptions(signed: true),
       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[-−0-9]'))],
-      decoration: InputDecoration(labelText: label, counterText: '', errorText: errorText, errorMaxLines: 2),
+      decoration: InputDecoration(
+          labelText: label, counterText: '', errorText: errorText, errorMaxLines: 2, helperText: helperText, helperMaxLines: 2),
     );
 
 Future<void> _addMonster(BuildContext context, WidgetRef ref) async {
@@ -552,22 +699,121 @@ Future<void> _changeHp(BuildContext context, WidgetRef ref, Combatant c) async {
 Future<void> _editInitiative(BuildContext context, WidgetRef ref, Combatant c) async {
   final ctrl = TextEditingController(text: c.initiative?.toString() ?? '');
   final rng = ref.read(diceRandomProvider);
+  // Text that is not a number ("1-8") is refused with the error under the
+  // field, as in the add dialog; an empty field means "no initiative".
+  String? error;
   final v = await showDialog<String>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text('${c.name} · inisiyatif'),
-      content: _numField(ctrl, 'İnisiyatif'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, '${rng.nextInt(20) + 1 + c.initBonus}'),
-          child: Text('At (d20${c.initBonus >= 0 ? '+' : ''}${c.initBonus})'),
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        title: Text('${c.name} · inisiyatif'),
+        content: _numField(
+          ctrl,
+          'İnisiyatif',
+          key: const Key('initiative-field'),
+          errorText: error,
+          helperText: 'Boş bırakılırsa inisiyatif silinir',
+          onChanged: (_) {
+            if (error != null) setState(() => error = statError(ctrl.text));
+          },
         ),
-        FilledButton(onPressed: () => Navigator.pop(context, ctrl.text), child: const Text('Kaydet')),
-      ],
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, '${rng.nextInt(20) + 1 + c.initBonus}'),
+            child: Text('At (d20${c.initBonus >= 0 ? '+' : ''}${c.initBonus})'),
+          ),
+          FilledButton(
+            key: const Key('initiative-save'),
+            onPressed: () {
+              final e = statError(ctrl.text);
+              if (e == null) {
+                Navigator.pop(context, ctrl.text);
+              } else {
+                setState(() => error = e);
+              }
+            },
+            child: const Text('Kaydet'),
+          ),
+        ],
+      ),
     ),
   );
   if (v == null) return;
   await ref.read(databaseProvider).setInitiative(c.id, _int(v));
+}
+
+/// "Düzenle": what the add dialog asked for and could not be changed since
+/// (name, HP maximum, armor class, a player's level), with the same checks.
+Future<void> _editCombatant(BuildContext context, WidgetRef ref, Combatant c) async {
+  final name = TextEditingController(text: c.name);
+  final hp = TextEditingController(text: c.hpMax?.toString() ?? '');
+  final ac = TextEditingController(text: c.ac?.toString() ?? '');
+  final level = TextEditingController(text: c.level?.toString() ?? '');
+  var tried = false; // errors show after the first "Kaydet"
+  String? nameError() => name.text.trim().isEmpty ? 'Ad gerekli' : null;
+  String? hpError() => statError(hp.text, min: 1);
+  String? acError() => statError(ac.text, min: 1);
+  ValueChanged<String> changed(StateSetter setState) => (_) {
+        if (tried) setState(() {});
+      };
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        title: Text('${c.name} · düzenle'),
+        content: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            TextField(
+              key: const Key('edit-name'),
+              controller: name,
+              textCapitalization: TextCapitalization.words,
+              onChanged: changed(setState),
+              decoration: InputDecoration(labelText: 'Ad', errorText: tried ? nameError() : null),
+            ),
+            const SizedBox(height: 8),
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Expanded(
+                child: _numField(hp, 'Azami CP',
+                    key: const Key('edit-hp'), onChanged: changed(setState), errorText: tried ? hpError() : null),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _numField(ac, 'ZS', key: const Key('edit-ac'), onChanged: changed(setState), errorText: tried ? acError() : null),
+              ),
+            ]),
+            if (c.isPlayer) ...[
+              const SizedBox(height: 8),
+              _levelField(level, key: const Key('edit-level-field'), onChanged: (_) => setState(() {})),
+            ],
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
+          FilledButton(
+            key: const Key('edit-save'),
+            onPressed: c.isPlayer && _levelError(level.text) != null
+                ? null
+                : () {
+                    if (nameError() == null && hpError() == null && acError() == null) {
+                      Navigator.pop(context, true);
+                    } else {
+                      setState(() => tried = true);
+                    }
+                  },
+            child: const Text('Kaydet'),
+          ),
+        ],
+      ),
+    ),
+  );
+  if (ok != true) return;
+  await ref.read(databaseProvider).updateCombatant(
+        c.id,
+        name: name.text.trim(),
+        hpMax: _int(hp.text),
+        ac: _int(ac.text),
+        level: c.isPlayer ? _level(level.text) : null,
+      );
 }
 
 Future<void> _editLevel(BuildContext context, WidgetRef ref, Combatant c) async {
@@ -608,7 +854,9 @@ Future<void> _showCombatantMenu(BuildContext context, WidgetRef ref, Combatant c
     showDragHandle: true,
     isScrollControlled: true,
     builder: (context) => Consumer(builder: (context, ref, _) {
-      final live = ref.watch(encounterProvider).value?.combatants.where((x) => x.id == c.id).firstOrNull ?? c;
+      final order = ref.watch(encounterProvider).value?.combatants ?? const <Combatant>[];
+      final live = order.where((x) => x.id == c.id).firstOrNull ?? c;
+      final canMoveUp = canMoveInTie(order, live.id, up: true), canMoveDown = canMoveInTie(order, live.id, up: false);
       return SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -629,6 +877,26 @@ Future<void> _showCombatantMenu(BuildContext context, WidgetRef ref, Combatant c
             if (live.hpCurrent != null)
               ListTile(leading: const Icon(Icons.favorite_outline), title: const Text('Hasar / iyileştirme'), onTap: () => _changeHp(context, ref, live)),
             ListTile(leading: const Icon(Icons.flag_outlined), title: const Text('İnisiyatifi değiştir'), onTap: () => _editInitiative(context, ref, live)),
+            // The order within a tie: shown when someone else has the same
+            // initiative, and each way only as far as the tie goes.
+            if (canMoveUp || canMoveDown) ...[
+              ListTile(
+                key: const Key('move-up'),
+                enabled: canMoveUp,
+                leading: const Icon(Icons.arrow_upward),
+                title: const Text('Yukarı taşı'),
+                subtitle: const Text('Aynı inisiyatiftekiler arasında'),
+                onTap: () => ref.read(databaseProvider).moveInTie(live.id, up: true),
+              ),
+              ListTile(
+                key: const Key('move-down'),
+                enabled: canMoveDown,
+                leading: const Icon(Icons.arrow_downward),
+                title: const Text('Aşağı taşı'),
+                subtitle: const Text('Aynı inisiyatiftekiler arasında'),
+                onTap: () => ref.read(databaseProvider).moveInTie(live.id, up: false),
+              ),
+            ],
             if (live.isPlayer)
               ListTile(
                 key: const Key('edit-level'),
@@ -637,6 +905,13 @@ Future<void> _showCombatantMenu(BuildContext context, WidgetRef ref, Combatant c
                 subtitle: Text(live.level == null ? 'Girilmedi (grup seviyesi kullanılır)' : '${live.level}. seviye'),
                 onTap: () => _editLevel(context, ref, live),
               ),
+            ListTile(
+              key: const Key('edit-combatant'),
+              leading: const Icon(Icons.edit_outlined),
+              title: const Text('Düzenle'),
+              subtitle: Text(live.isPlayer ? 'Ad, azami Can Puanı, ZS, seviye' : 'Ad, azami Can Puanı, ZS'),
+              onTap: () => _editCombatant(context, ref, live),
+            ),
             if (monster != null)
               ListTile(
                 leading: const Icon(Icons.menu_book_outlined),
