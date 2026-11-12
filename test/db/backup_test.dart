@@ -21,7 +21,8 @@ Future<Map<String, List<Map<String, Object?>>>> dump(AppDatabase db) async => {
 
 /// A database with rows in every table and every column set: two encounters
 /// (an old one and the active one), a mid-round turn record, pen lines and
-/// painted areas, a picture and a reported (emptied) one.
+/// painted areas, a picture and a reported (emptied) one, the GM's own map
+/// picture (cropped, "Doldur"), big tokens.
 Future<AppDatabase> populated() async {
   final db = _open();
   await db.writeSetting('contentLang', 'en');
@@ -50,6 +51,9 @@ Future<AppDatabase> populated() async {
   await db.addScene(assetId: 'a1', png: Uint8List.fromList([137, 80, 78, 71, 0, 255]), mode: 'map', narrative: 'Orman', seed: 42);
   final hidden = await db.addScene(assetId: 'a2', png: Uint8List.fromList([1, 2, 3]), mode: 'atmosphere', narrative: '', seed: 7);
   await db.hideScene(hidden!);
+  await db.setMapImage(Uint8List.fromList([255, 216, 255, 224, 0, 16, 74, 70, 73, 70]), width: 1600, height: 900);
+  await db.setMapImageFit('cover');
+  await db.setTokenScale(1.5);
   return db;
 }
 
@@ -90,6 +94,8 @@ void main() {
     // The reported picture (no bytes) is not in the backup.
     expect(after['map_scenes'], [before['map_scenes']!.first]);
     expect(after['map_scenes']!.single['png'], [137, 80, 78, 71, 0, 255]);
+    expect(after['map_images'], before['map_images']);
+    expect(after['map_images']!.single['bytes'], [255, 216, 255, 224, 0, 16, 74, 70, 73, 70]);
     Map<String, Object?> userSettings(List<Map<String, Object?>> rows) =>
         {for (final r in rows) if (!deviceBoundSettings.contains(r['key'])) r['key'] as String: r['value']};
     expect(userSettings(after['settings']!), userSettings(before['settings']!));
@@ -107,6 +113,9 @@ void main() {
     expect((s.encounter.round, s.current!.name), (2, 'Goblin'));
     expect((await target.watchStrokes().first).where((x) => x.isRegion).single.width, 0.05);
     expect((await target.watchActiveScene().first)!.narrative, 'Orman');
+    final picture = (await target.watchActiveMapImage().first)!;
+    expect((picture.width, picture.height, picture.fit), (1600, 900, 'cover'));
+    expect((s.encounter.tokenScale, s.encounter.mapBackground), (1.5, 'upload'));
     await source.close();
     await target.close();
   });
@@ -120,6 +129,11 @@ void main() {
     final scene = (tables['map_scenes'] as List).single as Map<String, Object?>;
     expect(scene['png'], base64Encode([137, 80, 78, 71, 0, 255]));
     expect(scene['hidden'], false);
+    final picture = (tables['map_images'] as List).single as Map<String, Object?>;
+    expect(picture['bytes'], base64Encode([255, 216, 255, 224, 0, 16, 74, 70, 73, 70]));
+    expect(picture['fit'], 'cover');
+    final encounter = (tables['encounters'] as List).single as Map<String, Object?>;
+    expect((encounter['token_scale'], encounter['map_background']), (1.5, 'upload'));
     await db.close();
   });
 
@@ -162,13 +176,14 @@ void main() {
     const known = {
       'settings': ['key', 'value'],
       'notes': ['id', 'title', 'body', 'pinned', 'created_at', 'updated_at'],
-      'encounters': ['id', 'name', 'round', 'turn_index', 'started', 'active', 'created_at'],
+      'encounters': ['id', 'name', 'round', 'turn_index', 'started', 'active', 'created_at', 'token_scale', 'map_background'],
       'combatants': [
         'id', 'encounter_id', 'name', 'initiative', 'init_bonus', 'hp_current', 'hp_max', 'ac', 'is_player', 'conditions', //
         'monster_id', 'sort_order', 'created_at', 'pos_x', 'pos_y', 'level',
       ],
       'map_strokes': ['id', 'encounter_id', 'points', 'color', 'created_at', 'region', 'width'],
       'map_scenes': ['id', 'encounter_id', 'asset_id', 'png', 'mode', 'narrative', 'seed', 'hidden', 'created_at'],
+      'map_images': ['id', 'encounter_id', 'bytes', 'width', 'height', 'fit', 'created_at'],
     };
     expect({for (final t in db.allTables) t.actualTableName: [for (final c in t.$columns) c.name]}, known);
     final tables = (await exportJson(db))['tables'] as Map<String, Object?>;
@@ -231,6 +246,30 @@ void main() {
     expect(note.updatedAt.toUtc(), DateTime.utc(2026, 9, 1, 18, 30));
     expect((await db.readSettings())['partyLevel'], '3');
     await db.close();
+  });
+
+  test('a schema-5 file (before map pictures) restores: no picture, normal tokens, the online picture shown', () async {
+    final source = await populated();
+    final json = await exportJson(source);
+    // As the app wrote it at schema 5: no picture table, no map settings.
+    json['schemaVersion'] = 5;
+    final tables = json['tables'] as Map<String, Object?>;
+    tables.remove('map_images');
+    for (final e in (tables['encounters'] as List).cast<Map<String, Object?>>()) {
+      e
+        ..remove('token_scale')
+        ..remove('map_background');
+    }
+    final target = _open();
+    await target.setMapImage(Uint8List.fromList([1, 2]), width: 2, height: 1);
+    await importJson(target, json);
+    expect(await target.select(target.mapImages).get(), isEmpty, reason: 'the old picture is replaced like everything else');
+    final s = await target.watchEncounterState().first;
+    expect((s.encounter.tokenScale, s.encounter.mapBackground), (1.0, 'online'));
+    expect((await target.watchActiveScene().first)!.narrative, 'Orman');
+    expect(await target.watchStrokes().first, hasLength(2));
+    await source.close();
+    await target.close();
   });
 
   test('refusals: garbage, wrong format, missing tables, newer schema, too large', () async {

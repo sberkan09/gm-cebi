@@ -39,6 +39,8 @@ saklanır (yedek dosyaları ise kaydetmeyi seçtiğin yerde). Bize ulaşmaz:
   zırh sınıfı, seviye ve durum etiketleri.
 - **Savaş haritası:** çizdiğin çizgiler, alan fırçasıyla boyadığın alanlar ve jetonların
   haritadaki yerleri. Karşılaşmaya bağlı saklanır.
+- **Yüklediğin harita resimleri:** savaş haritası olarak seçtiğin resim (sistemin dosya seçicisiyle,
+  izin istenmeden), karşılaşmaya bağlı. Cihazından çıkmaz; yalnızca kendi aldığın yedeklere girer.
 - **Çevrimiçi resimler** (yalnızca çevrimiçi sahneli derlemede, özelliği kullanırsan): üretilen
   harita resimleri, yazdığın tarif ve resmin sunucudaki numarası, karşılaşmaya bağlı.
 - **Yedek dosyaları:** Ayarlar → Yedekleme → "Yedek al" ile kendin oluşturduğun dosyalar. Uygulamadaki

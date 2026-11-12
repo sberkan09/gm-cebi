@@ -134,6 +134,37 @@ class MapToken {
   final double? hpFraction;
 }
 
+/// How a non-square picture sits in the square map. [name] is stored in
+/// `map_images.fit`.
+enum MapFit {
+  /// All of it, centred; the rest shows the paper colour.
+  contain('Sığdır'),
+
+  /// The square filled, the longer side centre-cropped.
+  cover('Doldur');
+
+  const MapFit(this.label);
+  final String label;
+
+  static MapFit of(String name) => name == 'cover' ? cover : contain;
+}
+
+/// Where a [width] × [height] picture goes in a map of [side]: the part of
+/// the picture painted ([src], in its pixels) and where it lands ([dst]).
+({Rect src, Rect dst}) fitRects(MapFit fit, double width, double height, double side) {
+  final full = Rect.fromLTWH(0, 0, width, height);
+  if (width <= 0 || height <= 0) return (src: full, dst: Rect.fromLTWH(0, 0, side, side));
+  switch (fit) {
+    case MapFit.contain:
+      final s = side / math.max(width, height);
+      final w = width * s, h = height * s;
+      return (src: full, dst: Rect.fromLTWH((side - w) / 2, (side - h) / 2, w, h));
+    case MapFit.cover:
+      final m = math.min(width, height);
+      return (src: Rect.fromLTWH((width - m) / 2, (height - m) / 2, m, m), dst: Rect.fromLTWH(0, 0, side, side));
+  }
+}
+
 /// Grid cells per side: 5-foot squares on a 100-foot map.
 const mapGridCells = 20;
 
@@ -151,6 +182,8 @@ class MapPainter extends CustomPainter {
     this.regionOpacity = regionScreenOpacity,
     this.labelStyle,
     this.background,
+    this.backgroundFit,
+    this.tokenScale = 1,
     this.paper = true,
   });
 
@@ -159,9 +192,16 @@ class MapPainter extends CustomPainter {
   /// moves change, the line in progress and the tokens, as two layers).
   final bool paper;
 
-  /// The online picture made from the sketch: the bottom layer, under the
-  /// grid, the strokes and the tokens.
+  /// The picture under the map (the user's own, or the online one made from
+  /// the sketch): the bottom layer, under the grid, the strokes and the tokens.
   final ui.Image? background;
+
+  /// How [background] sits in the square ([fitRects]); null stretches it
+  /// over the whole square (the online pictures, which are square).
+  final MapFit? backgroundFit;
+
+  /// "Jeton boyutu": a factor of [tokenRadius].
+  final double tokenScale;
 
   /// Painted areas: over the picture, under the grid, the lines and the tokens.
   final List<RegionStroke> regions;
@@ -184,12 +224,11 @@ class MapPainter extends CustomPainter {
     if (paper) canvas.drawRect(Offset.zero & size, Paint()..color = theme.paper);
     final bg = background;
     if (bg != null) {
-      canvas.drawImageRect(
-        bg,
-        Rect.fromLTWH(0, 0, bg.width.toDouble(), bg.height.toDouble()),
-        Rect.fromLTWH(0, 0, side, side),
-        Paint()..filterQuality = FilterQuality.medium,
-      );
+      final fit = backgroundFit;
+      final r = fit == null
+          ? (src: Rect.fromLTWH(0, 0, bg.width.toDouble(), bg.height.toDouble()), dst: Rect.fromLTWH(0, 0, side, side))
+          : fitRects(fit, bg.width.toDouble(), bg.height.toDouble(), side);
+      canvas.drawImageRect(bg, r.src, r.dst, Paint()..filterQuality = FilterQuality.medium);
     }
     paintRegions(canvas, regions, side, opacity: regionOpacity);
     if (grid) {
@@ -227,7 +266,7 @@ class MapPainter extends CustomPainter {
   }
 
   void _paintToken(Canvas canvas, MapToken t, double side) {
-    final r = tokenRadius(side);
+    final r = tokenRadius(side) * tokenScale;
     final c = _px(t.position, side);
     final base = t.isPlayer ? theme.player : theme.foe;
     final fill = t.isDown ? base.withValues(alpha: 0.35) : base;

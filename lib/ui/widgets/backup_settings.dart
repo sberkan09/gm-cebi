@@ -14,7 +14,7 @@ String formatShortDate(DateTime d) =>
 /// When this device last made a backup (a device-bound setting).
 final lastBackupAtProvider = FutureProvider<DateTime?>((ref) => readLastBackupAt(ref.watch(databaseProvider)));
 
-const backupContentsText = 'Notlar, karşılaşma, harita ve çevrimiçi resimler. Giriş bilgilerin yedeğe girmez.';
+const backupContentsText = 'Notlar, karşılaşma, harita (yüklediğin harita resmi dahil) ve çevrimiçi resimler. Giriş bilgilerin yedeğe girmez.';
 const restoreWarningText = 'Buradaki notlar, karşılaşma ve harita silinir; yedektekiler gelir. Geri alınamaz.';
 
 enum _BackupTarget { share, save }

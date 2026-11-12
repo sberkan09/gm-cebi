@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -83,6 +85,34 @@ void main() {
       await tapKey(tester, 'new-encounter-all');
       expect(await names(tester, db), isEmpty);
       expect(await strokesOf(tester, db), isEmpty);
+    });
+
+    appTest('my uploaded map picture is named in the dialog and moves with "Haritayı tut", with its fit and the token size', gmPack: true,
+        (tester, db) async {
+      await fight(tester, db);
+      final picture = await pumped(tester, db.setMapImage(Uint8List.fromList([1, 2, 3]), width: 40, height: 20));
+      await pumped(tester, db.setMapImageFit('cover'));
+      await pumped(tester, db.setTokenScale(0.6));
+      await openNewEncounterDialog(tester);
+      expect(tester.widget<Text>(find.byKey(const Key('keep-map-effect'))).data,
+          'Harita çizimi (çizgiler ve alanlar) ve yüklediğin harita resmi yeni karşılaşmaya taşınır.');
+      await tapKey(tester, 'keep-map');
+      expect(tester.widget<Text>(find.byKey(const Key('keep-map-effect'))).data,
+          'Harita çizimi (çizgiler ve alanlar) ve yüklediğin harita resmi silinir.');
+      await tapKey(tester, 'keep-map');
+      await tapKey(tester, 'new-encounter-players');
+      final e = (await encounter(tester, db)).encounter;
+      final row = await pumped(tester, db.select(db.mapImages).getSingle());
+      expect((row.id, row.encounterId, row.fit), (picture, e.id, 'cover'));
+      expect(e.tokenScale, 0.6);
+    });
+
+    appTest('a picture alone is kept by default, and named alone', gmPack: true, (tester, db) async {
+      await fight(tester, db, drawing: false);
+      await pumped(tester, db.setMapImage(Uint8List.fromList([1]), width: 1, height: 1));
+      await openNewEncounterDialog(tester);
+      expect(tester.widget<CheckboxListTile>(find.byKey(const Key('keep-map'))).value, isTrue, reason: 'my own picture is not lost by default');
+      expect(tester.widget<Text>(find.byKey(const Key('keep-map-effect'))).data, 'Yüklediğin harita resmi yeni karşılaşmaya taşınır.');
     });
 
     appTest('without a drawing there is nothing to keep: no checkbox; "Vazgeç" changes nothing', gmPack: true, (tester, db) async {

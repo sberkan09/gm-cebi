@@ -40,6 +40,16 @@ class Encounters extends Table {
   BoolColumn get started => boolean().withDefault(const Constant(false))();
   BoolColumn get active => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime()();
+
+  /// Battle-map token size, a factor of the painter's token radius: 0.6
+  /// (Küçük), 1.0 (Orta) or 1.5 (Büyük). (schema 6)
+  RealColumn get tokenScale => real().withDefault(const Constant(1.0))();
+
+  /// The picture chosen under the battle map: `none` (the drawing alone),
+  /// `upload` (the user's own picture, [MapImages]) or `online` (the newest
+  /// [MapScenes] picture). A choice whose picture does not exist falls back
+  /// to the other picture, then to none (`shownBackground`). (schema 6)
+  TextColumn get mapBackground => text().withDefault(const Constant('online'))();
 }
 
 class Combatants extends Table {
@@ -112,6 +122,29 @@ class MapScenes extends Table {
 
   /// Reported by the user: never shown again.
   BoolColumn get hidden => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime()();
+}
+
+/// A picture the user loaded as an encounter's battle map (schema 6): a
+/// ready-made map or a photo of a hand-drawn one. At most one per encounter;
+/// loading another replaces it. Kept apart from [MapScenes]: it has no
+/// server id, is never reported, pruned or sent anywhere, and stays on the
+/// device (and in the backups the user makes).
+class MapImages extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get encounterId => integer().unique().references(Encounters, #id, onDelete: KeyAction.cascade)();
+
+  /// The file as picked (PNG, JPEG, WebP, GIF), or a PNG scaled down to
+  /// 2048 px on its longer side when the file was too large.
+  BlobColumn get bytes => blob()();
+
+  /// Size in pixels as shown (after an EXIF rotation).
+  IntColumn get width => integer()();
+  IntColumn get height => integer()();
+
+  /// How a non-square picture sits in the square map: `contain` (Sığdır:
+  /// all of it, paper around it) or `cover` (Doldur: centre-cropped).
+  TextColumn get fit => text().withDefault(const Constant('contain'))();
   DateTimeColumn get createdAt => dateTime()();
 }
 
@@ -196,12 +229,30 @@ class EncounterState {
       combatants.isEmpty ? null : combatants[encounter.turnIndex.clamp(0, combatants.length - 1)];
 }
 
-@DriftDatabase(tables: [Settings, Notes, Encounters, Combatants, MapStrokes, MapScenes])
+/// The user's own battle-map picture without its bytes: what the map needs
+/// to lay it out ([AppDatabase.watchActiveMapImage]). Equal when nothing
+/// shown changed, so turns (which re-run the query) rebuild nothing.
+class MapImageInfo {
+  const MapImageInfo({required this.id, required this.width, required this.height, required this.fit});
+  final int id;
+  final int width;
+  final int height;
+
+  /// `contain` or `cover` ([MapImages.fit]).
+  final String fit;
+
+  @override
+  bool operator ==(Object other) => other is MapImageInfo && other.id == id && other.width == width && other.height == height && other.fit == fit;
+  @override
+  int get hashCode => Object.hash(id, width, height, fit);
+}
+
+@DriftDatabase(tables: [Settings, Notes, Encounters, Combatants, MapStrokes, MapScenes, MapImages])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: 'gm_cebi'));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -220,6 +271,12 @@ class AppDatabase extends _$AppDatabase {
             // Old strokes keep null: pen lines, as before.
             if (!await _hasColumn('map_strokes', 'region')) await m.addColumn(mapStrokes, mapStrokes.region);
             if (!await _hasColumn('map_strokes', 'width')) await m.addColumn(mapStrokes, mapStrokes.width);
+          }
+          if (from < 6) {
+            // Old encounters: normal tokens, the online picture shown when there is one (as before).
+            if (!await _hasColumn('encounters', 'token_scale')) await m.addColumn(encounters, encounters.tokenScale);
+            if (!await _hasColumn('encounters', 'map_background')) await m.addColumn(encounters, encounters.mapBackground);
+            await m.createTable(mapImages); // CREATE TABLE IF NOT EXISTS
           }
         }),
         beforeOpen: (details) async {
@@ -453,18 +510,24 @@ class AppDatabase extends _$AppDatabase {
         }
       });
 
-  /// Deletes the active encounter (and, by cascade, its combatants, its map
-  /// and its online pictures) and starts an empty one. Player characters can
-  /// be carried over with full HP and off the map. With [keepMap] the drawing
-  /// (lines and areas, with their ids) and the picture in use (the newest one
-  /// not reported) move to the new encounter; older pictures are deleted.
+  /// Deletes the active encounter (and, by cascade, its combatants, its map,
+  /// its uploaded picture and its online pictures) and starts an empty one.
+  /// Player characters can be carried over with full HP and off the map.
+  /// With [keepMap] the drawing (lines and areas, with their ids), the
+  /// uploaded picture with its fit, the online picture in use (the newest one
+  /// not reported), the token size and the background choice move to the new
+  /// encounter; older online pictures are deleted.
   Future<void> newEncounter({bool keepPlayers = true, bool keepMap = false}) async {
     await transaction(() async {
       final e = await activeEncounter();
       final players = keepPlayers
           ? await (select(combatants)..where((c) => c.encounterId.equals(e.id) & c.isPlayer.equals(true))).get()
           : <Combatant>[];
-      final id = await into(encounters).insert(EncountersCompanion.insert(createdAt: DateTime.now()));
+      final id = await into(encounters).insert(EncountersCompanion.insert(
+        createdAt: DateTime.now(),
+        tokenScale: keepMap ? Value(e.tokenScale) : const Value.absent(),
+        mapBackground: keepMap ? Value(e.mapBackground) : const Value.absent(),
+      ));
       for (final p in players) {
         await into(combatants).insert(p.toCompanion(false).copyWith(
               id: const Value.absent(),
@@ -487,6 +550,7 @@ class AppDatabase extends _$AppDatabase {
         if (picture != null) {
           await (update(mapScenes)..where((s) => s.id.equals(picture.id))).write(MapScenesCompanion(encounterId: Value(id)));
         }
+        await (update(mapImages)..where((i) => i.encounterId.equals(e.id))).write(MapImagesCompanion(encounterId: Value(id)));
       }
       await (delete(encounters)..where((x) => x.id.equals(e.id))).go();
       await writeSetting(_actedKey, null);
@@ -494,8 +558,9 @@ class AppDatabase extends _$AppDatabase {
   }
 
   /// What [newEncounter] deletes, or with `keepMap` carries over, of the
-  /// active encounter's map: a drawing (lines or areas) and a picture in use.
-  Future<({bool drawing, bool picture})> activeMapContents() async {
+  /// active encounter's map: a drawing (lines or areas), an online picture in
+  /// use and the user's uploaded picture.
+  Future<({bool drawing, bool picture, bool upload})> activeMapContents() async {
     final e = await activeEncounter();
     final stroke = await (selectOnly(mapStrokes)
           ..addColumns([mapStrokes.id])
@@ -507,7 +572,11 @@ class AppDatabase extends _$AppDatabase {
           ..where(mapScenes.encounterId.equals(e.id) & mapScenes.hidden.equals(false))
           ..limit(1))
         .get();
-    return (drawing: stroke.isNotEmpty, picture: picture.isNotEmpty);
+    final upload = await (selectOnly(mapImages)
+          ..addColumns([mapImages.id])
+          ..where(mapImages.encounterId.equals(e.id)))
+        .get();
+    return (drawing: stroke.isNotEmpty, picture: picture.isNotEmpty, upload: upload.isNotEmpty);
   }
 
   // ------------------------------------------------------------ battle map
@@ -578,6 +647,74 @@ class AppDatabase extends _$AppDatabase {
         .write(const CombatantsCompanion(posX: Value(null), posY: Value(null)));
   }
 
+  /// "Jeton boyutu" of the active encounter's map (see [Encounters.tokenScale]).
+  Future<void> setTokenScale(double scale) async {
+    final e = await activeEncounter();
+    await (update(encounters)..where((x) => x.id.equals(e.id))).write(EncountersCompanion(tokenScale: Value(scale)));
+  }
+
+  /// "Arka plan": `none`, `upload` or `online` (see [Encounters.mapBackground]).
+  Future<void> setMapBackground(String background) async {
+    final e = await activeEncounter();
+    await (update(encounters)..where((x) => x.id.equals(e.id))).write(EncountersCompanion(mapBackground: Value(background)));
+  }
+
+  // ------------------------------------------------------------ uploaded map picture
+
+  /// The active encounter's uploaded picture, without its bytes. The query
+  /// joins encounters, so it re-runs on every turn; compare with `distinct`.
+  Stream<MapImageInfo?> watchActiveMapImage() => customSelect(
+        'SELECT i.id, i.width, i.height, i.fit FROM map_images i JOIN encounters e ON e.id = i.encounter_id WHERE e.active = 1 '
+        'ORDER BY i.id DESC LIMIT 1',
+        readsFrom: {mapImages, encounters},
+      ).watch().map((rows) => rows.isEmpty
+          ? null
+          : MapImageInfo(
+              id: rows.first.read<int>('id'),
+              width: rows.first.read<int>('width'),
+              height: rows.first.read<int>('height'),
+              fit: rows.first.read<String>('fit')));
+
+  /// The bytes of an uploaded picture; null if it is gone.
+  Future<Uint8List?> mapImageBytes(int id) async {
+    final row = await (selectOnly(mapImages)
+          ..addColumns([mapImages.bytes])
+          ..where(mapImages.id.equals(id)))
+        .getSingleOrNull();
+    return row?.read(mapImages.bytes);
+  }
+
+  /// "Harita resmi yükle" / "Resmi değiştir": the active encounter's picture
+  /// becomes [bytes] (a new row, so a new id: the decoded image is cached by
+  /// id) and is shown. A replaced picture's fit is kept. Returns the new id.
+  Future<int> setMapImage(Uint8List bytes, {required int width, required int height}) => transaction(() async {
+        final e = await activeEncounter();
+        final old = await (select(mapImages)..where((i) => i.encounterId.equals(e.id))).getSingleOrNull();
+        await (delete(mapImages)..where((i) => i.encounterId.equals(e.id))).go();
+        final id = await into(mapImages).insert(MapImagesCompanion.insert(
+          encounterId: e.id,
+          bytes: bytes,
+          width: width,
+          height: height,
+          fit: old == null ? const Value.absent() : Value(old.fit),
+          createdAt: DateTime.now(),
+        ));
+        await (update(encounters)..where((x) => x.id.equals(e.id))).write(const EncountersCompanion(mapBackground: Value('upload')));
+        return id;
+      });
+
+  /// "Resmi kaldır": the drawing and the tokens stay.
+  Future<void> removeMapImage() async {
+    final e = await activeEncounter();
+    await (delete(mapImages)..where((i) => i.encounterId.equals(e.id))).go();
+  }
+
+  /// "Sığdır" (`contain`) or "Doldur" (`cover`).
+  Future<void> setMapImageFit(String fit) async {
+    final e = await activeEncounter();
+    await (update(mapImages)..where((i) => i.encounterId.equals(e.id))).write(MapImagesCompanion(fit: Value(fit)));
+  }
+
 
   // ------------------------------------------------------------ online scenes
 
@@ -595,8 +732,9 @@ class AppDatabase extends _$AppDatabase {
   static const maxScenesPerEncounter = 5;
 
   /// Stores a picture with [encounterId] (the encounter the sketch belonged
-  /// to; default the active one) and prunes that encounter's older pictures
-  /// ([maxScenesPerEncounter]). Nothing is stored if that encounter is gone.
+  /// to; default the active one), makes it that encounter's background and
+  /// prunes its older pictures ([maxScenesPerEncounter]). Nothing is stored
+  /// if that encounter is gone.
   Future<int?> addScene({required String assetId, required Uint8List png, required String mode, required String narrative, required int seed, int? encounterId}) async {
     final id = encounterId ?? (await activeEncounter()).id;
     final exists = await (select(encounters)..where((e) => e.id.equals(id))).getSingleOrNull();
@@ -611,6 +749,7 @@ class AppDatabase extends _$AppDatabase {
         seed: seed,
         createdAt: DateTime.now(),
       ));
+      await (update(encounters)..where((x) => x.id.equals(id))).write(const EncountersCompanion(mapBackground: Value('online')));
       await _pruneScenes(id);
       return row;
     });

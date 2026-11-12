@@ -128,6 +128,14 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-11-12 — Çevrimiçi oturum: heartbeat'te `410` gelince oturum boşta kalır, bir sonraki gerekli kullanıcı eyleminde açılır (GPU boşuna sıcak tutulmaz). Her işe toplam 4 dakikalık tek süre sınırı. Çıkış ve hesap silme ekrandan bağımsız yürür. Bildirilen resmin baytları silinir; karşılaşma başına son 5 resim tutulur.
 - 2026-11-12 — Kayıt, arama ve göz at listeleri tablette 720 dp'lik ortalanmış sütunda; iki bölmeli tablet düzeni ayrı bir iş.
 
+## Yedekleme, yayın düzeni ve harita resmi (2026-11-12, #32–#34)
+
+- 2026-11-12 — Yedek tek bir JSON dosyasıdır (`gm-cebi-yedek-YYYY-AA-GG.json`); tablolar şemadan okunur, yeni tablo ya da sütun teste eklenmezse bir test kırılır. Giriş anahtarları ve cihaza özel ayarlar (çevrimiçi onay ve anahtarı, test anahtarı, son yedek zamanı) yedeğe girmez. Geri yükleme birleştirmez, değiştirir: tek işlemde, kimlikler korunarak; hata olursa hiçbir şey değişmez. Daha yeni şemadan yedek reddedilir, eskisi kabul edilir. Dosya seçici tür süzmez; dosyanın yedek olup olmadığına içeriği karar verir.
+- 2026-11-12 — `file_picker` en az iki haftalık bir sürüme kilitlenir (13.3.0); yeni çıkmış sürüme hemen geçilmez.
+- 2026-11-12 — GM Paketi kilitliyken var olan notlar okunabilir (salt okunur); ekleme, düzenleme ve silme kilitli kalır.
+- 2026-11-12 — Test APK'ları isteğe bağlı sabit bir test anahtarıyla imzalanır (`TEST_KEYSTORE_*` secret'ları; Play yükleme anahtarından ayrı). Yalnızca ARM, iki dosya (arm64, arm32). Her PR'da mağaza App Bundle'ı derlenip İnternet izni ve dahili test anahtarı içermediği denetlenir.
+- 2026-11-12 — Kullanıcının yüklediği harita resmi ayrı tabloda durur (`map_images`, şema 6; çevrimiçi resimlerin budama ve bildirme kuralları ona dokunmaz), cihazdan hiç çıkmaz ve yedeğe girer. Harita kare kalır: resim "Sığdır" (varsayılan) ya da "Doldur" ile yerleşir. Çizimler yüklenen resmin üstünde görünür. Jeton boyutu (Küçük/Orta/Büyük) ve gösterilen arka plan karşılaşmaya kaydedilir. Izgarayı resme hizalama ve resmin en-boy oranını izleyen harita sonraki iş.
+
 ## Onay bekleyenler
 
 - 2026-11-09 — Kalan içeriğin tamamı makine destekli çevrildi; mağaza metinleri ve Ayarlar notu bunu açıkça söyler, "kusursuz/resmî çeviri" denmez. İnsan incelemesi sonraki adım.

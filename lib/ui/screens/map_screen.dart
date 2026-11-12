@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../db/database.dart';
+import '../../features/backup/device_files.dart';
 import '../../features/flags.dart';
+import '../../features/map_image.dart';
 import '../../features/map_sketch.dart';
 import '../../features/online_scene/online_settings.dart';
 import '../../features/online_scene/scene_controller.dart';
@@ -30,9 +32,16 @@ import '../widgets/online_scene.dart';
 /// and still moves tokens. The stylus' eraser end or barrel button erases for
 /// that stroke, and a hovering stylus shows where it will draw.
 ///
+/// The GM's own picture ("Harita resmi yükle": a ready-made battle map, a
+/// photo of a hand-drawn one) can be the bottom layer; the drawing stays
+/// visible over it and the tokens on top. It never leaves the device. The map
+/// stays square: the picture is fitted in ("Sığdır") or cropped ("Doldur").
+///
 /// Optional online feature (docs/online-scene.md): the terrain sketch can be
 /// turned into a picture by NeuraCraft Cloud; the picture becomes the bottom
-/// layer and the tokens stay on top. Without it, the map works the same.
+/// layer (the sketch it was made from is hidden) and the tokens stay on top.
+/// Without it, the map works the same. One background shows at a time
+/// ("Arka plan" in the map's menu).
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
 
@@ -135,7 +144,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   double _side = 1;
   List<MapStroke> _strokes = const [];
   List<Combatant> _placed = const [];
-  bool _hasBackground = false;
+  bool _onlineShown = false;
+  double _tokenScale = 1;
 
   bool get _penActive => _byStylus && _pointer != null;
 
@@ -166,9 +176,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   /// it is drawn as after (under the grid and the lines, one opacity for the
   /// whole area layer): this layer is repainted on each move of the area
   /// brush, and only then.
-  MapPainter _savedLayer(List<MapStroke> strokes, ui.Image? background, MapTheme theme, ColorScheme scheme) {
+  ///
+  /// [hideSketch]: over an online picture the drawing is hidden (the picture
+  /// was made from it); over the user's own picture it stays, to annotate it.
+  MapPainter _savedLayer(List<MapStroke> strokes, ui.Image? background, MapFit? fit, bool hideSketch, MapTheme theme, ColorScheme scheme) {
     final painting = _drawing != null && _drawingArea;
-    final from = [strokes, background, _grid, scheme, _erasingRev];
+    final from = [strokes, background, fit, hideSketch, _grid, scheme, _erasingRev];
     final kept = _saved;
     if (!painting && kept != null && from.length == _savedFrom.length) {
       var same = true;
@@ -179,14 +192,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
     final painter = MapPainter(
       background: background,
-      // Over the picture the sketch is hidden: the picture was made from it.
+      backgroundFit: fit,
       strokes: [
-        if (background == null)
+        if (!hideSketch)
           for (final s in strokes)
             if (!s.isRegion && !_erasing.containsKey(s.id)) SketchStroke(_points(s), s.color),
       ],
       regions: [
-        if (background == null)
+        if (!hideSketch)
           for (final s in strokes)
             if (s.isRegion && !_erasing.containsKey(s.id)) RegionStroke(_points(s), RegionKind.of(s.region!), s.width ?? regionWidths.last),
         if (painting) RegionStroke(_drawing!, _region, regionWidths[_regionWidth]),
@@ -226,8 +239,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final unplaced = [for (final c in combatants) if (c.mapPosition == null) c];
     final online = ref.watch(onlineFeatureVisibleProvider);
     final sceneBusy = ref.watch(sceneControllerProvider) is SceneWorking;
-    final sceneId = online && ref.watch(sceneVisibleProvider) ? ref.watch(activeSceneIdProvider) : null;
-    final background = sceneId == null ? null : ref.watch(sceneImageProvider(sceneId)).value;
+    final shown = ref.watch(shownBackgroundProvider);
+    final upload = ref.watch(activeMapImageProvider).value;
+    final hasOnline = ref.watch(onlineBackgroundAvailableProvider);
+    final tokenScale = ref.watch(tokenScaleProvider);
+    final sceneId = shown == MapBackground.online ? ref.watch(activeSceneIdProvider) : null;
+    final background = switch (shown) {
+      MapBackground.online => sceneId == null ? null : ref.watch(sceneImageProvider(sceneId)).value,
+      MapBackground.upload => upload == null ? null : ref.watch(mapImageProvider(upload.id)).value,
+      MapBackground.none => null,
+    };
 
     // Undo steps belong to one encounter; a new encounter starts clean.
     if (state != null && state.encounter.id != _undoEncounter) {
@@ -268,7 +289,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         _areaLayer = true;
       }),
     );
-    final canvas = _canvas(context, state, strokes, combatants, placed, background);
+    final canvas = _canvas(context, state, strokes, combatants, placed, background,
+        fit: shown == MapBackground.upload && upload != null ? MapFit.of(upload.fit) : null, online: shown == MapBackground.online, tokenScale: tokenScale);
 
     return OnlineSessionScope(
         child: Scaffold(
@@ -295,6 +317,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             onPressed: () => setState(() => _grid = !_grid),
           ),
           PopupMenuButton<String>(
+            key: const Key('map-menu'),
             onSelected: (v) async {
               if (v == 'clear' && await _confirmClear(context)) {
                 final rows = [...strokes];
@@ -302,10 +325,34 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 if (rows.isNotEmpty) setState(() => _pushUndo(_Removed(rows)));
               }
               if (v == 'tokens') await db.clearTokenPositions();
+              if (v == 'upload') await _pickImage();
+              if (v == 'remove-image') await db.removeMapImage();
+              if (v.startsWith('bg-')) await db.setMapBackground(v.substring(3));
+              if (v.startsWith('fit-')) await db.setMapImageFit(v.substring(4));
+              if (v.startsWith('token-')) await db.setTokenScale(tokenScales[int.parse(v.substring(6))]);
             },
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'clear', child: Text('Çizimi temizle')),
-              PopupMenuItem(value: 'tokens', child: Text('Jetonları kaldır')),
+            itemBuilder: (_) => [
+              PopupMenuItem(key: const Key('map-upload'), value: 'upload', child: Text(upload == null ? 'Harita resmi yükle' : 'Resmi değiştir')),
+              if (upload != null) const PopupMenuItem(key: Key('map-image-remove'), value: 'remove-image', child: Text('Resmi kaldır')),
+              // Only the backgrounds that exist; nothing to choose without a picture.
+              if (upload != null || hasOnline) ...[
+                const PopupMenuDivider(),
+                for (final b in backgroundChoices(hasUpload: upload != null, hasOnline: hasOnline))
+                  CheckedPopupMenuItem(key: Key('map-bg-${b.name}'), value: 'bg-${b.name}', checked: shown == b, child: Text('Arka plan: ${b.label}')),
+              ],
+              if (upload != null) ...[
+                const PopupMenuDivider(),
+                for (final f in MapFit.values)
+                  CheckedPopupMenuItem(
+                      key: Key('map-image-fit-${f.name}'), value: 'fit-${f.name}', checked: MapFit.of(upload.fit) == f, child: Text('Resim: ${f.label}')),
+              ],
+              const PopupMenuDivider(),
+              for (var i = 0; i < tokenScales.length; i++)
+                CheckedPopupMenuItem(
+                    key: Key('map-token-$i'), value: 'token-$i', checked: tokenScaleIndex(tokenScale) == i, child: Text('Jeton boyutu: ${tokenScaleNames[i]}')),
+              const PopupMenuDivider(),
+              const PopupMenuItem(value: 'clear', child: Text('Çizimi temizle')),
+              const PopupMenuItem(value: 'tokens', child: Text('Jetonları kaldır')),
             ],
           ),
         ],
@@ -331,6 +378,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             child: Column(children: [
               toolbar,
               const SceneStatusBar(),
+              // The map's settings at hand on a tablet (on a phone: the ⋮ menu).
+              ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: box.maxHeight * 0.3),
+                child: SingleChildScrollView(
+                  child: _MapOptions(upload: upload, hasOnline: hasOnline, shown: shown, tokenScale: tokenScale),
+                ),
+              ),
               Expanded(child: unplaced.isEmpty ? const SizedBox.shrink() : _tray(unplaced, combatants, placed, Axis.vertical)),
               _TurnBar(state: state),
             ]),
@@ -340,8 +394,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     ));
   }
 
-  Widget _canvas(
-      BuildContext context, EncounterState? state, List<MapStroke> strokes, List<Combatant> combatants, List<Combatant> placed, ui.Image? background) {
+  Widget _canvas(BuildContext context, EncounterState? state, List<MapStroke> strokes, List<Combatant> combatants, List<Combatant> placed,
+      ui.Image? background, {required MapFit? fit, required bool online, required double tokenScale}) {
     final scheme = Theme.of(context).colorScheme;
     final theme = MapTheme.of(scheme);
     final current = state?.current;
@@ -360,7 +414,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         _side = side;
         _strokes = strokes;
         _placed = placed;
-        _hasBackground = background != null;
+        _onlineShown = online && background != null;
+        _tokenScale = tokenScale;
 
         return Semantics(
           container: true,
@@ -396,7 +451,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             RepaintBoundary(
                               child: CustomPaint(
                                 key: const Key('map-saved'),
-                                painter: _savedLayer(strokes, background, theme, scheme),
+                                painter: _savedLayer(strokes, background, fit, online && background != null, theme, scheme),
                                 size: Size.square(side),
                               ),
                             ),
@@ -421,6 +476,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                                   ],
                                   grid: false,
                                   theme: theme,
+                                  tokenScale: tokenScale,
                                   labelStyle: Theme.of(context).textTheme.labelLarge,
                                 ),
                                 size: Size.square(side),
@@ -489,7 +545,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   Combatant? _tokenAt(Offset local) {
     final at = _toMap(local);
-    final r = tokenRadius(_side) * 1.3 / _side; // a little forgiving for fingers
+    final r = tokenRadius(_side) * _tokenScale * 1.3 / _side; // a little forgiving for fingers
     for (final c in _placed.reversed) {
       final p = c.mapPosition!;
       if (math.sqrt(math.pow(p.x - at.x, 2) + math.pow(p.y - at.y, 2)) <= r) return c;
@@ -568,8 +624,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         _dragPos = hit.mapPosition;
         return;
       }
-      // Editing the sketch: show it rather than the picture.
-      if (_hasBackground) ref.read(sceneVisibleProvider.notifier).set(false);
+      // Editing the sketch: show it rather than the online picture (the
+      // user's own picture stays: the drawing is visible over it).
+      if (_onlineShown) unawaited(setSceneVisible(ref, false));
       if (erases || _tool == _Tool.eraser) {
         _gesture = _Gesture.erase;
         _lastErase = _toMap(local);
@@ -877,6 +934,35 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     );
   }
 
+  /// "Harita resmi yükle" / "Resmi değiştir": the system picker, then the
+  /// checks ([prepareMapImage]); a refused file says why. The first time, a
+  /// hint about the picture's own grid (the app's grid is not kept per map).
+  Future<void> _pickImage() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final db = ref.read(databaseProvider);
+    try {
+      final bytes = await ref.read(deviceFilesProvider).pickImage();
+      if (bytes == null) return;
+      final p = await ref.read(mapImagePreparerProvider)(bytes);
+      await db.setMapImage(p.bytes, width: p.width, height: p.height);
+      if (_grid && (await db.readSettings())[mapImageGridHintKey] == null) {
+        await db.writeSetting(mapImageGridHintKey, 'shown');
+        messenger.showSnackBar(SnackBar(
+          key: const Key('map-grid-hint'),
+          content: const Text(mapImageGridHint),
+          action: SnackBarAction(
+            label: 'Izgarayı kapat',
+            onPressed: () {
+              if (mounted) setState(() => _grid = false);
+            },
+          ),
+        ));
+      }
+    } on MapImageException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
   Future<bool> _confirmClear(BuildContext context) async =>
       await showDialog<bool>(
         context: context,
@@ -1112,6 +1198,72 @@ class _CursorPainter extends CustomPainter {
   @override
   bool shouldRepaint(_CursorPainter old) =>
       old.at != at || old.eraser != eraser || old.radius != radius || old.color != color || old.outline != outline;
+}
+
+/// Tablet side panel: the map's background, the uploaded picture's fit and
+/// the token size (the same choices as the ⋮ menu).
+class _MapOptions extends ConsumerWidget {
+  const _MapOptions({required this.upload, required this.hasOnline, required this.shown, required this.tokenScale});
+
+  final MapImageInfo? upload;
+  final bool hasOnline;
+  final MapBackground shown;
+  final double tokenScale;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final db = ref.read(databaseProvider);
+    final t = Theme.of(context).textTheme;
+    final upload = this.upload;
+    Widget row(String label, Widget control) => Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+          child: Row(children: [
+            SizedBox(width: 72, child: Text(label, style: t.labelMedium)),
+            Expanded(child: Align(alignment: Alignment.centerLeft, child: FittedBox(fit: BoxFit.scaleDown, child: control))),
+          ]),
+        );
+    const dense = VisualDensity(horizontal: -2, vertical: -2);
+    return Column(mainAxisSize: MainAxisSize.min, children: [
+      if (upload != null || hasOnline)
+        row(
+          'Arka plan',
+          SegmentedButton<MapBackground>(
+            key: const Key('panel-background'),
+            showSelectedIcon: false,
+            style: const ButtonStyle(visualDensity: dense),
+            segments: [
+              for (final b in backgroundChoices(hasUpload: upload != null, hasOnline: hasOnline))
+                ButtonSegment(value: b, label: Text(switch (b) { MapBackground.none => 'Yok', MapBackground.upload => 'Resmim', MapBackground.online => 'Çevrimiçi' }), tooltip: b.label),
+            ],
+            selected: {shown},
+            onSelectionChanged: (v) => db.setMapBackground(v.first.name),
+          ),
+        ),
+      if (upload != null)
+        row(
+          'Resim',
+          SegmentedButton<MapFit>(
+            key: const Key('panel-fit'),
+            showSelectedIcon: false,
+            style: const ButtonStyle(visualDensity: dense),
+            segments: [for (final f in MapFit.values) ButtonSegment(value: f, label: Text(f.label))],
+            selected: {MapFit.of(upload.fit)},
+            onSelectionChanged: (v) => db.setMapImageFit(v.first.name),
+          ),
+        ),
+      row(
+        'Jeton',
+        SegmentedButton<int>(
+          key: const Key('panel-token-size'),
+          showSelectedIcon: false,
+          style: const ButtonStyle(visualDensity: dense),
+          segments: [for (var i = 0; i < tokenScales.length; i++) ButtonSegment(value: i, label: Text(tokenScaleNames[i]))],
+          selected: {tokenScaleIndex(tokenScale)},
+          onSelectionChanged: (v) => db.setTokenScale(tokenScales[v.first]),
+        ),
+      ),
+    ]);
+  }
 }
 
 /// Run combat from the map: whose turn it is and the next-turn button.

@@ -1,6 +1,22 @@
 # Durum
 
-Son güncelleme: 2026-11-12 (uygulama incelemesi ve düzeltmeleri)
+Son güncelleme: 2026-11-12 (yedekleme, harita resmi, yayın düzeni)
+
+## Yedekleme, harita resmi ve yayın düzeni (2026-11-12, #32–#34)
+
+- **Yedekleme (#33):** Ayarlar → Yedekleme: "Yedek al" (paylaş ya da dosyaya kaydet) ve "Yedekten
+  geri yükle". Notlar, karşılaşma, harita ve resimler; giriş bilgileri girmez. Ayrıca tek notu
+  metin olarak paylaşma ve GM Paketi kilitliyken okunabilir notlar.
+- **Kendi resmini harita olarak yükleme (#34):** haritanın ⋮ menüsünden resim yükleme, Sığdır /
+  Doldur, arka plan seçimi (yok / yüklenen / çevrimiçi), jeton boyutu. Resim cihazda kalır.
+- **Yayın düzeni (#32):** sabit test imzası (isteğe bağlı secret'lar), ARM APK'ları (~23 MB),
+  PR'da mağaza derlemesi denetimi, çevrimiçi sürüm için mağaza metni ve gizlilik politikası
+  varyantları.
+
+Ürün sahibini bekleyenler: test anahtarı secret'ları, gizlilik politikasındaki yer tutucular
+(iletişim e-postası, yayın tarihi, geliştirici adı), mağaza derlemesinin çevrimdışı mı çevrimiçi mi
+olacağı. NeuraCraft'ı bekleyenler: bölge katmanı (neuracraft-cloud #42), yenileme toleransı (#52).
+
 
 ## Uygulama incelemesi (2026-11-12, #28–#30)
 

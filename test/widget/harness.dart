@@ -13,6 +13,7 @@ import 'package:gm_cebi/db/database.dart';
 import 'package:gm_cebi/features/backup/backup.dart' show maxBackupBytes;
 import 'package:gm_cebi/features/backup/device_files.dart';
 import 'package:gm_cebi/features/flags.dart';
+import 'package:gm_cebi/features/map_image.dart' show maxPickBytes;
 import 'package:gm_cebi/providers.dart';
 
 import '../support.dart';
@@ -99,7 +100,7 @@ Future<void> goBack(WidgetTester tester) async {
 }
 
 /// Records what would go to the share sheet or the save dialog, and hands
-/// [picked] to the file picker.
+/// [picked] (a backup) or [pickedImage] (a map picture) to the file picker.
 class FakeDeviceFiles implements DeviceFiles {
   final shared = <(String, Uint8List)>[];
   final saved = <(String, Uint8List)>[];
@@ -125,4 +126,14 @@ class FakeDeviceFiles implements DeviceFiles {
 
   @override
   Future<Uint8List?> pickJson({int maxBytes = maxBackupBytes}) async => picked;
+
+  /// Handed to "Harita resmi yükle" (null: the picker was cancelled).
+  Uint8List? pickedImage;
+  int imagePicks = 0;
+
+  @override
+  Future<Uint8List?> pickImage({int maxBytes = maxPickBytes}) async {
+    imagePicks++;
+    return pickedImage;
+  }
 }

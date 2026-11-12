@@ -13,6 +13,7 @@ import '../../data/neuracraft/client.dart';
 import '../../data/neuracraft/errors.dart';
 import '../../data/neuracraft/models.dart';
 import '../../db/database.dart';
+import '../../features/map_image.dart';
 import '../../features/map_sketch.dart';
 import '../../features/online_scene/account.dart';
 import '../../features/online_scene/messages.dart';
@@ -71,15 +72,16 @@ class _OnlineSessionScopeState extends ConsumerState<OnlineSessionScope> {
   Widget build(BuildContext context) => widget.child;
 }
 
-/// Whether the online picture or the bare sketch is shown under the tokens.
-class SceneVisibility extends Notifier<bool> {
-  @override
-  bool build() => true;
-  void set(bool v) => state = v;
-}
+/// Whether the online picture is shown under the tokens (rather than the
+/// bare sketch, or the sketch over the user's own picture). Stored with the
+/// encounter ([Encounters.mapBackground]); see [shownBackgroundProvider].
+final sceneVisibleProvider = Provider<bool>((ref) => ref.watch(shownBackgroundProvider) == MapBackground.online);
 
-final sceneVisibleProvider = NotifierProvider<SceneVisibility, bool>(SceneVisibility.new);
-
+/// Hides the online picture: the user's own picture is shown if there is
+/// one, otherwise the drawing alone. Or, with [visible], shows it.
+Future<void> setSceneVisible(WidgetRef ref, bool visible) => ref.read(databaseProvider).setMapBackground(visible
+    ? MapBackground.online.name
+    : (ref.read(activeMapImageProvider).value != null ? MapBackground.upload.name : MapBackground.none.name));
 
 /// Above the map: the job in progress, the last error, or the server status;
 /// and the picture's actions once there is one.
@@ -160,7 +162,7 @@ class SceneStatusBar extends ConsumerWidget {
               key: const Key('scene-toggle'),
               label: const Text('Resim'),
               selected: visible,
-              onSelected: (v) => ref.read(sceneVisibleProvider.notifier).set(v),
+              onSelected: (v) => setSceneVisible(ref, v),
             ),
             PopupMenuButton<String>(
               key: const Key('scene-menu'),
@@ -216,7 +218,7 @@ Future<void> showSceneSheet(BuildContext context, WidgetRef ref) async {
     ),
   );
   if (result != null && context.mounted) {
-    ref.read(sceneVisibleProvider.notifier).set(true);
+    // The new picture becomes the background when it arrives (AppDatabase.addScene).
     await ref.read(sceneControllerProvider.notifier).generate(mode: result.mode, narrative: result.narrative, ground: result.ground);
   }
 }

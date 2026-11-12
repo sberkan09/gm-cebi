@@ -355,38 +355,48 @@ class _CombatantCard extends ConsumerWidget {
 
 typedef _NewEncounterChoice = ({bool keepPlayers, bool keepMap});
 
-/// Asks before "Yeni karşılaşma" and says what it deletes. The map (drawing
-/// and online picture) is only mentioned when there is one.
+/// Asks before "Yeni karşılaşma" and says what it deletes. The map (drawing,
+/// uploaded picture, online picture) is only mentioned when there is one.
 Future<_NewEncounterChoice?> _confirmNewEncounter(BuildContext context, AppDatabase db) async {
   final map = await db.activeMapContents();
   if (!context.mounted) return null;
   return showDialog<_NewEncounterChoice>(
     context: context,
-    builder: (context) => _NewEncounterDialog(hasDrawing: map.drawing, hasPicture: map.picture),
+    builder: (context) => _NewEncounterDialog(hasDrawing: map.drawing, hasPicture: map.picture, hasUpload: map.upload),
   );
 }
 
 class _NewEncounterDialog extends StatefulWidget {
-  const _NewEncounterDialog({required this.hasDrawing, required this.hasPicture});
+  const _NewEncounterDialog({required this.hasDrawing, required this.hasPicture, this.hasUpload = false});
 
   final bool hasDrawing;
   final bool hasPicture;
+
+  /// The GM's own map picture ("Harita resmi yükle").
+  final bool hasUpload;
 
   @override
   State<_NewEncounterDialog> createState() => _NewEncounterDialogState();
 }
 
 class _NewEncounterDialogState extends State<_NewEncounterDialog> {
-  /// On when there is a drawing to lose.
-  late bool _keepMap = widget.hasDrawing;
+  /// On when there is a drawing or the GM's own picture to lose.
+  late bool _keepMap = widget.hasDrawing || widget.hasUpload;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final hasMap = widget.hasDrawing || widget.hasPicture;
-    final map = widget.hasDrawing && widget.hasPicture
-        ? 'Harita çizimi (çizgiler ve alanlar) ve çevrimiçi resim'
-        : (widget.hasDrawing ? 'Harita çizimi (çizgiler ve alanlar)' : 'Haritanın çevrimiçi resmi');
+    final hasMap = widget.hasDrawing || widget.hasPicture || widget.hasUpload;
+    final parts = [
+      if (widget.hasDrawing) 'harita çizimi (çizgiler ve alanlar)',
+      if (widget.hasUpload) 'yüklediğin harita resmi',
+      if (widget.hasPicture) 'çevrimiçi resim',
+    ];
+    final joined = parts.length < 2 ? parts.join() : '${parts.sublist(0, parts.length - 1).join(', ')} ve ${parts.last}';
+    // The first letter is never i/ı, so Dart's upper case is right here.
+    final map = parts.length == 1 && widget.hasPicture
+        ? 'Haritanın çevrimiçi resmi'
+        : (joined.isEmpty ? '' : '${joined[0].toUpperCase()}${joined.substring(1)}');
     return AlertDialog(
       title: const Text('Yeni karşılaşma'),
       scrollable: true,

@@ -96,16 +96,27 @@ Kullanıcı verisi (drift/SQLite, `lib/db/database.dart`) Ayarlar → Yedekleme 
 alınır: `gm-cebi-yedek-YYYY-AA-GG.json` (`lib/features/backup/backup.dart`).
 
 ```json
-{"format": "gm-cebi-backup", "version": 1, "schemaVersion": 5,
+{"format": "gm-cebi-backup", "version": 1, "schemaVersion": 6,
  "createdAt": "2026-11-12T11:05:00.000Z", "app": "1.0.0",
  "tables": {"notes": [{"id": 3, "title": "…", "pinned": false, "created_at": "2026-10-01T16:05:00.000Z", …}],
-            "settings": […], "encounters": […], "combatants": […], "map_strokes": […], "map_scenes": […]}}
+            "settings": […], "encounters": […], "combatants": […], "map_strokes": […], "map_scenes": […],
+            "map_images": […]}}
 ```
+
+Savaş haritasının tabloları (şema 6):
+
+| Tablo / sütun | Açıklama |
+|---|---|
+| `encounters.token_scale` | "Jeton boyutu": 0.6 Küçük, 1.0 Orta (varsayılan), 1.5 Büyük; jeton yarıçapının çarpanı |
+| `encounters.map_background` | Haritanın altında ne görünür: `none`, `upload`, `online` (varsayılan; eski karşılaşmalar önceki gibi). Seçilen resim yoksa öteki resme, o da yoksa `none`'a düşer |
+| `map_strokes` | Çizgiler ve alan fırçası (`region`, `width`) |
+| `map_scenes` | Çevrimiçi resimler: sunucudaki numara, PNG, tarif; karşılaşma başına son 5, bildirilen gizlenir |
+| `map_images` | Kullanıcının yüklediği harita resmi, karşılaşma başına en çok bir (`encounter_id` benzersiz; yenisi eskisinin yerini alır): `bytes` (seçilen dosya; 6 MB ya da 4096 px üstüyse uzun kenarı 2048 px PNG, en çok 12 MB), `width`/`height` (EXIF dönüşü uygulanmış), `fit` (`contain` Sığdır, `cover` Doldur), `created_at`. Hiçbir yere gönderilmez |
 
 - Tablolar ve sütunlar drift'in tablo bilgisinden yazılır: yeni bir tablo ya da sütun kendiliğinden yedeğe girer.
   Bilerek dışarıda bırakılan tablo `backupExcludedTables` listesindedir (bugün boş); bir test, ikisinde de
   olmayan yeni tabloda ya da sütunda kırılır.
-- Sütun adları SQL şemasındaki gibidir. Tarihler ISO-8601 UTC metin, blob'lar (resim PNG'si) base64, mantıksal
+- Sütun adları SQL şemasındaki gibidir. Tarihler ISO-8601 UTC metin, blob'lar (çevrimiçi resim, yüklenen harita resmi) base64, mantıksal
   değerler `true`/`false`; id'ler korunur (yabancı anahtarlar ve `initiativeActed` onlara bakar).
 - Girmeyenler: cihaza bağlı ayarlar (`ncConsent`, `ncEnabled`, `gmPackOverride`, `lastBackupAt`), bildirilmiş ya da
   baytı olmayan resimler. Giriş bilgileri zaten veritabanında değil, güvenli depodadır.
