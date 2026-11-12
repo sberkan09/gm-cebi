@@ -50,7 +50,10 @@ class SystemDeviceFiles implements DeviceFiles {
 
   @override
   Future<Uint8List?> pickJson({int maxBytes = maxBackupBytes}) async {
-    final f = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: const ['json']);
+    // Any file type: a backup that arrived through a messaging app or a file
+    // manager is often labelled as a generic file and would be greyed out by a
+    // ".json only" filter. What it is gets decided by its content (parseBackup).
+    final f = await FilePicker.pickFile();
     if (f == null) return null;
     final size = f.lengthSync() ?? await f.length();
     if (size != null && size > maxBytes) throw const BackupException(tooLargeMessage);
