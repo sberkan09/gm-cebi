@@ -80,3 +80,39 @@ Türkçe metinler SRD 5.2.1'in çevirisidir ve orijinal metinden türetilmiş, d
 | Telif hakkı | | `2026 <senin adın ya da yayıncı adı>` |
 | Destek URL'si | | Zorunlu. Ör. depo adresi ya da bir iletişim sayfası |
 | Gizlilik politikası URL'si | | `privacy-policy-tr.md` / `-en.md`'nin yayımlandığı adres |
+
+---
+
+## Çevrimiçi sahneli derleme için değişen cümleler
+
+> **Yalnızca `NC_API_URL` ile derlenmiş (çevrimiçi sahne açık) bir sürüm mağazaya giderse kullan.**
+> Bugünkü mağaza derlemesi çevrimdışıdır; onun metni yukarıdakidir ve değişmez. Bu derlemede
+> yukarıdaki metnin yalnızca aşağıdaki parçaları değiştirilir, geri kalanı aynen kalır. Gizlilik
+> politikasında "Çevrimiçi sahne" bölümü, veri güvenliği formunda "Çevrimiçi sahne açık derleme"
+> cevapları yayımlanmış olmalı (`play-data-safety.md`, `docs/ios-testflight.md` A.4).
+
+**Uzun açıklama, ilk paragrafın son cümlesi** — yerine:
+
+```
+İnternet gerekmez, hesap gerekmez; reklam ve analitik yoktur. Yalnızca isteğe bağlı çevrimiçi sahne özelliği internet ve e-postayla giriş ister.
+```
+
+**Uzun açıklama, GM PAKETİ'ne eklenecek madde** (isteğe bağlı, "Oturum notları" maddesinden sonra):
+
+```
+• Sahneyi canlandır (isteğe bağlı, internet gerekir): savaş haritasına kabaca çizdiğin araziyi resme dönüştürür. Jetonlar ve ızgara resmin üstünde kalır.
+```
+
+**Uzun açıklama, GİZLİLİK paragrafı** — yerine:
+
+```
+Uygulama internetsiz çalışır; reklam ya da analitik yoktur. Notların ve karşılaşmaların yalnızca telefonunda saklanır. İsteğe bağlı "Sahneyi canlandır" özelliği, savaş haritası çizimini ve yazdığın tarifi resim üretmek için bir sunucuya gönderir; bunu yalnızca onay verip e-postana gelen kodla giriş yaptıktan sonra yapar. Kullanmazsan hiçbir şey gönderilmez. Hesabını ve sunucudaki verilerini uygulama içinden silebilirsin.
+```
+
+**App Store tanıtım metni** (en çok 170, 161 karakter) — yerine:
+
+```
+Kural, büyü ve canavarları Türkçe ya da İngilizce ara; zar at, inisiyatif ve notlarını tut. İnternetsiz çalışır, reklamsız. Haritadan resim üretmek isteğe bağlı.
+```
+
+Kısa açıklama, alt başlık ve anahtar kelimeler internetten söz etmediği için aynı kalır.

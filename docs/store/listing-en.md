@@ -76,3 +76,39 @@ First test release. Rule, condition and spell search (Turkish/English), spell ca
 | Keywords | 100, comma-separated | `rpg,5e,ttrpg,dice,spells,monsters,initiative,tracker,gm,dm,tabletop,turkish,rules,srd` |
 | Description | 4000 | Same as the Play full description above |
 | Category | | Primary: Reference; secondary: Games → Role Playing or Board |
+
+---
+
+## Sentences that change in an online scene build
+
+> **Use only if a build made with `NC_API_URL` (online scene enabled) goes to a store.** Today's
+> store build is offline; its text is the one above and does not change. For an online scene build,
+> replace only the parts below and keep everything else as is. The privacy policy's "Online scene"
+> section and the "online scene build" data safety answers must be published too
+> (`play-data-safety.md`, `docs/ios-testflight.md` A.4).
+
+**Full description, last sentence of the first paragraph** — replace with:
+
+```
+No internet or account needed, no ads, no analytics. Only the optional online scene feature uses the internet and an emailed sign-in code.
+```
+
+**Full description, extra GM PACK bullet** (optional, after "Session notes"):
+
+```
+• Bring the scene to life (optional, needs internet): turns the terrain you sketch on the battle map into a picture. Tokens and the grid stay on top.
+```
+
+**Full description, PRIVACY paragraph** — replace with:
+
+```
+The app works offline. No ads, no analytics. Your notes and encounters stay on your phone. The optional "bring the scene to life" feature sends your battle map sketch and the description you write to a server to make a picture, and only after you agree and sign in with a code sent to your email. If you do not use it, nothing is sent. You can delete your account and its server data inside the app.
+```
+
+**App Store promotional text** (max 170, 167 characters) — replace with:
+
+```
+Search rules, spells and monsters in Turkish or English, roll dice, track initiative and keep notes. Works offline, no ads. Optional: turn a map sketch into a picture.
+```
+
+The short description, subtitle and keywords do not mention the internet and stay the same.

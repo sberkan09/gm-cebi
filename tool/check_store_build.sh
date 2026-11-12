@@ -5,10 +5,22 @@
 #   tool/check_store_build.sh build/app/outputs/bundle/release/app-release.aab
 #   tool/check_store_build.sh --online …   a build with the online scene feature (NC_API_URL):
 #                                          the INTERNET permission is then required, not refused
+#   tool/check_store_build.sh --allow-debug-signature …
+#                                          skips only the "not debug-signed" check: pull-request CI
+#                                          builds the store bundle without the upload key (no secrets)
 set -euo pipefail
+usage="usage: tool/check_store_build.sh [--online] [--allow-debug-signature] <app-release.aab>"
 online=0
-if [ "${1:-}" = "--online" ]; then online=1; shift; fi
-aab=${1:?usage: tool/check_store_build.sh [--online] <app-release.aab>}
+allow_debug=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --online) online=1; shift ;;
+    --allow-debug-signature) allow_debug=1; shift ;;
+    -*) echo "$usage" >&2; exit 2 ;;
+    *) break ;;
+  esac
+done
+aab=${1:?$usage}
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 unzip -q "$aab" 'base/lib/*/libapp.so' 'base/manifest/AndroidManifest.xml' -d "$work"
@@ -36,7 +48,9 @@ elif [ "$online" = 1 ] && [ "$has_internet" = 0 ]; then
   fail=1
 fi
 # Signed with an upload key, never the debug key (a local build without key.properties).
-if keytool -printcert -jarfile "$aab" 2>/dev/null | grep -q 'CN=Android Debug'; then
+if [ "$allow_debug" = 1 ]; then
+  echo "note: signature check skipped (--allow-debug-signature); not an upload candidate" >&2
+elif keytool -printcert -jarfile "$aab" 2>/dev/null | grep -q 'CN=Android Debug'; then
   echo "FAIL: signed with the debug key; Play rejects it (android/key.properties, docs/release.md)" >&2
   fail=1
 fi
