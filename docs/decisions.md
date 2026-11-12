@@ -119,6 +119,15 @@ olarak işaretlenir ve ürün sahibine sorulur.
 - 2026-11-09 — Kilitli ad soyu ve cinsiyeti de korur (ad soya uysun); bu sırada soy/cinsiyet filtreleri kapalıdır ve ekranda söylenir. Kilitli görünüş yeni soya uymuyorsa (Ejderdoğan'da saç, Elf'te kuyruk zili) yeniden üretilir; uyuyorsa korunur. Görünüş satırları her cinsiyete uyar; cüce sakal satırı da kadın cüceler için geçerlidir (bilinçli seçim).
 - 2026-11-09 — Tutarlılık kuralları: iki karşıt özellik birlikte gelmez (`npcOppositeTraits`), lakap özellikle çelişmez ("Kurnaz" + "saf" yok, `npcEpithetClashes`), soyadı verilen adı tekrarlamaz ("Fındık Fındıkdibi" yok). Gerçek dinî topluluk çağrışımı yapan sözcükler ("tarikat") kullanılmaz.
 
+## İnceleme düzeltmeleri (2026-11-12, #28–#30)
+
+- 2026-11-12 — Tur sırası: sıra işareti katılımcıyı her yeniden sıralamada izler; o tur kimlerin oynadığı ayrıca tutulur (ayarlar tablosunda `initiativeActed`, şema değişmedi). "Sonraki" sıradaki henüz oynamamış ilk katılımcıya geçer, herkes oynadıysa yeni tur başlar; "Önceki" oynanan sıraları geri yürür. Sonuç: tur ortasında işaretin üstüne eklenen katılımcı o tur oynar. Eşit inisiyatifler `sortOrder` ile elle sıralanır.
+- 2026-11-12 — "Yeni karşılaşma" neyin silineceğini söyler; "Haritayı tut" çizgileri, alanları ve en yeni bildirilmemiş resmi yeni karşılaşmaya taşır. Jetonlar sıfırlanır.
+- 2026-11-12 — Telefonlar (kısa kenar < 600 dp) dikeye kilitli, tabletler serbest; iPhone `Info.plist`'te yalnızca dikey. Yatay telefon düzeni ayrıca tasarlanana kadar böyle kalır.
+- 2026-11-12 — Arama: çekimli sorgular için ek soyma (`trStems`, üç eke kadar; yalnızca yazıldığı gibi adıyla eşleşen kayıt yoksa). Sözlük terimleri adıyla eşleşen kayıtların altında. Sonuç sınırı görünür ("892 sonuçtan ilk 60", "Daha fazla göster"). Arama süresi yalnızca dahili derlemede.
+- 2026-11-12 — Çevrimiçi oturum: heartbeat'te `410` gelince oturum boşta kalır, bir sonraki gerekli kullanıcı eyleminde açılır (GPU boşuna sıcak tutulmaz). Her işe toplam 4 dakikalık tek süre sınırı. Çıkış ve hesap silme ekrandan bağımsız yürür. Bildirilen resmin baytları silinir; karşılaşma başına son 5 resim tutulur.
+- 2026-11-12 — Kayıt, arama ve göz at listeleri tablette 720 dp'lik ortalanmış sütunda; iki bölmeli tablet düzeni ayrı bir iş.
+
 ## Onay bekleyenler
 
 - 2026-11-09 — Kalan içeriğin tamamı makine destekli çevrildi; mağaza metinleri ve Ayarlar notu bunu açıkça söyler, "kusursuz/resmî çeviri" denmez. İnsan incelemesi sonraki adım.
