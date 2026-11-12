@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/turkish.dart';
 import '../../db/database.dart';
+import '../../features/backup/device_files.dart';
 import '../../features/flags.dart';
 import '../../providers.dart';
 import '../widgets/locked.dart';
@@ -16,7 +17,15 @@ const _months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz
 String formatDate(DateTime d) =>
     '${d.day} ${_months[d.month - 1]} ${d.year}, ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
-/// Session notes (GM pack): a simple list with search, newest first, pinned on top.
+/// Lock explanation over the notes when the GM pack is missing: notes written
+/// before stay readable (and can be shared or backed up), nothing is lost.
+const notesLockedText = 'Oturum notları GM Paketi ile açılır. Var olan notların okunabilir; yeni not, düzenleme ve silme kilitli.';
+
+/// A note as plain text for "Notu paylaş": the title, a blank line, the body.
+String noteShareText(String title, String body) => [title.trim(), body.trim()].where((s) => s.isNotEmpty).join('\n\n');
+
+/// Session notes (GM pack): a simple list with search, newest first, pinned on
+/// top. Without the GM pack, notes already written stay readable (read-only).
 class NotesScreen extends ConsumerStatefulWidget {
   const NotesScreen({super.key});
 
@@ -29,15 +38,17 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (!ref.watch(entitlementsProvider).allows(Feature.sessionNotes)) {
+    final locked = !ref.watch(entitlementsProvider).allows(Feature.sessionNotes);
+    final notes = ref.watch(notesProvider);
+    // Nothing to read: the plain lock screen.
+    if (locked && notes.value?.isEmpty != false && !notes.isLoading) {
       return Scaffold(appBar: AppBar(title: const Text('Notlar')), body: const GmPackLocked(feature: 'Oturum notları'));
     }
-    final notes = ref.watch(notesProvider);
     final t = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Oturum Notları'), actions: const [_NpcButton()]),
-      floatingActionButton: FloatingActionButton.extended(
+      appBar: AppBar(title: const Text('Oturum Notları'), actions: [if (!locked) const _NpcButton()]),
+      floatingActionButton: locked ? null : FloatingActionButton.extended(
         key: const Key('new-note'),
         heroTag: 'fab-notes',
         onPressed: () async {
@@ -55,6 +66,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
           final f = trFold(_filter.trim());
           final list = f.isEmpty ? all : all.where((n) => trFold('${n.title} ${n.body}').contains(f)).toList();
           return Column(children: [
+            if (locked) const GmPackLockedBanner(text: notesLockedText),
             if (all.length > 3 || _filter.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
@@ -144,6 +156,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> with Widget
   bool _pinned = false;
   bool _loaded = false;
   bool _dirty = false;
+
+  /// Without the GM pack the note is only shown (and can be shared).
+  bool _readOnly = false;
   Timer? _debounce;
   late final AppDatabase _db = ref.read(databaseProvider);
 
@@ -181,7 +196,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> with Widget
   }
 
   Future<void> _save() async {
-    if (!_dirty) return;
+    if (!_dirty || _readOnly) return;
     _dirty = false;
     await _db.updateNote(widget.noteId, title: _title.text, body: _body.text);
   }
@@ -191,7 +206,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> with Widget
     WidgetsBinding.instance.removeObserver(this);
     _debounce?.cancel();
     final empty = _title.text.trim().isEmpty && _body.text.trim().isEmpty;
-    if (_loaded && empty) {
+    if (_loaded && empty && !_readOnly) {
       _db.deleteNote(widget.noteId); // don't keep blank notes
     } else {
       _save();
@@ -201,44 +216,65 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> with Widget
     super.dispose();
   }
 
+  Future<void> _share() async {
+    final text = noteShareText(_title.text, _body.text);
+    if (text.isEmpty) return;
+    await ref.read(deviceFilesProvider).shareText(text, subject: _title.text.trim().isEmpty ? null : _title.text.trim());
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
+    _readOnly = !ref.watch(entitlementsProvider).allows(Feature.sessionNotes);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Not'),
         actions: [
-          IconButton(
-            tooltip: _pinned ? 'Sabitlemeyi kaldır' : 'Üste sabitle',
-            icon: Icon(_pinned ? Icons.push_pin : Icons.push_pin_outlined),
-            onPressed: () async {
-              setState(() => _pinned = !_pinned);
-              await _db.updateNote(widget.noteId, pinned: _pinned);
-            },
-          ),
-          IconButton(
-            key: const Key('delete-note'),
-            tooltip: 'Sil',
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () async {
-              final ok = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Not silinsin mi?'),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
-                    FilledButton(key: const Key('confirm-delete'), onPressed: () => Navigator.pop(context, true), child: const Text('Sil')),
-                  ],
-                ),
-              );
-              if (ok != true) return;
-              _debounce?.cancel();
-              _dirty = false;
-              _title.clear();
-              _body.clear();
-              await _db.deleteNote(widget.noteId);
-              if (context.mounted) Navigator.pop(context);
-            },
+          if (!_readOnly) ...[
+            IconButton(
+              tooltip: _pinned ? 'Sabitlemeyi kaldır' : 'Üste sabitle',
+              icon: Icon(_pinned ? Icons.push_pin : Icons.push_pin_outlined),
+              onPressed: () async {
+                setState(() => _pinned = !_pinned);
+                await _db.updateNote(widget.noteId, pinned: _pinned);
+              },
+            ),
+            IconButton(
+              key: const Key('delete-note'),
+              tooltip: 'Sil',
+              icon: const Icon(Icons.delete_outline),
+              onPressed: () async {
+                final ok = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Not silinsin mi?'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
+                      FilledButton(key: const Key('confirm-delete'), onPressed: () => Navigator.pop(context, true), child: const Text('Sil')),
+                    ],
+                  ),
+                );
+                if (ok != true) return;
+                _debounce?.cancel();
+                _dirty = false;
+                _title.clear();
+                _body.clear();
+                await _db.deleteNote(widget.noteId);
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
+          ],
+          PopupMenuButton<void>(
+            key: const Key('note-menu'),
+            tooltip: 'Diğer',
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                key: const Key('share-note'),
+                enabled: _loaded,
+                onTap: _share,
+                child: const ListTile(leading: Icon(Icons.share_outlined), title: Text('Notu paylaş'), contentPadding: EdgeInsets.zero),
+              ),
+            ],
           ),
         ],
       ),
@@ -247,8 +283,10 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> with Widget
           : Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: Column(children: [
+                if (_readOnly) const GmPackLockedBanner(text: notesLockedText),
                 TextField(
                   key: const Key('note-title'),
+                  readOnly: _readOnly,
                   controller: _title,
                   onChanged: (_) => _changed(),
                   textCapitalization: TextCapitalization.sentences,
@@ -259,6 +297,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> with Widget
                 Expanded(
                   child: TextField(
                     key: const Key('note-body'),
+                    readOnly: _readOnly,
                     controller: _body,
                     onChanged: (_) => _changed(),
                     textCapitalization: TextCapitalization.sentences,

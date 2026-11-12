@@ -62,3 +62,30 @@ class GmPackLocked extends ConsumerWidget {
     );
   }
 }
+
+/// On top of a GM-pack screen whose existing data stays readable without the
+/// entitlement (session notes): what is locked, and that nothing is lost.
+class GmPackLockedBanner extends StatelessWidget {
+  const GmPackLockedBanner({super.key, required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      key: const Key('gm-pack-locked-banner'),
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      color: scheme.secondaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(children: [
+          Icon(Icons.lock_outline, color: scheme.onSecondaryContainer),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text, style: t.bodyMedium?.copyWith(color: scheme.onSecondaryContainer))),
+        ]),
+      ),
+    );
+  }
+}

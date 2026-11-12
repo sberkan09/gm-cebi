@@ -11,6 +11,7 @@ import '../../features/online_scene/messages.dart';
 import '../../features/online_scene/online_settings.dart';
 import '../../features/online_scene/scene_controller.dart';
 import '../../providers.dart';
+import '../widgets/backup_settings.dart';
 import '../widgets/sign_in_sheet.dart';
 
 /// Settings, About and License.
@@ -77,6 +78,8 @@ class SettingsScreen extends ConsumerWidget {
             onChanged: notifier.setPenMode,
           ),
         ],
+        section('Yedekleme'),
+        const BackupSettings(),
         section('GM Paketi'),
         ListTile(
           leading: Icon(ent.gmPack ? Icons.lock_open : Icons.lock_outline, color: scheme.primary),

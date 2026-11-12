@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
@@ -9,6 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gm_cebi/app.dart';
 import 'package:gm_cebi/data/search.dart';
 import 'package:gm_cebi/db/database.dart';
+import 'package:gm_cebi/features/backup/backup.dart' show maxBackupBytes;
+import 'package:gm_cebi/features/backup/device_files.dart';
 import 'package:gm_cebi/features/flags.dart';
 import 'package:gm_cebi/providers.dart';
 
@@ -93,4 +96,33 @@ Future<void> openTab(WidgetTester tester, String label) async {
 Future<void> goBack(WidgetTester tester) async {
   await tester.binding.handlePopRoute();
   await settle(tester);
+}
+
+/// Records what would go to the share sheet or the save dialog, and hands
+/// [picked] to the file picker.
+class FakeDeviceFiles implements DeviceFiles {
+  final shared = <(String, Uint8List)>[];
+  final saved = <(String, Uint8List)>[];
+  final texts = <(String, String?)>[];
+  Uint8List? picked;
+  bool cancelSave = false;
+
+  @override
+  Future<bool> shareFile(Uint8List bytes, {required String fileName, required String mimeType}) async {
+    shared.add((fileName, bytes));
+    return true;
+  }
+
+  @override
+  Future<void> shareText(String text, {String? subject}) async => texts.add((text, subject));
+
+  @override
+  Future<bool> saveFile(Uint8List bytes, {required String fileName, required String mimeType}) async {
+    if (cancelSave) return false;
+    saved.add((fileName, bytes));
+    return true;
+  }
+
+  @override
+  Future<Uint8List?> pickJson({int maxBytes = maxBackupBytes}) async => picked;
 }

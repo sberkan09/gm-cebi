@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gm_cebi/features/backup/device_files.dart';
+import 'package:gm_cebi/ui/screens/notes_screen.dart';
 
 import 'harness.dart';
+import 'map_test.dart' show pumped;
 
 void main() {
   appTest('initiative and notes are locked without the GM pack', (tester, db) async {
@@ -9,6 +12,44 @@ void main() {
     expect(find.text('İnisiyatif takibi GM Paketi ile açılır.'), findsOneWidget);
     await openTab(tester, 'Notlar');
     expect(find.text('Oturum notları GM Paketi ile açılır.'), findsOneWidget);
+    expect(find.byKey(const Key('new-note')), findsNothing);
+  });
+
+  appTest('locked notes stay readable, but cannot be created, edited or deleted', (tester, db) async {
+    await pumped(tester, db.createNote(title: '3. oturum', body: 'Kurt sürüsü, köprüde pusu.'));
+    await openTab(tester, 'Notlar');
+    expect(find.text(notesLockedText), findsOneWidget);
+    expect(find.text('3. oturum'), findsOneWidget);
+    expect(find.text('Kurt sürüsü, köprüde pusu.'), findsOneWidget);
+    expect(find.byKey(const Key('new-note')), findsNothing);
+    expect(find.byKey(const Key('open-npc')), findsNothing);
+
+    await tester.tap(find.text('3. oturum'));
+    await settle(tester);
+    expect(find.text(notesLockedText), findsOneWidget);
+    expect(tester.widget<TextField>(find.byKey(const Key('note-title'))).readOnly, isTrue);
+    expect(tester.widget<TextField>(find.byKey(const Key('note-body'))).readOnly, isTrue);
+    expect(find.byKey(const Key('delete-note')), findsNothing);
+    expect(find.byTooltip('Üste sabitle'), findsNothing);
+    await tester.enterText(find.byKey(const Key('note-body')), 'değişti');
+    await settle(tester);
+    await goBack(tester);
+    final notes = await pumped(tester, db.select(db.notes).get());
+    expect(notes.single.body, 'Kurt sürüsü, köprüde pusu.');
+  });
+
+  final files = FakeDeviceFiles();
+  appTest('share a note as text', gmPack: true, overrides: [deviceFilesProvider.overrideWithValue(files)], (tester, db) async {
+    await pumped(tester, db.createNote(title: '3. oturum ', body: 'Kurt sürüsü.\nKöprüde pusu.\n'));
+    await openTab(tester, 'Notlar');
+    await tester.tap(find.text('3. oturum'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('note-menu')));
+    await settle(tester);
+    await tester.tap(find.text('Notu paylaş'));
+    await settle(tester);
+    expect(files.texts.single, ('3. oturum\n\nKurt sürüsü.\nKöprüde pusu.', '3. oturum'));
+    expect(noteShareText('', ' yalnız metin '), 'yalnız metin');
   });
 
   appTest('initiative: add, order, next turn, damage', gmPack: true, (tester, db) async {
