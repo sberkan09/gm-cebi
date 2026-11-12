@@ -159,22 +159,119 @@ void main() {
     });
   });
 
-  test('410 session.closed on a heartbeat opens a new session silently', () {
+  test('410 session.closed on a heartbeat: idle, no new session until the user needs one', () {
     fakeAsync((a) {
       final c = make();
       settle(c, a);
       ctl(c).acquire();
       a.flushMicrotasks();
-      // The next heartbeat finds the session closed; everything else as usual.
+      // The session idled out (or ran its 8 hours); the map is still open.
       server.override = (r) {
         server.override = null;
         return FakeServer.error(410, 'session.closed');
       };
       a.elapse(const Duration(seconds: 120));
       a.flushMicrotasks();
-      expect(server.calls, ['POST /v1/sessions', 'POST /v1/sessions/s1/heartbeat', 'POST /v1/sessions']);
+      expect(server.calls, ['POST /v1/sessions', 'POST /v1/sessions/s1/heartbeat']);
+      expect(st(c).phase, SessionPhase.idle);
+      expect(st(c).sessionId, isNull);
+      expect(capacityLabel(st(c)), 'Bağlı değil');
+
+      a.elapse(const Duration(hours: 2));
+      expect(server.calls, hasLength(2), reason: 'an idle map opens nothing and sends no heartbeats: no GPU is kept warm');
+
+      // Opening the scene sheet or sending a sketch asks for a session again.
+      ctl(c).ensureOpen();
+      a.flushMicrotasks();
+      expect(server.count('POST /v1/sessions'), 2);
       expect(st(c).sessionId, 's2');
       expect(st(c).phase, SessionPhase.open);
+      a.elapse(const Duration(seconds: 120));
+      expect(server.count('POST /v1/sessions/s2/heartbeat'), 1, reason: 'heartbeats run again');
+      c.dispose();
+    });
+  });
+
+  test('idle after a 410: coming back from the background, or back to the map, opens a session again', () {
+    fakeAsync((a) {
+      final c = make();
+      settle(c, a);
+      ctl(c).acquire();
+      a.flushMicrotasks();
+      server.override = (r) => FakeServer.error(410, 'session.closed');
+      a.elapse(const Duration(seconds: 120));
+      a.flushMicrotasks();
+      server.override = null;
+      expect(st(c).phase, SessionPhase.idle);
+
+      ctl(c).setForeground(false);
+      a.elapse(const Duration(minutes: 10));
+      expect(server.count('POST /v1/sessions'), 1);
+      ctl(c).setForeground(true);
+      tick(a);
+      expect(server.count('POST /v1/sessions'), 2, reason: 'the map came back to the foreground');
+
+      // Idle again; the GM leaves the map and returns.
+      server.override = (r) => FakeServer.error(410, 'session.closed');
+      a.elapse(const Duration(seconds: 120));
+      a.flushMicrotasks();
+      server.override = null;
+      expect(st(c).phase, SessionPhase.idle);
+      ctl(c).release();
+      a.elapse(const Duration(minutes: 1));
+      ctl(c).acquire();
+      tick(a);
+      expect(server.count('POST /v1/sessions'), 3);
+      expect(st(c).phase, SessionPhase.open);
+      c.dispose();
+    });
+  });
+
+  test('a session found closed on the beat of a resume is opened again at once', () {
+    fakeAsync((a) {
+      final c = make();
+      settle(c, a);
+      ctl(c).acquire();
+      a.flushMicrotasks();
+      ctl(c).setForeground(false);
+      a.elapse(const Duration(minutes: 30)); // timed out on the server meanwhile
+      server.override = (r) {
+        server.override = null;
+        return FakeServer.error(410, 'session.closed');
+      };
+      ctl(c).setForeground(true);
+      tick(a);
+      expect(server.calls, ['POST /v1/sessions', 'POST /v1/sessions/s1/heartbeat', 'POST /v1/sessions']);
+      expect(st(c).sessionId, 's2');
+      c.dispose();
+    });
+  });
+
+  test('a malformed session answer: failed with the generic label, retried a minute later', () {
+    fakeAsync((a) {
+      final c = make();
+      settle(c, a);
+      // No `session` object: NcSession.fromJson throws a TypeError, not an NcException.
+      server.override = (r) => http.Response(jsonEncode({'capacity': {'state': 'ready'}}), 201, headers: {'content-type': 'application/json'});
+      ctl(c).acquire();
+      a.flushMicrotasks();
+      expect(st(c).phase, SessionPhase.failed, reason: 'not stranded on "Bağlanıyor…"');
+      expect(capacityLabel(st(c)), 'Şu an kullanılamıyor');
+      server.override = null;
+      a.elapse(OnlineSessionController.retryDelay);
+      a.flushMicrotasks();
+      expect(st(c).phase, SessionPhase.open);
+      expect(server.count('POST /v1/sessions'), 2);
+
+      // The same on a heartbeat: the session is kept, the next beat tries again.
+      server.override = (r) => http.Response('{"session": 7}', 200, headers: {'content-type': 'application/json'});
+      a.elapse(const Duration(seconds: 120));
+      a.flushMicrotasks();
+      expect(st(c).sessionId, 's1');
+      expect(st(c).phase, SessionPhase.open);
+      server.override = null;
+      a.elapse(const Duration(seconds: 120));
+      expect(server.count('POST /v1/sessions/s1/heartbeat'), 2);
       c.dispose();
     });
   });

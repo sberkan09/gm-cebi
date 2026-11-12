@@ -5,14 +5,17 @@ import 'dart:typed_data';
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gm_cebi/data/neuracraft/auth.dart';
 import 'package:gm_cebi/data/neuracraft/client.dart';
 import 'package:gm_cebi/data/neuracraft/config.dart';
+import 'package:gm_cebi/data/neuracraft/errors.dart';
 import 'package:gm_cebi/data/neuracraft/models.dart';
 import 'package:gm_cebi/db/database.dart';
 import 'package:gm_cebi/features/online_scene/account.dart';
+import 'package:gm_cebi/features/online_scene/messages.dart';
 import 'package:gm_cebi/features/online_scene/online_settings.dart';
 import 'package:gm_cebi/features/online_scene/scene_controller.dart';
 import 'package:gm_cebi/features/online_scene/session_controller.dart';
@@ -26,6 +29,7 @@ const config = NcConfig(baseUrl: 'http://nc.test', clientId: 'nc_client_t');
 
 final sketch = Uint8List.fromList([0x89, 0x50, 0x4e, 0x47, 7, 7, 7]);
 final scenePng = Uint8List.fromList(List.generate(64, (i) => i));
+final blankSketch = Uint8List.fromList([0x89, 0x50, 0x4e, 0x47, 0, 0, 0]);
 
 Map<String, Object?> job(String state, {String? error, bool output = false}) => {
       'id': 'job-${state.hashCode}',
@@ -64,6 +68,12 @@ class Server {
   /// The `GET /v1/presets` answer (null: 404).
   Map<String, Object?>? presets;
 
+  /// Answers to the picture's download in turn; then the picture.
+  final downloads = <http.StreamedResponse Function()>[];
+
+  /// No event stream (a proxy in the way) and a job that stays `queued`.
+  bool stuckQueued = false;
+
   Future<http.StreamedResponse> handle(http.BaseRequest r) async {
     calls.add('${r.method} ${r.url.path}');
     final p = r.url.path;
@@ -81,6 +91,8 @@ class Server {
       if (submit.isNotEmpty) return submit.removeAt(0)();
       return jsonStream({'job': job('queued')}, 201);
     }
+    if (stuckQueued && p.endsWith('/events')) return err(406, 'not_acceptable');
+    if (stuckQueued && p.startsWith('/v1/jobs/') && r.method == 'GET') return jsonStream({'job': job('queued')});
     if (p.endsWith('/events')) {
       if (this.events != null) return http.StreamedResponse(this.events!.stream, 200, headers: {'content-type': 'text/event-stream'});
       if (hangEvents) {
@@ -98,6 +110,7 @@ class Server {
     }
     if (p.endsWith('/cancel')) return jsonStream({'job': job('cancelled')});
     if (p == '/v1/assets/asset-1/content') {
+      if (downloads.isNotEmpty) return downloads.removeAt(0)();
       return http.StreamedResponse(const Stream.empty(), 302, headers: {'location': 'https://storage.test/blob'});
     }
     if (r.url.host == 'storage.test') return http.StreamedResponse(Stream.value(scenePng), 200);
@@ -139,6 +152,7 @@ void main() {
             pollInterval: const Duration(milliseconds: 1),
           )),
       sketchExporterProvider.overrideWithValue(() async => withSketch ? sketch : null),
+      blankSketchExporterProvider.overrideWithValue(() async => blankSketch),
       regionsExporterProvider.overrideWithValue(() async => regions),
       sceneRandomProvider.overrideWithValue(Random(42)),
     ]);
@@ -329,6 +343,89 @@ void main() {
     expect(await db.watchActiveScene().first, isNull);
   });
 
+  test('a job gets one overall deadline: stuck in the queue on the polling fallback, it is cancelled and can be retried', () {
+    fakeAsync((a) {
+      final memory = AppDatabase(NativeDatabase.memory());
+      server = Server()..stuckQueued = true;
+      final box = ProviderContainer(overrides: [
+        databaseProvider.overrideWithValue(memory),
+        ncConfigProvider.overrideWithValue(config),
+        onlineSettingsProvider.overrideWith(() => FakeOnlineSettings(const OnlineSettings(consented: true))),
+        ncTokenStoreProvider.overrideWithValue(MemoryTokenStore(NcTokens(
+            accessToken: 'nc_eu_a1', refreshToken: 'nc_rt_r1', accessExpiresAt: DateTime.now().add(const Duration(days: 2)), endUserId: 'eu_1'))),
+        ncHttpClientProvider.overrideWithValue(MockClient.streaming((r, _) => server.handle(r))),
+        sketchExporterProvider.overrideWithValue(() async => sketch),
+        regionsExporterProvider.overrideWithValue(() async => null),
+        sceneRandomProvider.overrideWithValue(Random(1)),
+      ]);
+      c = ProviderContainer(); // for tearDown
+      box.listen(sceneControllerProvider, (_, _) {});
+      box.listen(onlineSessionProvider, (_, _) {});
+      box.read(onlineSettingsProvider);
+      box.read(ncAccountProvider);
+      a.flushMicrotasks();
+      a.elapse(Duration.zero);
+      unawaited(box.read(sceneControllerProvider.notifier).generate(mode: SceneMode.map, narrative: 'köprü'));
+      a.elapse(SceneController.jobDeadline - const Duration(seconds: 5));
+      expect(box.read(sceneControllerProvider), isA<SceneWorking>(), reason: 'still waiting just before the deadline');
+      a.elapse(const Duration(seconds: 10));
+      final failed = box.read(sceneControllerProvider);
+      expect(failed, isA<SceneFailed>(), reason: 'the idle timeout is per event and never fires while polling; the deadline does');
+      expect((failed as SceneFailed).message, messageForReaction(NcReaction.busy));
+      expect(failed.retryable, isTrue);
+      expect(server.calls.where((x) => x.endsWith('/cancel')), hasLength(1), reason: 'the job is cancelled on the server');
+      final polls = server.calls.where((x) => x.startsWith('GET /v1/jobs/')).length;
+      a.elapse(const Duration(minutes: 30));
+      expect(server.calls.where((x) => x.startsWith('GET /v1/jobs/')).length, lessThanOrEqualTo(polls + 1), reason: 'polling stopped');
+      expect(server.count('POST /v1/presets/sketch_to_scene/jobs'), 1, reason: 'no new job on its own');
+      box.dispose();
+      memory.close();
+      a.elapse(const Duration(seconds: 1));
+    });
+  });
+
+  test('a failed download after a finished job: "Yeniden dene" fetches the same picture, no second job', () async {
+    await make(Server()..downloads.add(() => throw http.ClientException('connection reset')));
+    await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
+    final f = st() as SceneFailed;
+    expect(f.message, 'Sunucuya ulaşılamadı. Harita çevrimdışı çalışmaya devam ediyor.');
+    expect(f.retryable, isTrue);
+    expect(await db.watchActiveScene().first, isNull);
+
+    await ctl().retry();
+    expect(st(), isA<SceneIdle>());
+    expect(server.count('POST /v1/presets/sketch_to_scene/jobs'), 1, reason: 'the picture was already made (and counted)');
+    expect(server.count('GET /v1/assets/asset-1/content'), 2);
+    final scene = (await db.watchActiveScene().first)!;
+    expect(scene.png, scenePng);
+    expect(scene.narrative, 'köprü');
+    expect(scene.seed, server.bodies.single['params']['seed']);
+
+    // Nothing is left over: the next retry is a new job.
+    await ctl().retry();
+    expect(server.count('POST /v1/presets/sketch_to_scene/jobs'), 2);
+  });
+
+  test('the picture is gone when its download is retried (404): then a new job', () async {
+    await make(Server()
+      ..downloads.addAll([() => err(503, 'unavailable'), () => err(404, 'not_found')]));
+    await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
+    expect(st(), isA<SceneFailed>());
+    await ctl().retry();
+    expect(st(), isA<SceneIdle>());
+    expect(server.count('POST /v1/presets/sketch_to_scene/jobs'), 2);
+    expect(await db.watchActiveScene().first, isNotNull);
+  });
+
+  test('a new request from the sheet does not fetch an older undelivered picture', () async {
+    await make(Server()..downloads.add(() => throw http.ClientException('connection reset')));
+    await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
+    expect(st(), isA<SceneFailed>());
+    await ctl().generate(mode: SceneMode.atmosphere, narrative: 'orman');
+    expect(server.count('POST /v1/presets/sketch_to_scene/jobs'), 2);
+    expect((await db.watchActiveScene().first)!.narrative, 'orman');
+  });
+
   test('report: hidden locally at once, sent to the service; hidden even when sending fails', () async {
     await make(Server());
     await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
@@ -370,6 +467,32 @@ void main() {
     await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
     final f = st() as SceneFailed;
     expect(f.message, 'Bir hata oluştu, resim üretilemedi.');
+  });
+
+  test('nothing is sent while the feature is switched off or before consent', () async {
+    for (final settings in const [OnlineSettings(enabled: false, consented: true), OnlineSettings(consented: false)]) {
+      server = Server();
+      c = ProviderContainer(overrides: [
+        databaseProvider.overrideWithValue(db),
+        ncConfigProvider.overrideWithValue(config),
+        onlineSettingsProvider.overrideWith(() => FakeOnlineSettings(settings)),
+        ncTokenStoreProvider.overrideWithValue(MemoryTokenStore(signedInTokens())),
+        ncHttpClientProvider.overrideWithValue(MockClient.streaming((r, _) => server.handle(r))),
+        sketchExporterProvider.overrideWithValue(() async => sketch),
+        regionsExporterProvider.overrideWithValue(() async => null),
+      ]);
+      c.listen(sceneControllerProvider, (_, _) {});
+      await c.read(onlineSettingsProvider.future);
+      await c.read(ncAccountProvider.notifier).load();
+      await ctl().generate(mode: SceneMode.map, narrative: 'köprü');
+      await ctl().retry();
+      expect(st(), isA<SceneIdle>());
+      expect(server.calls, isEmpty);
+      expect(await c.read(sceneFeaturesProvider.future), same(NcSceneFeatures.none));
+      expect(server.calls, isEmpty, reason: 'not even the presets question');
+      c.dispose();
+    }
+    c = ProviderContainer();
   });
 
   test('a description over 500 UTF-16 units (emoji) is refused before sending', () async {
@@ -456,6 +579,33 @@ void main() {
       await ctl().generate(mode: SceneMode.atmosphere, narrative: 'köprü', ground: 'sand');
       expect((server.bodies.single['inputs'] as Map).keys, ['sketch']);
       expect(server.count('GET /v1/presets'), 0);
+    });
+
+    test('painted areas only, a service that takes them: a blank sketch goes with the region layer', () async {
+      await make(Server()..presets = advertised(), withSketch: false, regions: regions);
+      await ctl().generate(mode: SceneMode.map, narrative: 'nehir', ground: 'grass');
+      expect(st(), isA<SceneIdle>());
+      final body = server.bodies.single;
+      expect(body['inputs']['sketch']['inline'], base64Encode(blankSketch));
+      expect(body['inputs']['regions']['inline'], base64Encode(regions));
+      expect(body['params']['ground'], 'grass');
+      expect(await db.watchActiveScene().first, isNotNull);
+    });
+
+    test('painted areas only, a service that does not take them: asked to draw lines too, no session, no job', () async {
+      await make(Server(), withSketch: false, regions: regions);
+      await ctl().generate(mode: SceneMode.map, narrative: 'nehir');
+      final f = st() as SceneFailed;
+      expect(f.message, 'Çizgiyle de çiz: sunucu henüz alanları desteklemiyor.');
+      expect(f.retryable, isFalse);
+      expect(server.calls, ['GET /v1/presets'], reason: 'only the question; no GPU is asked for');
+    });
+
+    test('painted areas only in atmosphere mode: asked to draw lines too, nothing is sent', () async {
+      await make(Server()..presets = advertised(), withSketch: false, regions: regions);
+      await ctl().generate(mode: SceneMode.atmosphere, narrative: 'nehir');
+      expect((st() as SceneFailed).message, 'Çizgiyle de çiz: boyanan alanlar yalnızca Harita modunda gönderilir.');
+      expect(server.calls, isEmpty);
     });
 
     test('nothing painted: no region layer, no presets request', () async {

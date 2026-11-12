@@ -92,6 +92,15 @@ String? capacityWarning(OnlineSessionState s) => switch ((s.phase, s.capacity)) 
       _ => null,
     };
 
+/// Nothing is drawn on the map yet.
+const drawFirstMessage = 'Önce haritaya araziyi çiz.';
+
+/// Only painted areas, and the service does not take the region layer.
+const linesNeededMessage = 'Çizgiyle de çiz: sunucu henüz alanları desteklemiyor.';
+
+/// Only painted areas, in atmosphere mode (the region layer is for map mode).
+const linesNeededForAtmosphereMessage = 'Çizgiyle de çiz: boyanan alanlar yalnızca Harita modunda gönderilir.';
+
 const reportReasonLabels = {
   ReportReason.sexual: 'Cinsel içerik',
   ReportReason.violenceGore: 'Şiddet ya da kan',
