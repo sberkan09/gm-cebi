@@ -30,6 +30,8 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          # Gradle dependencies and wrapper, shared by the APK and both App Bundle builds.
+          cache: gradle
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -49,3 +51,17 @@ jobs:
           name: gm-cebi-internal-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
+      # The store configuration, built as release-aab.yml builds it (same flags) but without
+      # secrets: pull requests get none, so the bundle is debug-signed and only the signature
+      # check is skipped. Runs after the APK so Gradle and the Dart build cache are warm.
+      - name: Store App Bundle (offline) passes the store checks
+        run: |
+          flutter build appbundle --release --dart-define=GMCEBI_INTERNAL=false --dart-define=GMCEBI_GM_PACK=true
+          tool/check_store_build.sh --allow-debug-signature build/app/outputs/bundle/release/app-release.aab
+      # A store build with the online scene (docs/online-scene.md): the INTERNET permission must
+      # then be present. The address is a placeholder; nothing is contacted.
+      - name: Store App Bundle (online scene) passes the store checks
+        run: |
+          flutter build appbundle --release --dart-define=GMCEBI_INTERNAL=false --dart-define=GMCEBI_GM_PACK=true \
+            --dart-define=NC_API_URL=https://example.invalid
+          tool/check_store_build.sh --online --allow-debug-signature build/app/outputs/bundle/release/app-release.aab
