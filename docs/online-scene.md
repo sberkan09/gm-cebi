@@ -321,6 +321,14 @@ Kaynak: neuracraft-cloud `docs/PRIVACY.md` ve `docs/partners/gm-cebi.md` ("Priva
   alana taşıyor); içini taramak, doldurmak ya da açıklamada belirtmek değiştirmedi. Ayrıntı ve
   resimler: [`online-scene/2026-11-10-map-mode.md`](online-scene/2026-11-10-map-mode.md).
   Uygulama harita modunda kısa bir çizim ipucu gösteriyor (ağaçlar daire; nehir, su ve küçük
-  eşyalar açıklamada). Çözüm alan katmanı (yukarıda); sunucu tarafı canlı olunca uygulama kendiliğinden
-  göndermeye başlar.
+  eşyalar açıklamada).
+- **Alan katmanı canlıda (2026-11-12, neuracraft-cloud #54):** servis `regions` ve `ground`
+  alanlarını listeliyor; uygulama kendiliğinden göndermeye başladı. Uygulamanın dışa aktarma
+  koduyla üretilen nehirli çizimde nehir artık iki kıyı arasında mavi bir şerit; zindanda odalar
+  ve koridorlar yerinde, ama `ground: stone` ile oda ve dışarısı birbirine yakın (`dirt` daha net).
+  Ayrıntı ve resimler: [`online-scene/2026-11-12-regions.md`](online-scene/2026-11-12-regions.md).
+- **Yenileme toleransı (neuracraft-cloud #52):** yenileme yanıtı kaybolursa aynı token'la 60 sn
+  içinde yeniden denemek aynı yeni token'ı döndürüyor; kullanıcı yeniden giriş yapmak zorunda
+  kalmıyor. Uygulamada değişiklik gerekmedi; canlıda ayrıca denenmedi (giriş yapmış bir kullanıcı
+  gerekir).
 - **Cihaz:** gerçek telefon ya da tablette denenmedi.
