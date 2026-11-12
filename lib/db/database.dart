@@ -30,7 +30,9 @@ class Encounters extends Table {
   TextColumn get name => text().withDefault(const Constant(''))();
   IntColumn get round => integer().withDefault(const Constant(1))();
 
-  /// Index into the initiative-sorted combatant list.
+  /// Index into the initiative-sorted combatant list: whose turn it is. It
+  /// follows that combatant when the order changes; who has already acted
+  /// this round is kept beside it (see `AppDatabase._acted`).
   IntColumn get turnIndex => integer().withDefault(const Constant(0))();
 
   /// Becomes true at the first "next turn". Before that the marker stays on
@@ -171,6 +173,17 @@ List<Combatant> initiativeOrder(Iterable<Combatant> list) {
   return out;
 }
 
+/// Whether the combatant [id] can swap places with its neighbour above
+/// ([up]) or below in [order] (initiative order): only with one that has the
+/// same initiative, so only the order within a tie changes. Combatants
+/// without an initiative are not a tie: they have no place in the order yet.
+bool canMoveInTie(List<Combatant> order, int id, {required bool up}) {
+  final i = order.indexWhere((c) => c.id == id);
+  final j = up ? i - 1 : i + 1;
+  if (i < 0 || j < 0 || j >= order.length) return false;
+  return order[i].initiative != null && order[j].initiative == order[i].initiative;
+}
+
 class EncounterState {
   const EncounterState(this.encounter, this.combatants);
 
@@ -292,55 +305,92 @@ class AppDatabase extends _$AppDatabase {
     bool isPlayer = false,
     String? monsterId,
     int? level,
-  }) async {
-    final e = await activeEncounter();
-    final current = await _currentCombatantId(e);
-    final id = await into(combatants).insert(CombatantsCompanion.insert(
-      encounterId: e.id,
-      name: name,
-      initiative: Value(initiative),
-      initBonus: Value(initBonus),
-      hpCurrent: Value(hp),
-      hpMax: Value(hp),
-      ac: Value(ac),
-      isPlayer: Value(isPlayer),
-      monsterId: Value(monsterId),
-      level: Value(level),
-      createdAt: DateTime.now(),
-    ));
-    await _keepTurnOn(e, current);
-    return id;
-  }
+  }) =>
+      _reordering((e) async => into(combatants).insert(CombatantsCompanion.insert(
+            encounterId: e.id,
+            name: name,
+            initiative: Value(initiative),
+            initBonus: Value(initBonus),
+            hpCurrent: Value(hp),
+            hpMax: Value(hp),
+            ac: Value(ac),
+            isPlayer: Value(isPlayer),
+            monsterId: Value(monsterId),
+            level: Value(level),
+            sortOrder: Value(await _tieEnd(e.id, initiative)),
+            createdAt: DateTime.now(),
+          )));
 
   /// Sets (or, with null, clears) a player's level.
   Future<void> setLevel(int id, int? level) =>
       (update(combatants)..where((c) => c.id.equals(id))).write(CombatantsCompanion(level: Value(level)));
 
-  /// Sets (or clears) one combatant's initiative; only that column is written.
-  Future<void> setInitiative(int id, int? initiative) async {
-    final e = await activeEncounter();
-    final current = await _currentCombatantId(e);
-    await (update(combatants)..where((c) => c.id.equals(id))).write(CombatantsCompanion(initiative: Value(initiative)));
-    await _keepTurnOn(e, current);
-  }
+  /// "Düzenle": the name, the HP maximum, the armor class and (players) the
+  /// level. Current HP follows the maximum: an unhurt creature stays at full
+  /// HP, a hurt one keeps its HP (never above the new maximum); without a
+  /// maximum no HP is tracked.
+  Future<void> updateCombatant(int id, {required String name, required int? hpMax, required int? ac, int? level}) =>
+      transaction(() async {
+        final c = await (select(combatants)..where((c) => c.id.equals(id))).getSingleOrNull();
+        if (c == null) return;
+        final hurt = c.hpCurrent != null && c.hpMax != null && c.hpCurrent! < c.hpMax!;
+        final hp = hpMax == null ? null : (hurt && c.hpCurrent! < hpMax ? c.hpCurrent : hpMax);
+        await (update(combatants)..where((c) => c.id.equals(id))).write(CombatantsCompanion(
+          name: Value(name),
+          hpMax: Value(hpMax),
+          hpCurrent: Value(hp),
+          ac: Value(ac),
+          level: Value(c.isPlayer ? level : null),
+        ));
+      });
 
-  Future<void> removeCombatant(int id) async {
-    final e = await activeEncounter();
-    final order = await _order(e);
-    final idx = order.indexWhere((c) => c.id == id);
-    await (delete(combatants)..where((c) => c.id.equals(id))).go();
-    final remaining = order.length - 1;
-    if (idx < 0 || remaining <= 0) {
-      if (remaining <= 0) await _setTurn(e, e.round, 0);
-      return;
-    }
-    if (idx < e.turnIndex) {
-      await _setTurn(e, e.round, e.turnIndex - 1); // same creature keeps the turn
-    } else if (idx == e.turnIndex && idx >= remaining) {
-      // The current creature was last in the order: the turn passes to the top of the next round.
-      await _setTurn(e, e.started ? e.round + 1 : e.round, 0);
-    }
-  }
+  /// Sets (or clears) one combatant's initiative. Only the initiative and the
+  /// place within a tie are written. The turn stays with whoever has it.
+  Future<void> setInitiative(int id, int? initiative) => _reordering((e) async {
+        final c = await (select(combatants)..where((c) => c.id.equals(id))).getSingleOrNull();
+        if (c == null || c.initiative == initiative) return;
+        await (update(combatants)..where((c) => c.id.equals(id))).write(CombatantsCompanion(
+          initiative: Value(initiative),
+          sortOrder: Value(await _tieEnd(c.encounterId, initiative)),
+        ));
+      });
+
+  /// "Yukarı taşı" / "Aşağı taşı": swaps a combatant with its neighbour of the
+  /// same initiative (see [canMoveInTie]); otherwise nothing happens.
+  Future<void> moveInTie(int id, {required bool up}) => _reordering((e) async {
+        final order = await _order(e);
+        if (!canMoveInTie(order, id, up: up)) return;
+        final i = order.indexWhere((c) => c.id == id);
+        final tie = [for (final c in order) if (c.initiative == order[i].initiative) c.id];
+        final at = tie.indexOf(id);
+        tie[at] = tie[up ? at - 1 : at + 1];
+        tie[up ? at - 1 : at + 1] = id;
+        await batch((b) {
+          for (var k = 0; k < tie.length; k++) {
+            b.update(combatants, CombatantsCompanion(sortOrder: Value(k)), where: (x) => x.id.equals(tie[k]));
+          }
+        });
+      });
+
+  Future<void> removeCombatant(int id) => transaction(() async {
+        final e = await activeEncounter();
+        final before = await _order(e);
+        final idx = before.indexWhere((c) => c.id == id);
+        if (idx < 0) return;
+        final currentIdx = e.turnIndex.clamp(0, before.length - 1);
+        final acted = (await _acted(e, before))..remove(id);
+        await (delete(combatants)..where((c) => c.id.equals(id))).go();
+        final order = [...before]..removeAt(idx);
+        if (order.isEmpty) return _setTurn(e, e.round, 0, const []);
+        if (idx != currentIdx) {
+          // Whoever has the turn keeps it.
+          return _setTurn(e, e.round, order.indexWhere((c) => c.id == before[currentIdx].id), acted);
+        }
+        // The current creature left: the turn passes to the next one who has
+        // not acted, or to the top of the next round.
+        final next = order.indexWhere((c) => !acted.contains(c.id));
+        await (next < 0 ? _setTurn(e, e.started ? e.round + 1 : e.round, 0, const []) : _setTurn(e, e.round, next, acted));
+      });
 
   /// Applies damage (positive) or healing (negative), clamped to 0..max.
   Future<void> changeHp(int id, int damage) async {
@@ -361,51 +411,59 @@ class AppDatabase extends _$AppDatabase {
   }
 
   /// Rolls initiative (d20 + bonus) for every non-player combatant that has none.
-  Future<void> rollMissingInitiative(int Function(int bonus) rollD20) async {
-    final e = await activeEncounter();
-    final current = await _currentCombatantId(e);
-    final list = await (select(combatants)..where((c) => c.encounterId.equals(e.id))).get();
-    await batch((b) {
-      for (final c in list) {
-        if (c.initiative == null && !c.isPlayer) {
-          b.update(combatants, CombatantsCompanion(initiative: Value(rollD20(c.initBonus))),
-              where: (x) => x.id.equals(c.id));
+  Future<void> rollMissingInitiative(int Function(int bonus) rollD20) => _reordering((e) async {
+        final list = await (select(combatants)
+              ..where((c) => c.encounterId.equals(e.id))
+              ..orderBy([(c) => OrderingTerm.asc(c.id)]))
+            .get();
+        for (final c in list) {
+          if (c.initiative != null || c.isPlayer) continue;
+          final v = rollD20(c.initBonus);
+          await (update(combatants)..where((x) => x.id.equals(c.id)))
+              .write(CombatantsCompanion(initiative: Value(v), sortOrder: Value(await _tieEnd(e.id, v))));
         }
-      }
-    });
-    await _keepTurnOn(e, current);
-  }
+      });
 
-  Future<void> nextTurn() async {
-    final e = await activeEncounter();
-    final n = (await _order(e)).length;
-    if (n == 0) return;
-    if (!e.started) {
-      await (update(encounters)..where((x) => x.id.equals(e.id))).write(const EncountersCompanion(started: Value(true)));
-    }
-    final next = e.turnIndex + 1;
-    await (next >= n ? _setTurn(e, e.round + 1, 0) : _setTurn(e, e.round, next));
-  }
+  /// The turn passes to the first combatant in the order who has not acted
+  /// this round; when everyone has, the next round starts at the top.
+  Future<void> nextTurn() => transaction(() async {
+        final e = await activeEncounter();
+        final order = await _order(e);
+        if (order.isEmpty) return;
+        if (!e.started) {
+          await (update(encounters)..where((x) => x.id.equals(e.id))).write(const EncountersCompanion(started: Value(true)));
+        }
+        final acted = [...await _acted(e, order), order[e.turnIndex.clamp(0, order.length - 1)].id];
+        final next = order.indexWhere((c) => !acted.contains(c.id));
+        await (next < 0 ? _setTurn(e, e.round + 1, 0, const []) : _setTurn(e, e.round, next, acted));
+      });
 
-  Future<void> previousTurn() async {
-    final e = await activeEncounter();
-    final n = (await _order(e)).length;
-    if (n == 0) return;
-    if (e.turnIndex > 0) {
-      await _setTurn(e, e.round, e.turnIndex - 1);
-    } else if (e.round > 1) {
-      await _setTurn(e, e.round - 1, n - 1);
-    }
-  }
+  /// Back to whoever acted before the current combatant; from the top of a
+  /// round, to the last in the order of the round before.
+  Future<void> previousTurn() => transaction(() async {
+        final e = await activeEncounter();
+        final order = await _order(e);
+        if (order.isEmpty) return;
+        final acted = await _acted(e, order);
+        if (acted.isNotEmpty) {
+          final previous = acted.removeLast();
+          await _setTurn(e, e.round, order.indexWhere((c) => c.id == previous), acted);
+        } else if (e.round > 1) {
+          await _setTurn(e, e.round - 1, order.length - 1, [for (final c in order.take(order.length - 1)) c.id]);
+        }
+      });
 
-  /// Deletes the active encounter (and, by cascade, its combatants) and starts
-  /// an empty one. Player characters can be carried over with full HP.
-  Future<void> newEncounter({bool keepPlayers = true}) async {
-    final e = await activeEncounter();
-    final players = keepPlayers
-        ? await (select(combatants)..where((c) => c.encounterId.equals(e.id) & c.isPlayer.equals(true))).get()
-        : <Combatant>[];
+  /// Deletes the active encounter (and, by cascade, its combatants, its map
+  /// and its online pictures) and starts an empty one. Player characters can
+  /// be carried over with full HP and off the map. With [keepMap] the drawing
+  /// (lines and areas, with their ids) and the picture in use (the newest one
+  /// not reported) move to the new encounter; older pictures are deleted.
+  Future<void> newEncounter({bool keepPlayers = true, bool keepMap = false}) async {
     await transaction(() async {
+      final e = await activeEncounter();
+      final players = keepPlayers
+          ? await (select(combatants)..where((c) => c.encounterId.equals(e.id) & c.isPlayer.equals(true))).get()
+          : <Combatant>[];
       final id = await into(encounters).insert(EncountersCompanion.insert(createdAt: DateTime.now()));
       for (final p in players) {
         await into(combatants).insert(p.toCompanion(false).copyWith(
@@ -414,12 +472,42 @@ class AppDatabase extends _$AppDatabase {
               initiative: const Value(null),
               conditions: const Value(''),
               hpCurrent: Value(p.hpMax),
+              sortOrder: const Value(0),
               posX: const Value(null),
               posY: const Value(null),
             ));
       }
+      if (keepMap) {
+        await (update(mapStrokes)..where((s) => s.encounterId.equals(e.id))).write(MapStrokesCompanion(encounterId: Value(id)));
+        final picture = await (select(mapScenes)
+              ..where((s) => s.encounterId.equals(e.id) & s.hidden.equals(false))
+              ..orderBy([(s) => OrderingTerm.desc(s.id)])
+              ..limit(1))
+            .getSingleOrNull();
+        if (picture != null) {
+          await (update(mapScenes)..where((s) => s.id.equals(picture.id))).write(MapScenesCompanion(encounterId: Value(id)));
+        }
+      }
       await (delete(encounters)..where((x) => x.id.equals(e.id))).go();
+      await writeSetting(_actedKey, null);
     });
+  }
+
+  /// What [newEncounter] deletes, or with `keepMap` carries over, of the
+  /// active encounter's map: a drawing (lines or areas) and a picture in use.
+  Future<({bool drawing, bool picture})> activeMapContents() async {
+    final e = await activeEncounter();
+    final stroke = await (selectOnly(mapStrokes)
+          ..addColumns([mapStrokes.id])
+          ..where(mapStrokes.encounterId.equals(e.id))
+          ..limit(1))
+        .get();
+    final picture = await (selectOnly(mapScenes)
+          ..addColumns([mapScenes.id])
+          ..where(mapScenes.encounterId.equals(e.id) & mapScenes.hidden.equals(false))
+          ..limit(1))
+        .get();
+    return (drawing: stroke.isNotEmpty, picture: picture.isNotEmpty);
   }
 
   // ------------------------------------------------------------ battle map
@@ -557,25 +645,69 @@ class AppDatabase extends _$AppDatabase {
   Future<List<Combatant>> _order(Encounter e) async =>
       initiativeOrder(await (select(combatants)..where((c) => c.encounterId.equals(e.id))).get());
 
-  Future<int?> _currentCombatantId(Encounter e) async {
-    final o = await _order(e);
-    return o.isEmpty ? null : o[e.turnIndex.clamp(0, o.length - 1)].id;
-  }
+  /// Settings key for who has had a turn this round: the encounter id, a
+  /// colon, then combatant ids in the order the turns were taken ("7:12,15"),
+  /// the current combatant not included. Kept beside [Encounters.turnIndex]
+  /// (and in the key-value table, so the schema stays as it is) so that a
+  /// re-sort (a changed initiative, a newcomer, a re-ordered tie) neither
+  /// skips anyone nor asks anyone twice in the round.
+  static const _actedKey = 'initiativeActed';
 
-  /// After a re-sort, keeps the turn marker on the same combatant once combat
-  /// has started; before that it stays on the first combatant.
-  Future<void> _keepTurnOn(Encounter e, int? combatantId) async {
-    if (!e.started) {
-      if (e.turnIndex != 0) await _setTurn(e, e.round, 0);
-      return;
+  /// Who has acted this round, in the order the turns were taken; [order] is
+  /// the initiative order [Encounters.turnIndex] points into. Without a record
+  /// for this encounter (one from before the record was kept) that is everyone
+  /// above the marker.
+  Future<List<int>> _acted(Encounter e, List<Combatant> order) async {
+    if (!e.started || order.isEmpty) return [];
+    final turn = e.turnIndex.clamp(0, order.length - 1);
+    final row = await (select(settings)..where((s) => s.key.equals(_actedKey))).getSingleOrNull();
+    final colon = row?.value.indexOf(':') ?? -1;
+    if (row == null || colon < 0 || row.value.substring(0, colon) != '${e.id}') {
+      return [for (final c in order.take(turn)) c.id];
     }
-    if (combatantId == null) return;
-    final o = await _order(e);
-    final idx = o.indexWhere((c) => c.id == combatantId);
-    if (idx >= 0 && idx != e.turnIndex) await _setTurn(e, e.round, idx);
+    final waiting = {for (final c in order) if (c.id != order[turn].id) c.id};
+    return [
+      for (final s in row.value.substring(colon + 1).split(','))
+        if (int.tryParse(s) case final id? when waiting.remove(id)) id,
+    ];
   }
 
-  Future<void> _setTurn(Encounter e, int round, int turn) =>
-      (update(encounters)..where((x) => x.id.equals(e.id)))
-          .write(EncountersCompanion(round: Value(round), turnIndex: Value(turn)));
+  /// Runs [change], which may re-sort the order, and leaves the turn with the
+  /// combatant who had it (before combat starts: on the top of the order).
+  /// Who has acted this round does not change, so a combatant who moves
+  /// across the marker is neither skipped nor asked twice.
+  Future<T> _reordering<T>(Future<T> Function(Encounter e) change) => transaction(() async {
+        final e = await activeEncounter();
+        final before = await _order(e);
+        final current = before.isEmpty ? null : before[e.turnIndex.clamp(0, before.length - 1)].id;
+        final acted = await _acted(e, before);
+        final result = await change(e);
+        if (!e.started) {
+          if (e.turnIndex != 0) await _setTurn(e, e.round, 0, const []);
+        } else if (current != null) {
+          final idx = (await _order(e)).indexWhere((c) => c.id == current);
+          if (idx >= 0) await _setTurn(e, e.round, idx, acted);
+        }
+        return result;
+      });
+
+  /// The tie-break for a combatant that gets [initiative]: after the others
+  /// with the same initiative once that tie has been ordered by hand
+  /// ([moveInTie]); until then 0, which leaves a tie in creation order.
+  Future<int> _tieEnd(int encounterId, int? initiative) async {
+    final tie = await (select(combatants)
+          ..where((c) => c.encounterId.equals(encounterId) & (initiative == null ? c.initiative.isNull() : c.initiative.equals(initiative))))
+        .get();
+    var last = 0;
+    for (final c in tie) {
+      if (c.sortOrder > last) last = c.sortOrder;
+    }
+    return tie.any((c) => c.sortOrder != 0) ? last + 1 : 0;
+  }
+
+  Future<void> _setTurn(Encounter e, int round, int turn, List<int> acted) async {
+    await (update(encounters)..where((x) => x.id.equals(e.id)))
+        .write(EncountersCompanion(round: Value(round), turnIndex: Value(turn)));
+    await writeSetting(_actedKey, '${e.id}:${acted.join(',')}');
+  }
 }

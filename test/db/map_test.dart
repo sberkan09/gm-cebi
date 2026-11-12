@@ -72,6 +72,58 @@ void main() {
     expect(await db.select(db.mapStrokes).get(), isEmpty, reason: 'old strokes are deleted with their encounter');
   });
 
+  test('a new encounter can keep the map: lines, areas and the picture in use; tokens come off', () async {
+    final ayla = await db.addCombatant(name: 'Ayla', isPlayer: true, hp: 20);
+    final gob = await db.addCombatant(name: 'Goblin', hp: 7);
+    await db.setTokenPosition(ayla, const Offset01(0.3, 0.3));
+    await db.setTokenPosition(gob, const Offset01(0.6, 0.6));
+    final line = await db.addStroke(const [Offset01(0.1, 0.1), Offset01(0.9, 0.9)], color: 2);
+    final water = await db.addStroke(const [Offset01(0.2, 0.2), Offset01(0.8, 0.3)], region: 0, width: 0.09);
+    await db.addScene(assetId: 'a1', png: Uint8List.fromList([1]), mode: 'map', narrative: 'köprü', seed: 1);
+    final reported = await db.addScene(assetId: 'a2', png: Uint8List.fromList([2]), mode: 'map', narrative: 'köprü', seed: 2);
+    final inUse = await db.addScene(assetId: 'a3', png: Uint8List.fromList([3]), mode: 'map', narrative: 'köprü', seed: 3);
+    final newest = await db.addScene(assetId: 'a4', png: Uint8List.fromList([4]), mode: 'map', narrative: 'köprü', seed: 4);
+    await db.hideScene(reported!);
+    await db.hideScene(newest!);
+    expect((await db.watchActiveScene().first)!.id, inUse);
+    final before = await db.activeEncounter();
+
+    await db.newEncounter(keepPlayers: true, keepMap: true);
+    final s = await db.watchEncounterState().first;
+    expect(s.encounter.id, isNot(before.id));
+    expect(await db.select(db.encounters).get(), hasLength(1));
+    expect(s.combatants.map((c) => c.name), ['Ayla']);
+    expect(s.combatants.single.mapPosition, isNull, reason: 'token positions are reset');
+    final strokes = await db.watchStrokes().first;
+    expect(strokes.map((x) => x.id), [line, water], reason: 'the same strokes, in the same order');
+    expect(strokes[0].color, 2);
+    expect(strokes[0].offsets, const [Offset01(0.1, 0.1), Offset01(0.9, 0.9)]);
+    expect(strokes[1].region, 0);
+    expect(strokes[1].width, closeTo(0.09, 1e-9));
+    final scene = await db.watchActiveScene().first;
+    expect(scene!.id, inUse);
+    expect(scene.png, [3]);
+    expect((await db.select(db.mapScenes).get()).map((x) => x.id), [inUse], reason: 'older and reported pictures go with the old encounter');
+
+    // The kept map is the new encounter's map: drawing and undo go on as usual.
+    await db.addStroke(const [Offset01(0.5, 0.5), Offset01(0.6, 0.6)]);
+    await db.undoStroke();
+    expect((await db.watchStrokes().first).map((x) => x.id), [line, water]);
+
+    await db.newEncounter(keepPlayers: false, keepMap: false);
+    expect(await db.select(db.mapStrokes).get(), isEmpty);
+    expect(await db.select(db.mapScenes).get(), isEmpty);
+    expect(await db.watchActiveScene().first, isNull);
+  });
+
+  test('keeping the map of an encounter without a drawing or a picture is fine', () async {
+    await db.addCombatant(name: 'Goblin', hp: 7);
+    await db.newEncounter(keepPlayers: false, keepMap: true);
+    expect(await db.watchStrokes().first, isEmpty);
+    expect(await db.watchActiveScene().first, isNull);
+    expect((await db.watchEncounterState().first).combatants, isEmpty);
+  });
+
   test('schema 1 databases are upgraded: columns and table added, data kept', () async {
     final dir = await Directory.systemTemp.createTemp('gmcebi-migration');
     final file = File('${dir.path}/v1.sqlite');

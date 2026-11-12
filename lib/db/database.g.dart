@@ -802,7 +802,9 @@ class Encounter extends DataClass implements Insertable<Encounter> {
   final String name;
   final int round;
 
-  /// Index into the initiative-sorted combatant list.
+  /// Index into the initiative-sorted combatant list: whose turn it is. It
+  /// follows that combatant when the order changes; who has already acted
+  /// this round is kept beside it (see `AppDatabase._acted`).
   final int turnIndex;
 
   /// Becomes true at the first "next turn". Before that the marker stays on

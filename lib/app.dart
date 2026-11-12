@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,9 +32,69 @@ class GmCebiApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const HomeShell(),
+      home: const PhonePortrait(child: HomeShell()),
     );
   }
+}
+
+/// Screens with a shortest side under this many dp are phones.
+const tabletShortestSide = 600.0;
+
+/// The orientations the app takes on a screen of [size] (dp), for
+/// [SystemChrome.setPreferredOrientations], where an empty list means every
+/// orientation. Phones are portrait only: in landscape the lists are a strip
+/// between the bars and the keyboard leaves no room to type a note. Tablets
+/// rotate freely. Null while the size is not known (before the first frame).
+List<DeviceOrientation>? orientationsFor(Size size) {
+  if (size.isEmpty) return null;
+  return size.shortestSide < tabletShortestSide ? const [DeviceOrientation.portraitUp] : const [];
+}
+
+/// Keeps a phone in portrait (see [orientationsFor]); on iOS the Info.plist
+/// says the same, so an iPhone does not start sideways either.
+class PhonePortrait extends StatefulWidget {
+  const PhonePortrait({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<PhonePortrait> createState() => _PhonePortraitState();
+}
+
+class _PhonePortraitState extends State<PhonePortrait> with WidgetsBindingObserver {
+  /// What the system was last told.
+  List<DeviceOrientation>? _orientations;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // After the first frame: the size of the view is known by then.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _apply());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// The size changed: a foldable was opened or closed, or a tablet's window
+  /// was resized. (A phone kept in portrait never gets here by turning.)
+  @override
+  void didChangeMetrics() => _apply();
+
+  void _apply() {
+    if (!mounted) return;
+    final view = View.of(context);
+    final wanted = orientationsFor(view.physicalSize / view.devicePixelRatio);
+    if (wanted == null || listEquals(wanted, _orientations)) return;
+    _orientations = wanted;
+    SystemChrome.setPreferredOrientations(wanted);
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// Bottom navigation: everything one thumb away.

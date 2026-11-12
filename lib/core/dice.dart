@@ -77,10 +77,8 @@ class RolledTerm {
     return t;
   }
 
-  bool get isNatural20 => term.sides == 20 && _keptValues.length == 1 && _keptValues.first == 20;
-  bool get isNatural1 => term.sides == 20 && _keptValues.length == 1 && _keptValues.first == 1;
-
-  List<int> get _keptValues => [for (var i = 0; i < values.length; i++) if (kept[i]) values[i]];
+  /// The dice that count towards the total.
+  List<int> get keptValues => [for (var i = 0; i < values.length; i++) if (kept[i]) values[i]];
 }
 
 class RollResult {
@@ -94,8 +92,16 @@ class RollResult {
   /// Human-readable working, e.g. `[17, (4)] + 5`; dropped dice in parentheses.
   final String breakdown;
 
-  bool get isCritical => terms.length == 1 && terms.first.isNatural20;
-  bool get isFumble => terms.length == 1 && terms.first.isNatural1;
+  /// Natural 20 / natural 1: the face of the d20 when exactly one d20 counts
+  /// in the whole expression (`1d20+5`, `2d20kh1`, also `1d20+1d4+3`). With
+  /// two or more kept d20s there is no single die to call natural.
+  bool get isCritical => _onlyD20 == 20;
+  bool get isFumble => _onlyD20 == 1;
+
+  int? get _onlyD20 {
+    final d20s = [for (final t in terms) if (t.term.sides == 20) ...t.keptValues];
+    return d20s.length == 1 ? d20s.single : null;
+  }
 }
 
 // ---------------------------------------------------------------- AST
@@ -403,3 +409,22 @@ class _Parser {
 String advantageExpression(int modifier) => '2d20kh1${_mod(modifier)}';
 String disadvantageExpression(int modifier) => '2d20kl1${_mod(modifier)}';
 String _mod(int m) => m == 0 ? '' : (m > 0 ? '+$m' : '$m');
+
+/// A single d20 roll with flat modifiers (`1d20`, `d20+5`, `3+1d20-1`), or one
+/// already rolled with advantage or disadvantage (`2d20kh1+5`).
+final _singleD20 = RegExp(r'^((?:-?\d+(?:[+-]\d+)*\+)?)(?:1?[dz]20|2[dz]20(?:kh?1?|kl1?|dl1?|dh1?))((?:[+-]\d+)*)$');
+
+/// [expression] rolled with advantage (or [disadvantage]): the d20 becomes
+/// `2d20kh1` (`2d20kl1`), the modifiers stay as typed. Null when the
+/// expression is not a single d20 roll (`2d6+3`, `1d20+1d4`): there is no
+/// advantage to give, and nothing is rewritten. An empty expression counts
+/// as a plain d20.
+String? withAdvantage(String expression, {bool disadvantage = false}) {
+  final die = disadvantage ? '2d20kl1' : '2d20kh1';
+  final s = expression.toLowerCase().replaceAll(RegExp(r'\s'), '').replaceAll('−', '-');
+  if (s.isEmpty) return die;
+  final m = _singleD20.firstMatch(s);
+  if (m == null) return null;
+  final out = '${m.group(1)}$die${m.group(2)}';
+  return DiceExpression.isValid(out) ? out : null;
+}
