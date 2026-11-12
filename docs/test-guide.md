@@ -13,9 +13,25 @@ oradadır, işin bitince kaldırabilirsin.
 
 ## Kurulum (Android 8 ve üstü)
 
-1. Sana gönderilen `gm-cebi-*.apk` dosyasını telefona indir.
+1. GitHub'daki sürüm sayfasından **`gm-cebi-<sürüm>-arm64.apk`** dosyasını telefona indir (çoğu
+   cihaz için). Telefon "uygulama yüklenmedi" ya da "uyumlu değil" derse aynı sayfadaki
+   `gm-cebi-<sürüm>-arm32.apk`'yı dene (eski ya da 32 bit cihazlar).
 2. Açınca "bilinmeyen kaynaklardan yükleme" izni istenirse bu dosya için izin ver.
 3. Kur ve aç. İnternet gerekmez; her şey telefonda çalışır.
+
+### Yeni test sürümü gelince
+
+- Yeni APK'yı indirip aynı şekilde kur. Sürüm aynı imzayla geldiyse eski sürümün **üzerine kurulur**;
+  notların, karşılaşmaların ve ayarların yerinde kalır. Her seferinde aynı dosyayı (arm64 ya da arm32)
+  seç.
+- Sürüm sayfasının en üstünde **"debug imzalı: önceki sürümün üzerine kurulamaz"** yazıyorsa ya da
+  telefon "paket mevcut paketle çakışıyor" / "uygulama yüklenmedi" derse, yeni sürüm farklı bir imza
+  taşıyor. O zaman:
+  1. Eski uygulamada **Ayarlar → Yedekleme → "Yedek al"** ile yedeğini al ve yedek dosyasını
+     telefonda (ya da kendine göndererek) sakla;
+  2. eski "GM Cebi Test"i kaldır (kaldırınca verileri silinir);
+  3. yeni APK'yı kur ve yedeği geri yükle.
+- Bu durum yalnızca imza anahtarı değiştiğinde (ör. sabit test anahtarına ilk geçişte) bir kez olur.
 
 Bu test sürümünde **GM Paketi açık** gelir. Kilitli hâlini görmek için:
 Ara → sağ üstteki dişli → "Test: GM Paketi açık" anahtarını kapat.
